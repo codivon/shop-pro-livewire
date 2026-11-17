@@ -1,0 +1,952 @@
+/* =====================================================================
+   theme-header.css — اصلاحات هدر، جستجو، مگا منو، اعلان‌ها و فوتر
+   SaniarTheme (تعمیر باگ‌های بصری)
+   نکته: style.css و responsive.css دست‌نخورده و عین تمپلیت می‌مانند؛
+   این فایل فقط استایل‌های تکمیلی/جایگزین را اضافه می‌کند.
+   ===================================================================== */
+
+/* =====================================================================
+   ۱) جستجوی زنده — پنل نتایج (فقط با محتوا نمایش داده می‌شود)
+   ===================================================================== */
+.search-form.search-header {
+    position: relative;
+}
+
+.search-header #search-result {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    left: 0;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 15px;
+    box-shadow: var(--shadow-lg);
+    padding: 18px;
+    z-index: 900;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.search-header #search-result.open {
+    display: block;
+}
+
+/* --- آیتم‌های داخل پنل نتایج (partials/search-result.blade.php) --- */
+.sr-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 12px;
+}
+
+.sr-products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.sr-products + .sr-links {
+    margin-top: 14px;
+}
+
+.sr-product {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: calc(25% - 9px);
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 8px;
+    transition: 0.2s all ease-in-out;
+    -webkit-transition: 0.2s all ease-in-out;
+}
+
+.sr-product:hover {
+    border-color: var(--main-color-one-shadow);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.sr-product-image {
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f7f7f7;
+}
+
+.sr-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.sr-product-title {
+    font-size: 12px;
+    color: #333;
+    line-height: 1.7;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.sr-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sr-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: #f7f7f7;
+    border-radius: 20px;
+    padding: 6px 12px;
+    transition: 0.2s all ease-in-out;
+    -webkit-transition: 0.2s all ease-in-out;
+}
+
+.sr-link i {
+    font-size: 14px;
+    color: var(--main-color-one);
+}
+
+.sr-link:hover {
+    color: var(--main-color-one);
+    background: var(--main-color-one-shadow);
+}
+
+.sr-link-all {
+    margin-top: 12px;
+    background: var(--main-color-one);
+    color: #fff;
+}
+
+.sr-link-all i {
+    color: #fff;
+}
+
+.sr-link-all:hover {
+    background: var(--main-color-one-hover);
+    color: #fff;
+}
+
+.sr-empty {
+    width: 100%;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted-two);
+    padding: 14px 0 6px;
+}
+
+/* =====================================================================
+   ۲) مگا منو — تعمیر قطع شدن زنجیره hover بین دکمه و پنل
+   (ارتفاع ردیف نوار منو روی سایت واقعی ۴۸px است ولی پنل از ۵۰px
+   شروع می‌شود → با فاصله ۲px ماوس از لی هاو می‌افتد و منو بسته می‌شد)
+   ===================================================================== */
+
+/* ارتفاع ردیف دقیقا مثل تمپلیت (۵۶px) تا لبه پایین li با پنل همپوشانی داشته باشد */
+.mega-menu .top-menu-parent .row {
+    min-height: 56px;
+}
+
+/* پل نامرئی hover — دراپ‌داون‌های عمومی (sub-menu و level-one):
+   مگای اول (ul.main-menu) از اسکرول‌بار داخلی دارد و عناصر خارج از
+   لبه‌اش clip می‌شوند؛ البته پنل مگا ۲px با ردیف دکمه همپوشانی دارد و حلقهٔ
+   hover بدون پل هم برقرار است. */
+.top-menu-menu > ul > li > ul.sub-menu.mega-container::after,
+.top-menu-menu > ul > li > ul.level-one::after {
+    content: '';
+    position: absolute;
+    top: -14px;
+    right: 0;
+    left: 0;
+    height: 14px;
+    pointer-events: auto;
+}
+
+/* =====================================================================
+   ۳) زنگوله اعلان‌ها داخل گروه دکمه‌های هدر (کاربر وارد شده)
+   ===================================================================== */
+.front-dropdown-notification {
+    display: flex;
+    align-items: center;
+}
+
+.front-dropdown-notification .notification-trigger {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    /* نیاز محصول: margin چپ/راست ۷px */
+    margin-left: 7px;
+    margin-right: 7px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
+    color: var(--text-muted);
+    font-size: 22px;
+    line-height: 1;
+    transition: 0.2s all ease-in-out;
+    -webkit-transition: 0.2s all ease-in-out;
+}
+
+/* نیاز محصول: سایز آیکون زنگوله ۳۰px.
+   (قاعدهٔ سراسری پلتفرم «a {font-size: … !important}» روی خود تگ a اثر
+   می‌گذارد؛ برای همین سایز روی خود <i> ست می‌شود) */
+.front-dropdown-notification .notification-trigger i {
+    font-size: 30px;
+}
+
+.front-dropdown-notification .notification-trigger:hover,
+.front-dropdown-notification .notification-trigger:focus {
+    color: var(--main-color-one);
+    background: #fff;
+}
+
+.front-dropdown-notification .badge-notif-count {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 20px;
+    background: var(--main-color-one);
+    border: 2px solid #fff;
+    color: #fff;
+    font-size: 10px;
+    line-height: 14px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* --- پنل کشویی اعلان‌ها --- */
+.front-dropdown-notification .notif-dropdown {
+    min-width: 340px;
+    max-width: calc(100vw - 24px);
+    padding: 0;
+    border: 1px solid #eee;
+    border-radius: 15px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    /* چون تریگر سمت چپ هدر است، پنل باید از لبه چپ تریگر باز شود وگرنه از صفحه بیرون می‌زند */
+    top: 100% !important;
+    right: auto !important;
+    left: 0 !important;
+    margin-top: 12px !important;
+    transform: none !important;
+}
+
+.notif-dropdown-header {
+    background: #f8f9fb;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.notif-header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notif-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
+
+.notif-header-title i {
+    color: var(--main-color-one);
+    font-size: 18px;
+}
+
+.notif-header-count.header-count {
+    display: inline-block;
+    min-width: 22px;
+    height: 22px;
+    line-height: 22px;
+    padding: 0 7px;
+    border-radius: 20px;
+    background: var(--main-color-one);
+    color: #fff;
+    font-size: 12px;
+    text-align: center;
+}
+
+.notif-list.scrollable-container.media-list {
+    max-height: 320px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 8px;
+    list-style: none;
+    display: block;
+}
+
+.notif-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    transition: 0.15s all ease-in-out;
+}
+
+.notif-card:hover {
+    background: #f7f7f7;
+}
+
+.notif-card-icon {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--main-color-one-shadow);
+    color: var(--main-color-one);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.notif-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.notif-card-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 4px;
+}
+
+.notif-card-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0 0 6px;
+    line-height: 1.8;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.notif-card-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-muted-two);
+}
+
+.notif-dot {
+    flex: 0 0 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--main-color-one);
+    margin-top: 15px;
+}
+
+.notif-empty {
+    text-align: center;
+    padding: 28px 10px 22px;
+}
+
+.notif-empty-icon {
+    font-size: 34px;
+    color: #d0d0d0;
+    margin-bottom: 8px;
+}
+
+.notif-empty-text {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+.notif-empty-sub {
+    font-size: 11px;
+    color: var(--text-muted-two);
+}
+
+.notif-dropdown-footer {
+    border-top: 1px solid #eee;
+}
+
+.notif-dropdown-footer .notif-footer-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--main-color-one);
+}
+
+.notif-dropdown-footer .notif-footer-link:hover {
+    background: #f8f9fb;
+}
+
+/* =====================================================================
+   ۴) فوتر — کارت‌های نشان خدمات (services sliders) که در تمپلیت نیستند
+   ===================================================================== */
+.footer-inner-box .footer-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 15px;
+    padding: 12px 16px;
+    box-shadow: var(--shadow-sm);
+    transition: 0.2s all ease-in-out;
+    -webkit-transition: 0.2s all ease-in-out;
+}
+
+.footer-inner-box .footer-badge:hover {
+    border-color: var(--main-color-one-shadow);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.footer-inner-box .footer-badge img {
+    height: 55px;
+    width: auto;
+    object-fit: contain;
+}
+
+.footer-inner-box .footer-badge .item-feature {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* فاصله استاندارد بین بلوک‌های فوتر مثل تمپلیت */
+.footer .footer-inner-box + .footer-socail {
+    margin-top: 20px;
+}
+
+/* فرم خبرنامه فوتر — هماهنگ با استایل سرچ باکس سانیار */
+.footer-newsletter-form input.form-control {
+    background-color: #f4f4f4;
+    border: 1px solid #eee;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    font-size: 14px;
+    transition: 0.2s all ease-in-out;
+    -webkit-transition: 0.2s all ease-in-out;
+}
+
+.footer-newsletter-form input.form-control:focus {
+    background-color: #f4f4f4;
+    border-color: #aaa;
+    box-shadow: var(--shadow-sm);
+}
+
+.footer-newsletter-form button {
+    padding: 12px 26px;
+    flex: 0 0 auto;
+}
+
+/* =====================================================================
+   ۵) موبایل — حالت‌های هدر زیر ۹۹۲px
+   ===================================================================== */
+@media (max-width: 991px) {
+    .search-header #search-result {
+        max-height: 60vh;
+    }
+
+    .sr-product {
+        width: calc(50% - 6px);
+    }
+
+    .front-dropdown-notification .notif-dropdown {
+        min-width: 300px;
+    }
+}
+
+/* =====================================================================
+   پنل نتایج جستجوی زنده — جایگزین بلاک قدیمی search-result-fixed
+   ===================================================================== */
+.search-header {
+    position: relative;
+}
+
+.search-result {
+    display: none;
+}
+
+.search-result.open {
+    display: block;
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    left: 0;
+    z-index: 900;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(28, 28, 37, .16);
+    padding: 12px;
+    max-height: 430px;
+    overflow-y: auto;
+}
+
+.search-result .sr-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text-muted, #777);
+    padding: 6px 8px;
+    margin: 0 0 6px;
+}
+
+.search-result .sr-products {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.search-result .sr-product {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #fafafa;
+    border: 1px solid #f0f0f0;
+    transition: 0.18s all ease-in-out;
+}
+
+.search-result .sr-product:hover {
+    background: var(--main-color-one-shadow, #f2f6ff);
+    border-color: transparent;
+}
+
+.search-result .sr-product-image img {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #fff;
+    padding: 3px;
+}
+
+.search-result .sr-product-title {
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--color-site, #333);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.search-result .sr-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.search-result .sr-link-all {
+    color: var(--main-color-one);
+    background: var(--main-color-one-shadow, #f2f6ff);
+    transition: 0.18s all ease-in-out;
+}
+
+.search-result .sr-link-all:hover {
+    color: #fff;
+    background: var(--main-color-one);
+}
+
+.search-result .sr-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 22px 10px;
+    font-size: 13px;
+    color: var(--text-muted, #777);
+}
+
+@media (max-width: 575px) {
+    .search-result .sr-products {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =====================================================================
+   ویجت «اسلایدر و دو بنر کناری»
+   یک اسلایدر بزرگ + دو بنر زیر هم در ستون کناری (ارتفاع هم‌تراز اسلایدر)
+   ===================================================================== */
+.saniar-side-banners {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+}
+
+.saniar-side-banners a {
+    flex: 1 1 0;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: var(--shadow-box);
+    transition: 0.25s all ease-in-out;
+    -webkit-transition: 0.25s all ease-in-out;
+}
+
+.saniar-side-banners a:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.saniar-side-banners img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px;
+}
+
+/* موبایل: دو بنر کنار هم زیر اسلایدر */
+@media (max-width: 991px) {
+    .saniar-side-banners {
+        flex-direction: row;
+    }
+
+    .saniar-side-banners a {
+        min-height: 90px;
+    }
+}
+
+/* =====================================================================
+   ویجت «اسلایدر شگفت انگیز» (اصلاحات ریز ظاهری)
+   استایلهای اصلی .amazing در style.css تمپلیت است.
+   ===================================================================== */
+.amazing-slider .slider-item .title h3 a {
+    color: var(--text-color, #212529);
+    transition: 0.2s all ease-in-out;
+}
+
+.amazing-slider .slider-item .title h3 a:hover {
+    color: var(--main-color-one);
+}
+
+.amazing-slider .slider-item .image img {
+    max-height: 260px;
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+.amazing-slider .slider-item .timer .countdown {
+    display: flex;
+    justify-content: flex-start;
+    gap: 6px;
+    direction: ltr;
+}
+
+.amazing-slider .slider-item .timer .countdown .countdown-container {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+}
+
+.amazing-slider-link .item .price .old-price.price-discount {
+    text-decoration: line-through;
+    color: #cccccc;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.amazing-slider-link .item {
+    transition: 0.2s all ease-in-out;
+}
+
+.amazing-slider-link .item:hover {
+    transform: translateY(-2px);
+}
+
+/* موبایل: فهرست کناری مخفی است؛ ارتفاع اسلاید آزاد می‌شود */
+@media (max-width: 991px) {
+    .amazing-slider {
+        max-height: none;
+    }
+
+    .amazing-slider .slider-item .image img {
+        max-height: 200px;
+    }
+}
+
+/* =====================================================================
+   پنل جستجوی لحظه‌ای پیشرفته (sr2-*)
+   حالت خالی: جستجوهای اخیر + پرطرفدار + بنر — حالت تایپ: نتایج زنده
+   ===================================================================== */
+.search-form {
+    position: relative;
+}
+
+.saniar-search-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    left: 0;
+    background: #fff;
+    border: 1px solid #eef0f3;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg, 0 12px 34px rgba(15, 23, 42, .14));
+    padding: 18px;
+    z-index: 960;
+    max-height: min(480px, 72vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.saniar-search-panel.open {
+    display: block;
+    animation: sr2FadeIn 0.18s ease-out;
+}
+
+@keyframes sr2FadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* نوار اسکرول ظریف */
+.saniar-search-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.saniar-search-panel::-webkit-scrollbar-thumb {
+    background: #d8dbe2;
+    border-radius: 10px;
+}
+
+.sr2-section + .sr2-section {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #f1f2f6;
+}
+
+.sr2-heading {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 10px;
+}
+
+/* چیپ‌های جستجوی اخیر / پرطرفدار */
+.sr2-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sr2-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+    border-radius: 22px;
+    padding: 7px 14px;
+    font-size: 13px;
+    line-height: 1;
+    transition: 0.18s all ease-in-out;
+    -webkit-transition: 0.18s all ease-in-out;
+}
+
+.sr2-chip i {
+    font-size: 13px;
+    color: var(--main-color-one);
+}
+
+.sr2-chip:hover {
+    border-color: var(--main-color-one);
+    color: var(--main-color-one);
+    background: var(--main-color-one-shadow, #f2f6ff);
+}
+
+/* ردیف‌های نتایج */
+.sr2-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    transition: 0.15s background ease-in-out;
+    -webkit-transition: 0.15s background ease-in-out;
+}
+
+.sr2-row:hover {
+    background: #f6f7f9;
+}
+
+.sr2-row-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.sr2-row-icon {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f4f5f7;
+    color: var(--text-muted, #6b7280);
+    font-size: 14px;
+}
+
+.sr2-thumb {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #f7f7f9;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.sr2-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.sr2-thumb-empty i {
+    color: #c3c8d2;
+}
+
+.sr2-row-title {
+    font-size: 13.5px;
+    color: #24344d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sr2-row:hover .sr2-row-title {
+    color: var(--main-color-one);
+}
+
+.sr2-row-context {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--text-muted, #8a8f9c);
+}
+
+/* ردیف «مشاهده همهٔ نتایج» */
+.sr2-row.sr2-all {
+    margin-top: 12px;
+    background: var(--main-color-one-shadow, #f2f6ff);
+}
+
+.sr2-row.sr2-all .sr2-row-title {
+    font-weight: 700;
+    color: var(--main-color-one);
+}
+
+.sr2-row.sr2-all .sr2-row-icon {
+    background: var(--main-color-one);
+    color: #fff;
+}
+
+/* بنر پایین پنل حالت خالی */
+.sr2-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: linear-gradient(105deg, #b91c1c 0%, #7f1d1d 55%, #450a0a 100%);
+    color: #fff;
+    box-shadow: var(--shadow-md);
+    transition: 0.2s transform ease-in-out;
+    -webkit-transition: 0.2s transform ease-in-out;
+}
+
+.sr2-banner:hover {
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+.sr2-banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sr2-banner-title {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.sr2-banner-sub {
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.sr2-banner > i {
+    font-size: 20px;
+    opacity: 0.9;
+}
+
+.sr2-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 22px 10px;
+    font-size: 13px;
+    color: var(--text-muted, #8a8f9c);
+}
+
+/* موبایل: پنل داخل منوی آفکانس */
+@media (max-width: 991px) {
+    .saniar-search-panel {
+        max-height: 60vh;
+    }
+}

@@ -1,0 +1,183 @@
+<?php
+
+namespace Themes\SaniarTheme\src;
+
+use Illuminate\Support\ServiceProvider;
+use App\Models\Category;
+use App\Models\Link;
+use App\Models\Menu;
+use App\Models\Post;
+use App\Models\Product;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
+
+class ThemeServiceProvider extends ServiceProvider
+{
+    /**
+     * Register services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        require_once(__DIR__ . '/helpers.php');
+
+        // set config file
+        if ($this->app['config']->get('front') === null) {
+            $this->app['config']->set('front', require __DIR__ . '/../config/general.php');
+        }
+    }
+
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        // اگر دارایی‌های تم روی هاست «کپی واقعی» است (بدون symlink) و
+        // منبع بعد از git pull جدیدتر شده، خودکار نوسازی می‌شود (اسکن کش‌شده؛
+        // پس از optimize:clear اولین بازدید تازه‌سازی می‌کند) — بدون shop:link دستی
+        try {
+            \App\Services\ThemeAssetSync::syncIfStale(basename(realpath(__DIR__.'/..')));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        // load routes
+
+        Route::group([
+            'middleware' => ['web'],
+        ], function () {
+            $this->loadRoutesFrom(__DIR__ . '/routes/web.php');
+        });
+
+        /* rate-limiter جستجوی لحظه‌ای هدر.
+           روت search/suggest متعلق به تم است و نام limiter آن (front-suggest)
+           باید همین‌جا ثبت شود؛ در غیر این صورت در production با
+           MissingRateLimiterException («Rate limiter [App\Models\User::front-suggest]
+           is not defined») خطای ۵۰۰ می‌داد و جستجوی لحظه‌ای از کار می‌افتاد. */
+        $this->registerRateLimiters();
+
+        /*  + ۱۶۷ — کست تاریخ پایان ویژه به Carbon (سطح تم، بدون تغییر هسته).
+           جدول products ستون timestamp با نام special_end_date دارد ولی مدل Product
+           هیچ casts/$dates تعریف نمی‌کند و در Laravel 13 ستون‌های timestamp خودکار
+           کست نمی‌شوند؛ در نتیجه product-card / amazing-slider / product-block-2
+           با «Call to a member function format()/gt() on string» کرش می‌کردند
+           (فقط وقتی محصول تاریخ پایان ویژه داشته باشد — دقیقاً حالت شگفت‌انگیز).
+
+           رفع «Non-static method Model::mergeCasts cannot be called
+           statically» : mergeCasts متد «نمونه» (instance) است و نمی‌توان آن را
+           استاتیک صدا زد؛ بنابراین با رویداد retrieved روی «هر نمونه» که از
+           دیتابیس واکشی می‌شود اعمال می‌شود (کم‌هزینه و بدون دوباره‌کاری). */
+        Product::retrieved(function (Product $product) {
+            $product->mergeCasts(['special_end_date' => 'datetime']);
+        });
+
+        $this->loadTranslationsFrom(__DIR__ . '/resources/lang', 'front');
+
+        // load views
+        $this->loadViewsFrom(__DIR__ . '/resources/views', 'front');
+
+        // share with views
+        // کامپوزرها lazy هستند (فقط هنگام رندر ویو اجرا می‌شوند)؛ بدون ثبت در
+        // حالت کنسول، ویوهای تم در تست‌ها با متغیرهای تعریف‌نشده 500 می‌دهند
+        $this->viewComposer();
+    }
+
+    /**
+     * rate-limiterهای تعریف‌شده در تم.
+     * سبک همان هسته (AppServiceProvider::registerRateLimiters): در تست/محیط تست
+     * محدودیتی نیست و فقط در production سقف دارد تا ربات‌ها جستجو را هدر ندهند.
+     */
+    private function registerRateLimiters(): void
+    {
+        $isProduction = $this->app->environment('production');
+
+        \Illuminate\Support\Facades\RateLimiter::for('front-suggest', function ($request) use ($isProduction) {
+            if (! $isProduction) {
+                return \Illuminate\Cache\RateLimiting\Limit::none();
+            }
+
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(600)->by(optional($request->user())->id ?: 'suggest|'.$request->ip());
+        });
+    }
+
+    private function viewComposer()
+    {
+        // SHARE WITH SPECIFIC VIEW
+
+
+        view()->composer(['front::partials.footer'], function ($view) {
+
+            $footer_links = config('front.linkGroups', []);
+
+            // FIX مقیاس: لینک‌های فوتر در هر بازدید کوئری نمی‌زنند
+            $links = Cache::remember('front.footer.links', 300, function () {
+                return Link::orderBy('ordering')->get();
+            });
+
+            $view->with(compact('footer_links', 'links'));
+        });
+
+        view()->composer(['front::partials.menu.menu', 'front::partials.mobile-menu.menu'], function ($view) {
+
+            // FIX مقیاس: درخت منو قبلاً به‌خاطر cache-forget داخل کانستراکتور
+            // CategoryObserver در «هر ریکوئست» بازسازی می‌شد — الان کش واقعاً کار می‌کند.
+            // postcats/menus هم با کش کوتاه‌مدت از کوئری حذف شدند.
+            // eager-loading درخت منو: قبلاً به‌ازای هر آیتم منو ۲-۳ کوئری
+            // ($menu->category / $menu->menus / getCategories) اجرا می‌شد = N+1
+            [$productcats, $postcats, $menus] = Cache::remember('front.menu.data', 300, function () {
+                $productcats = Cache::rememberForever('front.productcats', function () {
+                    return Category::published()->whereNull('category_id')
+                        ->orderBy('ordering')
+                        ->where('type', 'productcat')
+                        ->getWithChilds();
+                });
+
+                $postcats = Category::published()->where('type', 'postcat')->whereNull('category_id')->orderBy('ordering')->get();
+                // detectLang مثل پنل ادمین (منوهای سایر زبان‌ها در فرانت نیایند)
+                $menus    = Menu::detectLang()
+                    ->whereNull('menu_id')
+                    // درخت منو + دستهٔ هر آیتم — childrenmenus خودش category را eager می‌کند
+                    ->with(['category.categories', 'menus', 'childrenmenus'])
+                    ->orderBy('ordering')
+                    ->get();
+
+                return [$productcats, $postcats, $menus];
+            });
+
+            $view->with(compact('productcats', 'postcats', 'menus'));
+        });
+
+        view()->composer(['front::blogs.partials.sidebar'], function ($view) {
+
+            $latest_posts = Cache::remember('front.blog.latest_posts', 300, function () {
+                return Post::where('published', true)->latest()->take(6)->get();
+            });
+
+            $view->with(compact('latest_posts'));
+        });
+
+        view()->composer(['front::user.layouts.master'], function ($view) {
+
+            $user = auth()->user();
+
+            // FIX مقیاس: inRandomOrder روی میلیون محصول = full-scan؛ کش ۱۰ دقیقه‌ای
+            $random_products = Cache::remember('front.user_layout.random_products', 600, function () {
+                return Product::where('published', true)
+                    ->available()
+                    ->inRandomOrder()
+                    ->limit(10)
+                    ->get();
+            });
+
+            $view->with(compact('user', 'random_products'));
+        });
+
+        view()->composer(['front::partials.cart', 'front::carts.partials.checkout-sidebar', 'front::carts.checkout', 'front::carts.index'], function ($view) {
+            $cart = get_cart();
+            $view->with('cart', $cart);
+        });
+    }
+}

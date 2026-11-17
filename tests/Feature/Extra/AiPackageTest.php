@@ -1044,7 +1044,7 @@ class AiPackageTest extends TestCase
     }
 
     #[Test]
-    #[TestDox]
+    #[TestDox('بند ۱۲ — تنظیمات: دکمهٔ بررسی تزریق + پیش‌نمایش موقعیت؛ راهنما: بخش‌های جدید + کامپایل blade')]
     public function settings_injection_checker_and_guide_new_sections(): void
     {
         $this->requireModule();

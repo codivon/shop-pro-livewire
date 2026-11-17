@@ -354,7 +354,7 @@ class CreditPayIntegrationTest extends TestCase
     /* ================= ۱۰) کامپایل ویوهای تغییر یافته ================= */
 
     #[Test]
-    #[TestDox]
+    #[TestDox('بند ۱۰ — همهٔ ویوهای تغییر یافته کامپایل سالم دارند')]
     public function all_changed_views_compile(): void
     {
         $this->requireCreditPay();

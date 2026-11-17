@@ -543,7 +543,7 @@ class AiProvidersRegistryTest extends TestCase
     /* ================= ۱۰) ذخیرهٔ تنظیمات جدید ================= */
 
     #[Test]
-    #[TestDox]
+    #[TestDox('بند ۱۱ — ذخیرهٔ تنظیمات: پرووایدر دوم، دستیار، برند، اتوبلاگ و تلاش مجدد')]
     public function settings_persist_phase96_keys(): void
     {
         $this->requireModule();

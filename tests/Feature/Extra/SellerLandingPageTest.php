@@ -112,7 +112,7 @@ class SellerLandingPageTest extends TestCase
     }
 
     #[Test]
-    #[TestDox]
+    #[TestDox('سوییچ seller_landing_page خاموش ⇒ نسخهٔ سادهٔ لندینگ سرو می‌شود')]
     public function simple_landing_serves_when_toggle_off(): void
     {
         $this->enableVendor();

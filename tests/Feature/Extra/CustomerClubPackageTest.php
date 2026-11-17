@@ -533,7 +533,7 @@ class CustomerClubPackageTest extends TestCase
     }
 
     #[Test]
-    #[TestDox]
+    #[TestDox('بند ۱۴ — قرارداد ثبت‌شده: «راهنما و آموزش» در منوی فرانت نیست + منوی فرانت/بک در رجیستری‌ها ثبت شده')]
     public function guide_not_in_front_menu_and_menus_registered(): void
     {
         $this->requireCustomerClub();

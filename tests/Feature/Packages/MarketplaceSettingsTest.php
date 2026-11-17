@@ -480,7 +480,7 @@ class MarketplaceSettingsTest extends TestCase
     /* ================= ۷) سازگاری رو‌به‌جلو ================= */
 
     #[Test]
-    #[TestDox]
+    #[TestDox('بند ۹ — پیش‌فرض‌ها = وضعیت پیش‌فرض: هیچ رفتار فعلی نمی‌شکند')]
     public function defaults_preserve_pre_phase99_behavior(): void
     {
         $this->newCreator();

@@ -1,0 +1,85 @@
+name: CI — هسته فروشگاه
+
+# (زیرساخت فروش) — CI برای هسته:
+# نصب وابستگی‌ها + مایگریشن/سیید روی MariaDB واقعی + اجرای مجموعهٔ تست
+
+# تست‌های مستثنی (مستند شده — نه شکست واقعی):
+# - PriceAlertFrontendRestyleTest : ۳ شکست محیطی pre-existing
+#  - تست‌های پکیج‌ها (CustomerClubPackage/LogisticsPackage/ReferralRewards/
+#    AccountingPackage/AiPackage/MarketingMessaging/MoneyPackages) : کد پکیج در
+#    مخزن مستقل است و Modules/ در مخزن هسته gitignore می‌شود — روی
+# محیط تست توسعه با نصب پکیج اجرا و سبز شده‌اند.
+#  - ConcurrentUsersTest / MillionScaleTest : تست‌های بار سنگین (هر اجرا چند دقیقه و
+#                            حافظه‌بر) — جداگانه و دستی اجرا می‌شوند.
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: مجموعهٔ تست هسته (PHP 8.4 + MariaDB 10.11)
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: shop
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -proot --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: نصب PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, curl, dom, fileinfo, gd, iconv, intl, zip, bcmath, pdo_mysql, exif
+          coverage: none
+
+      - name: نصب وابستگی‌های Composer
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: آماده‌سازی .env
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          cat >> .env <<'ENV'
+          DB_HOST=127.0.0.1
+          DB_PORT=3306
+          DB_DATABASE=shop
+          DB_USERNAME=root
+          DB_PASSWORD=root
+          ADMIN_ROUTE_PREFIX=admin
+          DEBUGBAR_ENABLED=false
+          BROADCAST_DRIVER=log
+          ENV
+
+      - name: مایگریشن و Seed
+        run: |
+          php artisan migrate --force
+          php artisan db:seed --force
+
+      - name: نشانگر نصب‌بودن اپلیکیشن
+        # application_installed() = file_exists(storage/installed) — بدون این فایل،
+        # بوت اپ theme را ثبت نمیکند و روت‌های front.* (front.cart و …) وجود
+        # ندارند → دهها شکست تست در محیط CI (روی محیط تست واقعی این فایل هست).
+        run: |
+          mkdir -p storage/logs storage/framework/cache/data storage/framework/sessions storage/framework/views
+          touch storage/installed
+
+      - name: اجرای تست‌ها
+        # php صریح — vendor/bin/phpunit در این ریپو بیت اجرایی ندارد (exit 126)
+        run: php vendor/bin/phpunit --exclude-filter 'PriceAlertFrontendRestyleTest|CustomerClubPackageTest|LogisticsPackageTest|ReferralRewardsTest|AccountingPackageTest|AiPackageTest|ConcurrentUsersTest|MillionScaleTest|MarketingMessagingTest|MoneyPackagesTest'

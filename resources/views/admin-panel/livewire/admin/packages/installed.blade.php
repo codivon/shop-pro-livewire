@@ -1,0 +1,444 @@
+{{-- ماژول‌های نصب‌شده — پورت back/packages/installed.blade.php --}}
+<div class="mx-auto max-w-7xl space-y-5">
+
+    {{-- سربرگ --}}
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <span class="flex size-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-brand-500/12 dark:text-brand-400">
+                <x-admin-panel::icon name="package-check" class="size-6" />
+            </span>
+            <div>
+                <h1 class="text-lg font-bold">ماژول‌های نصب‌شده</h1>
+                <p class="text-xs text-ink-3 dark:text-night-ink-2">مدیریت، آپدیت و حذف ماژول‌های نصب‌شده</p>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            {{-- بازیابی رکوردهای گم‌شدهٔ installed_modules از پوشهٔ Modules/ (بعد از ریست دیتابیس هاست) --}}
+            <button type="button" wire:click="recoverFromDisk"
+                    wire:loading.attr="disabled" wire:target="recoverFromDisk"
+                    class="ap-btn-outline !py-2"
+                    title="اسکن پوشهٔ ماژول‌ها و بازسازی رکوردهای گم‌شدهٔ دیتابیس (برای بعد از ریست/بازیابی دیتابیس هاست)">
+                <x-admin-panel::icon name="history" class="size-4" />
+                بازیابی از پوشهٔ ماژول‌ها
+            </button>
+            <a href="{{ route('np.packages.index') }}" class="ap-btn-outline !py-2">
+                <x-admin-panel::icon name="package" class="size-4" />
+                بازار
+            </a>
+        </div>
+    </div>
+
+    {{-- جدول --}}
+    <div class="ap-card overflow-hidden" @if ($this->hasUpdating) wire:poll.4s @endif>
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[720px] text-start text-sm">
+                <thead>
+                    <tr class="border-b border-line bg-surface-2 text-xs text-ink-3 dark:border-night-line dark:bg-night-3 dark:text-night-ink-2">
+                        <th class="px-4 py-3 text-start font-semibold">ماژول</th>
+                        <th class="px-4 py-3 text-start font-semibold">نسخه نصب‌شده</th>
+                        <th class="px-4 py-3 text-start font-semibold">آخرین نسخه</th>
+                        <th class="px-4 py-3 text-start font-semibold">وضعیت</th>
+                        <th class="px-4 py-3 text-start font-semibold">لایسنس</th>
+                        <th class="px-4 py-3 text-start font-semibold">تاریخ نصب</th>
+                        <th class="px-4 py-3 text-start font-semibold">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-line dark:divide-night-line">
+                    @forelse ($this->modules as $module)
+                        @php
+                            // پوشش اشتراک برای «همهٔ» ماژول‌های صفحه (نقشهٔ دسته‌ای کش‌شده؛ نه فقط منقضی‌های محلی) — یک‌بار در ابتدای ردیف تا هر دو ستون (وضعیت + لایسنس) استفاده کنند
+                            $subCoverage = $this->subscriptions[$module->slug] ?? null;
+                        @endphp
+                        <tr class="transition-colors hover:bg-surface-2 dark:hover:bg-night-3">
+                            <td class="px-4 py-3">
+                                {{-- نمایش «عنوان» ماژول (module.json پکیج → کش بازار → نام فنی) --}}
+                                <p class="font-bold">{{ $module->displayName() }}</p>
+                                <p class="ltr text-xs text-ink-3 dark:text-night-ink-2">{{ $module->slug }}</p>
+                            </td>
+                            <td class="fa-digits px-4 py-3">{{ $module->version }}</td>
+                            <td class="fa-digits px-4 py-3">
+                                @if ($module->cache)
+                                    {{ $module->cache->latest_version }}
+                                    @if ($module->isUpdatable())
+                                        <span class="ap-badge bg-amber-50 text-amber-700 dark:bg-amber-500/12 dark:text-amber-400">آپدیت موجود</span>
+                                    @endif
+                                @else
+                                    —
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
+                                @php
+                                    $statusMeta = [
+                                        'installed' => ['نصب‌شده', 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/12 dark:text-emerald-400'],
+                                        'updating'  => ['در حال بروزرسانی', 'bg-amber-50 text-amber-700 dark:bg-amber-500/12 dark:text-amber-400'],
+                                        'failed'    => ['ناموفق', 'bg-red-50 text-red-700 dark:bg-red-500/12 dark:text-red-400'],
+                                    ][$module->status] ?? [$module->status, 'bg-surface-2 text-ink-2 dark:bg-night-3 dark:text-night-ink-2'];
+                                @endphp
+                                <span class="ap-badge {{ $statusMeta[1] }}">{{ $statusMeta[0] }}</span>
+                                {{-- هر پکیجی که جزو اشتراک فعال بازار است، مستقل از لایسنس تکی، «با اشتراک معتبر» نشان می‌گیرد --}}
+                                @if ($subCoverage !== null)
+                                    <span class="ap-badge bg-violet-50 text-violet-700 dark:bg-violet-500/12 dark:text-violet-400"
+                                          title="این پکیج جزو اشتراک فعال است و تا پایان اشتراک بدون لایسنس تکی هم معتبر می‌ماند">
+                                        با اشتراک معتبر
+                                    </span>
+                                @endif
+                                {{-- خطای «لایسنس/اشتراک» برای پوشش‌شده‌ها معنایی ندارد (لایسنسِ آن همان اشتراک است)؛ خطاهای فنی دیگر مثل قبلی نمایش داده می‌شوند --}}
+                                @if ($module->last_error && ($subCoverage === null || ! $this->isLicenseNoiseError($module->last_error)))
+                                    <p class="mt-1 max-w-[220px] truncate text-[11px] text-red-500" title="{{ $module->last_error }}">{{ $module->last_error }}</p>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-xs">
+                                @if ($module->isExpired($subCoverage))
+                                    <span class="ap-badge bg-red-50 text-red-700 dark:bg-red-500/12 dark:text-red-400">منقضی شده</span>
+                                @elseif ($subCoverage !== null)
+                                    @if ($subCoverage->diffInYears(now()) > 5)
+                                        <span class="ap-badge bg-violet-50 text-violet-700 dark:bg-violet-500/12 dark:text-violet-400"
+                                              title="این پکیج جزو اشتراک فعال است و تا پایان اشتراک معتبر می‌ماند">
+                                            با اشتراک معتبر
+                                        </span>
+                                    @else
+                                        <span class="ap-badge bg-violet-50 text-violet-700 dark:bg-violet-500/12 dark:text-violet-400"
+                                              title="این پکیج جزو اشتراک فعال است و تا پایان اشتراک معتبر می‌ماند">
+                                            با اشتراک معتبر تا {{ \App\Livewire\Admin\Packages\PackageInstalled::jdate($subCoverage, 'Y/m/d') }}
+                                        </span>
+                                    @endif
+                                    @if ($module->license_expires_at)
+                                        {{-- لایسنس تکیِ خودِ پکیج هم برای شفافیت نمایش داده می‌شود --}}
+                                        <p class="mt-1 text-[11px] text-ink-3 dark:text-night-ink-2">لایسنس تکی: {{ \App\Livewire\Admin\Packages\PackageInstalled::jdate($module->license_expires_at, 'Y/m/d') }}</p>
+                                    @endif
+                                @elseif ($module->license_expires_at)
+                                    {{ \App\Livewire\Admin\Packages\PackageInstalled::jdate($module->license_expires_at, 'Y/m/d') }}
+                                @else
+                                    نامحدود
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-xs text-ink-2 dark:text-night-ink-2">
+                                {{ \App\Livewire\Admin\Packages\PackageInstalled::jdate($module->installed_at, 'Y/m/d') }}
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <button type="button" wire:click="toggleActivation({{ \Illuminate\Support\Js::from($module->slug)->toHtml() }})"
+                                            wire:loading.attr="disabled" wire:target="toggleActivation"
+                                            class="rounded-lg p-1.5 {{ $module->is_active ? 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' : 'text-ink-3 hover:bg-surface-3 dark:hover:bg-night-3' }}"
+                                            title="{{ $module->is_active ? 'غیرفعال‌سازی' : 'فعال‌سازی' }}">
+                                        <x-admin-panel::icon name="{{ $module->is_active ? 'circle-check' : 'circle-x' }}" class="size-4.5" />
+                                    </button>
+                                    {{-- گیت آپدیت: با خاموشی کلید اصلی/allow_install دکمهٔ آپدیت مخفی --}}
+                                    {{-- کلیک روی «آپدیت ماژول” → مودال بررسی نسخه جدید/بروزرسانی --}}
+                                    @if (\App\Support\MarketplaceSettings::allowInstall())
+                                        <button type="button" wire:click="openUpdateModal({{ \Illuminate\Support\Js::from($module->slug)->toHtml() }})"
+                                                wire:loading.attr="disabled" wire:target="openUpdateModal"
+                                                class="rounded-lg p-1.5 text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                                                title="آپدیت ماژول">
+                                            <x-admin-panel::icon name="refresh-cw" class="size-4.5" />
+                                        </button>
+                                    @endif
+                                    @can('packages.installed')
+                                        {{-- گیت حذف: با خاموشی allow_uninstall دکمهٔ حذف مخفی --}}
+                                        @if (\App\Support\MarketplaceSettings::allowUninstall())
+                                            <button type="button" wire:click="confirmUninstall({{ \Illuminate\Support\Js::from($module->slug)->toHtml() }})"
+                                                    class="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
+                                                    title="حذف ماژول">
+                                                <x-admin-panel::icon name="trash-2" class="size-4.5" />
+                                            </button>
+                                        @endif
+                                    @endcan
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-12 text-center">
+                                <span class="mx-auto mb-2 flex size-12 items-center justify-center rounded-2xl bg-surface-2 text-ink-3 dark:bg-night-3">
+                                    <x-admin-panel::icon name="package" class="size-6" />
+                                </span>
+                                <p class="text-sm font-bold">ماژولی نصب نشده است</p>
+                                <p class="mt-1 text-xs text-ink-3 dark:text-night-ink-2">پکیج‌های موردنظر را از بازار نصب کنید.</p>
+                                {{-- اگر پوشهٔ ماژول‌ها پر است ولی جدول خالی (ریست دیتابیس هاست)، یک‌کلیک بازیابی --}}
+                                <button type="button" wire:click="recoverFromDisk"
+                                        wire:loading.attr="disabled" wire:target="recoverFromDisk"
+                                        class="ap-btn mx-auto mt-4 !py-2">
+                                    <x-admin-panel::icon name="history" class="size-4" />
+                                    بازیابی از پوشهٔ ماژول‌ها
+                                </button>
+                                <p class="mt-2 text-[11px] text-ink-3 dark:text-night-ink-2">اگر بعد از ریست/تمدید دیتابیس، پوشهٔ ماژول‌ها سر جای خودش است، با یک کلیک رکوردها و منوها بازمی‌گردند.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- صفحه‌بندی --}}
+        @if ($this->modules->hasPages())
+            <div class="border-t border-line px-4 py-3 dark:border-night-line">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <p class="text-xs text-ink-3 dark:text-night-ink-2">
+                        نمایش <span class="fa-digits">{{ number_format($this->modules->firstItem() ?? 0) }}</span> تا
+                        <span class="fa-digits">{{ number_format($this->modules->lastItem() ?? 0) }}</span> از
+                        <span class="fa-digits">{{ number_format($this->modules->total()) }}</span> ماژول
+                    </p>
+                    <nav class="flex items-center gap-1" aria-label="صفحه‌بندی">
+                        @if ($this->modules->onFirstPage())
+                            <span class="rounded-lg p-2 text-ink-3 opacity-40"><x-admin-panel::icon name="chevron-right" class="size-4" /></span>
+                        @else
+                            <button wire:click="previousPage" class="rounded-lg p-2 text-ink-2 transition-colors hover:bg-surface-3 dark:hover:bg-night-3" aria-label="صفحه قبل">
+                                <x-admin-panel::icon name="chevron-right" class="size-4" />
+                            </button>
+                        @endif
+
+                        @foreach ($this->modules->onEachSide(1)->toArray()['links'] as $link)
+                            @if ($link['label'] === '...')
+                                <span class="px-2 text-xs text-ink-3">…</span>
+                            @elseif (! is_numeric(trim($link['label'])))
+                            @elseif ($link['active'])
+                                <span class="fa-digits flex size-8 items-center justify-center rounded-lg bg-brand-600 text-[13px] font-bold text-white">{{ $link['label'] }}</span>
+                            @else
+                                <button wire:click="gotoPage({{ trim($link['label']) }})"
+                                        class="fa-digits flex size-8 items-center justify-center rounded-lg text-[13px] font-semibold text-ink-2 transition-colors hover:bg-surface-3 dark:text-night-ink-2 dark:hover:bg-night-3">
+                                    {{ $link['label'] }}
+                                </button>
+                            @endif
+                        @endforeach
+
+                        @if ($this->modules->hasMorePages())
+                            <button wire:click="nextPage" class="rounded-lg p-2 text-ink-2 transition-colors hover:bg-surface-3 dark:hover:bg-night-3" aria-label="صفحه بعد">
+                                <x-admin-panel::icon name="chevron-left" class="size-4" />
+                            </button>
+                        @else
+                            <span class="rounded-lg p-2 text-ink-3 opacity-40"><x-admin-panel::icon name="chevron-left" class="size-4" /></span>
+                        @endif
+                    </nav>
+                </div>
+            </div>
+        @endif
+    </div>
+
+    {{-- مودال تایید حذف ماژول --}}
+    <div x-data="{ open: @entangle('confirmingUninstall').live }"
+         x-show="open" x-cloak
+         class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" x-show="open" x-on:click="open=false" x-transition.opacity aria-hidden="true"></div>
+        <div x-show="open" x-on:click.stop
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+             class="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-6 shadow-pop dark:border-night-line dark:bg-night-2"
+             role="dialog" aria-modal="true">
+            <div class="mb-3 flex size-12 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400">
+                <x-admin-panel::icon name="trash-2" class="size-6" />
+            </div>
+            <h3 class="text-base font-bold">حذف ماژول</h3>
+            <p class="mt-1.5 text-[13px] leading-6 text-ink-2 dark:text-night-ink-2">
+                با حذف ماژول <b class="ltr">{{ \App\Models\InstalledModule::where('slug', $confirmingUninstall)->first()?->displayName() ?? $confirmingUninstall }}</b> فایل‌ها و تنظیمات آن از پروژه پاک می‌شود و قابل بازگشت نیست.
+            </p>
+            <div class="mt-5 flex gap-2.5">
+                <button type="button" wire:click="uninstall" wire:loading.attr="disabled"
+                        class="ap-btn flex-1 bg-red-600 text-white hover:bg-red-700">
+                    بله حذف شود
+                </button>
+                <button type="button" x-on:click="open=false" class="ap-btn-ghost flex-1">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- ======================
+         مودال آپدیت ماژول: نام/تصویر/نسخه + «بررسی نسخه جدید» ← «بروزرسانی»
+         ====================== --}}
+    <div x-data="{ open: @entangle('updatingModal').live }"
+         x-show="open" x-cloak
+         class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" x-show="open" x-on:click="open=false" x-transition.opacity aria-hidden="true"></div>
+        <div x-show="open" x-on:click.stop
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+             class="relative w-full max-w-md overflow-hidden rounded-2xl border border-line bg-surface shadow-pop dark:border-night-line dark:bg-night-2"
+             role="dialog" aria-modal="true" aria-labelledby="update-modal-title">
+
+            {{-- سربرگ گرادیانی --}}
+            <div class="relative overflow-hidden bg-gradient-to-l from-brand-600 to-brand-500 px-5 py-4">
+                <div class="pointer-events-none absolute -top-14 start-1/2 size-40 rounded-full bg-white/10 blur-2xl"></div>
+                <div class="relative flex items-center gap-3">
+                    <span class="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-white">
+                        <x-admin-panel::icon name="refresh-cw" class="size-5.5" />
+                    </span>
+                    <div>
+                        <h3 id="update-modal-title" class="text-[15px] font-bold text-white">آپدیت ماژول</h3>
+                        <p class="mt-0.5 text-[11px] text-white/85">بررسی نسخه جدید و بروزرسانی پکیج</p>
+                    </div>
+                    <button type="button" x-on:click="open=false"
+                            class="absolute end-0 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/20 hover:text-white"
+                            aria-label="بستن">
+                        <x-admin-panel::icon name="x" class="size-5" />
+                    </button>
+                </div>
+            </div>
+
+            {{-- بدنه --}}
+            <div class="space-y-3.5 px-5 py-4">
+
+                {{-- کارت پکیج: تصویر + نام + نسخه --}}
+                <div class="flex items-center gap-3.5 rounded-2xl border border-line bg-surface-2 p-3.5 dark:border-night-line dark:bg-night-3">
+                    @if (filled($updateModal['thumbnail']))
+                        <img src="{{ $updateModal['thumbnail'] }}" alt="{{ $updateModal['name'] }}"
+                             class="size-[70px] shrink-0 rounded-xl border border-line object-cover dark:border-night-line"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    @endif
+                    <span class="flex size-[70px] shrink-0 items-center justify-center rounded-xl border border-line bg-brand-50 text-brand-600 dark:border-night-line dark:bg-brand-500/12 dark:text-brand-400 {{ filled($updateModal['thumbnail']) ? 'hidden' : '' }}"
+                          style="{{ filled($updateModal['thumbnail']) ? 'display:none' : '' }}">
+                        <x-admin-panel::icon name="package" class="size-8" />
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm font-bold">{{ $updateModal['name'] }}</p>
+                        <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                            <span class="ap-badge border border-line bg-surface text-ink-2 dark:border-night-line dark:bg-night-2 dark:text-night-ink-2">
+                                <x-admin-panel::icon name="box" class="size-3.5" />
+                                نسخه فعلی: <b class="ltr">v{{ $updateModal['version'] }}</b>
+                            </span>
+                            @if (filled($updateModal['latest_version']) && $updateModal['state'] === 'has_update')
+                                <span class="ap-badge animate-pulse border border-brand-500/40 bg-brand-50 text-brand-700 dark:bg-brand-500/12 dark:text-brand-400">
+                                    <x-admin-panel::icon name="arrow-up" class="size-3.5" />
+                                    نسخه جدید: <b class="ltr">v{{ $updateModal['latest_version'] }}</b>
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ناحیه وضعیت --}}
+
+                {{-- حالت اولیه: راهنما --}}
+                @if ($updateModal['state'] === 'idle')
+                    <div class="flex items-start gap-3 rounded-2xl border border-brand-500/25 bg-brand-50/60 p-3.5 dark:bg-brand-500/8">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">
+                            <x-admin-panel::icon name="search" class="size-4.5" />
+                        </span>
+                        <div>
+                            <p class="text-[13px] font-bold text-brand-800 dark:text-brand-300">بررسی نسخه جدید</p>
+                            <p class="mt-0.5 text-xs leading-6 text-brand-700/90 dark:text-brand-400/90">برای اتصال به سرور پکیج‌ها و اطلاع از وجود نسخه جدید، روی دکمهٔ «بررسی نسخه جدید» کلیک کنید.</p>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- در حال بررسی (هماهنگ با wire:loading) --}}
+                <div wire:loading wire:target="checkNewVersion">
+                    <div class="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-50 p-3.5 dark:bg-amber-500/8">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400">
+                            <svg class="size-4.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round" /></svg>
+                        </span>
+                        <div>
+                            <p class="text-[13px] font-bold text-amber-800 dark:text-amber-300">در حال بررسی نسخه جدید…</p>
+                            <p class="mt-0.5 text-xs text-amber-700/90 dark:text-amber-400/90">در حال اتصال به سرور پکیج‌ها، لطفاً صبر کنید.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- نسخه جدید یافت شد --}}
+                @if ($updateModal['state'] === 'has_update')
+                    <div class="flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-50 p-3.5 dark:border-emerald-500/25 dark:bg-emerald-500/8">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-[0_4px_12px_rgb(16_185_129/.4)]">
+                            <x-admin-panel::icon name="cloud-download" class="size-4.5" />
+                        </span>
+                        <div>
+                            <p class="text-[13px] font-bold text-emerald-800 dark:text-emerald-300">نسخه جدید یافت شد! (v{{ $updateModal['latest_version'] }})</p>
+                            <p class="mt-0.5 text-xs leading-6 text-emerald-700/90 dark:text-emerald-400/90">با کلیک روی «بروزرسانی»، آخرین نسخه در صف دانلود و نصب قرار می‌گیرد.</p>
+                        </div>
+                    </div>
+
+                    {{-- تغییرات نسخه جدید --}}
+                    @if (filled($updateModal['changelog']))
+                        <div class="overflow-hidden rounded-2xl border border-line dark:border-night-line">
+                            <div class="flex items-center gap-1.5 border-b border-line bg-surface-2 px-3.5 py-2 text-xs font-bold text-ink-2 dark:border-night-line dark:bg-night-3 dark:text-night-ink-2">
+                                <x-admin-panel::icon name="file-text" class="size-4 text-brand-600 dark:text-brand-400" />
+                                تغییرات نسخه جدید
+                            </div>
+                            <ul class="max-h-32 space-y-1 overflow-y-auto px-4 py-2.5 text-xs leading-6 text-ink-2 dark:text-night-ink-2">
+                                @foreach ($updateModal['changelog'] as $change)
+                                    <li class="flex items-start gap-1.5"><span class="mt-[7px] size-1 shrink-0 rounded-full bg-brand-500"></span><span>{{ $change }}</span></li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                @endif
+
+                {{-- به‌روز است --}}
+                @if ($updateModal['state'] === 'up_to_date')
+                    <div class="flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-50 p-3.5 dark:border-emerald-500/25 dark:bg-emerald-500/8">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white">
+                            <x-admin-panel::icon name="check-circle" class="size-4.5" />
+                        </span>
+                        <div>
+                            <p class="text-[13px] font-bold text-emerald-800 dark:text-emerald-300">شما آخرین نسخه را نصب دارید</p>
+                            <p class="mt-0.5 text-xs text-emerald-700/90 dark:text-emerald-400/90">هم‌اکنون نسخهٔ v{{ $updateModal['latest_version'] }} به‌روزترین نسخهٔ این پکیج است.</p>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- خطا --}}
+                @if ($updateModal['state'] === 'error')
+                    <div class="flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-50 p-3.5 dark:border-red-500/25 dark:bg-red-500/8">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-red-500 text-white">
+                            <x-admin-panel::icon name="circle-alert" class="size-4.5" />
+                        </span>
+                        <div class="min-w-0">
+                            <p class="text-[13px] font-bold text-red-800 dark:text-red-300">بررسی ناموفق بود</p>
+                            <p class="mt-0.5 break-words text-xs leading-6 text-red-700/90 dark:text-red-400/90">{{ $updateModal['message'] ?: 'خطا در ارتباط با سرور پکیج‌ها. لطفاً دوباره تلاش کنید.' }}</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            {{-- فوتر: انصراف + دکمهٔ اصلی --}}
+            <div class="flex items-center gap-2.5 border-t border-line bg-surface-2 px-5 py-4 dark:border-night-line dark:bg-night-3">
+                <button type="button" x-on:click="open=false" class="ap-btn-ghost flex-1">
+                    <x-admin-panel::icon name="x" class="size-4" />
+                    انصراف
+                </button>
+
+                @if ($updateModal['state'] === 'has_update')
+                    {{-- بروزرسانی --}}
+                    <button type="button" wire:click="confirmUpdate"
+                            wire:loading.attr="disabled" wire:target="confirmUpdate"
+                            class="ap-btn-primary flex-1 !bg-emerald-600 hover:!bg-emerald-700">
+                        <span wire:loading wire:target="confirmUpdate" class="inline-flex items-center gap-2">
+                            <svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round" /></svg>
+                            در حال قرارگیری در صف…
+                        </span>
+                        <span wire:loading.remove wire:target="confirmUpdate" class="inline-flex items-center gap-2">
+                            <x-admin-panel::icon name="arrow-up" class="size-4" />
+                            بروزرسانی به <b class="ltr">v{{ $updateModal['latest_version'] }}</b>
+                        </span>
+                    </button>
+                @elseif ($updateModal['state'] === 'up_to_date')
+                    <button type="button" disabled class="ap-btn flex-1 cursor-not-allowed opacity-60">
+                        <x-admin-panel::icon name="check-circle" class="size-4" />
+                        به‌روز است
+                    </button>
+                @else
+                    {{-- بررسی نسخه جدید (حالت اولیه/خطا) --}}
+                    <button type="button" wire:click="checkNewVersion"
+                            wire:loading.attr="disabled" wire:target="checkNewVersion"
+                            class="ap-btn-primary flex-1">
+                        <span wire:loading wire:target="checkNewVersion" class="inline-flex items-center gap-2">
+                            <svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round" /></svg>
+                            در حال بررسی…
+                        </span>
+                        <span wire:loading.remove wire:target="checkNewVersion" class="inline-flex items-center gap-2">
+                            <x-admin-panel::icon name="search" class="size-4" />
+                            {{ $updateModal['state'] === 'error' ? 'تلاش مجدد' : 'بررسی نسخه جدید' }}
+                        </span>
+                    </button>
+                @endif
+            </div>
+
+        </div>
+    </div>
+
+    {{-- لودینگ --}}
+    <div wire:loading wire:target="updateModule, confirmUpdate, uninstall, toggleActivation, recoverFromDisk, previousPage, nextPage, gotoPage, openUpdateModal, checkNewVersion"
+         class="pointer-events-none fixed bottom-6 start-6 z-[65] flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2.5 shadow-pop dark:border-night-line dark:bg-night-3">
+        <svg class="size-4 animate-spin text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round" />
+        </svg>
+        <span class="text-[13px] font-semibold">در حال بارگذاری…</span>
+    </div>
+</div>

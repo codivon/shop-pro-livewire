@@ -1,0 +1,36 @@
+/node_modules
+/public/hot
+/public/storage
+/public/uploads
+/public/modules
+
+# فایل‌های تولیدی sitemap (در سرور به‌صورت خودکار ساخته می‌شوند؛ نسخه‌های کامیت‌شده آدرس‌های 127.0.0.1 داشتند)
+/public/sitemap.xml
+/public/sitemap/
+/storage/*.key
+/storage/debugbar
+/storage/installed
+/bootstrap/cache/*.php
+/Modules/*
+.env
+.env.testing
+.phpunit.cache
+.env.backup
+/modules_statuses.json
+modules_statuses.json
+.phpunit.result.cache
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.idea/
+.htaccess-for-zip
+
+# hot file وییت پنل مدیریت (هرگز کامیت نشود)
+/admin-panel.hot
+.phpunit.cache/
+
+# فاز ۹۷ — مارکرهای گیت self-heal پکیج‌ها
+storage/framework/selfheal-*.flag
+composer.phar

@@ -1,0 +1,330 @@
+<?php
+
+namespace App\Support;
+
+use App\Models\Seller;
+
+/*
+ * لایهٔ مرکزی تنظیمات چندفروشندگی پیشرفته
+ *
+ * همهٔ کلیدها در جدول options نگهداری می‌شوند (همان مکانیزم استاندارد هسته:
+ * option() / option_update() + کش per-language) و از تب «چندفروشندگی» در
+ * تنظیمات برنامه‌نویس (/admin/{prefix}/developer) مدیریت می‌شوند.
+ *
+ * قاعدهٔ طلایی مدیر پروژه: «هر امکانی که اضافه می‌شود از تنظیمات قابل
+ * شخصی‌سازی باشد؛ حداقل فعال/غیرفعال کردن» — هر قابلیت یک کلید
+ * مستقل دارد با گیت واقعی در کد.
+ *
+ * کلید اصلیِ چندفروشندگی از قبل وجود داشت : multi_vendor_system_status
+ * با قرارداد مقدار قدیمی 'true'/'false' و در «تنظیمات دیگر» (Others.php) هم
+ * سوییچ دارد. برای سازگاری کامل با تمام خواننده‌های قدیمی (میدل‌ور Seller،
+ * سایدبار، Product.php و ...) این کلاس همان کلید را با همان قرارداد می‌نویسد،
+ * ولی خواندنش هم 'true' و هم '1' را می‌پذیرد (مقاوم به هر دو قرارداد).
+ *
+ * قرارداد بقیهٔ کلیدها: '1' روشن / '0' خاموش .
+ */
+class MultiVendorSettings
+{
+    /** کلید اصلی چندفروشندگی — همان کلید قدیمی (قرارداد 'true'/'false') */
+    public const KEY_ENABLED = 'multi_vendor_system_status';
+
+    /* ================= کلید اصلی ================= */
+
+    /**
+     * روشن بودن سیستم چندفروشندگی — هم 'true' (قرارداد قدیمی) و هم '1'
+     * را می‌پذیرد تا با هر نویسنده‌ای سازگار بماند.
+     */
+    public static function enabled(): bool
+    {
+        return in_array(option(self::KEY_ENABLED, 'false'), ['true', '1'], true);
+    }
+
+    /** نوشتن کلید اصلی — با قرارداد قدیمی 'true'/'false' تا خواننده‌های فعلی نشکنند */
+    public static function setEnabled(bool $on): void
+    {
+        option_update(self::KEY_ENABLED, $on ? 'true' : 'false');
+    }
+
+    /* ================= گیت‌های ================= */
+
+    /**
+     * تسویهٔ خودکار فروشندگان پس از پرداخت سفارش (هر مسیر پرداخت: درگاه/کیف پول).
+     * قابلیت جدید : پیش از این فقط سفارش‌های «کیف پولی» سهم فروشنده را
+     * واریز می‌کردند (payUsingWallet) و سفارش‌های درگاهی هرگز تسویه نمی‌شدند.
+     */
+    public static function autoSettlement(): bool
+    {
+        return option('multi_vendor_auto_settlement', '1') === '1';
+    }
+
+    /**
+     * کمیسیون پیش‌فرض سراسری (درصد) وقتی هیچ دسته‌بندیِ مسیرِ محصول کمیسیون
+     * نداشته باشد. null یعنی «بدون پیش‌فرض» = دقیقاً رفتار پیش‌فرض (۰).
+     */
+    public static function defaultCommission(): ?int
+    {
+        $raw = trim((string) option('multi_vendor_default_commission', ''));
+
+        if ($raw === '') {
+            return null;
+        }
+
+        if (! is_numeric($raw)) {
+            return null;
+        }
+
+        return min(100, max(0, (int) $raw));
+    }
+
+    /** کمیسیون اختصاصیِ هر فروشنده (فیلد per-seller در جدول sellers) معتبر باشد؟ */
+    public static function sellerOverrideEnabled(): bool
+    {
+        return option('multi_vendor_seller_commission_override', '1') === '1';
+    }
+
+    /** پرداخت دسته‌جمعی تسویهٔ فروشندگان (صفحهٔ «درخواستی‌ها») */
+    public static function bulkSettlementEnabled(): bool
+    {
+        return option('multi_vendor_bulk_settlement', '1') === '1';
+    }
+
+    /** کارت آمار تسویه در داشبورد فروشنده */
+    public static function dashboardStatsEnabled(): bool
+    {
+        return option('multi_vendor_dashboard_stats', '1') === '1';
+    }
+
+    /**
+     * صورت‌حساب تسویهٔ فروشنده : صفحهٔ ردیف‌به‌ردیفِ
+     * کمیسیون/سهم هر سفارش در پنل فروشنده + خروجی اکسل. داده (seller_deposits
+     * + WalletHistory) از موجود است؛ این کلید فقط نمایشش را کنترل می‌کند.
+     */
+    public static function settlementStatementEnabled(): bool
+    {
+        return option('multi_vendor_settlement_statement', '1') === '1';
+    }
+
+    /**
+     * گزارش فروش فروشنده : بخش «گزارش فروش» صفحهٔ آمار پنل
+     * فروشنده — درآمد زمانی ۳۰ روز، پرفروش‌ترین‌ها و بازدید→سفارش. منبع
+     * داده (order_items.seller_id روی سفارش‌های paid + Viewer) از قبل
+     * موجود است؛ این کلید فقط بخش فروش را کنترل می‌کند — آمار بازدیدِ
+     * همان صفحه مستقل از این کلید سرو می‌شود.
+     */
+    public static function analyticsEnabled(): bool
+    {
+        return option('seller_analytics_enabled', '1') === '1';
+    }
+
+    /**
+     * سیگنال‌های تقاضا : «X مشتری منتظر موجودی» (StockNotify) و
+     * «X منتظر کاهش قیمت» (PriceAlert) از نگاه فروشنده — صفحهٔ اختصاصی پنل
+     * فروشنده + آیتم منو. داده از /۸۳ موجود است و فقط ادمین می‌دید؛
+     * این کلید نمایشش به فروشنده را کنترل می‌کند (موبایل مشتری ماسک می‌شود).
+     */
+    public static function demandSignalsEnabled(): bool
+    {
+        return option('seller_demand_signals', '1') === '1';
+    }
+
+    /**
+     * دسترسی فروشنده به نظرات محصولاتش : صفحهٔ امتیاز/توصیه/
+     * آمار رضایتِ Review در پنل فروشنده — تا امروز فقط ادمین می‌دید و
+     * فروشنده فقط Q&A داشت. فقط-خواندنی: تأیید/رد همچنان کارِ ادمین است.
+     */
+    public static function reviewsAccessEnabled(): bool
+    {
+        return option('seller_reviews_access', '1') === '1';
+    }
+
+    /**
+     * مرکز موجودی فروشنده : صفحهٔ ناموجود/کم‌موجود
+     * ردیف‌به‌ردیف + تاریخچهٔ stock_movements از نگاه
+     * فروشنده — جایگزین شمارش درون-حلقهٔ Blade داشبورد.
+     */
+    public static function inventoryCenterEnabled(): bool
+    {
+        return option('seller_inventory_center', '1') === '1';
+    }
+
+    /**
+     * خروجی اکسل محصولات فروشنده : دکمهٔ خروجی در «مدیریت
+     * محصولات» پنل فروشنده — همان مبنای لیست (SellerVariant) با قیمت/موجودی/
+     * دسته‌بندی/تنوع‌ها. الگوی SellerOrdersExport و SellerSettlementsExport.
+     */
+    public static function productsExportEnabled(): bool
+    {
+        return option('seller_products_export', '1') === '1';
+    }
+
+    /**
+     * لیدربورد مقایسهٔ فروشندگان : صفحهٔ رتبه‌بندی
+     * عملکرد فروشندگان (درآمد/سفارش/اقلام) با نمودار ECharts پنل جدید و
+     * فیلتر دوره — مبنای واحد درآمد: order_items.seller_id روی سفارش‌های paid.
+     */
+    public static function leaderboardEnabled(): bool
+    {
+        return option('multi_vendor_leaderboard', '1') === '1';
+    }
+
+    /**
+     * پنل مدرن فروشندگان : رابط لایوایر ۴ SPA مستقل از تم
+     * روشن ⇒ صفحات GET پنل فروشنده از پنل جدید (resources/views/sellers +
+     * app/Livewire/Seller) سرو می‌شود؛ خاموش ⇒ پنل قدیمی (sellers-old) سرجایش.
+     * اندپوینت‌های POST/داده‌ای هر دو حالت مشترک‌اند (همان کنترلرهای منتقل‌شدهٔ app).
+     * این کلید در سطح «تعریف روت» خوانده می‌شود (routes/seller.php) — مثل
+     * روت‌های تم، پروژه از route:cache استفاده نمی‌کند و روت‌ها per-request
+     * لود می‌شوند؛ با route:cache مقدار فریز می‌شود.
+     */
+    public const KEY_MODERN_PANEL = 'seller_panel_modern';
+
+    public static function modernPanelEnabled(): bool
+    {
+        return option(self::KEY_MODERN_PANEL, '1') === '1';
+    }
+
+    /**
+     * صفحهٔ فرود پیشرفتهٔ فروشندگان : لندینگ تک‌صفحه‌ای /seller
+     * (hero + پلن‌ها + آمار + چرا ما + مراحل + تجربهٔ فروشندگان + CTA + سوالات)
+     * با محتوای ادیت‌شدنی از «فروشندگان ← تنظیمات فروشندگان ← صفحهٔ فرود».
+     * خاموش ⇒ نسخهٔ سادهٔ (landing-simple) سرو می‌شود. پیش‌فرض روشن.
+     */
+    public const KEY_LANDING_PAGE = 'seller_landing_page';
+
+    public static function landingPageEnabled(): bool
+    {
+        return option(self::KEY_LANDING_PAGE, '1') === '1';
+    }
+
+    /** حداقل مبلغ درخواست برداشت فروشنده (تومان) — ۰ یعنی بدون حد اضافه
+     * (حداقل قدیمی ۱۰٬۰۰۰ تومانی فرم برداشت همیشه معتبر است).
+     */
+    public static function minWithdrawAmount(): int
+    {
+        return max(0, (int) option('multi_vendor_withdraw_min_amount', '0'));
+    }
+
+    /**
+     * احراز هویت مالکیت موبایل فروشنده : در گام «اطلاعات تکمیلی»
+     * ثبت‌نام، تطابق شمارهٔ موبایل و کد ملی با سرویس شاهکارِ فینوتک (همان
+     * سرویس پکیج InstallmentCredit) بررسی می‌شود. کلیدهای فینوتک جداگانه‌اند:
+     * finnotech_client_id / finnotech_client_secret — بدون آن‌ها (یا خطای
+     * اتصال) بررسی رد می‌شود و ثبت‌نام آزاد ادامه می‌یابد؛ تنها جواب صریح
+     * «متعلق به یک نفر نیستند» مسدودکننده است.
+     * پیش‌فرض خاموش (سرویس بیرونی است).
+     */
+    public const KEY_KYC_MOBILE = 'seller_kyc_mobile_verify';
+
+    public static function kycMobileVerifyEnabled(): bool
+    {
+        return option(self::KEY_KYC_MOBILE, '0') === '1';
+    }
+
+    /**
+     * ربات‌گیر (کد امنیتی) ورود با رمز عبور : در تب «رمز عبور» صفحهٔ
+     * ورود فروشندگان (موبایل/ایمیل + رمز) کد امنیتی تصویری سرو می‌شود و
+     * seller.login_check آن را با همان CaptchaService ورود مدیر اعتبارسنجی
+     * می‌کند. روش دوم ورود (موبایل + کد تأیید) خودش otp دارد و نیازی ندارد.
+     * فقط وقتی پنل مدرن فعال است اجرا می‌شود تا فرم ورود قدیمی نشکند.
+     * پیش‌فرض روشن (درخواست صریح مدیر پروژه).
+     */
+    public const KEY_LOGIN_CAPTCHA = 'seller_login_captcha';
+
+    public static function loginCaptchaEnabled(): bool
+    {
+        return self::modernPanelEnabled() && option(self::KEY_LOGIN_CAPTCHA, '1') === '1';
+    }
+
+    /* ================= منطق کمیسیون ================= */
+
+    /**
+     * کمیسیون مؤثر یک فروشنده برای یک آیتم سفارش.
+     * ترتیب اولویت: کمیسیون اختصاصی فروشنده > کمیسیون دسته‌بندی (اولین جدِ
+     * غیر null در مسیر والد) > پیش‌فرض سراسری > صفر.
+     *
+     * $categoryInfo خروجی Order::getCategoryCommissionWithParent() است:
+     * ['commission' => int, 'category_id' => ?int] — category_id فقط وقتی
+     * غیر null است که کمیسیونِ صریحِ یک دسته‌بندی پیدا شده باشد.
+     */
+    public static function resolveCommission(?int $sellerId, array $categoryInfo): array
+    {
+        // کمیسیون اختصاصی فروشنده (با کش درون‌ریکوئستی — هر فروشنده یک‌بار از DB)
+        if ($sellerId && self::sellerOverrideEnabled()) {
+            $override = self::sellerOverride($sellerId);
+
+            if (! is_null($override)) {
+                return [
+                    'commission' => min(100, max(0, (int) $override)),
+                    'category_id' => null,
+                    'source' => 'seller',
+                ];
+            }
+        }
+
+        // کمیسیون صریحِ دسته‌بندی
+        if (! is_null($categoryInfo['category_id'] ?? null)) {
+            return [
+                'commission' => (int) $categoryInfo['commission'],
+                'category_id' => $categoryInfo['category_id'],
+                'source' => 'category',
+            ];
+        }
+
+        // پیش‌فرض سراسری (جدید — فقط وقتی هیچ دسته‌بندیِ صریحی نبود)
+        $default = self::defaultCommission();
+
+        if (! is_null($default)) {
+            return [
+                'commission' => $default,
+                'category_id' => null,
+                'source' => 'default',
+            ];
+        }
+
+        return [
+            'commission' => (int) ($categoryInfo['commission'] ?? 0),
+            'category_id' => null,
+            'source' => 'category',
+        ];
+    }
+
+    /** کش درون‌ریکوئستیِ کمیسیون اختصاصی فروشندگان (جلوگیری از N+1) */
+    private static array $sellerOverrideCache = [];
+
+    /** کمیسیون اختصاصی فروشنده — null یعنی «بدون override» */
+    public static function sellerOverride(int $sellerId): ?int
+    {
+        if (! array_key_exists($sellerId, self::$sellerOverrideCache)) {
+            self::$sellerOverrideCache[$sellerId] = Seller::query()
+                ->whereKey($sellerId)
+                ->value('commission');
+        }
+
+        $value = self::$sellerOverrideCache[$sellerId];
+
+        return is_null($value) ? null : (int) $value;
+    }
+
+    /**
+     * خالی‌کردن کش کمیسیون اختصاصی — پس از ذخیرهٔ override و در setUp تست‌ها
+     * (استاتیک بین درخواست‌های تست باقی می‌ماند).
+     */
+    public static function flushCache(): void
+    {
+        self::$sellerOverrideCache = [];
+    }
+
+    /* ================= پیام‌های استاندارد گیت‌ها ================= */
+
+    /** پیام گارد سروری وقتی سیستم چندفروشندگی خاموش است */
+    public static function disabledMessage(): string
+    {
+        return 'سیستم چندفروشندگی از تنظیمات غیرفعال است.';
+    }
+
+    /** پیام گارد سروری پرداخت دسته‌جمعی */
+    public static function bulkSettlementDisabledMessage(): string
+    {
+        return 'پرداخت دسته‌جمعی تسویه از تنظیمات چندفروشندگی غیرفعال شده است.';
+    }
+}

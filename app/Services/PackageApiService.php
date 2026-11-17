@@ -1,0 +1,298 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use RuntimeException;
+
+class PackageApiService
+{
+    private string $baseUrl;
+    private string $token;
+    private string $projectKey;
+    private int $timeout;
+
+    public function __construct()
+    {
+        // : با توکن/URL خالی (env ست‌نشده) هم سازه نباید Fatal بدهد
+        // درخواست‌ها بعداً با RuntimeException گرفته می‌شوند و صفحه پیام خطا نشان می‌دهد
+        $this->baseUrl   = rtrim((string) config('packages.api.base_url'), '/');
+        $this->token     = (string) config('packages.api.token');
+        $this->projectKey = (string) config('packages.api.project_key');
+        $this->timeout   = (int) config('packages.api.timeout', 30);
+    }
+
+    /* ===================================================================
+     *  لیست پکیج‌ها
+     * =================================================================== */
+    public function listPackages(array $query = []): array
+    {
+        return $this->request('GET', '/api/v1/packages', $query);
+    }
+
+    /* ===================================================================
+     *  جزئیات یک پکیج
+     * پارامتر اختیاری تایم‌اوت: فراخوانیِ درون‌صفحه‌ای (مثل پوشش
+     *  اشتراک در صفحهٔ نصب‌شده‌ها) هرگز نباید رندر را ۳۰ ثانیه بلاک کند؛
+     *  پیش‌فرض null = همان رفتار قبلی.
+     * =================================================================== */
+    public function getPackage(string $slug, ?int $timeoutSec = null): array
+    {
+        return $this->request('GET', "/api/v1/packages/{$slug}", [], false, $timeoutSec);
+    }
+
+    /* ===================================================================
+     *  ایجاد درخواست خرید - API یک payment_url برمی‌گرداند
+     *  Response: { payment_url, transaction_id, amount, expires_in }
+     * =================================================================== */
+    public function createPurchase(string $slug, string $callbackUrl, ?int $adminId = null, ?int $pricingPlanId = null): array
+    {
+        return $this->request('POST', "/api/v1/packages/{$slug}/purchase", [
+            'callback_url'    => $callbackUrl,
+            'project_key'     => $this->projectKey,
+            'admin_id'        => $adminId,
+            'pricing_plan_id' => $pricingPlanId,
+        ]);
+    }
+
+    /* ===================================================================
+     *  بررسی وضعیت پرداخت بعد از برگشت از درگاه
+     *  Response: { paid: bool, license_key, expires_at, transaction_id }
+     * =================================================================== */
+    public function verifyPayment(string $transactionId): array
+    {
+        return $this->request('POST', "/api/v1/payments/{$transactionId}/verify", [], true);
+    }
+
+    /* ===================================================================
+     *  بررسی اعتبار لایسنس (همچنین برای آپدیت‌ها استفاده می‌شود)
+     *  Response: { valid, expires_at, download_token, version }
+     *
+     * امضای پارامتر دوم nullable شد: رکورد installed_modules
+     *  می‌تواند license_key خالی داشته باشد (نصبِ در جریان markPending /
+     *  اشتراکِ بی‌کلید / شکست صدور)؛ در این حالت به‌جای TypeError (500
+     *  تمام صفحات پنل که LicenseGuard پکیج‌ها در بوت صدا می‌شود)، پاسخِ
+     *  «نامعتبر» بدون تماس API برمی‌گردد — همان قراردادی که گاردها برای
+     *  «پاسخ ساختارناقص» انتظار دارند.
+     * =================================================================== */
+    public function verifyLicense(string $slug, ?string $licenseKey): array
+    {
+        /* «اول اشتراک، بعد لایسنس» — کلید خالی هم باید به سرور برود:
+         * سرور با توکنِ آپدیتِ پروژه احراز می‌کند و اگر اشتراکِ فعالِ طرح‌محور
+         * این پکیج را بپوشاند، لایسنسِ رایگان صادر و پاکت امضاشدهٔ معتبر
+         * برمی‌گرداند؛ وگرنه حکم امضاشدهٔ رد می‌آید (بستن پکیج).
+         * فراخوانی این متد فقط در «چک دوره‌ای» گارد رخ می‌دهد (ضد-استورم ۹۰
+         * ثانیه + فاصلهٔ چک از پاکت)، پس تماس اضافیِ مکرر ایجاد نمی‌کند. */
+
+        return $this->request('POST', "/api/v1/packages/{$slug}/verify-license", [
+            'license_key' => (string) $licenseKey,
+            'project_key' => $this->projectKey,
+        ], false, 6, 3);
+    }
+
+    /* ===================================================================
+     *  چک آپدیت
+     *  Response: { has_update, latest_version, current_version, changelog }
+     * =================================================================== */
+    public function checkUpdate(string $slug, string $currentVersion): array
+    {
+        return $this->request('GET', "/api/v1/packages/{$slug}/check-update", [
+            'current_version' => $currentVersion,
+        ]);
+    }
+
+    /* ===================================================================
+     *  دانلود URL (با token موقت)
+     * =================================================================== */
+    public function getDownloadUrl(string $downloadToken): string
+    {
+        return "{$this->baseUrl}/api/v1/packages/download/{$downloadToken}";
+    }
+
+    /* ===================================================================
+     * قالب‌ها (Templates)
+     *  قرارداد کامل: مستند API-AGENT-SPEC §5.2 — بدون لایسنس؛
+     *  دو نوع خرید: normal (پیش‌فرض) و exclusive (انتقال کامل).
+     * =================================================================== */
+
+    /** لیست قالب‌ها — GET /api/v1/templates (search, category(int), per_page) */
+    public function listTemplates(array $query = []): array
+    {
+        return $this->request('GET', '/api/v1/templates', $query);
+    }
+
+    /** جزئیات یک قالب — GET /api/v1/templates/{slug} (price, discount_price, exclusive_price, ...) */
+    public function getTemplate(string $slug): array
+    {
+        return $this->request('GET', "/api/v1/templates/{$slug}");
+    }
+
+    /**
+     * خرید قالب — POST /api/v1/templates/{slug}/purchase
+     * پاسخ پولی: { payment_url, transaction_id, amount, gateway }
+     * خرید مجدهای normal: توکن دانلود مستقیم (download_token)
+     */
+    public function createTemplatePurchase(string $slug, string $purchaseType, string $callbackUrl, ?int $adminId = null): array
+    {
+        return $this->request('POST', "/api/v1/templates/{$slug}/purchase", [
+            'purchase_type' => $purchaseType === 'exclusive' ? 'exclusive' : 'normal',
+            'callback_url'  => $callbackUrl,
+            'project_key'   => $this->projectKey,
+            'admin_id'      => $adminId,
+        ]);
+    }
+
+    /** تأیید پرداخت قالب — POST /api/v1/templates/payments/{transactionId}/verify (soft 4xx مثل پکیج‌ها) */
+    public function verifyTemplatePayment(string $transactionId): array
+    {
+        return $this->request('POST', "/api/v1/templates/payments/{$transactionId}/verify", [], true);
+    }
+
+    /** بررسی نسخه جدید قالب — GET /api/v1/templates/{slug}/check-update */
+    public function checkTemplateUpdate(string $slug, string $currentVersion): array
+    {
+        return $this->request('GET', "/api/v1/templates/{$slug}/check-update", [
+            'current_version' => $currentVersion,
+        ]);
+    }
+
+    /** لینک دانلود یک‌بارمصرف قالب — POST /api/v1/templates/{slug}/download-url → { download_url, file_hash } */
+    public function createTemplateDownloadUrl(string $slug): array
+    {
+        return $this->request('POST', "/api/v1/templates/{$slug}/download-url");
+    }
+
+    /** دانلود سمت سرور قالب با auth — GET /api/v1/templates/{slug}/download (پاسخ: ZIP باینری) */
+    public function downloadTemplate(string $slug): \Illuminate\Http\Client\Response
+    {
+        return Http::timeout((int) config('packages.download.timeout', 300))
+            ->connectTimeout((int) config('packages.download.connect_timeout', 30))
+            ->withToken($this->token)
+            ->withHeaders([
+                'Accept'        => 'application/json',
+                'X-Project-Key' => $this->projectKey,
+                'X-Project-Url' => request()->root(),
+            ])
+            ->get("{$this->baseUrl}/api/v1/templates/{$slug}/download");
+    }
+
+    /** URL دانلود با توکن یک‌بارمصرف قالب */
+    public function getTemplateDownloadUrl(string $downloadToken): string
+    {
+        return "{$this->baseUrl}/api/v1/templates/download/{$downloadToken}";
+    }
+
+    /* ===================================================================
+     * مانیفست یکپارچگی فایل‌ها (module.lock) — سخت‌سازی امنیتی
+     *  GET /api/v1/packages/{slug}/manifest
+     *  Response: { manifest: {slug, version, file_hash, files: {path: sha256}}, signature }
+     * =================================================================== */
+    public function fetchManifest(string $slug, ?string $version = null): array
+    {
+        $query = $version ? ['version' => $version] : [];
+
+        /* quiet4xx: ۴۰۴ «نسخهٔ درخواستی یافت نشد» وضعیت کسب‌وکاری مورد انتظار
+         * است (نسخهٔ نصب‌شده روی بازار نیست) — نه خطای سرور؛ سطح لاگ INFO می‌شود
+         * تا سیلاب ERROR در لاگ روزانه نسازد (متن گویای سرور حفظ می‌شود). */
+        return $this->request('GET', "/api/v1/packages/{$slug}/manifest", $query, false, 60, 30, true);
+    }
+
+    /* ===================================================================
+     *  درخواست HTTP مشترک
+     * =================================================================== */
+
+    private function request(string $method, string $endpoint, array $data = [], bool $soft4xx = false, ?int $timeoutSec = null, ?int $connectSec = null, bool $quiet4xx = false): array
+    {
+        try {
+            $projectUrl = request()->root();
+            /* تایم‌اوت کوتاه برای فراخوانی‌های غیربلاک‌کننده (مثل verify-license که
+             * وسط لود صفحه اجرا می‌شود) — یک چک لایسنس هرگز نباید رندر صفحه را
+             * تا ۱۲۰ ثانیه متوقف کند؛ فراخوانی‌های سنگین (نصب/پرداخت) پیش‌فرض می‌مانند. */
+            $http = Http::timeout($timeoutSec ?? $this->timeout)
+                ->connectTimeout($connectSec ?? (int) config('packages.api.connect_timeout', 30))
+                ->withToken($this->token)
+                ->withHeaders([
+                    'Accept'        => 'application/json',
+                    'X-Project-Key' => $this->projectKey,
+                    'X-Project-Url' => $projectUrl,
+                ]);
+
+            $response = $method === 'GET'
+                ? $http->get($this->baseUrl . $endpoint, $data)
+                : $http->post($this->baseUrl . $endpoint, $data);
+
+            if (!$response->successful()) {
+                $errorJson = $response->json();
+                $errorBody = $response->body();
+                $errorMessage = $errorJson['message'] ?? $errorJson['error'] ?? null;
+
+                /* quiet4xx — خطاهای 4xx «مورد انتظار» (مثل ۴۰۴ مانیفست) در سطح
+                 * INFO لاگ می‌شوند؛ فقط 5xx و قطع شبکه ERROR می‌مانند. */
+                if ($quiet4xx && $response->status() >= 400 && $response->status() < 500) {
+                    Log::info('Packages API 4xx — وضعیت کسب‌وکاری مورد انتظار', [
+                        'endpoint' => $endpoint,
+                        'status'   => $response->status(),
+                        'message'  => mb_substr((string) $errorMessage, 0, 300),
+                    ]);
+                } else {
+                    Log::error('Packages API failed', [
+                        'endpoint' => $endpoint,
+                        'status'   => $response->status(),
+                        'body'     => $errorBody,
+                    ]);
+                }
+
+                // 4xx = پاسخ کسب‌وکاری API (لغو پرداخت، تراکنش یافت نشد، ...)
+                //   برای verifyPayment این «جواب قطعیِ پرداخت‌نشدن» است، نه قطعیِ سرور
+                if ($soft4xx && $response->status() >= 400 && $response->status() < 500) {
+                    return [
+                        'paid'    => false,
+                        'message' => $errorMessage ?: 'پرداخت تأیید نشد.',
+                    ];
+                }
+
+                /*
+                 * سخت‌سازی امنیتی تمایز نوع‌دار:
+                 *  • 5xx = اشکال موقتی سرور بازار ⇒ Unreachable (مهلت/grace، نه بستن)
+                 *  • 4xx = رد قطعی کسب‌وکاری (احراز/دامنه/اعتبارسنجی) ⇒ Rejected (بستن)
+                 */
+                if ($response->status() >= 500) {
+                    throw new PackageApiUnreachableException(
+                        $errorMessage ?: 'سرور پکیج‌ها موقتاً در دسترس نیست.'
+                    );
+                }
+
+                throw new PackageApiRejectedException(
+                    $errorMessage ?: 'ارتباط با سرور پکیج‌ها برقرار نشد.',
+                    $response->status(),
+                    $errorJson
+                );
+            }
+
+            $json = $response->json();
+            if ($json === null) {
+                /*
+                 * پاسخ 2xx با بدنهٔ غیرJSON هرگز به‌صورت null برنگردد؛
+                 * nullِ برگشتی قبلاً در Cache::remember کش می‌شد و مودال/لیست را
+                 * بی‌صدا خالی می‌کرد. خطای واضح → بدون کش‌شدن + قابل نمایش در UI.
+                 */
+                Log::warning('PKG-API-DEBUG null json', ['endpoint' => $endpoint, 'status' => $response->status(), 'body' => substr($response->body(), 0, 200)]);
+
+                throw new RuntimeException('پاسخ سرور پکیج‌ها معتبر نبود (JSON نامعتبر). لطفاً دوباره تلاش کنید.');
+            }
+
+            return $json;
+        } catch (ConnectionException $e) {
+            Log::error('Packages API connection error', [
+                'endpoint' => $endpoint,
+                'error'    => $e->getMessage(),
+            ]);
+            /* سخت‌سازی امنیتی قطع شبکه ⇒ Unreachable؛ گارد با «مهلت» تصمیم می‌گیرد
+             * نه با بستن فوری (فرق قطع موقت اینترنت با رد قطعی سرور). */
+            throw new PackageApiUnreachableException('ارتباط با سرور پکیج‌ها برقرار نشد. لطفاً مجدد تلاش کنید.');
+        }
+    }
+
+}

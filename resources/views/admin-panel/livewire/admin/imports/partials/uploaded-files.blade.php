@@ -1,4 +1,4 @@
-{{-- فایل‌های آپلودشده‌ی درون‌ریزی با قابلیت حذف — }}
+{{-- فایل‌های آپلودشده‌ی درون‌ریزی با قابلیت حذف --}}
 <div class="ap-card overflow-hidden">
     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-line p-4 dark:border-night-line">
         <h2 class="flex items-center gap-2 text-sm font-bold">

@@ -1,4 +1,4 @@
-{{-- سایدبار پنل جدید — }}
+{{-- سایدبار پنل جدید --}}
 @php
     $menu = config('admin-menu.groups');
     $admin = auth('adminPanel')->user();

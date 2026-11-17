@@ -1,4 +1,4 @@
-{{-- تنظیمات قالب — پورت back/themes/settings.blade.php — بازطراحی مدرن }}
+{{-- تنظیمات قالب — پورت back/themes/settings.blade.php — بازطراحی مدرن --}}
 {{-- فیلدها بر اساس «linebreak» (سربرگ بخش قدیمی) به کارت‌های مستقل بخش‌بندی می‌شوند --}}
 @php
     $errors = $errors ?? (new \Illuminate\Support\ViewErrorBag())->put('default', new \Illuminate\Support\MessageBag());

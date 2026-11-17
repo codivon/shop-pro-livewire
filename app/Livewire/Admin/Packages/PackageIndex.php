@@ -15,7 +15,6 @@ use App\Support\MarketplaceSettings;
 use App\Support\SubscriptionDisplay;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
@@ -185,6 +184,12 @@ class PackageIndex extends Component
 
     /** paid | license | subscription — نتیجه‌ی checkPurchaseState */
     public string $detailMode = 'paid';
+
+    /**
+     * اطلاعات لایسنس فعال برای نمایش در مودال جزئیات (اعتبار تا / روز باقی‌مانده / کد لایسنس)؛
+     * از نتیجه‌ی checkPurchaseState پر می‌شود — حتی وقتی خرید فقط روی سرور بازار ثبت شده باشد.
+     */
+    public array $detailLicense = [];
 
     public ?string $detailWarning = null;
 
@@ -1260,6 +1265,7 @@ class PackageIndex extends Component
         $this->detailLogs = [];
         $this->detailWarning = null;
         $this->detailMode = 'paid';
+        $this->detailLicense = [];
         $this->detailPlanId = null;
         $this->detailConfirmingUninstall = false;
 
@@ -1285,10 +1291,13 @@ class PackageIndex extends Component
             }
 
             // خرید قبلی معتبر؟ (پورت purchased قدیمی)
-            $package['purchased'] = PackagePurchase::where('package_slug', $slug)
-                ->where('status', PackagePurchase::STATUS_PAID)
-                ->whereNotNull('license_key')
-                ->exists();
+            // علاوه بر رکورد محلی، پرچم is_purchased سرور بازار هم ملاک است —
+            // خریدِ انجام‌شده مستقیم روی سایت بازار رکورد محلی ندارد ولی معتبر است.
+            $package['purchased'] = (bool) ($package['is_purchased'] ?? false)
+                || PackagePurchase::where('package_slug', $slug)
+                    ->where('status', PackagePurchase::STATUS_PAID)
+                    ->whereNotNull('license_key')
+                    ->exists();
 
             // اطلاعات نصب محلی
             $installed = InstalledModule::where('slug', $slug)->first();
@@ -1346,6 +1355,11 @@ class PackageIndex extends Component
 
                 if (($state['mode'] ?? 'paid') === 'license') {
                     $this->detailMode = 'license';
+                    $this->detailLicense = [
+                        'expires_at_jalali' => $state['expires_at_jalali'] ?? null,
+                        'days_remaining' => $state['days_remaining'] ?? null,
+                        'license_key' => $state['license_key'] ?? null,
+                    ];
                 } else {
                     $this->detailMode = 'paid';
                     $this->detailWarning = $state['warning'] ?? null;
@@ -1365,6 +1379,7 @@ class PackageIndex extends Component
     {
         $this->detailOpen = false;
         $this->detailConfirmingUninstall = false;
+        $this->detailLicense = [];
         $this->installError = null;
     }
 
@@ -1662,7 +1677,7 @@ class PackageIndex extends Component
                 );
             } catch (\Throwable $e) {
                 Log::warning('Packages cache row sync failed', [
-                    'slug'  => $pkg['slug'] ?? null,
+                    'slug' => $pkg['slug'] ?? null,
                     'error' => Str::limit(preg_replace('/\s*\(Connection:.*$/s', '', (string) $e->getMessage()), 300),
                 ]);
             }

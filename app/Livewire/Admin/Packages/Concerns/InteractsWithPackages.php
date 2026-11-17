@@ -190,15 +190,15 @@ trait InteractsWithPackages
             $this->dispatch('toast', message: $e->getMessage(), type: 'error');
         } catch (Throwable $e) {
             Log::error('Package install failed', ['slug' => $slug, 'error' => $e->getMessage()]);
-            $this->lastInstallError = 'خطا در ارتباط با سرور: ' . $e->getMessage();
+            $this->lastInstallError = 'خطا در ارتباط با سرور: '.$e->getMessage();
             $this->dispatch('toast', message: 'خطا در ارتباط با سرور.', type: 'error');
         }
     }
 
     /**
      * بررسی وضعیت خرید/اشتراک یک پکیج (پورت checkPurchase قدیمی)
-     * خروجی برای مودال تأیید نصب پنل جدید — همان منطق اولویت‌ها:
-     * ۱) اشتراک فعال  ۲) خرید مستقیم با لایسنس معتبر  ۳) جریان عادی خرید
+     * خروجی برای مودال تأیید نصب پنل جدید — اولویت‌ها:
+     * ۱) اشتراک فعال  ۲) خریدِ ثبت‌شده روی سرور بازار  ۳) خرید محلی با لایسنس معتبر  ۴) جریان عادی خرید
      */
     public function checkPurchaseState(string $slug): array
     {
@@ -209,6 +209,7 @@ trait InteractsWithPackages
             $apiPackage = $this->api()->getPackage($slug);
             $apiPackage = $apiPackage['data'] ?? $apiPackage;
             $subscription = $apiPackage['subscription'] ?? null;
+            $subscriptionExpired = false;
 
             if ($subscription && ($subscription['is_free_with_subscription'] ?? false)) {
                 $expiresAt = $subscription['subscription_expires_at'] ?? null;
@@ -231,6 +232,39 @@ trait InteractsWithPackages
                     ];
                 }
 
+                $subscriptionExpired = true;
+            }
+
+            /*
+             * اولویت ۲: خریدِ ثبت‌شده روی خودِ سرور بازار
+             * پاسخ detail سرور برای هر پروژه is_purchased + purchased_license دارد؛
+             * اگر پکیج مستقیم از سایت بازار خریداری شده باشد، فروشگاه رکورد محلی
+             * ندارد و بدون این چک، مودال به‌اشتباه جریان «پرداخت و نصب» را نشان
+             * می‌داد. لایسنس معتبر ⇒ همگام‌سازی رکورد محلی + نصب بدون پرداخت.
+             */
+            $purchasedLicense = $apiPackage['purchased_license'] ?? null;
+            if (($apiPackage['is_purchased'] ?? false) && is_array($purchasedLicense) && filled($purchasedLicense['license_key'] ?? null)) {
+                $licenseExpiresAt = $purchasedLicense['expires_at'] ?? null;
+
+                if ($this->licenseHasTime($licenseExpiresAt)) {
+                    $this->syncMarketplacePurchase($slug, $apiPackage, $purchasedLicense);
+
+                    return [
+                        'mode' => 'license',
+                        'license_key' => $purchasedLicense['license_key'],
+                        'expires_at' => $licenseExpiresAt,
+                        'expires_at_jalali' => $this->jexpiry($licenseExpiresAt),
+                        'days_remaining' => $purchasedLicense['days_remaining'] ?? null,
+                    ];
+                }
+
+                return [
+                    'mode' => 'paid',
+                    'warning' => 'خرید قبلی شما برای این پکیج منقضی شده است؛ برای نصب، پلن موردنظر را انتخاب کنید.',
+                ];
+            }
+
+            if ($subscriptionExpired) {
                 return [
                     'mode' => 'paid',
                     'warning' => 'اشتراک شما منقضی شده است؛ برای نصب، پلن موردنظر را انتخاب کنید.',
@@ -240,7 +274,7 @@ trait InteractsWithPackages
             // API در دسترس نیست → ادامه با بررسی خرید محلی
         }
 
-        // اولویت ۲: خرید مستقیم قبلی
+        // اولویت ۳: خرید مستقیم قبلی (رکورد محلی)
         $purchase = PackagePurchase::query()
             ->where('package_slug', $slug)
             ->where('status', PackagePurchase::STATUS_PAID)
@@ -273,10 +307,62 @@ trait InteractsWithPackages
 
         return [
             'mode' => 'license',
+            'license_key' => $purchase->license_key,
             'expires_at' => $expiresAt,
             'expires_at_jalali' => $this->jexpiry($expiresAt),
             'days_remaining' => $expiresAt ? (int) round(now()->diffInDays(Carbon::parse($expiresAt))) : null,
         ];
+    }
+
+    /**
+     * همگام‌سازی خریدِ ثبت‌شده روی سرور بازار با جدول محلی package_purchases
+     * وقتی پکیج مستقیم از سایت بازار خریداری شده باشد، فروشگاه رکورد محلی ندارد؛
+     * نشان «خریداری‌شده» روی کارت، دکمه «بررسی و نصب» و جریان
+     * reinstallWithExistingLicense همه به این رکورد تکیه می‌کنند. رکورد همان
+     * لایسنس به‌روزرسانی می‌شود تا با هر بار باز شدن مودال، رکورد تکراری ساخته نشود.
+     */
+    protected function syncMarketplacePurchase(string $slug, array $package, array $purchasedLicense): void
+    {
+        try {
+            $licenseKey = (string) $purchasedLicense['license_key'];
+
+            $existing = PackagePurchase::query()
+                ->where('package_slug', $slug)
+                ->where('license_key', $licenseKey)
+                ->orderByDesc('paid_at')
+                ->first();
+
+            $versions = collect($package['active_versions'] ?? [])->pluck('version')->filter()->values()->all();
+            if (! empty($versions)) {
+                usort($versions, fn ($a, $b) => version_compare((string) $a, (string) $b));
+                $version = (string) end($versions);
+            } else {
+                $version = (string) ($package['latest_version']['version'] ?? '');
+            }
+
+            $payload = [
+                'type' => 'package',
+                'admin_id' => auth('adminPanel')->id(),
+                'package_slug' => $slug,
+                'package_name' => $package['name'] ?? $slug,
+                'version' => $version,
+                'license_key' => $licenseKey,
+                'license_expires_at' => $purchasedLicense['expires_at'] ?? null,
+                'status' => PackagePurchase::STATUS_PAID,
+                'paid_at' => $existing?->paid_at ?? now(),
+            ];
+
+            if ($existing) {
+                $existing->fill($payload)->save();
+            } else {
+                PackagePurchase::create($payload + [
+                    'meta' => ['source' => 'marketplace', 'synced_at' => now()->toDateTimeString()],
+                ]);
+            }
+        } catch (Throwable $e) {
+            // همگام‌سازی حیاتی نیست — نصب با لایسنس گرفته‌شده از API ادامه می‌یابد
+            Log::warning('Marketplace purchase sync failed', ['slug' => $slug, 'error' => $e->getMessage()]);
+        }
     }
 
     /** تاریخ جلالی برای نمایش در مودال (null امن) */
@@ -351,7 +437,7 @@ trait InteractsWithPackages
             $package = $this->api()->getPackage($slug);
             $package = $package['data'] ?? $package;
         } catch (RuntimeException $e) {
-            $this->lastInstallError = 'بررسی اشتراک ناموفق بود: ' . $e->getMessage();
+            $this->lastInstallError = 'بررسی اشتراک ناموفق بود: '.$e->getMessage();
             $this->dispatch('toast', message: $this->lastInstallError, type: 'error');
 
             return;
@@ -394,7 +480,7 @@ trait InteractsWithPackages
                     null   // pricing_plan_id لازم نیست — مسیر اشتراک قبل از چک پلن اجرا می‌شود
                 );
             } catch (RuntimeException $e) {
-                $this->lastInstallError = 'صدور لایسنس از اشتراک ناموفق بود: ' . $e->getMessage();
+                $this->lastInstallError = 'صدور لایسنس از اشتراک ناموفق بود: '.$e->getMessage();
                 $this->dispatch('toast', message: $this->lastInstallError, type: 'error');
 
                 return;
@@ -437,6 +523,9 @@ trait InteractsWithPackages
 
     /**
      * نصب مجدد با لایسنس قبلی (پورت reinstallWithExistingLicense قدیمی)
+     * اگر رکورد محلی نبود ولی سرور بازار این پکیج را برای پروژه «خریداری‌شده»
+     * اعلام کند (خرید مستقیم از سایت بازار)، لایسنس از پاسخ detail گرفته،
+     * رکورد محلی همگام و نصب ادامه می‌یابد — نه «خرید معتبری یافت نشد».
      */
     protected function reinstallWithExistingLicense(string $slug): void
     {
@@ -447,7 +536,36 @@ trait InteractsWithPackages
             ->orderByDesc('paid_at')
             ->first();
 
-        if (! $purchase) {
+        $licenseKey = $purchase?->license_key;
+        $adminId = $purchase?->admin_id ?? auth('adminPanel')->id();
+        $purchaseId = $purchase?->id;
+        $packageName = $purchase?->package_name;
+
+        if (empty($licenseKey)) {
+            try {
+                $apiPackage = $this->api()->getPackage($slug);
+                $apiPackage = $apiPackage['data'] ?? $apiPackage;
+                $purchasedLicense = $apiPackage['purchased_license'] ?? null;
+
+                if (($apiPackage['is_purchased'] ?? false)
+                    && is_array($purchasedLicense)
+                    && filled($purchasedLicense['license_key'] ?? null)
+                    && $this->licenseHasTime($purchasedLicense['expires_at'] ?? null)) {
+                    $licenseKey = (string) $purchasedLicense['license_key'];
+                    $packageName = $apiPackage['name'] ?? $slug;
+                    $this->syncMarketplacePurchase($slug, $apiPackage, $purchasedLicense);
+                    $purchaseId = PackagePurchase::query()
+                        ->where('package_slug', $slug)
+                        ->where('license_key', $licenseKey)
+                        ->orderByDesc('paid_at')
+                        ->value('id');
+                }
+            } catch (Throwable $e) {
+                Log::warning('Marketplace license lookup failed', ['slug' => $slug, 'error' => $e->getMessage()]);
+            }
+        }
+
+        if (empty($licenseKey)) {
             $this->lastInstallError = 'خرید معتبری برای این پکیج یافت نشد.';
             $this->dispatch('toast', message: $this->lastInstallError, type: 'error');
 
@@ -455,9 +573,9 @@ trait InteractsWithPackages
         }
 
         try {
-            $verify = $this->api()->verifyLicense($slug, $purchase->license_key);
+            $verify = $this->api()->verifyLicense($slug, $licenseKey);
         } catch (Throwable $e) {
-            $this->lastInstallError = 'بررسی لایسنس ناموفق بود: ' . $e->getMessage();
+            $this->lastInstallError = 'بررسی لایسنس ناموفق بود: '.$e->getMessage();
             $this->dispatch('toast', message: $this->lastInstallError, type: 'error');
 
             return;
@@ -470,19 +588,19 @@ trait InteractsWithPackages
             return;
         }
 
-        InstalledModule::markPending($slug, $purchase->package_name, null, $purchase->license_key);
+        InstalledModule::markPending($slug, $packageName, null, $licenseKey);
 
         InstallPackageJob::dispatch(
             $slug,
-            $purchase->license_key,
-            $purchase->admin_id,
-            $purchase->id,
+            $licenseKey,
+            $adminId,
+            $purchaseId,
             $verify['download_token'] ?? null
         );
 
         Log::info('Package reinstall with existing license', [
             'slug' => $slug,
-            'purchase_id' => $purchase->id,
+            'purchase_id' => $purchaseId,
         ]);
 
         $this->dispatch('toast', message: 'نصب پکیج آغاز شد — تا پایان، وضعیت «در حال نصب» نمایش داده می‌شود.', type: 'success');

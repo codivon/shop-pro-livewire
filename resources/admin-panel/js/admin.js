@@ -780,7 +780,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         get confirmLabel() {
-            if (this.mode === 'license') return 'بررسی و نصب';
+            // license = لایسنس قبلاً در checkPurchaseState تأیید شده ⇒ دکمه فقط «نصب»
+            if (this.mode === 'license') return 'نصب';
             if (this.mode === 'subscription') return 'نصب با اشتراک';
             if (this.mode === 'free') return 'نصب پکیج';
             const plan = this.selectedPlan();

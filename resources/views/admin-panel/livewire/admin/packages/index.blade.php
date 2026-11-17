@@ -590,7 +590,10 @@
             @foreach ($visiblePackages as $pkg)
                 @php
                     $slug = $pkg['slug'] ?? '';
-                    $isPurchased = in_array($slug, $purchasedSlugs);
+                    // خرید محلی + خرید ثبت‌شده روی سرور بازار (خرید مستقیم از سایت بازار رکورد محلی ندارد)
+                    $isPurchased = in_array($slug, $purchasedSlugs) || (bool) ($pkg['is_purchased'] ?? false);
+                    $purchasedExpiry = $pkg['purchased_license']['expires_at'] ?? null;
+                    $purchasedValid = $isPurchased && (empty($purchasedExpiry) || \Carbon\Carbon::parse($purchasedExpiry)->isFuture());
                     $installedVersion = $installedMap[$slug] ?? null;
                     $isInstalled = $installedVersion !== null;
                     $hasUpdate = $this->hasUpdate($slug, $pkg, $installedVersion);
@@ -635,7 +638,7 @@
                                 <span class="ap-badge bg-violet-500 text-white shadow">
                                     <x-admin-panel::icon name="award" class="size-3" /> رایگان با اشتراک
                                 </span>
-                            @elseif ($isPurchased && ! $isFree)
+                            @elseif ($purchasedValid && ! $isFree)
                                 <span class="ap-badge bg-sky-500 text-white shadow">خریداری‌شده</span>
                             @elseif ($isFree)
                                 <span class="ap-badge bg-emerald-500 text-white shadow">رایگان</span>
@@ -739,10 +742,10 @@
                                             class="ap-btn-primary !px-3 !py-1.5 !text-xs">
                                         <x-admin-panel::icon name="award" class="size-3.5" /> نصب با اشتراک
                                     </button>
-                                @elseif ($isPurchased)
+                                @elseif ($purchasedValid && ! $isFree)
                                     <button type="button" x-on:click="ask({{ \Illuminate\Support\Js::from($pkg)->toHtml() }})"
                                             class="ap-btn-primary !px-3 !py-1.5 !text-xs">
-                                        <x-admin-panel::icon name="shield" class="size-3.5" /> برسی و نصب
+                                        <x-admin-panel::icon name="shield" class="size-3.5" /> بررسی و نصب
                                     </button>
                                 @else
                                     <button type="button" x-on:click="ask({{ \Illuminate\Support\Js::from($pkg)->toHtml() }})"
@@ -1251,7 +1254,7 @@
                             </div>
                         @endif
 
-                        {{-- وضعیت لایسنس فعال (پورت modal-license-section) --}}
+                        {{-- وضعیت لایسنس فعال (پورت modal-license-section) — با اطلاعات اعتبار لایسنس --}}
                         @if ($detailMode === 'license' && !$dInstalled)
                             <div class="mt-4 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/25 dark:bg-emerald-500/10">
                                 <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white">
@@ -1262,7 +1265,23 @@
                                         <x-admin-panel::icon name="check-circle" class="size-4" />
                                         قبلاً خریداری شده — بدون پرداخت نصب می‌شود
                                     </p>
-                                    <p class="mt-1 text-emerald-700/80 dark:text-emerald-400/80">لایسنس شما برای این پکیج فعال است</p>
+                                    <p class="mt-1 text-emerald-700/80 dark:text-emerald-400/80">
+                                        لایسنس شما برای این پکیج فعال است
+                                        @if (!empty($detailLicense['expires_at_jalali']))
+                                            — اعتبار تا <span class="fa-digits font-bold">{{ $detailLicense['expires_at_jalali'] }}</span>
+                                            @if (filled($detailLicense['days_remaining']))
+                                                (<span class="fa-digits">{{ $detailLicense['days_remaining'] }}</span> روز باقی‌مانده)
+                                            @endif
+                                        @else
+                                            — بدون محدودیت زمانی
+                                        @endif
+                                    </p>
+                                    @if (!empty($detailLicense['license_key']))
+                                        <p class="mt-1 flex flex-wrap items-center gap-1 text-[11px] text-emerald-700/70 dark:text-emerald-400/70">
+                                            کد لایسنس:
+                                            <span class="ltr font-mono font-bold">{{ substr($detailLicense['license_key'], 0, 8) . '…' . substr($detailLicense['license_key'], -4) }}</span>
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
                         @endif
@@ -1612,7 +1631,7 @@
                                         class="ap-btn-primary min-w-32"
                                         @if ($detailMode === 'paid' && count($dPlans) && !$detailPlanId) disabled @endif>
                                     <x-admin-panel::icon name="{{ $detailMode === 'subscription' ? 'award' : ($detailMode === 'license' ? 'shield' : ($selectedFree ? 'download' : 'credit-card')) }}" class="size-4" />
-                                    {{ $detailMode === 'subscription' ? 'نصب با اشتراک' : ($detailMode === 'license' ? 'بررسی و نصب' : ($selectedFree ? 'نصب پکیج' : 'پرداخت و نصب')) }}
+                                    {{ $detailMode === 'subscription' ? 'نصب با اشتراک' : ($detailMode === 'license' ? 'نصب' : ($selectedFree ? 'نصب پکیج' : 'پرداخت و نصب')) }}
                                 </button>
                             @elseif ($dInstalled['status'] === 'updating')
                                 <button type="button" disabled class="ap-btn min-w-32 opacity-70">

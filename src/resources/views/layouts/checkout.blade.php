@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css') }}">
 
     {{-- استایل‌های مشترک تم (متغیرهای رنگ، content-box، bank-item، pay-table و ...) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=173">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=174">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
 
     {{-- تم تیرهٔ چک‌اوت (قوانین اختصاصی چک‌اوت انتهای همین فایل است) --}}
@@ -111,7 +111,7 @@
 <script src="{{ asset('back/assets/js/customToast.js') }}?v=8"></script>
 {{-- block()/unblock() در scripts.js تعریف شده‌اند --}}
 <script src="{{ theme_asset("js/scripts.js") }}?v=12"></script>
-<script src="{{theme_asset('js/main.js')}}?v=19"></script>
+<script src="{{theme_asset('js/main.js')}}?v=20"></script>
 
 @stack('scripts')
 

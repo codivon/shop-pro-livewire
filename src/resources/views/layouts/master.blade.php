@@ -64,7 +64,7 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=173">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=174">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
@@ -72,7 +72,7 @@
     <link rel="stylesheet" href="{{ theme_asset('css/owl.carousel.min.css') }}">
 
     {{-- اصلاحات ظاهری ریز (هدر/محصول/صفحات) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-header.css') }}?v=161">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-header.css') }}?v=162">
     <link rel="stylesheet" href="{{ theme_asset('css/theme-product.css') }}?v=20">
     <link rel="stylesheet" href="{{ theme_asset('css/theme-pages.css') }}">
 
@@ -390,7 +390,9 @@
                     @else
                         <div class="btn-group header-btn-group shadow-sm rounded-pill">
                             <div class="dropdown">
-                                <a href="{{ route('register') }}" class="btn btn-white header-register border-0 rounded-pill">
+                                {{-- فاز ۱۷۷ — لینک ثبت‌نام به /login: در این فروشگاه روت
+                                     register مسیر نصب‌کننده (/setup) است و نباید در فرانت لینک شود --}}
+                                <a href="{{ route('login') }}" class="btn btn-white header-register border-0 rounded-pill">
                                     <i class="bi bi-person-circle font-20 text-muted me-1"></i>
                                     <span>ثبت نام</span>
                                 </a>
@@ -497,7 +499,7 @@
 {{-- پلاگین go-to-top حذف شد؛ دکمهٔ مستطیلی «برگشت به بالا» در theme-header.js --}}
 <script src="{{theme_asset('plugin/rasta-contact/script.js')}}"></script>
 <script src="{{theme_asset('js/saniar-init.js')}}?v=164"></script>
-<script src="{{theme_asset('js/theme-header.js')}}?v=23"></script>
+<script src="{{theme_asset('js/theme-header.js')}}?v=24"></script>
 
 {{-- اسکریپت‌های عملکردی فروشگاه --}}
 <script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}"></script>
@@ -509,7 +511,7 @@
 <script src="{{theme_asset('js/owl.carousel.min.js')}}"></script>
 <script src="{{ asset('back/assets/js/customToast.js') }}?v=8"></script>
 <script src="{{ theme_asset("js/scripts.js") }}?v=12"></script>
-<script src="{{theme_asset('js/main.js')}}?v=19"></script>
+<script src="{{theme_asset('js/main.js')}}?v=20"></script>
 @stack('scripts')
 
 {!! option('info_scripts') !!}

@@ -63,9 +63,10 @@
                             @endforeach
                         </ul>
                         @if ($product->specialSpecifications()->count() > 3)
-                            <a class="link-border product-params-more-handler" href="">
-                                <span class="show-more">موارد بیشتر</span>
-                                <span class="show-less">بستن</span>
+                            {{-- فاز ۱۷۷ — دکمهٔ مدرن با آیکون؛ تعویض برچسب با کلاس open (CSS/JS) --}}
+                            <a class="link-border snr-more-toggle product-params-more-handler" href="">
+                                <span class="show-more"><i class="bi bi-chevron-down snr-toggle-icon"></i>موارد بیشتر</span>
+                                <span class="show-less"><i class="bi bi-chevron-up snr-toggle-icon"></i>موارد کمتر</span>
                             </a>
                         @endif
                     </div>
@@ -75,9 +76,10 @@
                     <div class="product-additional-info mt-2">
                         <div class="product-additional-item is-masked">
                             <p class="mb-0 font-13">{!! nl2br($product->short_description) !!}</p>
-                            <a class="mask-handler link-border" href="">
-                                <span class="show-more">مشاهده بیشتر</span>
-                                <span class="show-less">مشاهده کمتر</span>
+                            {{-- فاز ۱۷۷ — ماسک توضیح کوتاه + دکمهٔ مدرن با آیکون --}}
+                            <a class="mask-handler link-border snr-more-toggle" href="">
+                                <span class="show-more"><i class="bi bi-chevron-down snr-toggle-icon"></i>مشاهده بیشتر</span>
+                                <span class="show-less"><i class="bi bi-chevron-up snr-toggle-icon"></i>مشاهده کمتر</span>
                             </a>
                             <div class="shadow-box"></div>
                         </div>

@@ -934,6 +934,21 @@
     opacity: 0.9;
 }
 
+/* فاز ۱۷۷ — بنر تصویری دلخواه مدیر (تنظیمات دیگر → بنر جستجوی هدر) */
+.sr2-banner.sr2-banner-image {
+    padding: 0;
+    overflow: hidden;
+    background: #fff;
+}
+
+.sr2-banner.sr2-banner-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 190px;
+    object-fit: cover;
+}
+
 .sr2-empty {
     display: flex;
     align-items: center;

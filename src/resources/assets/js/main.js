@@ -430,12 +430,10 @@ $(document).ready(function () {
     // zoom gallery product----------------
     //single-product------------------
     // collapse tab-------------------
-    $(".product-params-more-handler a").on('click', function (e) {
-        e.preventDefault();
-        $(".product-params-more").slideToggle(200);
-        $(this).find('.show-more').fadeToggle(0);
-        $(this).find('.show-less').fadeToggle(0);
-    });
+    /* فاز ۱۷۷ — هندلر قدیمیِ سلکتورِ مرده حذف شد: `.product-params-more-handler a`
+       روی فرزند a بایند می‌شد درحالی‌که خود هندلر همان <a> است؛ توگل «موارد
+       بیشتر» ویژگی‌های کالا حالا در pages/products/show.js به‌صورت delegated
+       و اسکوپ‌شده بایند می‌شود (کلاس open + CSS). */
 
     $(".table-suppliers-more a").on('click', function (e) {
         e.preventDefault();
@@ -445,21 +443,36 @@ $(document).ready(function () {
         $(this).find('.show-less').fadeToggle(0);
     });
 
-    $(".mask-handler").click(function (e) {
+    /* فاز ۱۷۷ — ماسک «مشاهده بیشتر/کمتر» — یک هندلر واحد delegated برای همهٔ
+       ماسک‌های سایت (توضیح کوتاه محصول، توضیحات تب محصول، آدرس چک‌اوت):
+       ۱) مشکل قبلی: fadeToggle مستقل دو اسپن — وقتی هر دو برچسب آشکار بودند
+          با یک کلیک هر دو ناپدید می‌شدند («موارد کمتر نیست»).
+          الان تعویض برچسب با کلاس open انجام می‌شود (CSS: show-less فقط در open).
+       ۲) delegated است تا بعد از replaceWith ای‌جکسی (تعویض تنوع در صفحهٔ
+          محصول) هم روی محتوای تازه کار کند.
+       ۳) بایند مستقیم قبلی دو تکه بود و checkout.js هم کپی‌اش را داشت —
+          همه به همین یک هندلر رسیدند. */
+    $(document).on('click', '.mask-handler', function (e) {
         e.preventDefault();
-        var sumaryBox = $(this).parents('.content-expert-summary');
-        sumaryBox.find('.mask-text-product-summary').toggleClass('active');
-        sumaryBox.find('.shadow-box').fadeToggle(0);
-        $(this).find('.show-more').fadeToggle(0);
-        $(this).find('.show-less').fadeToggle(0);
-    });
-    $(".product-additional-info .mask-handler").click(function (e) {
-        e.preventDefault();
-        var sumaryBox = $(this).parents('.is-masked ');
-        sumaryBox.find('p').toggleClass('active');
-        sumaryBox.find('.shadow-box').fadeToggle(0);
-        $(this).find('.show-more').fadeToggle(0);
-        $(this).find('.show-less').fadeToggle(0);
+        var $handler = $(this);
+        var $box = $handler.closest('.is-masked');
+        if (! $box.length) {
+            $box = $handler.closest('#address-section');
+        }
+        if (! $box.length) { return; }
+
+        $box.find('.mask-text-product-summary').toggleClass('active');
+        $box.children('p').toggleClass('active');
+        $box.find('.checkout-contact').toggleClass('active');
+
+        var $shadow = $box.find('> .shadow-box');
+        if ($box.find('.mask-text-product-summary.active, > p.active, .checkout-contact.active').length) {
+            $shadow.fadeOut(0);
+        } else {
+            $shadow.fadeIn(0);
+        }
+
+        $handler.toggleClass('open');
     });
 
     $(".expert-article-button").click(function (e) {

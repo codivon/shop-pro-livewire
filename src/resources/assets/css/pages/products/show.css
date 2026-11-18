@@ -575,24 +575,119 @@ tr.table-suppliers-row.in-filter.shown {
     display: none;
 }
 
-.product-params-more-handler {
+/* ---------- فاز ۱۷۷ — دکمهٔ مدرن «بیشتر/کمتر» (مشخصات + توضیحات) ----------
+   مشکل قبلی: کلاس پایهٔ پنهان‌سازی show-less فقط برای هندلر مشخصات تعریف
+   شده بود و برای mask-handler هیچ قاعده‌ای نبود ⇒ هر دو برچسب کنار هم
+   رندر می‌شدند و با fadeToggleِ مستقل، با یک کلیک هر دو ناپدید می‌شدند.
+   الان: تعویض برچسب کاملاً کلاس‌محور (open) + استایل یکسان و مدرن. */
+.snr-more-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 7px;
+    margin-top: 8px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--main-color-one, #275fe0);
+    background: color-mix(in srgb, var(--main-color-one, #275fe0) 9%, #fff);
+    border: 1px solid color-mix(in srgb, var(--main-color-one, #275fe0) 28%, #fff);
     cursor: pointer;
-    font-size: 14px;
+    transition: all .25s ease;
+    -webkit-transition: all .25s ease;
+    user-select: none;
 }
 
-.product-params-more-handler .show-less {
+.snr-more-toggle:hover,
+.snr-more-toggle.open {
+    color: #fff;
+    background: var(--main-color-one, #275fe0);
+    border-color: var(--main-color-one, #275fe0);
+    box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--main-color-one, #275fe0) 55%, transparent);
+    transform: translateY(-1px);
+}
+
+.snr-more-toggle:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.snr-toggle-icon {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    transition: transform .25s ease;
+    -webkit-transition: transform .25s ease;
+}
+
+.snr-more-toggle:hover .show-more .snr-toggle-icon,
+.snr-more-toggle.open .show-less .snr-toggle-icon {
+    transform: translateY(2px);
+}
+
+/* پایه: برچسب «کمتر» پنهان — برای همهٔ توگل‌ها (مشخصات + ماسک‌ها)
+   ترتیب مهم است: اول نمایش spanها، بعد پنهان‌سازی show-less */
+.snr-more-toggle .show-more,
+.snr-more-toggle .show-less {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.snr-more-toggle .show-less,
+.product-params-more-handler .show-less,
+.mask-handler .show-less {
     display: none;
 }
 
-.product-params-more-handler.open .show-more {
+/* حالت باز — هندلر مشخصات با کلاس open، ماسک‌ها هم با open (توسط JS) */
+.product-params-more-handler.open .show-more,
+.mask-handler.open .show-more {
     display: none;
 }
 
-.product-params-more-handler.open .show-less {
-    display: inline;
+.product-params-more-handler.open .show-less,
+.mask-handler.open .show-less {
+    display: inline-flex;
+}
+
+/* برای توگل مشخصات قاعدهٔ قدیمی open هم حفظ شد (show.js toggleClass('open')) */
+.product-params-more-handler.open {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+/* ---------- فاز ۱۷۷ — ماسک توضیح کوتاه زیر ویژگی‌ها (قبلاً CSS نداشت
+   و متن همیشه کامل دیده می‌شد؛ حالا سه‌خط اول + گرادیان) ---------- */
+.product-additional-info .product-additional-item.is-masked {
+    position: relative;
+}
+
+.product-additional-info .product-additional-item.is-masked > p {
+    max-height: 66px;
+    overflow: hidden;
+    transition: max-height .3s ease;
+    -webkit-transition: max-height .3s ease;
+}
+
+.product-additional-info .product-additional-item.is-masked > p.active {
+    max-height: none;
+}
+
+.product-additional-info .product-additional-item.is-masked .shadow-box {
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 42px;
+    height: 44px;
+    background: linear-gradient(rgba(255, 255, 255, 0), #fff);
+    pointer-events: none;
+}
+
+.product-additional-info .product-additional-item.is-masked > p.active ~ .shadow-box {
+    display: none;
 }
 
 /* ---------- ۳) تب‌های صفحهٔ محصول (مشخصات کلی/فنی/نظرات/پرسش و پاسخ)
@@ -690,7 +785,12 @@ tr.table-suppliers-row.in-filter.shown {
     font-size: 14px;
 }
 
-/* ماسک «ادامه مطلب» توضیحات */
+/* ماسک «مشاهده بیشتر» توضیحات — فاز ۱۷۷: کانتور position:relative +
+   گرادیان بالای دکمه می‌نشیند (bottom برابر ارتفاع دکمه) و روی کلیک اثر ندارد */
+.product-page .p-tabs .is-masked {
+    position: relative;
+}
+
 .product-page .p-tabs .is-masked .mask-text-product-summary {
     max-height: 220px;
     overflow: hidden;
@@ -703,11 +803,12 @@ tr.table-suppliers-row.in-filter.shown {
 
 .product-page .p-tabs .is-masked .shadow-box {
     position: absolute;
-    bottom: 0;
+    bottom: 44px;
     left: 0;
     right: 0;
-    height: 70px;
+    height: 60px;
     background: linear-gradient(rgba(255, 255, 255, 0), #fff);
+    pointer-events: none;
 }
 
 .product-page .p-tabs .is-masked .mask-text-product-summary.active ~ .shadow-box {

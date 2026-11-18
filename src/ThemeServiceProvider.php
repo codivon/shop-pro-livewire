@@ -140,7 +140,13 @@ class ThemeServiceProvider extends ServiceProvider
                 $menus    = Menu::detectLang()
                     ->whereNull('menu_id')
                     // درخت منو + دستهٔ هر آیتم — childrenmenus خودش category را eager می‌کند
-                    ->with(['category.categories', 'menus', 'childrenmenus'])
+                    // فاز ۱۷۷ — دو سطح عمیق‌تر برای زیرمنوی تو در تو مگامنو
+                    // (فرزندانِ دسته‌ها و آیتم‌های منو) تا رندر تو در تو N+1 نگیرد
+                    ->with([
+                        'category.categories.categories',
+                        'menus',
+                        'childrenmenus.childrenmenus',
+                    ])
                     ->orderBy('ordering')
                     ->get();
 

@@ -309,7 +309,7 @@
     <script src="{{ theme_asset('js/jquery.nice-select.min.js') }}"></script>
     <script src="{{ theme_asset('js/pages/addresses/map-select-scripts.js') }}?v=161"></script>
     <script src="{{ theme_asset('js/pages/carts/checkout.js') }}?v=173"></script>
-    <script src="{{ theme_asset('js/pages/checkout.js') }}?v=174"></script>
+    <script src="{{ theme_asset('js/pages/checkout.js') }}?v=175"></script>
     <script src="{{ theme_asset('js/pages/addresses/index.js') }}?v=161"></script>
     <script src="{{ theme_asset('js/pages/addresses/add-edit-address.js?v=2') }}"></script>
 @endpush

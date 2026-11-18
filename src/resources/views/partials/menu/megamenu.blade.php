@@ -15,13 +15,28 @@
                     {{-- data-cat-image: تصویر پس‌زمینهٔ دسته برای نمایش پایین-چپ پنل فرعی --}}
                     <li class="main-menu-sub-active-li" @if(!empty($childMenu->category->background_image) || !empty($childMenu->category->image)) data-cat-image="{{ asset($childMenu->category->background_image ?: $childMenu->category->image) }}" @endif>
                         <a href="{{ $childMenu->category->link }}">{{ $childMenu->title ?: $childMenu->category->title }}{!! menu_icon($childMenu->category->icon) !!}</a>
+                        {{-- محتوای این ul در پنل ثابت snr-mega-flyout کپی می‌شود (jquery-app.js) --}}
                         <ul class="main-menu-sub back-menu">
                             @if(!$childMenu->category->getCategoriesCount() || !$childMenu->children)
                                 <li><a href="{{ $childMenu->category->link }}">{{ $childMenu->category->title }}</a></li>
                             @else
                                 <li><a class="title" href="{{ $childMenu->category->link }}">همه دسته بندی های {{ $childMenu->category->title }}</a></li>
+                                {{-- فاز ۱۷۷ — زیرمنوی تو در تو مثل نمونه: دسته‌ای که خودش
+                                     فرزند دارد، به‌صورت گروه با تیتر پررنگ و فرزندان زیر خودش
+                                     رندر می‌شود (مثل «گوشی های اپل → آیفون …») --}}
                                 @foreach (front_category_children($childMenu->category) as $childCategory)
-                                    <li><a href="{{ $childCategory->link }}">{{ $childCategory->title }}</a></li>
+                                    @if (front_category_children($childCategory)->isNotEmpty())
+                                        <li class="snr-mega-group">
+                                            <a class="title" href="{{ $childCategory->link }}">{{ $childCategory->title }}<i class="fa fa-angle-left"></i></a>
+                                            <ul class="snr-mega-group-list">
+                                                @foreach (front_category_children($childCategory) as $subChildCategory)
+                                                    <li><a href="{{ $subChildCategory->link }}">{{ $subChildCategory->title }}</a></li>
+                                                @endforeach
+                                            </ul>
+                                        </li>
+                                    @else
+                                        <li><a href="{{ $childCategory->link }}">{{ $childCategory->title }}</a></li>
+                                    @endif
                                 @endforeach
                             @endif
 

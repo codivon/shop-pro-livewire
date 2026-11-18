@@ -297,13 +297,23 @@ class ProductController extends Controller
                 }
             });
 
+            /* فاز ۱۷۷ — بنر فقط وقتی نمایش داده می‌شود که مدیر از تنظیمات پنل
+               (تنظیمات دیگر → بنر جستجوی هدر) فعالش کرده باشد؛ بدون مقدار،
+               هیچ بنری رندر نمی‌شود (قبلاً متن نمایشیِ پیش‌فرض همیشه می‌آمد) */
+            $banner = null;
+            $bannerTitle = trim((string) option('dt_search_banner_title', ''));
+            if ($bannerTitle !== '') {
+                $banner = [
+                    'title'    => $bannerTitle,
+                    'subtitle' => trim((string) option('dt_search_banner_subtitle', '')),
+                    'link'     => trim((string) option('dt_search_banner_link', '')) ?: route('front.products.discount'),
+                    'image'    => trim((string) option('dt_search_banner_image', '')),
+                ];
+            }
+
             return response()->json([
                 'popular' => $popular,
-                'banner'  => [
-                    'title' => option('dt_search_banner_title', 'جشنوارهٔ فروش ویژه'),
-                    'subtitle' => option('dt_search_banner_subtitle', 'تا ۷۰٪ تخفیف'),
-                    'link' => route('front.products.discount'),
-                ],
+                'banner'  => $banner,
             ]);
         }
 

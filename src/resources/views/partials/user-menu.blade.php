@@ -18,6 +18,7 @@
 @else
     <ul class="dropdown-menu">
         <li><a href="{{ route('login') }}" class="dropdown-item"><i class="bi bi-box-arrow-in-left me-2"></i>ورود به سایت</a></li>
-        <li><a href="{{ route('register') }}" class="dropdown-item"><i class="bi bi-person-plus me-2"></i>ثبت نام</a></li>
+        {{-- فاز ۱۷۷ — روت register مسیر نصب‌کننده (/setup) است؛ ثبت‌نام به login می‌رود --}}
+        <li><a href="{{ route('login') }}" class="dropdown-item"><i class="bi bi-person-plus me-2"></i>ثبت نام</a></li>
     </ul>
 @endif

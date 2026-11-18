@@ -85,13 +85,22 @@
 
             if (banner) {
                 hasSection = true;
-                html += '<a href="' + escapeHtml(banner.link || '#') + '" class="sr2-banner">' +
-                    '<span class="sr2-banner-text">' +
-                    '<span class="sr2-banner-title">' + escapeHtml(banner.title || '') + '</span>' +
-                    '<span class="sr2-banner-sub">' + escapeHtml(banner.subtitle || '') + '</span>' +
-                    '</span>' +
-                    '<i class="bi bi-arrow-left"></i>' +
-                    '</a>';
+                /* فاز ۱۷۷ — بنر با تصویر دلخواه مدیر (اگر تصویر تنظیم شده باشد)
+                   یا بنر متنی؛ فقط وقتی مدیر در تنظیمات مقدار داده باشد می‌آید */
+                var bannerImage = banner.image || '';
+                if (bannerImage) {
+                    html += '<a href="' + escapeHtml(banner.link || '#') + '" class="sr2-banner sr2-banner-image">' +
+                        '<img src="' + escapeHtml(bannerImage) + '" alt="' + escapeHtml(banner.title || '') + '" loading="lazy">' +
+                        '</a>';
+                } else {
+                    html += '<a href="' + escapeHtml(banner.link || '#') + '" class="sr2-banner">' +
+                        '<span class="sr2-banner-text">' +
+                        '<span class="sr2-banner-title">' + escapeHtml(banner.title || '') + '</span>' +
+                        '<span class="sr2-banner-sub">' + escapeHtml(banner.subtitle || '') + '</span>' +
+                        '</span>' +
+                        '<i class="bi bi-arrow-left"></i>' +
+                        '</a>';
+                }
             }
 
             panel.innerHTML = hasSection ? html : '<div class="sr2-empty">چیزی برای نمایش نیست</div>';
@@ -246,6 +255,9 @@
             searchBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 if (desktopInput && (desktopInput.value || '').trim().length > 0) {
+                    /* فاز ۱۷۷ — form.submit() رخداد submit را آتش نمی‌زند؛
+                       ذخیرهٔ جستجوی اخیر را اینجا دستی انجام می‌دهیم */
+                    pushRecent(desktopInput.value);
                     desktopForm.submit();
                 }
             });

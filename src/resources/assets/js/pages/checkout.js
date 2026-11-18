@@ -527,14 +527,9 @@ $('.sett-address').click(function () {
     });
 });
 
-$(".mask-handler").click(function (e) {
-    e.preventDefault();
-    var sumaryBox = $(this).parents('#address-section');
-    sumaryBox.find('.checkout-contact').toggleClass('active');
-    sumaryBox.find('.shadow-box').fadeToggle(0);
-    $(this).find('.show-more').fadeToggle(0);
-    $(this).find('.show-less').fadeToggle(0);
-});
+/* فاز ۱۷۷ — بایند مستقیم .mask-handler حذف شد؛ main.js یک هندلر واحد
+   delegated برای همهٔ ماسک‌ها دارد (توضیح محصول + آدرس چک‌اوت). بایند تکراری
+   اینجا باعث دوبار فیر شدنِ toggle می‌شد. */
 
 // ==================== Reserve ====================
 

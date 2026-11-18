@@ -1240,6 +1240,14 @@ header{
     page-break-inside: avoid;
 }
 
+/* فاز ۱۷۷ — آیکون فلشِ تیتر گروه‌های تو در تو (مثل نمونهٔ دیجی‌کالا) */
+.top-menu-menu ul.main-menu > ul.snr-mega-flyout li a.title i {
+    float: left;
+    font-size: 12px;
+    color: #9ca1aa;
+    margin-top: 4px;
+}
+
 /* /////////// end main menu /////////// */
 
 .top-menu-menu ul.level-one {

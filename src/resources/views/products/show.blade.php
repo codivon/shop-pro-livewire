@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ theme_asset('css/vendor/fancybox.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/owl.carousel.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/pages/products/show.css') }}?v=18">
+    <link rel="stylesheet" href="{{ theme_asset('css/pages/products/show.css') }}?v=19">
 @endpush
 
 @section('content')
@@ -301,9 +301,10 @@
                                                             <div class="mask-text-product-summary">
                                                                 <p>{!! $product->description !!}</p>
                                                             </div>
-                                                            <a class="mask-handler">
-                                                                <span class="show-more">ادامه مطلب</span>
-                                                                <span class="show-less">بستن</span>
+                                                            <a class="mask-handler link-border snr-more-toggle">
+                                                                {{-- فاز ۱۷۷ — برچسب‌های هم‌ساخت با بقیهٔ توگل‌ها + آیکون --}}
+                                                                <span class="show-more"><i class="bi bi-chevron-down snr-toggle-icon"></i>مشاهده بیشتر</span>
+                                                                <span class="show-less"><i class="bi bi-chevron-up snr-toggle-icon"></i>مشاهده کمتر</span>
                                                             </a>
                                                             <div class="shadow-box"></div>
                                                         </div>

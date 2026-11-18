@@ -8,6 +8,14 @@ return [
 
     'current_theme' => env('CURRENT_THEME', 'WeblakShop'),
 
+    /*
+     * فشرده‌سازی لایهٔ اطمینان پاسخ‌های متنی (CompressResponse).
+     * روی هاست‌هایی که mod_deflate/brotli ندارند، HTML چندصدکیلوبایتی پنل و
+     * پاسخ‌های آپدیت Livewire خام منتقل می‌شوند و تعامل‌ها کند حس می‌شوند.
+     * پیش‌فرض روشن؛ اگر هاست خودش فشرده می‌کند این میدلور بی‌اثر است.
+     */
+    'compress_responses' => env('RESPONSE_COMPRESSION', true),
+
     'permissions' => [
 
         'admins' => [

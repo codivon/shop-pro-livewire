@@ -18,8 +18,12 @@ return [
         'token' => env('SELF_UPDATER_HTTP_PRIVATE_ACCESS_TOKEN', env('PACKAGES_API_TOKEN')),
         'project_key' => env('SELF_UPDATER_HTTP_PRIVATE_ACCESS_TOKEN', env('PACKAGES_API_PROJECT_KEY')),
         'project_url' => env('PACKAGES_PROJECT_URL', env('APP_URL')),
-        'timeout' => env('PACKAGES_API_TIMEOUT', 120),
-        'connect_timeout' => env('PACKAGES_API_CONNECT_TIMEOUT', 30),
+        // بودجهٔ زمانی تماس‌های API بازار در مسیرِ «لود صفحه»: پیش‌تر ۱۲۰ ثانیه بود
+        // یعنی اگر سرور بازار کند/غیرفعال بود، صفحهٔ بازار تا ۲ دقیقه هنگ می‌کرد
+        // (فیوز ۹۰ ثانیه‌ای فقط بعد از یک خطا فعال می‌شد). ۱۵ ثانیه سقفِ منطقی است؛
+        // دانلود خود پکیج (packages.download) مستقل و ۳۰۰ ثانیه باقی مانده است.
+        'timeout' => env('PACKAGES_API_TIMEOUT', 15),
+        'connect_timeout' => env('PACKAGES_API_CONNECT_TIMEOUT', 5),
         'cache_ttl' => env('PACKAGES_CACHE_TTL', 300),
     ],
 

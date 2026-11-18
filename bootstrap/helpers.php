@@ -116,6 +116,78 @@ function option_update($option_name, $option_value)
     }
 }
 
+/**
+ * ذخیرهٔ گروهی گزینه‌ها — برای فرم‌هایی که ده‌ها گزینه را با هم ذخیره می‌کنند.
+ *
+ * option_update() به‌ازای هر گزینه یک SELECT + یک UPDATE/INSERT می‌زند؛ فرم‌های
+ * تنظیمات پنل (امنیت/بازارچه/چندفروشندگی) با ۲۰ تا ۳۰ گزینه یعنی ۴۰ تا ۶۰ رفت‌وبرگشت
+ * به دیتابیس در «هر ذخیره» — روی MySQL هاست اشتراکی یعنی صدها میلی‌ثانیه فقط برای
+ * نوشتن، پیش از آنکه رندر و پاسخ هم شروع شود. این نسخه:
+ *   ۱. مقادیر فعلی همهٔ گزینه‌ها را با «یک» SELECT می‌خواند؛
+ *   ۲. گزینه‌هایی که مقدارشان اصلاً تغییر نکرده را کلاً از نوشتن حذف می‌کند
+ *      (ذخیره‌های تکراری بدون تغییر ⇒ صفر کوئری نوشتن)؛
+ *   ۳. ردیف‌های واقعاً تغییریافته را داخل «یک» تراکنش ذخیره می‌کند (همان مسیر
+ *      Eloquent و همان رخدادها — لاگ فعالیت و ابطال کشِ options دست‌نخورده).
+ * کش و مموی درخواستی هم فقط برای گزینه‌های تغییرکرده write-through می‌شوند.
+ */
+function option_update_many(array $options, ?string $lang = null): void
+{
+    if ($options === []) {
+        return;
+    }
+
+    $nonLanguageOptions = (array) config('general.non_language_options', []);
+    $lang = $lang ?: app()->getLocale();
+
+    $byLanguage = [];
+    foreach ($options as $name => $value) {
+        $byLanguage[in_array($name, $nonLanguageOptions) ? 'fa' : $lang][$name] = $value;
+    }
+
+    foreach ($byLanguage as $language => $pairs) {
+        $existing = Option::where('lang', $language)
+            ->whereIn('option_name', array_keys($pairs))
+            ->pluck('option_value', 'option_name')
+            ->all();
+
+        $dirty = [];
+        foreach ($pairs as $name => $value) {
+            // مقایسهٔ سست مثل رفتار Eloquent در مقداردهی (int از فرم مقابل رشتهٔ دیتابیس)
+            if (! array_key_exists($name, $existing) || $existing[$name] != $value) {
+                $dirty[$name] = $value;
+            }
+        }
+
+        if ($dirty === []) {
+            continue;
+        }
+
+        DB::transaction(function () use ($language, $existing, $dirty): void {
+            foreach ($dirty as $name => $value) {
+                if (array_key_exists($name, $existing)) {
+                    Option::where('lang', $language)->where('option_name', $name)
+                        ->update(['option_value' => $value]);
+                } else {
+                    Option::create([
+                        'lang' => $language,
+                        'option_name' => $name,
+                        'option_value' => $value,
+                    ]);
+                }
+            }
+        });
+
+        foreach ($dirty as $name => $value) {
+            Cache::forever('options.'.$language.'.'.$name, $value);
+
+            if (app()->bound('memo.options')) {
+                $memoValue = (is_null($value) || $value === false || $value == '') ? null : $value;
+                app('memo.options')->offsetSet($language.'|'.$name, $memoValue);
+            }
+        }
+    }
+}
+
 function option($option_name, $default_value = '')
 {
     /*

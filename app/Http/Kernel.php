@@ -24,6 +24,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\RedirectMiddleware::class,
         \App\Http\Middleware\SecurityHeaders::class, // هدرهای امنیتی استاندارد
+        \App\Http\Middleware\CompressResponse::class, // آخرین لایه: فشرده‌سازی پاسخ‌های متنی اگر سرور قبلاً فشرده نکرده باشد
     ];
 
     /**

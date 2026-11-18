@@ -701,52 +701,56 @@ class Developer extends Component
         ]);
 
         // کپچا
-        option_update('security_captcha_enabled', $this->securityCaptchaEnabled ? 'on' : 'off');
-        option_update('security_captcha_admin_login', $this->securityCaptchaAdminLogin ? 'on' : 'off');
-        option_update('security_captcha_register', $this->securityCaptchaRegister ? 'on' : 'off');
-        option_update('security_captcha_customer_login', $this->securityCaptchaCustomerLogin ? 'on' : 'off');
-        option_update('security_captcha_seller_login', $this->securityCaptchaSellerLogin ? 'on' : 'off');
-        option_update('security_captcha_comments', $this->securityCaptchaComments ? 'on' : 'off');
-        option_update('security_time_trap_seconds', (string) $this->securityTimeTrapSeconds);
+        // ذخیرهٔ گروهی: همهٔ گزینه‌ها با یک SELECT خوانده و فقط مقادیر واقعاً
+        // تغییریافته در یک تراکنش نوشته می‌شوند (به‌جای ~۲۵×۲ رفت‌وبرگشت به دیتابیس).
+        option_update_many([
+            'security_captcha_enabled' => $this->securityCaptchaEnabled ? 'on' : 'off',
+            'security_captcha_admin_login' => $this->securityCaptchaAdminLogin ? 'on' : 'off',
+            'security_captcha_register' => $this->securityCaptchaRegister ? 'on' : 'off',
+            'security_captcha_customer_login' => $this->securityCaptchaCustomerLogin ? 'on' : 'off',
+            'security_captcha_seller_login' => $this->securityCaptchaSellerLogin ? 'on' : 'off',
+            'security_captcha_comments' => $this->securityCaptchaComments ? 'on' : 'off',
+            'security_time_trap_seconds' => (string) $this->securityTimeTrapSeconds,
 
-        // درایور هر نقطهٔ کپچا — هر نقطه فقط یک درایور
-        option_update('security_captcha_driver_admin_login', $this->captchaDriverAdminLogin);
-        option_update('security_captcha_driver_register', $this->captchaDriverRegister);
-        option_update('security_captcha_driver_customer_login', $this->captchaDriverCustomerLogin);
-        option_update('security_captcha_driver_seller_login', $this->captchaDriverSellerLogin);
-        option_update('security_captcha_driver_comments', $this->captchaDriverComments);
+            // درایور هر نقطهٔ کپچا — هر نقطه فقط یک درایور
+            'security_captcha_driver_admin_login' => $this->captchaDriverAdminLogin,
+            'security_captcha_driver_register' => $this->captchaDriverRegister,
+            'security_captcha_driver_customer_login' => $this->captchaDriverCustomerLogin,
+            'security_captcha_driver_seller_login' => $this->captchaDriverSellerLogin,
+            'security_captcha_driver_comments' => $this->captchaDriverComments,
 
-        // کلیدهای کپچای ابری (hCaptcha / Cloudflare Turnstile)
-        option_update('captcha_hcaptcha_site_key', trim($this->captchaHcaptchaSiteKey));
-        option_update('captcha_hcaptcha_secret', trim($this->captchaHcaptchaSecret));
-        option_update('captcha_turnstile_site_key', trim($this->captchaTurnstileSiteKey));
-        option_update('captcha_turnstile_secret', trim($this->captchaTurnstileSecret));
+            // کلیدهای کپچای ابری (hCaptcha / Cloudflare Turnstile)
+            'captcha_hcaptcha_site_key' => trim($this->captchaHcaptchaSiteKey),
+            'captcha_hcaptcha_secret' => trim($this->captchaHcaptchaSecret),
+            'captcha_turnstile_site_key' => trim($this->captchaTurnstileSiteKey),
+            'captcha_turnstile_secret' => trim($this->captchaTurnstileSecret),
 
-        // پیچیدگی کپچای ریاضی
-        option_update('captcha_math_operands', (string) min(4, max(2, $this->captchaMathOperands)));
+            // پیچیدگی کپچای ریاضی
+            'captcha_math_operands' => (string) min(4, max(2, $this->captchaMathOperands)),
 
-        // هانی‌پات
-        option_update('security_honeypot_enabled', $this->securityHoneypotEnabled ? 'on' : 'off');
+            // هانی‌پات
+            'security_honeypot_enabled' => $this->securityHoneypotEnabled ? 'on' : 'off',
 
-        // قفل تلاش‌ها
-        option_update('security_lockout_enabled', $this->securityLockoutEnabled ? 'on' : 'off');
-        option_update('security_lockout_admin_max', (string) $this->securityLockoutAdminMax);
-        option_update('security_lockout_admin_minutes', (string) $this->securityLockoutAdminMinutes);
-        option_update('security_lockout_customer_max', (string) $this->securityLockoutCustomerMax);
-        option_update('security_lockout_customer_minutes', (string) $this->securityLockoutCustomerMinutes);
-        option_update('security_lockout_comments_max', (string) $this->securityLockoutCommentsMax);
-        option_update('security_lockout_comments_minutes', (string) $this->securityLockoutCommentsMinutes);
+            // قفل تلاش‌ها
+            'security_lockout_enabled' => $this->securityLockoutEnabled ? 'on' : 'off',
+            'security_lockout_admin_max' => (string) $this->securityLockoutAdminMax,
+            'security_lockout_admin_minutes' => (string) $this->securityLockoutAdminMinutes,
+            'security_lockout_customer_max' => (string) $this->securityLockoutCustomerMax,
+            'security_lockout_customer_minutes' => (string) $this->securityLockoutCustomerMinutes,
+            'security_lockout_comments_max' => (string) $this->securityLockoutCommentsMax,
+            'security_lockout_comments_minutes' => (string) $this->securityLockoutCommentsMinutes,
 
-        // هدرهای امنیتی
-        option_update('security_headers_enabled', $this->securityHeadersEnabled ? 'on' : 'off');
-        option_update('security_hsts_enabled', $this->securityHstsEnabled ? 'on' : 'off');
+            // هدرهای امنیتی
+            'security_headers_enabled' => $this->securityHeadersEnabled ? 'on' : 'off',
+            'security_hsts_enabled' => $this->securityHstsEnabled ? 'on' : 'off',
 
-        // تلهٔ ربات — کلید اصلی مسدودسازی آی‌پی
-        option_update('security_bot_trap_enabled', $this->securityBotTrapEnabled ? 'on' : 'off');
+            // تلهٔ ربات — کلید اصلی مسدودسازی آی‌پی
+            'security_bot_trap_enabled' => $this->securityBotTrapEnabled ? 'on' : 'off',
 
-        // ورود دومرحله‌ای مدیر
-        option_update('admin_2fa_enabled', $this->adminTwoFactorEnabled ? 'on' : 'off');
-        option_update('admin_2fa_channel', $this->adminTwoFactorChannel);
+            // ورود دومرحله‌ای مدیر
+            'admin_2fa_enabled' => $this->adminTwoFactorEnabled ? 'on' : 'off',
+            'admin_2fa_channel' => $this->adminTwoFactorChannel,
+        ]);
 
         $this->dispatch('toast', message: 'تنظیمات امنیتی ذخیره شد.', type: 'success');
     }
@@ -766,13 +770,16 @@ class Developer extends Component
         ]);
 
         // کلید اصلی — گیت منو + صفحات packages/*
-        option_update(MarketplaceSettings::KEY_ENABLED, $this->marketEnabled ? '1' : '0');
-        option_update('packages_market_allow_install', $this->marketAllowInstall ? '1' : '0');
-        option_update('packages_market_allow_uninstall', $this->marketAllowUninstall ? '1' : '0');
-        option_update('packages_market_show_templates', $this->marketShowTemplates ? '1' : '0');
-        option_update('packages_market_auto_check_updates', $this->marketAutoCheckUpdates ? '1' : '0');
-        option_update('packages_market_items_per_page', (string) $this->marketItemsPerPage);
-        option_update('packages_market_notice_text', trim((string) $this->marketNoticeText));
+        // ذخیرهٔ گروهی همهٔ گزینه‌ها — یک SELECT + یک تراکنش، فقط مقادیر تغییرکرده
+        option_update_many([
+            MarketplaceSettings::KEY_ENABLED => $this->marketEnabled ? '1' : '0',
+            'packages_market_allow_install' => $this->marketAllowInstall ? '1' : '0',
+            'packages_market_allow_uninstall' => $this->marketAllowUninstall ? '1' : '0',
+            'packages_market_show_templates' => $this->marketShowTemplates ? '1' : '0',
+            'packages_market_auto_check_updates' => $this->marketAutoCheckUpdates ? '1' : '0',
+            'packages_market_items_per_page' => (string) $this->marketItemsPerPage,
+            'packages_market_notice_text' => trim((string) $this->marketNoticeText),
+        ]);
 
         $this->dispatch('toast', message: 'تنظیمات بازارچه ذخیره شد.', type: 'success');
     }
@@ -799,28 +806,31 @@ class Developer extends Component
         // (میدل‌ور Seller، سایدبار و Product.php با == 'true' می‌خوانند)
         MultiVendorSettings::setEnabled($this->vendorEnabled);
 
-        option_update('multi_vendor_auto_settlement', $this->vendorAutoSettlement ? '1' : '0');
-        option_update('multi_vendor_seller_commission_override', $this->vendorSellerOverride ? '1' : '0');
-        option_update('multi_vendor_bulk_settlement', $this->vendorBulkSettlement ? '1' : '0');
-        option_update('multi_vendor_dashboard_stats', $this->vendorDashboardStats ? '1' : '0');
-        option_update('multi_vendor_settlement_statement', $this->vendorSettlementStatement ? '1' : '0');
-        option_update('seller_analytics_enabled', $this->vendorSellerAnalytics ? '1' : '0');
-        option_update('seller_demand_signals', $this->vendorDemandSignals ? '1' : '0');
-        option_update('seller_reviews_access', $this->vendorReviewsAccess ? '1' : '0');
-        option_update('seller_inventory_center', $this->vendorInventoryCenter ? '1' : '0');
-        option_update('seller_products_export', $this->vendorProductsExport ? '1' : '0');
-        option_update('multi_vendor_leaderboard', $this->vendorLeaderboard ? '1' : '0');
-        option_update(MultiVendorSettings::KEY_MODERN_PANEL, $this->vendorModernPanel ? '1' : '0');
-        option_update(MultiVendorSettings::KEY_LANDING_PAGE, $this->vendorLandingPage ? '1' : '0');
-        option_update(MultiVendorSettings::KEY_KYC_MOBILE, $this->vendorKycMobileVerify ? '1' : '0');
-        // ربات‌گیر ورود فروشنده با رمز عبور
-        option_update(MultiVendorSettings::KEY_LOGIN_CAPTCHA, $this->vendorLoginCaptcha ? '1' : '0');
-        // انتخابگر آیکون پنل‌ها
-        option_update('admin_icon_picker', $this->adminIconPicker ? '1' : '0');
-        option_update('finnotech_client_id', trim((string) $this->vendorFinnotechClientId));
-        option_update('finnotech_client_secret', trim((string) $this->vendorFinnotechClientSecret));
-        option_update('multi_vendor_default_commission', trim((string) $this->vendorDefaultCommission) === '' ? '' : (string) max(0, min(100, (int) $this->vendorDefaultCommission)));
-        option_update('multi_vendor_withdraw_min_amount', (string) max(0, (int) $this->vendorMinWithdraw));
+        // ذخیرهٔ گروهی — یک SELECT + یک تراکنش، فقط مقادیر تغییرکرده
+        option_update_many([
+            'multi_vendor_auto_settlement' => $this->vendorAutoSettlement ? '1' : '0',
+            'multi_vendor_seller_commission_override' => $this->vendorSellerOverride ? '1' : '0',
+            'multi_vendor_bulk_settlement' => $this->vendorBulkSettlement ? '1' : '0',
+            'multi_vendor_dashboard_stats' => $this->vendorDashboardStats ? '1' : '0',
+            'multi_vendor_settlement_statement' => $this->vendorSettlementStatement ? '1' : '0',
+            'seller_analytics_enabled' => $this->vendorSellerAnalytics ? '1' : '0',
+            'seller_demand_signals' => $this->vendorDemandSignals ? '1' : '0',
+            'seller_reviews_access' => $this->vendorReviewsAccess ? '1' : '0',
+            'seller_inventory_center' => $this->vendorInventoryCenter ? '1' : '0',
+            'seller_products_export' => $this->vendorProductsExport ? '1' : '0',
+            'multi_vendor_leaderboard' => $this->vendorLeaderboard ? '1' : '0',
+            MultiVendorSettings::KEY_MODERN_PANEL => $this->vendorModernPanel ? '1' : '0',
+            MultiVendorSettings::KEY_LANDING_PAGE => $this->vendorLandingPage ? '1' : '0',
+            MultiVendorSettings::KEY_KYC_MOBILE => $this->vendorKycMobileVerify ? '1' : '0',
+            // ربات‌گیر ورود فروشنده با رمز عبور
+            MultiVendorSettings::KEY_LOGIN_CAPTCHA => $this->vendorLoginCaptcha ? '1' : '0',
+            // انتخابگر آیکون پنل‌ها
+            'admin_icon_picker' => $this->adminIconPicker ? '1' : '0',
+            'finnotech_client_id' => trim((string) $this->vendorFinnotechClientId),
+            'finnotech_client_secret' => trim((string) $this->vendorFinnotechClientSecret),
+            'multi_vendor_default_commission' => trim((string) $this->vendorDefaultCommission) === '' ? '' : (string) max(0, min(100, (int) $this->vendorDefaultCommission)),
+            'multi_vendor_withdraw_min_amount' => (string) max(0, (int) $this->vendorMinWithdraw),
+        ]);
 
         MultiVendorSettings::flushCache();
 

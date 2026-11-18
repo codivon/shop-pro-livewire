@@ -481,9 +481,16 @@
                 </div>
 
 
-                {{-- وضعیت زنده --}}
+                {{-- وضعیت زنده — فقط هنگام «در جریان بودن» بروزرسانی poll می‌شود.
+                    قبلاً شرطِ !== 'idle' بود؛ یعنی پس از پایان موفق/ناموفق بروزرسانی،
+                    همین صفحه تا وقتی مدیر دکمهٔ «ریست وضعیت» را نزند، هر ۲ ثانیه یک
+                    چرخهٔ کامل رندر+پاسخِ چندصدکیلوبایتی می‌زد و کل تب تنظیمات را کند
+                    می‌کرد (تأخیر در تیک/ذخیره‌ی فرم‌ها). حالا poll فقط برای وضعیت‌های
+                    فعال (queued/processing/waiting) رندر می‌شود؛ success/error با
+                    یک بلوک ثابت نمایش داده می‌شوند و هیچ درخواست پس‌زمینه‌ای ندارند. --}}
                 @if ($this->updateStatus['status'] !== 'idle')
-                    <div wire:poll.2s class="rounded-xl border border-line p-4 dark:border-night-line">
+                    <div @if (in_array($this->updateStatus['status'], ['queued', 'processing', 'waiting'])) wire:poll.2s @endif
+                         class="rounded-xl border border-line p-4 dark:border-night-line">
                         <div class="flex items-center justify-between gap-3">
                             <p class="text-[13px] font-bold">پیشرفت بروزرسانی</p>
                             <span class="ap-badge bg-surface-3 text-ink-2 dark:bg-night-3 dark:text-night-ink-2" dir="ltr">

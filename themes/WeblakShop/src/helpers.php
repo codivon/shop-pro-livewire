@@ -727,7 +727,10 @@ function front_search_match($query, string $term): void
     // نکتهٔ مهم: ایندکس FULLTEXT ایندباکس فقط هنگام COMMIT به‌روز می‌شود؛
     // در محیط تست (تراکنش باز) ردیف‌های تازه درج‌شده با MATCH دیده نمی‌شوند —
     // پس در تست از LIKE استفاده می‌کنیم؛ در production مسیر ایندکس FULLTEXT فعال است.
-    $useFulltext = ! app()->environment('testing');
+    // فقط روی MySQL/MariaDB مسیر FULLTEXT باز است؛ سایر درایورها (مثل sqlite در
+    // نصب محلی) کوئری information_schema ندارند و مستقیم به فالبک LIKE می‌روند.
+    $useFulltext = ! app()->environment('testing')
+        && in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true);
 
     if ($useFulltext) {
         static $fulltextAvailable = null;

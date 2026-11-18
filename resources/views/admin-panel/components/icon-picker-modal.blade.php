@@ -2,25 +2,14 @@
     مودال انتخابگر آیکون (یک‌بار به‌ازای هر صفحه — گارد IconPickerModal::$rendered)
     تب‌ها: Font Awesome / Material Design (MDI) / Lucide — سرچ + رنگ/اندازه
     درایور Alpine: window.apIconPicker (تعریف در admin.js)
-    داده‌ها: JSON اینلاین (fa-icons-map / mdi-icons-map / icons-map)
+    داده‌ها: با اولین باز شدن پیکر از مسیر np.icons.data واکشی می‌شود —
+    قبلاً JSON کامل نقشهٔ آیکون‌ها (~۲۲۵KB) داخل خود صفحه رندر می‌شد و
+    حجم HTML صفحات دارای پیکر را نزدیک دو برابر می‌کرد.
 --}}
-@php
-    $faList = array_keys(\App\Support\IconRegistry::fa());
-    $mdiList = array_keys(\App\Support\IconRegistry::mdi());
-    $lucide = \App\Support\IconRegistry::lucide();
-    $lucideList = [];
-    foreach ($lucide as $name => $inner) {
-        $lucideList[] = ['name' => $name, 'inner' => $inner];
-    }
-@endphp
+@if (! \App\View\Components\AdminPanel\IconPickerModal::$rendered)
+@php \App\View\Components\AdminPanel\IconPickerModal::$rendered = true; @endphp
 {{-- خودمیزبانی MDI: cdnjs روی IPهای ایران کند/مسدود است --}}
 <link rel="stylesheet" href="{{ asset('vendor/mdi/css/materialdesignicons.min.css') }}" referrerpolicy="no-referrer" />
-
-<script type="application/json" id="ap-icon-picker-data">{!! json_encode([
-    'fa' => $faList,
-    'mdi' => $mdiList,
-    'lucide' => $lucideList,
-], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
 
 {{-- z-[90]/z-[91]: ارجعیت بالاتر از همهٔ مودال‌های پنل (منو z-[60/61]، تنظیمات z-[80])
      + Escape وقتی پیکر باز است فقط پیکر را می‌بندد: stopImmediatePropagation جلوی
@@ -28,7 +17,7 @@
 <div x-data="apIconPicker" x-cloak
      x-on:open-ap-icon-picker.window="openWith($event.detail.target, $event.detail.mode)"
      x-on:keydown.escape.window="if (open) { $event.stopImmediatePropagation(); open = false }"
-     class="ap-icon-picker-modal" aria-hidden="true">
+     class="ap-icon-picker-modal" data-icon-data-url="{{ route('np.icons.data') }}" aria-hidden="true">
     {{-- پوشش پس‌زمینه --}}
     <div x-show="open" x-transition.opacity class="fixed inset-0 z-[90] bg-black/50 backdrop-blur-sm"
          x-on:click="open = false" aria-hidden="true"></div>
@@ -175,3 +164,4 @@
         </footer>
     </div>
 </div>
+@endif

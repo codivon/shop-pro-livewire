@@ -207,6 +207,9 @@ Route::prefix('admin/'.admin_route_prefix())->name('np.')->group(function () {
         // از Closure به کنترلر منتقل شد تا route:cache در پروداکشن ممکن شود
         Route::get('cache-clear', [SystemUtilityController::class, 'cacheClear'])->name('cache-clear');
 
+        // دادهٔ انتخابگر آیکون — فقط هنگام باز شدن پیکر واکشی می‌شود
+        Route::get('icon-data', \App\Http\Controllers\AdminPanel\IconDataController::class)->name('icons.data');
+
         /*
         |----------------------
         | محصولات

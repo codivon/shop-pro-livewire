@@ -1509,6 +1509,7 @@ window.apIconPicker = () => ({
     size: 0,
 
     data: null,
+    loading: false,
     collections: {
         fa: { label: 'Font Awesome', prefix: 'fa-solid fa-' },
         mdi: { label: 'Material Design (MDI)', prefix: 'mdi mdi-' },
@@ -1525,12 +1526,32 @@ window.apIconPicker = () => ({
         });
     },
 
-    /* --- داده‌ها (تنبل) --- */
+    /* --- داده‌ها (تنبل): اولین باز شدن پیکر ← واکشی یک‌باره از مسیر np.icons.data --- */
     load() {
-        if (this.data) return;
+        if (this.data || this.loading) return;
+
+        // سازگاری: اگر صفحه‌ای هنوز JSON اینلاین قدیمی را رندر کرده باشد
         const el = document.getElementById('ap-icon-picker-data');
+        if (el) {
+            this.applyData(el.textContent);
+            return;
+        }
+
+        const root = document.querySelector('.ap-icon-picker-modal');
+        const url = root && root.dataset.iconDataUrl;
+        if (!url) return;
+
+        this.loading = true;
+        fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+            .then((r) => (r.ok ? r.json() : Promise.reject(new Error('icon-data ' + r.status))))
+            .then((parsed) => this.applyData(JSON.stringify(parsed)))
+            .catch(() => { /* شبکه/سرور خطا داد — شبکهٔ خالی با پیام «پیدا نشد» نمایش داده می‌شود */ })
+            .finally(() => { this.loading = false; });
+    },
+
+    applyData(raw) {
         let parsed = { fa: [], mdi: [], lucide: [] };
-        try { parsed = JSON.parse(el ? el.textContent : '{}'); } catch (e) { parsed = { fa: [], mdi: [], lucide: [] }; }
+        try { parsed = JSON.parse(raw || '{}'); } catch (e) { parsed = { fa: [], mdi: [], lucide: [] }; }
         this.data = {
             fa: (parsed.fa || []).map((n) => ({ tab: 'fa', key: 'fa-' + n, name: String(n), cls: 'fa-solid fa-' + n, inner: '' })),
             mdi: (parsed.mdi || []).map((n) => ({ tab: 'mdi', key: 'mdi-' + n, name: String(n), cls: 'mdi mdi-' + n, inner: '' })),

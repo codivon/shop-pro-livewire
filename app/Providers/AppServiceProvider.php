@@ -98,23 +98,61 @@ class AppServiceProvider extends ServiceProvider
             $defaultConnection = $this->app['db']->connection();
 
             if ($defaultConnection instanceof \Illuminate\Database\SQLiteConnection) {
-                $defaultConnection->getPdo()->sqliteCreateFunction('field', function () {
-                    $args = func_get_args();
-                    $needle = array_shift($args);
-
-                    foreach ($args as $index => $haystack) {
-                        if ((string) $needle === (string) $haystack) {
-                            return $index + 1;
+                /*
+                 * dropForeignِ نام‌محور در sqlite پشتیبانی نمی‌شود (ساختار FK فقط
+                 * داخل CREATE TABLE است). چند مایگریشن قدیمی پروژه چنین فراخوانی
+                 *‌ای دارند؛ برای اینکه نصب محلی/تست روی sqlite هم کامل بالا بیاید،
+                 * گرامر را طوری جایگزین می‌کنیم که drop بدون ستون به no-op تبدیل
+                 * شود — رفتار روی MariaDB/MySQL دست‌نخورده می‌ماند.
+                 *
+                 * نکته: این بخش قبل از getPdo اجرا می‌شود، چون در نخستین نصب
+                 * فایل دیتابیس هنوز وجود ندارد و getPdo استثنای
+                 * SQLiteDatabaseDoesNotExistException می‌دهد (مایگریشن‌ها خودشان
+                 * فایل را می‌سازند) — نباید مانع ست‌شدن گرامر شود.
+                 */
+                $grammar = new class ($defaultConnection) extends \Illuminate\Database\Schema\Grammars\SQLiteGrammar {
+                    public function compileDropForeign(\Illuminate\Database\Schema\Blueprint $blueprint, \Illuminate\Support\Fluent $command)
+                    {
+                        if (empty($command->columns)) {
+                            return [];
                         }
+
+                        return parent::compileDropForeign($blueprint, $command);
                     }
+                };
+                $defaultConnection->setSchemaGrammar($grammar);
 
-                    return 0;
-                });
+                // اگر SchemaBuilder پیش از این Provider ساخته شده بود، گرامر قدیمی
+                // در خودش کش کرده است — نمونهٔ تکی را می‌ریزیم تا از نو ساخته شود.
+                $this->app->forgetInstance('db.schema');
 
-                // MySQL IF(cond, a, b) — در کوئری‌های صفحهٔ محصول/سبد استفاده می‌شود
-                $defaultConnection->getPdo()->sqliteCreateFunction('if', function ($cond = null, $a = null, $b = null) {
-                    return $cond ? $a : $b;
-                }, 3);
+                /*
+                 * توابع MySQL که در کوئری‌های پروژه استفاده می‌شوند و در sqlite
+                 * وجود ندارند — به معادل sqlite ثبت می‌شوند. بعد از getPdo است،
+                 * پس در نخستین نصب ممکن است شکست بخورد؛ درخواست‌های بعدی دوباره
+                 * همین‌جا می‌رسند و ثبت می‌شوند.
+                 */
+                try {
+                    $defaultConnection->getPdo()->sqliteCreateFunction('field', function () {
+                        $args = func_get_args();
+                        $needle = array_shift($args);
+
+                        foreach ($args as $index => $haystack) {
+                            if ((string) $needle === (string) $haystack) {
+                                return $index + 1;
+                            }
+                        }
+
+                        return 0;
+                    });
+
+                    // MySQL IF(cond, a, b) — در کوئری‌های صفحهٔ محصول/سبد استفاده می‌شود
+                    $defaultConnection->getPdo()->sqliteCreateFunction('if', function ($cond = null, $a = null, $b = null) {
+                        return $cond ? $a : $b;
+                    }, 3);
+                } catch (\Throwable $e) {
+                    report($e);
+                }
             }
         } catch (\Throwable $e) {
             report($e);

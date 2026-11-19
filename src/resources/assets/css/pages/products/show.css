@@ -570,55 +570,55 @@ tr.table-suppliers-row.in-filter.shown {
 }
 
 /* ---------- ۲) ویژگی‌های کالا زیر عنوان — فقط چند مورد اول،
-   بقیه با «موارد بیشتر» (هم‌تراز قالب مرجع) ---------- */
-.product-meta-feature-items .product-params-more {
+   بقیه با «موارد بیشتر» (هم‌تراز قالب مرجع) ----------
+   فاز ۱۷۸ — صفحهٔ محصولِ دانلودی (کانتینر .product-params) هم پوشش داده شد؛
+   قبلاً آن‌جا همهٔ ردیف‌ها همیشه باز بود و توگل هم بی‌اثر بود. */
+.product-meta-feature-items .product-params-more,
+.product-params .product-params-more {
     display: none;
 }
 
-/* ---------- فاز ۱۷۷ — دکمهٔ مدرن «بیشتر/کمتر» (مشخصات + توضیحات) ----------
-   مشکل قبلی: کلاس پایهٔ پنهان‌سازی show-less فقط برای هندلر مشخصات تعریف
-   شده بود و برای mask-handler هیچ قاعده‌ای نبود ⇒ هر دو برچسب کنار هم
-   رندر می‌شدند و با fadeToggleِ مستقل، با یک کلیک هر دو ناپدید می‌شدند.
-   الان: تعویض برچسب کاملاً کلاس‌محور (open) + استایل یکسان و مدرن. */
+/* ---------- فاز ۱۷۸ — توگل «بیشتر/کمتر» کوچکِ متنی (مشخصات + توضیحات + نقد) ----------
+   قبلاً دکمهٔ قرصیِ بزرگ بود (padding 7px/16px + پس‌زمینه + بوردر + سایه)؛
+   طبق نمونهٔ کاربر: لینک متنیِ ریز با آیکون کوچک، هم‌ترازِ انتهای سطر (چپ در RTL)
+   و با فاصلهٔ کافی از متنِ بالای خودش.
+   منطق تعویض برچسب (show-more/show-less با کلاس open) از فاز ۱۷۷ دست‌نخورده ماند. */
 .snr-more-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    margin-top: 8px;
-    padding: 7px 16px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1.6;
+    display: flex;
+    width: fit-content;
+    /* در RTL یعنی چسبیده به انتهای سطر (چپ) — مثل نمونهٔ ارسالی */
+    margin-inline-start: auto;
+    margin-right: auto;
+    margin-top: 12px;
+    padding: 2px 6px;
+    border: 0;
+    background: none;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.7;
     color: var(--main-color-one, #275fe0);
-    background: color-mix(in srgb, var(--main-color-one, #275fe0) 9%, #fff);
-    border: 1px solid color-mix(in srgb, var(--main-color-one, #275fe0) 28%, #fff);
     cursor: pointer;
-    transition: all .25s ease;
-    -webkit-transition: all .25s ease;
+    transition: color .2s ease;
+    -webkit-transition: color .2s ease;
     user-select: none;
 }
 
-.snr-more-toggle:hover,
-.snr-more-toggle.open {
-    color: #fff;
-    background: var(--main-color-one, #275fe0);
-    border-color: var(--main-color-one, #275fe0);
-    box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--main-color-one, #275fe0) 55%, transparent);
-    transform: translateY(-1px);
+.snr-more-toggle:hover {
+    color: color-mix(in srgb, var(--main-color-one, #275fe0) 72%, #000);
 }
 
-.snr-more-toggle:active {
-    transform: translateY(0);
-    box-shadow: none;
+.snr-more-toggle:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--main-color-one, #275fe0) 45%, transparent);
+    outline-offset: 2px;
+    border-radius: 6px;
 }
 
 .snr-toggle-icon {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 700;
     line-height: 1;
-    transition: transform .25s ease;
-    -webkit-transition: transform .25s ease;
+    transition: transform .2s ease;
+    -webkit-transition: transform .2s ease;
 }
 
 .snr-more-toggle:hover .show-more .snr-toggle-icon,
@@ -632,7 +632,7 @@ tr.table-suppliers-row.in-filter.shown {
 .snr-more-toggle .show-less {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 4px;
 }
 
 .snr-more-toggle .show-less,
@@ -654,19 +654,22 @@ tr.table-suppliers-row.in-filter.shown {
 
 /* برای توگل مشخصات قاعدهٔ قدیمی open هم حفظ شد (show.js toggleClass('open')) */
 .product-params-more-handler.open {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
+    display: flex;
+    width: fit-content;
+    gap: 4px;
 }
 
-/* ---------- فاز ۱۷۷ — ماسک توضیح کوتاه زیر ویژگی‌ها (قبلاً CSS نداشت
-   و متن همیشه کامل دیده می‌شد؛ حالا سه‌خط اول + گرادیان) ---------- */
+/* ---------- ماسک توضیح کوتاه زیر ویژگی‌ها ----------
+   فاز ۱۷۸ — پیش‌فرض «حداقل ۵ خط» (طبق نیاز کاربر؛ قبلاً ~۲ خط بود).
+   p عمومی قالب line-height: 27px دارد ⇒ ۵ خط = 135px.
+   گرادیان هم بالای توگلِ کوچک‌شده تنظیم شد. */
 .product-additional-info .product-additional-item.is-masked {
     position: relative;
 }
 
 .product-additional-info .product-additional-item.is-masked > p {
-    max-height: 66px;
+    line-height: 27px;
+    max-height: calc(5 * 27px);
     overflow: hidden;
     transition: max-height .3s ease;
     -webkit-transition: max-height .3s ease;
@@ -680,7 +683,7 @@ tr.table-suppliers-row.in-filter.shown {
     position: absolute;
     right: 0;
     left: 0;
-    bottom: 42px;
+    bottom: 36px;
     height: 44px;
     background: linear-gradient(rgba(255, 255, 255, 0), #fff);
     pointer-events: none;
@@ -803,10 +806,11 @@ tr.table-suppliers-row.in-filter.shown {
 
 .product-page .p-tabs .is-masked .shadow-box {
     position: absolute;
-    bottom: 44px;
+    /* فاز ۱۷۸ — بالای توگل کوچک‌شده (دکمهٔ قبلی قرصی و بلندتر بود) */
+    bottom: 36px;
     left: 0;
     right: 0;
-    height: 60px;
+    height: 52px;
     background: linear-gradient(rgba(255, 255, 255, 0), #fff);
     pointer-events: none;
 }

@@ -56,17 +56,18 @@
                         <h5 class="title font-16 mb-2">ویژگی های کالا</h5>
                         <ul class="navbar-nav">
                             @foreach ($product->specialSpecifications() as $specification)
-                                <li class="nav item {{ $loop->index >= 3 ? 'product-params-more' : '' }}">
+                                {{-- فاز ۱۷۸ — پیش‌فرض ۵ ردیف دیده می‌شود (قبلاً ۳) --}}
+                                <li class="nav item {{ $loop->index >= 5 ? 'product-params-more' : '' }}">
                                     <span>{{ $specification->name }}:</span>
                                     <strong>{{ $specification->pivot->value }}</strong>
                                 </li>
                             @endforeach
                         </ul>
-                        @if ($product->specialSpecifications()->count() > 3)
-                            {{-- فاز ۱۷۷ — دکمهٔ مدرن با آیکون؛ تعویض برچسب با کلاس open (CSS/JS) --}}
+                        @if ($product->specialSpecifications()->count() > 5)
+                            {{-- فاز ۱۷۸ — توگل کوچک متنی (CSS)؛ آیکون بعد از متن = انتهای سطر مثل نمونه --}}
                             <a class="link-border snr-more-toggle product-params-more-handler" href="">
-                                <span class="show-more"><i class="bi bi-chevron-down snr-toggle-icon"></i>موارد بیشتر</span>
-                                <span class="show-less"><i class="bi bi-chevron-up snr-toggle-icon"></i>موارد کمتر</span>
+                                <span class="show-more">موارد بیشتر<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
+                                <span class="show-less">موارد کمتر<i class="bi bi-chevron-up snr-toggle-icon"></i></span>
                             </a>
                         @endif
                     </div>
@@ -75,11 +76,12 @@
                 @if ($product->short_description)
                     <div class="product-additional-info mt-2">
                         <div class="product-additional-item is-masked">
+                            {{-- فاز ۱۷۸ — پیش‌فرض حداقل ۵ خط دیده می‌شود (CSS) --}}
                             <p class="mb-0 font-13">{!! nl2br($product->short_description) !!}</p>
-                            {{-- فاز ۱۷۷ — ماسک توضیح کوتاه + دکمهٔ مدرن با آیکون --}}
+                            {{-- توگل کوچک متنی؛ آیکون بعد از متن = انتهای سطر مثل نمونه --}}
                             <a class="mask-handler link-border snr-more-toggle" href="">
-                                <span class="show-more"><i class="bi bi-chevron-down snr-toggle-icon"></i>مشاهده بیشتر</span>
-                                <span class="show-less"><i class="bi bi-chevron-up snr-toggle-icon"></i>مشاهده کمتر</span>
+                                <span class="show-more">مشاهده بیشتر<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
+                                <span class="show-less">مشاهده کمتر<i class="bi bi-chevron-up snr-toggle-icon"></i></span>
                             </a>
                             <div class="shadow-box"></div>
                         </div>

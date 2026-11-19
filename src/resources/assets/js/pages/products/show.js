@@ -1069,10 +1069,11 @@ $(document).on('click', '[data-activate-tab]', function (e) {
 // «موارد بیشتر» ویژگی‌های کالا — سلکتور قدیمی main.js با مارکاپ تم
 // هم‌خوان نبود (‎.product-params-more-handler a روی خودِ <a> بایند
 // می‌شد نه فرزندش)؛ این‌جا delegated و اسکوپ‌شده بایند می‌شود.
+// فاز ۱۷۸ — صفحهٔ محصولِ دانلودی هم پوشش داده شد (کانتینر .product-params).
 $(document).on('click', '.product-params-more-handler', function (e) {
     e.preventDefault();
     var $handler = $(this);
-    var $items = $handler.closest('.product-meta-feature-items').find('.product-params-more');
+    var $items = $handler.closest('.product-meta-feature-items, .product-params').find('.product-params-more');
     $items.stop(true, true).slideToggle(200);
     $handler.toggleClass('open');
 });

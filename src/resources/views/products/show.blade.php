@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ theme_asset('css/vendor/fancybox.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/owl.carousel.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/pages/products/show.css') }}?v=19">
+    <link rel="stylesheet" href="{{ theme_asset('css/pages/products/show.css') }}?v=20">
 @endpush
 
 @section('content')
@@ -302,9 +302,9 @@
                                                                 <p>{!! $product->description !!}</p>
                                                             </div>
                                                             <a class="mask-handler link-border snr-more-toggle">
-                                                                {{-- فاز ۱۷۷ — برچسب‌های هم‌ساخت با بقیهٔ توگل‌ها + آیکون --}}
-                                                                <span class="show-more"><i class="bi bi-chevron-down snr-toggle-icon"></i>مشاهده بیشتر</span>
-                                                                <span class="show-less"><i class="bi bi-chevron-up snr-toggle-icon"></i>مشاهده کمتر</span>
+                                                                {{-- فاز ۱۷۸ — توگل کوچک متنی؛ آیکون بعد از متن مثل نمونه --}}
+                                                                <span class="show-more">مشاهده بیشتر<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
+                                                                <span class="show-less">مشاهده کمتر<i class="bi bi-chevron-up snr-toggle-icon"></i></span>
                                                             </a>
                                                             <div class="shadow-box"></div>
                                                         </div>
@@ -805,7 +805,7 @@
      @if(option('dt_price_alert_status', '1') == '1')
         <script src="{{ theme_asset('js/pages/products/price-alert.js') }}"></script>
      @endif
-   <script src="{{ theme_asset('js/pages/products/show.js') }}?v=20"></script>
+   <script src="{{ theme_asset('js/pages/products/show.js') }}?v=21"></script>
    <script src="{{ theme_asset('js/pages/comments.js') }}"></script>
    {{-- منطق لحظه‌ای قیمت + تعویض تصویر گالری (بدون اسکریپت اینلاین) --}}
    <script src="{{ theme_asset('js/theme-product.js') }}?v=4"></script>

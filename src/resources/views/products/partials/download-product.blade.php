@@ -198,16 +198,18 @@
                                                         ویژگی‌های محصول
                                                     </li>
                                                     @foreach ($product->specialSpecifications() as $specification)
-                                                        <li class='{{$loop->index>=3 ? 'product-params-more' : ''}}'>
+                                                        {{-- فاز ۱۷۸ — پیش‌فرض ۵ ردیف دیده می‌شود (قبلاً ۳) --}}
+                                                        <li class='{{$loop->index>=5 ? 'product-params-more' : ''}}'>
                                                             <span>{{ $specification->name }}: </span>
                                                             <span> {{ $specification->pivot->value }} </span>
                                                         </li>
                                                     @endforeach
-                                                    @if ($product->specialSpecifications()->count() > 3)
+                                                    @if ($product->specialSpecifications()->count() > 5)
                                                         <li class="product-params-more-handler">
-                                                            <a class="link-border" href="">
-                                                                <span class="show-more">موارد بیشتر</span>
-                                                                <span class="show-less">بستن</span>
+                                                            {{-- فاز ۱۷۸ — هم‌ساخت توگل کوچک صفحهٔ محصول --}}
+                                                            <a class="link-border snr-more-toggle" href="">
+                                                                <span class="show-more">موارد بیشتر<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
+                                                                <span class="show-less">موارد کمتر<i class="bi bi-chevron-up snr-toggle-icon"></i></span>
                                                             </a>
                                                         </li>
                                                     @endif

@@ -5,7 +5,45 @@
     $paPalette = \App\Livewire\Admin\Settings\Others::PALETTE;
     $paPlacements = \App\Livewire\Admin\Settings\Others::PLACEMENT_LABELS;
     $paFloatLabels = \App\Livewire\Admin\Settings\Others::FLOAT_POSITION_LABELS;
-    [$paPreviewBg, $paPreviewBg2] = $paPalette[$dt_price_alert_button_color] ?? $paPalette['red'];
+
+    /*
+    | /۱۸۲ — رنگ دلخواه (color picker) + رنگ متن + درصد اندازه
+    | تیره‌کردن hex برای استپ دوم گرادیان (هم‌رفتار استپ دومِ پالت در تم‌ها)
+    */
+    $paDarken = function (string $hex, float $amt = 0.18): string {
+        $hex = ltrim(trim($hex), '#');
+        if (strlen($hex) === 3) {
+            $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+        }
+        if (! preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
+            return '#c8102e';
+        }
+        $out = '#';
+        for ($i = 0; $i < 3; $i++) {
+            $out .= str_pad(dechex((int) max(0, min(255, (int) round(hexdec(substr($hex, $i * 2, 2)) * (1 - $amt))))), 2, '0', STR_PAD_LEFT);
+        }
+        return $out;
+    };
+
+    // رنگ پیش‌نمایش: اگر «دلخواه» → از اینپوت color picker؛ وگرنه از پالت
+    if ($dt_price_alert_button_color === 'custom') {
+        $paPreviewBg = preg_match('/^#[0-9a-fA-F]{6}$/', $dt_price_alert_button_color_custom) ? strtolower($dt_price_alert_button_color_custom) : '#ef394e';
+        $paPreviewBg2 = $paDarken($paPreviewBg);
+    } else {
+        [$paPreviewBg, $paPreviewBg2] = $paPalette[$dt_price_alert_button_color] ?? $paPalette['red'];
+    }
+
+    // رنگ متن پیش‌نمایش (پیش‌فرض سفید)
+    $paPreviewFg = preg_match('/^#[0-9a-fA-F]{6}$/', $dt_price_alert_button_text_color) ? strtolower($dt_price_alert_button_text_color) : '#ffffff';
+
+    // اندازهٔ پیش‌نمایش: کوچک/متوسط/بزرگ یا درصد دلخواه (۱۰۰٪ = متوسط)
+    $paSizePct = (int) min(200, max(50, (int) $dt_price_alert_button_size_percent ?: 100));
+    $paPreviewSize = match ($dt_price_alert_button_size) {
+        'sm'     => ['h' => 38, 'fs' => 12.5],
+        'lg'     => ['h' => 58, 'fs' => 16],
+        'custom' => ['h' => (int) max(24, round(48 * $paSizePct / 100)), 'fs' => (float) max(7, round(14 * $paSizePct / 100, 1))],
+        default  => ['h' => 48, 'fs' => 14],
+    };
 
     // استایل مطلقِ پیش‌نمایش دکمهٔ شناور داخل ماکِت صفحه (فیزیکی، هم‌قرارداد با CSS تم)
     $paFloatPreviewStyle = match ($dt_price_alert_float_pos) {
@@ -77,9 +115,10 @@
                         <div class="h-2 w-1/3 rounded-full bg-surface-2 dark:bg-night-3"></div>
                     </div>
                     {{-- دکمهٔ شناور در گوشهٔ انتخابی (انتقال نرم هنگام تغییر) --}}
+                    {{-- /۱۸۲ — اندازه (پیش‌فرض/درصد دلخواه) + رنگ متن به‌صورت اینلاین، مثل تم --}}
                     <div class="absolute transition-all duration-300" style="{{ $paFloatPreviewStyle }}">
-                        <button type="button" tabindex="-1" class="dt-preview-btn dt-preview-btn--float dt-preview-btn--{{ $dt_price_alert_button_size }}"
-                                style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}">
+                        <button type="button" tabindex="-1" class="dt-preview-btn dt-preview-btn--float"
+                                style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; --dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}; color: {{ $paPreviewFg }}">
                             <i class="{{ $dt_price_alert_button_icon }}"></i>
                             <span>{{ $dt_price_alert_button_text }}</span>
                         </button>
@@ -99,8 +138,8 @@
 
                     @if ($dt_price_alert_button_placement === 'above-cart')
                         <div class="mb-2 flex items-center justify-center" style="--dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}">
-                            <button type="button" tabindex="-1" class="dt-preview-btn dt-preview-btn--{{ $dt_price_alert_button_size }}"
-                                    style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px">
+                            <button type="button" tabindex="-1" class="dt-preview-btn"
+                                    style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; color: {{ $paPreviewFg }}">
                                 <i class="{{ $dt_price_alert_button_icon }}"></i>
                                 <span>{{ $dt_price_alert_button_text }}</span>
                             </button>
@@ -114,8 +153,8 @@
 
                     @if ($dt_price_alert_button_placement !== 'above-cart')
                         <div class="flex items-center justify-center" style="--dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}">
-                            <button type="button" tabindex="-1" class="dt-preview-btn dt-preview-btn--{{ $dt_price_alert_button_size }}"
-                                    style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px">
+                            <button type="button" tabindex="-1" class="dt-preview-btn"
+                                    style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; color: {{ $paPreviewFg }}">
                                 <i class="{{ $dt_price_alert_button_icon }}"></i>
                                 <span>{{ $dt_price_alert_button_text }}</span>
                             </button>
@@ -178,18 +217,64 @@
                                     @endif
                             </button>
                         @endforeach
+
+                        {{-- /۱۸۲ — سواچ «دلخواه»: انتخاب رنگ آزاد با color picker --}}
+                        <button type="button" wire:click="$set('dt_price_alert_button_color', 'custom')"
+                                wire:key="pa-color-custom"
+                                class="relative size-9 rounded-xl transition-transform hover:scale-105 {{ $dt_price_alert_button_color === 'custom' ? 'ring-2 ring-offset-2 ring-ink-400 dark:ring-night-ink dark:ring-offset-night-2' : '' }}"
+                                style="background: conic-gradient(from 180deg, #ef394e, #f97316, #eab308, #10b981, #06b6d4, #8b5cf6, #ef394e)"
+                                role="radio" aria-checked="{{ $dt_price_alert_button_color === 'custom' ? 'true' : 'false' }}"
+                                aria-label="رنگ دلخواه" title="رنگ دلخواه (انتخاب آزاد)">
+                                @if ($dt_price_alert_button_color === 'custom')
+                                    <span class="absolute inset-0 flex items-center justify-center">
+                                        <span class="flex size-4 items-center justify-center rounded-full bg-white/90 text-ink-2">
+                                            <x-admin-panel::icon name="check" class="size-3" />
+                                        </span>
+                                    </span>
+                                @endif
+                        </button>
                     </div>
-                    <p class="mt-1.5 text-[11px] text-ink-3 dark:text-night-ink-2">رنگ گرادیانی دکمه و مودال</p>
+
+                    {{-- /۱۸۲ — رنگ دلخواه: color picker + نمایش کد hex (فقط وقتی «دلخواه» انتخاب شده) --}}
+                    @if ($dt_price_alert_button_color === 'custom')
+                        <div class="mt-2 flex items-center gap-2" wire:key="pa-color-custom-picker">
+                            <input type="color" wire:model.live="dt_price_alert_button_color_custom"
+                                   class="h-9 w-14 cursor-pointer rounded-lg border border-line bg-transparent p-0.5 dark:border-night-line"
+                                   aria-label="انتخاب رنگ دلخواه دکمه" title="انتخاب رنگ دلخواه">
+                            <span dir="ltr" class="rounded-md bg-surface-2 px-2 py-1 font-mono text-[11px] font-bold text-ink-2 dark:bg-night-3 dark:text-night-ink">{{ strtoupper($dt_price_alert_button_color_custom) }}</span>
+                        </div>
+                    @endif
+
+                    <p class="mt-1.5 text-[11px] text-ink-3 dark:text-night-ink-2">رنگ گرادیانی دکمه و مودال — سواچ آخرین رنگ = انتخاب دلخواه</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="mb-1.5 block text-xs font-semibold">اندازه دکمه</label>
-                        <select wire:model.live="dt_price_alert_button_size" class="ap-input">
+                        <select wire:model.live="dt_price_alert_button_size" class="ap-input" aria-label="اندازه دکمه هشدار قیمت">
                             <option value="sm">کوچک</option>
                             <option value="md">متوسط</option>
                             <option value="lg">بزرگ</option>
+                            {{-- /۱۸۲ — اندازهٔ دلخواه بر اساس درصد --}}
+                            <option value="custom">دلخواه (درصد)</option>
                         </select>
+
+                        {{-- /۱۸۲ — درصد اندازهٔ دلخواه: عدد + اسلایدر (۱۰۰٪ = متوسط) --}}
+                        @if ($dt_price_alert_button_size === 'custom')
+                            <div class="mt-2" wire:key="pa-size-custom-input">
+                                <div class="mb-1.5 flex items-center justify-between">
+                                    <span class="text-[11px] font-semibold text-ink-2 dark:text-night-ink">درصد اندازه</span>
+                                    <span class="fa-digits rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] font-bold text-ink-2 dark:bg-night-3 dark:text-night-ink">{{ $dt_price_alert_button_size_percent }}٪</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="range" min="50" max="200" step="5" wire:model.live="dt_price_alert_button_size_percent"
+                                           class="w-full accent-brand-600" aria-label="درصد اندازهٔ دکمه">
+                                    <input type="number" min="50" max="200" step="5" wire:model.live="dt_price_alert_button_size_percent"
+                                           class="fa-digits ap-input !w-20 text-center" aria-label="عدد درصد اندازهٔ دکمه">
+                                </div>
+                                <p class="mt-1 text-[10.5px] text-ink-3 dark:text-night-ink-2">۱۰۰٪ = اندازهٔ متوسط — بازهٔ مجاز ۵۰ تا ۲۰۰</p>
+                            </div>
+                        @endif
                     </div>
                     <div>
                         <label class="mb-1.5 flex items-center justify-between text-xs font-semibold">
@@ -199,6 +284,23 @@
                         <input type="range" min="0" max="30" step="1" wire:model.live="dt_price_alert_button_radius"
                                class="mt-2 w-full accent-brand-600" aria-label="گردی گوشه‌ها (پیکسل)">
                     </div>
+                </div>
+
+                {{-- /۱۸۲ — رنگ «متنِ» دکمه (پیش‌فرض سفید) --}}
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold">رنگ متن دکمه</label>
+                    <div class="flex items-center gap-2">
+                        <input type="color" wire:model.live="dt_price_alert_button_text_color"
+                               class="h-9 w-14 cursor-pointer rounded-lg border border-line bg-transparent p-0.5 dark:border-night-line"
+                               aria-label="انتخاب رنگ متن دکمه" title="انتخاب رنگ متن دکمه">
+                        <span dir="ltr" class="rounded-md bg-surface-2 px-2 py-1 font-mono text-[11px] font-bold text-ink-2 dark:bg-night-3 dark:text-night-ink">{{ strtoupper($dt_price_alert_button_text_color) }}</span>
+                        <button type="button" wire:click="$set('dt_price_alert_button_text_color', '#ffffff')"
+                                class="rounded-lg border border-line px-2.5 py-1.5 text-[10.5px] font-semibold text-ink-2 transition-colors hover:bg-surface-2 dark:border-night-line dark:text-night-ink dark:hover:bg-night-3"
+                                title="بازگشت به سفید">
+                            سفید پیش‌فرض
+                        </button>
+                    </div>
+                    <p class="mt-1.5 text-[11px] text-ink-3 dark:text-night-ink-2">رنگ نوشتهٔ داخل دکمه — مثلاً مشکی برای پس‌زمینهٔ روشن</p>
                 </div>
 
                 <div class="sm:col-span-2">

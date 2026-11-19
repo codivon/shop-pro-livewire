@@ -1103,25 +1103,58 @@
                 'purple' => ['#8b5cf6', '#7c3aed'],
                 'dark'   => ['#334155', '#0f172a'],
             ];
-            [$paBg, $paBg2] = $paColorMap[option('dt_price_alert_button_color', 'red') ?: 'red'] ?? $paColorMap['red'];
+
+            /* /۱۸۲ — رنگ دلخواه (color picker پنل) + رنگ متن دکمه:
+               اگر رنگ = «custom» → از option رنگ دلخواه با استپ دومِ تیره‌شدهٔ خودکار
+               رنگ متن به‌صورت --dt-pa-fg روی مودال هم اعمال می‌شود */
+            $paHexSanM = function (string $v, string $fallback): string {
+                $v = trim($v);
+                if ($v === '') return $fallback;
+                if (! str_starts_with($v, '#')) $v = '#' . $v;
+                if (preg_match('/^#([0-9a-fA-F]{3})$/', $v)) {
+                    $v = '#' . $v[1] . $v[1] . $v[2] . $v[2] . $v[3] . $v[3];
+                }
+                return preg_match('/^#[0-9a-fA-F]{6}$/', $v) ? strtolower($v) : $fallback;
+            };
+            $paDarkenM = function (string $hex, float $amt = 0.18): string {
+                $hex = ltrim($hex, '#');
+                if (strlen($hex) === 3) $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+                if (! preg_match('/^[0-9a-fA-F]{6}$/', $hex)) return '#c8102e';
+                $out = '#';
+                for ($i = 0; $i < 3; $i++) {
+                    $out .= str_pad(dechex((int) max(0, min(255, (int) round(hexdec(substr($hex, $i * 2, 2)) * (1 - $amt))))), 2, '0', STR_PAD_LEFT);
+                }
+                return $out;
+            };
+
+            $paColorKey = (string) (option('dt_price_alert_button_color', 'red') ?: 'red');
+            if ($paColorKey === 'custom') {
+                $paBg  = $paHexSanM((string) option('dt_price_alert_button_color_custom', '#ef394e'), '#ef394e');
+                $paBg2 = $paDarkenM($paBg);
+            } else {
+                [$paBg, $paBg2] = $paColorMap[$paColorKey] ?? $paColorMap['red'];
+            }
+            $paFg = $paHexSanM((string) option('dt_price_alert_button_text_color', '#ffffff'), '#ffffff');
         @endphp
 
         <style>
             /* ===== دکمهٔ هشدار کاهش قیمت (کاملاً مستقل، بدون مارجین اضافه) ===== */
+            /* /۱۸۲ — رنگ متن از --dt-pa-fg (اینلاین روی دکمه؛ پیش‌فرض سفید) */
             .dt-pa-btn{--dt-pa-radius:10px;--dt-pa-h:48px;--dt-pa-fs:14px;
                 display:flex;align-items:center;justify-content:center;gap:8px;
                 width:100%;height:var(--dt-pa-h);
                 margin:10px 0 0; /* صریح: هیچ مارجین راست/چپ ارثی نمی‌ماند */
                 padding:0 14px;border:0;outline:0;border-radius:var(--dt-pa-radius);
                 background:linear-gradient(135deg,var(--dt-pa-bg,#ef394e),var(--dt-pa-bg2,#c8102e));
-                color:#fff !important;font-size:var(--dt-pa-fs);font-weight:600;line-height:1;
+                color:var(--dt-pa-fg,#fff) !important;font-size:var(--dt-pa-fs);font-weight:600;line-height:1;
                 cursor:pointer;box-shadow:0 8px 20px -10px var(--dt-pa-bg,#ef394e);
                 transition:transform .18s ease,box-shadow .25s ease,filter .2s ease;}
             .dt-pa-btn i{font-size:1.35em;line-height:1}
-            .dt-pa-btn:hover{transform:translateY(-1px);filter:brightness(1.07);box-shadow:0 12px 26px -12px var(--dt-pa-bg,#ef394e);color:#fff}
+            .dt-pa-btn:hover{transform:translateY(-1px);filter:brightness(1.07);box-shadow:0 12px 26px -12px var(--dt-pa-bg,#ef394e);color:var(--dt-pa-fg,#fff)}
             .dt-pa-btn:active{transform:translateY(0) scale(.99)}
-            .dt-pa-btn--sm{--dt-pa-h:40px;--dt-pa-fs:13px}
-            .dt-pa-btn--lg{--dt-pa-h:54px;--dt-pa-fs:15px}
+            /* /۱۸۲ — مقادیر اندازه هم‌قرارداد با پنل (کوچک ۳۸ / بزرگ ۵۸)؛ مقدار واقعی اینلاین روی دکمه ست می‌شود */
+            .dt-pa-btn--sm{--dt-pa-h:38px;--dt-pa-fs:12.5px}
+            .dt-pa-btn--lg{--dt-pa-h:58px;--dt-pa-fs:16px}
             .dt-pa-under-price .dt-pa-btn{margin:8px 0 0}
             .dt-pa-btn[hidden]{display:none !important} /* منبع مخفی حالت سلکتور */
 
@@ -1162,7 +1195,7 @@
             .dt-pa-close:hover{background:#e2e8f0;color:#0f172a}
             .dt-pa-body{padding:24px 22px 20px}
             .dt-pa-icon{width:64px;height:64px;margin:0 auto 14px;border-radius:20px;display:flex;align-items:center;justify-content:center;
-                font-size:30px;color:#fff;background:linear-gradient(135deg,var(--dt-pa-bg,#ef394e),var(--dt-pa-bg2,#c8102e));
+                font-size:30px;color:var(--dt-pa-fg,#fff);background:linear-gradient(135deg,var(--dt-pa-bg,#ef394e),var(--dt-pa-bg2,#c8102e));
                 box-shadow:0 14px 30px -12px var(--dt-pa-bg,#ef394e);animation:dtPaRing 2.6s ease-in-out infinite}
             @keyframes dtPaRing{0%,72%,100%{transform:rotate(0)}76%{transform:rotate(12deg)}80%{transform:rotate(-10deg)}84%{transform:rotate(7deg)}88%{transform:rotate(-5deg)}}
             .dt-pa-title{margin:0 0 8px;font-size:18px;font-weight:800;color:#0f172a;text-align:center}
@@ -1190,7 +1223,7 @@
             .dt-pa-hint b{direction:ltr;display:inline-block}
             .dt-pa-error{display:block;margin:-2px 0 10px;padding:9px 12px;border-radius:11px;background:#fef2f2;color:#dc2626;font-size:11.5px;line-height:1.9}
             .dt-pa-submit{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;border:0;border-radius:14px;
-                background:linear-gradient(135deg,var(--dt-pa-bg,#ef394e),var(--dt-pa-bg2,#c8102e));color:#fff;
+                background:linear-gradient(135deg,var(--dt-pa-bg,#ef394e),var(--dt-pa-bg2,#c8102e));color:var(--dt-pa-fg,#fff);
                 font-size:14.5px;font-weight:700;font-family:inherit;cursor:pointer;
                 box-shadow:0 12px 26px -12px var(--dt-pa-bg,#ef394e);transition:transform .18s,filter .2s}
             .dt-pa-submit:hover{filter:brightness(1.07);transform:translateY(-1px)}
@@ -1210,7 +1243,7 @@
                  data-product="{{ $product->id }}"
                  data-user="{{ $paIsUser ? '1' : '0' }}"
                  data-action="{{ route('front.price-alert.store') }}"
-                 style="--dt-pa-bg: {{ $paBg }}; --dt-pa-bg2: {{ $paBg2 }};">
+                 style="--dt-pa-bg: {{ $paBg }}; --dt-pa-bg2: {{ $paBg2 }}; --dt-pa-fg: {{ $paFg }};">
 
                 <button type="button" class="dt-pa-close" aria-label="بستن" title="بستن">&times;</button>
 

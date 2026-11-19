@@ -109,7 +109,11 @@ class Others extends Component
         'dark' => ['#334155', '#0f172a'],
     ];
 
-    public const SIZES = ['sm', 'md', 'lg'];
+    // /۱۸۲ — گزینهٔ «دلخواه» اضافه شد: با درصد اندازه (dt_price_alert_button_size_percent)
+    public const SIZES = ['sm', 'md', 'lg', 'custom'];
+
+    /** /۱۸۲ — رنگِ انتخابیِ حالت «دلخواه» (کلید رنگ در PALETTE نیست) */
+    public const COLOR_CUSTOM = 'custom';
 
     public const PLACEMENTS = ['below-cart', 'above-cart', 'under-price', 'float', 'custom-selector'];
 
@@ -158,7 +162,16 @@ class Others extends Component
     // شخصی‌سازی کامل دکمه + مودال + کانال‌های اطلاع‌رسانی
     public string $dt_price_alert_button_color = 'red';
 
+    /** /۱۸۲ — رنگ دلخواه دکمه (وقتی dt_price_alert_button_color = «custom») — فرمت #rrggbb */
+    public string $dt_price_alert_button_color_custom = '#ef394e';
+
+    /** /۱۸۲ — رنگ «متنِ» دکمه (پیش‌فرض سفید) — فرمت #rrggbb */
+    public string $dt_price_alert_button_text_color = '#ffffff';
+
     public string $dt_price_alert_button_size = 'md';
+
+    /** /۱۸۲ — درصد اندازهٔ دلخواه دکمه (وقتی dt_price_alert_button_size = «custom») — ۱۰۰٪ = اندازهٔ متوسط */
+    public string $dt_price_alert_button_size_percent = '100';
 
     public string $dt_price_alert_button_radius = '10';
 
@@ -247,8 +260,14 @@ class Others extends Component
         $this->dt_price_alert_button_icon = (string) (option('dt_price_alert_button_icon') ?: 'mdi mdi-bell-ring-outline');
 
         // شخصی‌سازی دکمه/مودال/کانال‌ها (مقدار نامعتبر → پیش‌فرض)
-        $this->dt_price_alert_button_color = in_array(($c = (string) option('dt_price_alert_button_color', 'red')), array_keys(self::PALETTE), true) ? $c : 'red';
+        $this->dt_price_alert_button_color = in_array(($c = (string) option('dt_price_alert_button_color', 'red')), array_merge(array_keys(self::PALETTE), [self::COLOR_CUSTOM]), true) ? $c : 'red';
         $this->dt_price_alert_button_size = in_array(($s = (string) option('dt_price_alert_button_size', 'md')), self::SIZES, true) ? $s : 'md';
+
+        // /۱۸۲ — رنگ دلخواه + رنگ متن + درصد اندازه (اعتبارسنجی hex/بازه)
+        $this->dt_price_alert_button_color_custom = self::normalizeHexColor((string) option('dt_price_alert_button_color_custom', '#ef394e'), '#ef394e');
+        $this->dt_price_alert_button_text_color = self::normalizeHexColor((string) option('dt_price_alert_button_text_color', '#ffffff'), '#ffffff');
+        $this->dt_price_alert_button_size_percent = (string) min(200, max(50, (int) (option('dt_price_alert_button_size_percent', '100') ?: 100)));
+
         $this->dt_price_alert_button_radius = (string) min(30, max(0, (int) (option('dt_price_alert_button_radius', '10') ?: 10)));
         $this->dt_price_alert_button_placement = in_array(($p = (string) option('dt_price_alert_button_placement', 'below-cart')), self::PLACEMENTS, true) ? $p : 'below-cart';
 
@@ -381,6 +400,8 @@ class Others extends Component
             'transport', // quirk قدیمی: این فیلد در env_options نبود → به‌صورت option ذخیره می‌شد
             'dt_price_alert_status', 'dt_price_alert_button_text', 'dt_price_alert_button_icon',
             'dt_price_alert_button_color', 'dt_price_alert_button_size', 'dt_price_alert_button_radius',
+            // /۱۸۲ — رنگ دلخواه/رنگ متن/درصد اندازه
+            'dt_price_alert_button_color_custom', 'dt_price_alert_button_text_color', 'dt_price_alert_button_size_percent',
             'dt_price_alert_button_placement', 'dt_price_alert_modal_title', 'dt_price_alert_modal_desc',
             'dt_pre_order_status', 'dt_pre_order_button_text', 'dt_pre_order_badge_text',
             // فاز ۱۷۷ — بنر جستجو (عنوان خالی = بدون بنر؛ لینک خالی در فرانت به تخفیف‌ها fallback می‌شود)
@@ -423,9 +444,13 @@ class Others extends Component
             }
 
             // /۸۴ — وایت‌لیست رنگ/اندازه/موقعیت + بازهٔ گردی گوشه‌ها
+            // /۱۸۲ — رنگ دلخواه (custom) + نرمال‌سازی hex رنگ دلخواه/رنگ متن + بازهٔ درصد اندازه (۵۰ تا ۲۰۰)
             $value = match ($key) {
-                'dt_price_alert_button_color' => in_array($value, array_keys(self::PALETTE), true) ? $value : 'red',
+                'dt_price_alert_button_color' => in_array($value, array_merge(array_keys(self::PALETTE), [self::COLOR_CUSTOM]), true) ? $value : 'red',
+                'dt_price_alert_button_color_custom' => self::normalizeHexColor($value, '#ef394e'),
+                'dt_price_alert_button_text_color' => self::normalizeHexColor($value, '#ffffff'),
                 'dt_price_alert_button_size' => in_array($value, self::SIZES, true) ? $value : 'md',
+                'dt_price_alert_button_size_percent' => (string) min(200, max(50, (int) $value ?: 100)),
                 'dt_price_alert_button_placement' => in_array($value, self::PLACEMENTS, true) ? $value : 'below-cart',
                 'dt_price_alert_button_radius' => (string) min(30, max(0, (int) $value)),
                 default => $value,
@@ -563,7 +588,10 @@ class Others extends Component
             'dt_price_alert_button_icon' => 'آیکون دکمه هشدار کاهش قیمت',
             // شخصی‌سازی کامل
             'dt_price_alert_button_color' => 'رنگ دکمه هشدار کاهش قیمت',
+            'dt_price_alert_button_color_custom' => 'رنگ دلخواه دکمه هشدار کاهش قیمت',
+            'dt_price_alert_button_text_color' => 'رنگ متن دکمه هشدار کاهش قیمت',
             'dt_price_alert_button_size' => 'اندازه دکمه هشدار کاهش قیمت',
+            'dt_price_alert_button_size_percent' => 'درصد اندازهٔ دکمه هشدار کاهش قیمت',
             'dt_price_alert_button_radius' => 'گردی گوشه‌های دکمه هشدار کاهش قیمت',
             'dt_price_alert_button_placement' => 'موقعیت دکمه هشدار کاهش قیمت',
             'dt_price_alert_float_pos' => 'موقعیت دکمه شناور هشدار کاهش قیمت',
@@ -598,6 +626,34 @@ class Others extends Component
     }
 
     /* ================= سلکتورهای «تگ دلخواه» ================= */
+
+    /**
+     * /۱۸۲ — نرمال‌سازی/اعتبارسنجی رنگ hex (فرمت #rrggbb؛ فرم ۳ رقمی هم پذیرفته می‌شود) —
+     * مقدار نامعتبر/خالی → fallback. فقط خروجی امنِ hex برمی‌گردد تا در style قابل تزریق نباشد.
+     */
+    public static function normalizeHexColor(string $value, string $fallback): string
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            return $fallback;
+        }
+
+        if (! str_starts_with($value, '#')) {
+            $value = '#' . $value;
+        }
+
+        // فرم خلاصهٔ ۳ رقمی (#abc) → کامل (#aabbcc)
+        if (preg_match('/^#([0-9a-fA-F]{3})$/', $value)) {
+            $value = '#' . $value[1] . $value[1] . $value[2] . $value[2] . $value[3] . $value[3];
+        }
+
+        if (preg_match('/^#[0-9a-fA-F]{6}$/', $value)) {
+            return strtolower($value);
+        }
+
+        return $fallback;
+    }
 
     /**
      * حداکثر تعداد سلکتورها (ضد سوءاستفاده/شلوغی UI)

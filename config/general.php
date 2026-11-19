@@ -527,6 +527,10 @@ return [
         'dt_price_alert_button_text',
         'dt_price_alert_button_icon',
         'dt_price_alert_button_color',
+        // /۱۸۲ — رنگ دلخواه/رنگ متن/درصد اندازه (مستقل از زبان، مثل بقیهٔ کلیدهای قابلیت)
+        'dt_price_alert_button_color_custom',
+        'dt_price_alert_button_text_color',
+        'dt_price_alert_button_size_percent',
         'dt_price_alert_button_size',
         'dt_price_alert_button_radius',
         'dt_price_alert_button_placement',

@@ -701,10 +701,19 @@
                 'dark'   => ['#334155', '#0f172a'],
             ];
             [$paBg, $paBg2] = $paColorMap[option('dt_price_alert_button_color', 'red') ?: 'red'] ?? $paColorMap['red'];
+
+            /* /۱۸۰ — آیکون دکمه: اگر mdi بود، فونت MDI باید برای «مهمان» هم لود شود؛
+               قبلاً materialdesignicons.css فقط برای کاربر وارد‌شده لود می‌شد و
+               مهمان آیکون دکمهٔ هشدار را اصلاً نمی‌دید (تغییر آیکون در پنل بی‌اثر) */
+            $paBtnIcon = trim((string) (option('dt_price_alert_button_icon', 'mdi mdi-bell-ring-outline') ?: 'mdi mdi-bell-ring-outline'));
         @endphp
 
         @push('styles')
-            <link rel="stylesheet" href="{{ theme_asset('css/pages/products/price-alert.css') }}">
+            {{-- /۱۸۰ — نسخهٔ کش (?v=2): قبلاً بدون نسخه بود و تغییرات CSS به مرورگر نمی‌رسید --}}
+            <link rel="stylesheet" href="{{ theme_asset('css/pages/products/price-alert.css') }}?v=2">
+            @if(str_starts_with($paBtnIcon, 'mdi'))
+                <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css') }}">
+            @endif
         @endpush
 
         <div class="dt-pa-overlay" id="dt_pa_overlay" aria-hidden="true">
@@ -803,7 +812,8 @@
      <script src="{{ theme_asset('js/vendor/jquery.fancybox.min.js') }}"></script>
      <script src="{{ theme_asset('js/plugins/apexcharts/apexcharts.js') }}"></script>
      @if(option('dt_price_alert_status', '1') == '1')
-        <script src="{{ theme_asset('js/pages/products/price-alert.js') }}"></script>
+        {{-- /۱۸۰ — نسخهٔ کش ?v=2 --}}
+        <script src="{{ theme_asset('js/pages/products/price-alert.js') }}?v=2"></script>
      @endif
    <script src="{{ theme_asset('js/pages/products/show.js') }}?v=21"></script>
    <script src="{{ theme_asset('js/pages/comments.js') }}"></script>

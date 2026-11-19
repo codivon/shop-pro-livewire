@@ -18,8 +18,21 @@
 .dt-pa-btn:active{transform:translateY(0) scale(.99)}
 .dt-pa-btn--sm{--dt-pa-h:40px;--dt-pa-fs:13px}
 .dt-pa-btn--lg{--dt-pa-h:54px;--dt-pa-fs:15px}
+/* /۱۸۰ — رنگ دکمه از تنظیمات پنل (تب قابلیت‌های فروشگاه):
+   قبلاً کلاس dt-pa-btn--{color} رندر می‌شد ولی هیچ قاعدهٔ CSS برایش وجود نداشت
+   ⇒ تغییر رنگ در پنل هیچ اثری روی دکمه نداشت (همیشه قرمزِ fallback).
+   مقادیر دقیقاً هم‌قرارداد با PALETTE در Others.php پنل است. */
+.dt-pa-btn--red{--dt-pa-bg:#ef394e;--dt-pa-bg2:#c8102e}
+.dt-pa-btn--orange{--dt-pa-bg:#f97316;--dt-pa-bg2:#ea580c}
+.dt-pa-btn--green{--dt-pa-bg:#10b981;--dt-pa-bg2:#059669}
+.dt-pa-btn--teal{--dt-pa-bg:#06b6d4;--dt-pa-bg2:#0891b2}
+.dt-pa-btn--purple{--dt-pa-bg:#8b5cf6;--dt-pa-bg2:#7c3aed}
+.dt-pa-btn--dark{--dt-pa-bg:#334155;--dt-pa-bg2:#0f172a}
 .dt-pa-under-price .dt-pa-btn{margin:8px 0 0}
-.dt-pa-btnidden]{display:none !important} /* منبع مخفی حالت سلکتور */
+/* /۱۸۰ — رفع سلکتور خراب (.dt-pa-btnidden]): در حالت «تگ دلخواه» دکمهٔ منبع
+   با اتریبیوت hidden رندر می‌شود ولی display:flex نویسنده بر [hidden] مرورگر
+   غلبه می‌کرد و دکمه تا اجرای JS پیدا بود */
+.dt-pa-btn[hidden]{display:none !important}
 
 /* ===== دکمهٔ شناور در گوشهٔ صفحه (۹ موقعیت) ===== */
 .dt-pa-float{position:fixed;z-index:9998;animation:dtPaFloatIn .5s cubic-bezier(.16,1,.3,1) both}

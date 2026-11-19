@@ -535,6 +535,8 @@ return [
         'dt_price_alert_button_size',
         'dt_price_alert_button_radius',
         'dt_price_alert_button_placement',
+        // /۱۸۴ — پوزیشن افقی دکمه (راست/وسط/چپ) — مستقل از زبان مثل بقیهٔ کلیدهای قابلیت
+        'dt_price_alert_button_align',
         'dt_price_alert_float_pos',
         'dt_price_alert_selectors',
         'dt_price_alert_modal_title',

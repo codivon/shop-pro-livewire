@@ -5,6 +5,13 @@
 @endphp
 <div class="mx-auto max-w-5xl space-y-5">
 
+    {{-- /۱۸۴ — مودال انتخابگر آیکون در سطح ریشهٔ صفحه، نه داخل کارت تب‌ها.
+         علت (هم‌الگوی صفحهٔ منوها): کارت تب‌ها overflow-hidden دارد و مودال fixedِ
+         پیکر اگر داخل فرم/کارت رندر شود به‌درستی نمایش داده نمی‌شود (دکمهٔ «انتخاب»
+         هشدار کاهش قیمت کار نمی‌کرد). گارد استاتیک IconPickerModal::$rendered
+         مانع رندر مجدد توسط دکمهٔ پیکرِ داخل فرم می‌شود. --}}
+    <x-admin-panel::icon-picker-modal />
+
     {{-- سربرگ : دکمهٔ ذخیرهٔ بالایی حذف شد (به نیاز محصول)؛ ذخیره فقط از نوار پایین --}}
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2.5">

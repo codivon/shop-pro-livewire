@@ -145,6 +145,21 @@ class Others extends Component
         'bottom-right' => 'پایین-راست',
     ];
 
+    /*
+    | /۱۸۴ — پوزیشن افقی دکمه (راست / وسط / چپ) داخل باکس فروش صفحهٔ محصول.
+    | فقط برای جاسازی‌های داخل باکس (زیر/بالای دکمهٔ خرید، چسبیده به قیمت)
+    | اعمال می‌شود؛ حالت «شناور» شبکهٔ ۹گانهٔ خودش را دارد و حالت «تگ دلخواه»
+    | دکمه را بعد از عنصرِ منطبق درج می‌کند (اینجا بی‌تاثیر است).
+    | در RTL: right = ابتدای خط (flex-start)، left = انتهای خط (flex-end).
+    */
+    public const ALIGNS = ['right', 'center', 'left'];
+
+    public const ALIGN_LABELS = [
+        'right' => 'راست',
+        'center' => 'وسط',
+        'left' => 'چپ',
+    ];
+
     // سلکتورهای نمونهٔ پیشنهادی (چیپ‌های قابل‌کلیک در UI — مثل نمونهٔ CheckoutTurbo)
     public const SELECTOR_EXAMPLES = [
         '#buy-box' => 'باکس خرید دیجی‌کالا-مانند',
@@ -184,6 +199,9 @@ class Others extends Component
     public string $dt_price_alert_button_radius = '10';
 
     public string $dt_price_alert_button_placement = 'below-cart';
+
+    /** /۱۸۴ — پوزیشن افقی دکمه در باکس فروش: right | center | left (پیش‌فرض وسط) */
+    public string $dt_price_alert_button_align = 'center';
 
     // موقعیت دکمهٔ شناور (۹گانه) + سلکتورهای «تگ دلخواه»
     public string $dt_price_alert_float_pos = 'bottom-right';
@@ -279,6 +297,9 @@ class Others extends Component
 
         $this->dt_price_alert_button_radius = (string) min(30, max(0, (int) (option('dt_price_alert_button_radius', '10') ?: 10)));
         $this->dt_price_alert_button_placement = in_array(($p = (string) option('dt_price_alert_button_placement', 'below-cart')), self::PLACEMENTS, true) ? $p : 'below-cart';
+
+        // /۱۸۴ — پوزیشن افقی دکمه (راست/وسط/چپ — مقدار نامعتبر → وسط)
+        $this->dt_price_alert_button_align = in_array(($al = (string) option('dt_price_alert_button_align', 'center')), self::ALIGNS, true) ? $al : 'center';
 
         // موقعیت شناور + سلکتورهای تگ دلخواه
         $this->dt_price_alert_float_pos = in_array(($fp = (string) option('dt_price_alert_float_pos', 'bottom-right')), self::FLOAT_POSITIONS, true) ? $fp : 'bottom-right';
@@ -411,6 +432,8 @@ class Others extends Component
             'dt_price_alert_button_color', 'dt_price_alert_button_size', 'dt_price_alert_button_radius',
             // /۱۸۲ — رنگ دلخواه/رنگ متن + /۱۸۳ — طول/عرض دلخواه اندازه
             'dt_price_alert_button_color_custom', 'dt_price_alert_button_text_color', 'dt_price_alert_button_height', 'dt_price_alert_button_width',
+            // /۱۸۴ — پوزیشن افقی دکمه (راست/وسط/چپ)
+            'dt_price_alert_button_align',
             'dt_price_alert_button_placement', 'dt_price_alert_modal_title', 'dt_price_alert_modal_desc',
             'dt_pre_order_status', 'dt_pre_order_button_text', 'dt_pre_order_badge_text',
             // فاز ۱۷۷ — بنر جستجو (عنوان خالی = بدون بنر؛ لینک خالی در فرانت به تخفیف‌ها fallback می‌شود)
@@ -463,6 +486,8 @@ class Others extends Component
                 'dt_price_alert_button_height' => (string) min(150, max(24, (int) $value ?: 48)),
                 'dt_price_alert_button_width' => (string) min(500, max(0, (int) $value)),
                 'dt_price_alert_button_placement' => in_array($value, self::PLACEMENTS, true) ? $value : 'below-cart',
+                // /۱۸۴ — پوزیشن افقی دکمه (راست/وسط/چپ)
+                'dt_price_alert_button_align' => in_array($value, self::ALIGNS, true) ? $value : 'center',
                 'dt_price_alert_button_radius' => (string) min(30, max(0, (int) $value)),
                 default => $value,
             };
@@ -606,6 +631,7 @@ class Others extends Component
             'dt_price_alert_button_width' => 'عرض دلخواه دکمه هشدار کاهش قیمت',
             'dt_price_alert_button_radius' => 'گردی گوشه‌های دکمه هشدار کاهش قیمت',
             'dt_price_alert_button_placement' => 'موقعیت دکمه هشدار کاهش قیمت',
+            'dt_price_alert_button_align' => 'پوزیشن افقی دکمه هشدار کاهش قیمت',
             'dt_price_alert_float_pos' => 'موقعیت دکمه شناور هشدار کاهش قیمت',
             'dt_price_alert_selectors' => 'سلکتورهای تزریق دکمه هشدار کاهش قیمت',
             'dt_price_alert_modal_title' => 'عنوان مودال هشدار کاهش قیمت',

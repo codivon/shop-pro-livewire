@@ -52,6 +52,16 @@
     // /۱۸۳ — عرضِ دلخواه فقط وقتی اندازه = «دلخواه» و عرض > ۰ (max-width فقط در پیش‌نمایش، تا از کارت بیرون نزند)
     $paPreviewWStyle = ($dt_price_alert_button_size === 'custom' && $paCustomW > 0) ? 'width: '.$paCustomW.'px; max-width: 100%;' : '';
 
+    /*
+    | /۱۸۴ — پوزیشن افقی دکمه (راست/وسط/چپ) — کلاس justify پیش‌نمایش.
+    | در RTL: justify-start = راست · justify-center = وسط · justify-end = چپ (هم‌قرارداد با dt-pa-wrap تم‌ها)
+    */
+    $paPreviewAlignClass = match ($dt_price_alert_button_align) {
+        'right' => 'justify-start',
+        'left'  => 'justify-end',
+        default => 'justify-center',
+    };
+
     // استایل مطلقِ پیش‌نمایش دکمهٔ شناور داخل ماکِت صفحه (فیزیکی، هم‌قرارداد با CSS تم)
     $paFloatPreviewStyle = match ($dt_price_alert_float_pos) {
         'top-left'      => 'top:10px;left:10px',
@@ -144,7 +154,8 @@
                     </div>
 
                     @if ($dt_price_alert_button_placement === 'above-cart')
-                        <div class="mb-2 flex items-center justify-center" style="--dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}">
+                        {{-- /۱۸۴ — پوزیشن افقی (راست/وسط/چپ) مثل تم با dt-pa-wrap --}}
+                        <div @class(['mb-2 flex items-center', $paPreviewAlignClass]) style="--dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}">
                             <button type="button" tabindex="-1" class="dt-preview-btn"
                                     style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; color: {{ $paPreviewFg }} !important; {{ $paPreviewWStyle }}">
                                 <i class="{{ $dt_price_alert_button_icon }}"></i>
@@ -159,7 +170,8 @@
                     </button>
 
                     @if ($dt_price_alert_button_placement !== 'above-cart')
-                        <div class="flex items-center justify-center" style="--dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}">
+                        {{-- /۱۸۴ — پوزیشن افقی (راست/وسط/چپ) مثل تم با dt-pa-wrap --}}
+                        <div @class(['flex items-center', $paPreviewAlignClass]) style="--dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}">
                             <button type="button" tabindex="-1" class="dt-preview-btn"
                                     style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; color: {{ $paPreviewFg }} !important; {{ $paPreviewWStyle }}">
                                 <i class="{{ $dt_price_alert_button_icon }}"></i>
@@ -287,7 +299,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <p class="mt-1 text-[10.5px] leading-5 text-ink-3 dark:text-night-ink-2">طول ۲۴ تا ۱۵۰ پیکسل — عرض ۰ = خودکار (اندازهٔ متن)</p>
+                                <p class="mt-1 text-[10.5px] leading-5 text-ink-3 dark:text-night-ink-2">طول ۲۴ تا ۱۵۰ پیکسل — عرض ۰ = خودکار (متناسب با طول)</p>
                             </div>
                         @endif
                     </div>
@@ -333,6 +345,39 @@
                             دکمه به‌صورت شناور (fixed) و همیشه‌در-دسترس در گوشهٔ انتخابی صفحه نمایش داده می‌شود.
                         @else
                             دکمه داخل باکس فروش صفحهٔ محصول، {{ $paPlacements[$dt_price_alert_button_placement] }} قرار می‌گیرد.
+                        @endif
+                    </p>
+                </div>
+
+                {{-- /۱۸۴ — پوزیشن افقی دکمه (راست / وسط / چپ) — هم‌قرارداد با dt-pa-wrap تم‌ها --}}
+                <div class="sm:col-span-2" wire:key="pa-align-picker">
+                    <label class="mb-1.5 block text-xs font-semibold">پوزیشن دکمه (راست / وسط / چپ)</label>
+                    <div class="mx-auto grid max-w-md grid-cols-3 gap-2" role="radiogroup" aria-label="پوزیشن افقی دکمه هشدار کاهش قیمت">
+                        @foreach (\App\Livewire\Admin\Settings\Others::ALIGNS as $paAl)
+                            <button type="button" wire:click="$set('dt_price_alert_button_align', '{{ $paAl }}')"
+                                    wire:key="pa-align-{{ $paAl }}"
+                                    @class([
+                                        'flex items-center justify-center gap-1.5 rounded-xl border-2 px-2 py-2.5 text-xs font-bold transition-all duration-200',
+                                        'border-brand-600 bg-brand-50 text-brand-700 dark:border-brand-500 dark:bg-brand-500/10 dark:text-brand-400' => $dt_price_alert_button_align === $paAl,
+                                        'border-line text-ink-3 hover:border-brand-300 dark:border-night-line dark:text-night-ink-2 dark:hover:border-brand-500/40' => $dt_price_alert_button_align !== $paAl,
+                                    ])
+                                    role="radio" aria-checked="{{ $dt_price_alert_button_align === $paAl ? 'true' : 'false' }}">
+                                <span @class([
+                                    'size-2.5 rounded-full transition-colors',
+                                    'bg-brand-600 dark:bg-brand-400' => $dt_price_alert_button_align === $paAl,
+                                    'bg-ink-300/60 dark:bg-night-line' => $dt_price_alert_button_align !== $paAl,
+                                ]) aria-hidden="true"></span>
+                                {{ \App\Livewire\Admin\Settings\Others::ALIGN_LABELS[$paAl] }}
+                            </button>
+                        @endforeach
+                    </div>
+                    <p class="mt-1.5 text-[11px] text-ink-3 dark:text-night-ink-2">
+                        @if ($dt_price_alert_button_placement === 'float')
+                            در حالت «شناور» پوزیشن با شبکهٔ ۹گانهٔ «موقعیت دکمهٔ شناور» کنترل می‌شود و این گزینه بی‌تاثیر است.
+                        @elseif ($dt_price_alert_button_placement === 'custom-selector')
+                            در حالت «تگ دلخواه» دکمه بعد از عنصرِ منطبق درج می‌شود و این گزینه بی‌تاثیر است.
+                        @else
+                            چینش افقی دکمه داخل باکس فروش صفحهٔ محصول — دکمه با تغییر اندازه، عرضش هم به‌نسبت کوچک/بزرگ می‌شود.
                         @endif
                     </p>
                 </div>
@@ -546,17 +591,20 @@
         {{-- /۱۸۱ — مقادیر اندازه با تم هم‌قرارداد شد (کوچک ۳۸ / متوسط ۴۸ / بزرگ ۵۸ پیکسل):
              در تم (فاز ۱۸۱) اندازه به‌صورت متغیر CSS اینلاین روی خود دکمه هم اعمال می‌شود
              تا مستقل از نسخهٔ CSS هاست قطعاً اعمال شود؛ پیش‌نمایش پنل هم همان اعداد را نشان می‌دهد --}}
+        {{-- /۱۸۴ — اندازهٔ متناسب: عرض دکمه هم به‌نسبت با طول کوچک/بزرگ می‌شود
+             (width:auto به‌عنوان آیتم فلکس + پدینگ افقی متناسب با طول) — هم‌قرارداد با تم‌ها --}}
         <style>
             .dt-preview-btn{--dt-pa-radius:10px;--dt-pa-h:48px;--dt-pa-fs:14px;
-                display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:var(--dt-pa-h);
-                margin:8px 0 0;padding:0 14px;border:0;border-radius:var(--dt-pa-radius);
+                display:flex;align-items:center;justify-content:center;gap:calc(var(--dt-pa-h)*.167);
+                width:auto;height:var(--dt-pa-h);
+                margin:8px 0 0;padding:0 calc(var(--dt-pa-h)*.3);border:0;border-radius:var(--dt-pa-radius);
                 background:linear-gradient(135deg,var(--dt-pa-bg,#ef394e),var(--dt-pa-bg2,#c8102e));
                 color:#fff;font-size:var(--dt-pa-fs);font-weight:600;cursor:default;box-shadow:0 8px 20px -10px var(--dt-pa-bg,#ef394e)}
             .dt-preview-btn i{font-size:1.3em}
             .dt-preview-btn--sm{--dt-pa-h:38px;--dt-pa-fs:12.5px}
             .dt-preview-btn--lg{--dt-pa-h:58px;--dt-pa-fs:16px}
-            /* حالت شناور داخل ماکِت: عرض خودکار، بدون مارجین */
-            .dt-preview-btn--float{width:auto;display:inline-flex;margin:0;padding:0 16px;box-shadow:0 10px 24px -8px rgba(15,23,42,.35)}
+            /* حالت شناور داخل ماکِت: عرض خودکار، بدون مارجین — پدینگ از قاعدهٔ متناسب پایه */
+            .dt-preview-btn--float{width:auto;display:inline-flex;margin:0;box-shadow:0 10px 24px -8px rgba(15,23,42,.35)}
         </style>
     </div>
 </section>

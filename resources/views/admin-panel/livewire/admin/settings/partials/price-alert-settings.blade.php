@@ -426,15 +426,18 @@
         </div>
 
         {{-- استایل دکمهٔ پیش‌نمایش (کپی هم‌قرارداد از تم) --}}
+        {{-- /۱۸۱ — مقادیر اندازه با تم هم‌قرارداد شد (کوچک ۳۸ / متوسط ۴۸ / بزرگ ۵۸ پیکسل):
+             در تم (فاز ۱۸۱) اندازه به‌صورت متغیر CSS اینلاین روی خود دکمه هم اعمال می‌شود
+             تا مستقل از نسخهٔ CSS هاست قطعاً اعمال شود؛ پیش‌نمایش پنل هم همان اعداد را نشان می‌دهد --}}
         <style>
-            .dt-preview-btn{--dt-pa-radius:10px;--dt-pa-h:48px;--dt-pa-fs:13.5px;
+            .dt-preview-btn{--dt-pa-radius:10px;--dt-pa-h:48px;--dt-pa-fs:14px;
                 display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:var(--dt-pa-h);
                 margin:8px 0 0;padding:0 14px;border:0;border-radius:var(--dt-pa-radius);
                 background:linear-gradient(135deg,var(--dt-pa-bg,#ef394e),var(--dt-pa-bg2,#c8102e));
                 color:#fff;font-size:var(--dt-pa-fs);font-weight:600;cursor:default;box-shadow:0 8px 20px -10px var(--dt-pa-bg,#ef394e)}
             .dt-preview-btn i{font-size:1.3em}
-            .dt-preview-btn--sm{--dt-pa-h:40px;--dt-pa-fs:12.5px}
-            .dt-preview-btn--lg{--dt-pa-h:54px;--dt-pa-fs:14.5px}
+            .dt-preview-btn--sm{--dt-pa-h:38px;--dt-pa-fs:12.5px}
+            .dt-preview-btn--lg{--dt-pa-h:58px;--dt-pa-fs:16px}
             /* حالت شناور داخل ماکِت: عرض خودکار، بدون مارجین */
             .dt-preview-btn--float{width:auto;display:inline-flex;margin:0;padding:0 16px;box-shadow:0 10px 24px -8px rgba(15,23,42,.35)}
         </style>

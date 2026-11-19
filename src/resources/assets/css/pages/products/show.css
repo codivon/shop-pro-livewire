@@ -578,18 +578,17 @@ tr.table-suppliers-row.in-filter.shown {
     display: none;
 }
 
-/* ---------- فاز ۱۷۸ — توگل «بیشتر/کمتر» کوچکِ متنی (مشخصات + توضیحات + نقد) ----------
-   قبلاً دکمهٔ قرصیِ بزرگ بود (padding 7px/16px + پس‌زمینه + بوردر + سایه)؛
-   طبق نمونهٔ کاربر: لینک متنیِ ریز با آیکون کوچک، هم‌ترازِ انتهای سطر (چپ در RTL)
-   و با فاصلهٔ کافی از متنِ بالای خودش.
+/* ---------- فاز ۱۷۹ — توگل «بیشتر/کمتر» کوچکِ متنی (مشخصات + توضیحات + نقد) ----------
+   فاز ۱۷۸ لینک متنی ریز ساخت؛ فاز ۱۷۹ مقادیر دقیقِ کاربر اعمال شد:
+   margin-top: 0 (بدون فاصلهٔ اضافی از متن بالا)، margin-right: 0،
+   برچسب‌ها با فونت ۱۱px و رنگ ‎#4681dd و فاصلهٔ ۳px بین متن و آیکون.
    منطق تعویض برچسب (show-more/show-less با کلاس open) از فاز ۱۷۷ دست‌نخورده ماند. */
 .snr-more-toggle {
     display: flex;
     width: fit-content;
-    /* در RTL یعنی چسبیده به انتهای سطر (چپ) — مثل نمونهٔ ارسالی */
     margin-inline-start: auto;
-    margin-right: auto;
-    margin-top: 12px;
+    margin-right: 0;
+    margin-top: 0px;
     padding: 2px 6px;
     border: 0;
     background: none;
@@ -627,12 +626,15 @@ tr.table-suppliers-row.in-filter.shown {
 }
 
 /* پایه: برچسب «کمتر» پنهان — برای همهٔ توگل‌ها (مشخصات + ماسک‌ها)
-   ترتیب مهم است: اول نمایش spanها، بعد پنهان‌سازی show-less */
+   ترتیب مهم است: اول نمایش spanها، بعد پنهان‌سازی show-less
+   فاز ۱۷۹ — مقادیر دقیق کاربر: gap ۳px، رنگ ‎#4681dd، فونت ۱۱px */
 .snr-more-toggle .show-more,
 .snr-more-toggle .show-less {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
+    color: #4681dd;
+    font-size: 11px;
 }
 
 .snr-more-toggle .show-less,
@@ -656,7 +658,7 @@ tr.table-suppliers-row.in-filter.shown {
 .product-params-more-handler.open {
     display: flex;
     width: fit-content;
-    gap: 4px;
+    gap: 3px;
 }
 
 /* ---------- ماسک توضیح کوتاه زیر ویژگی‌ها ----------
@@ -683,7 +685,9 @@ tr.table-suppliers-row.in-filter.shown {
     position: absolute;
     right: 0;
     left: 0;
-    bottom: 36px;
+    /* فاز ۱۷۹ — با حذف margin-top توگل (~۲۳px بلندتر نمی‌شود)، گرادیان
+       دقیقاً بالای لبهٔ توگل می‌نشیند (قبلاً 36px با فاصلهٔ ۱۲px بود) */
+    bottom: 24px;
     height: 44px;
     background: linear-gradient(rgba(255, 255, 255, 0), #fff);
     pointer-events: none;
@@ -806,8 +810,8 @@ tr.table-suppliers-row.in-filter.shown {
 
 .product-page .p-tabs .is-masked .shadow-box {
     position: absolute;
-    /* فاز ۱۷۸ — بالای توگل کوچک‌شده (دکمهٔ قبلی قرصی و بلندتر بود) */
-    bottom: 36px;
+    /* فاز ۱۷۹ — بالای توگل بدون margin-top (قبلاً 36px با فاصلهٔ ۱۲px بود) */
+    bottom: 24px;
     left: 0;
     right: 0;
     height: 52px;

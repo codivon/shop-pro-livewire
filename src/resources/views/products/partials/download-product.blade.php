@@ -208,7 +208,7 @@
                                                         <li class="product-params-more-handler">
                                                             {{-- فاز ۱۷۸ — هم‌ساخت توگل کوچک صفحهٔ محصول --}}
                                                             <a class="link-border snr-more-toggle" href="">
-                                                                <span class="show-more">موارد بیشتر<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
+                                                                <span class="show-more">موارد بیشتر...<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
                                                                 <span class="show-less">موارد کمتر<i class="bi bi-chevron-up snr-toggle-icon"></i></span>
                                                             </a>
                                                         </li>

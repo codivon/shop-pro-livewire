@@ -66,7 +66,7 @@
                         @if ($product->specialSpecifications()->count() > 5)
                             {{-- فاز ۱۷۸ — توگل کوچک متنی (CSS)؛ آیکون بعد از متن = انتهای سطر مثل نمونه --}}
                             <a class="link-border snr-more-toggle product-params-more-handler" href="">
-                                <span class="show-more">موارد بیشتر<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
+                                <span class="show-more">موارد بیشتر...<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
                                 <span class="show-less">موارد کمتر<i class="bi bi-chevron-up snr-toggle-icon"></i></span>
                             </a>
                         @endif

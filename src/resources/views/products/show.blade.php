@@ -700,7 +700,38 @@
                 'purple' => ['#8b5cf6', '#7c3aed'],
                 'dark'   => ['#334155', '#0f172a'],
             ];
-            [$paBg, $paBg2] = $paColorMap[option('dt_price_alert_button_color', 'red') ?: 'red'] ?? $paColorMap['red'];
+
+            /* /۱۸۲ — رنگ دلخواه (color picker پنل) + رنگ متن دکمه:
+               اگر رنگ = «custom» → از option رنگ دلخواه با استپ دومِ تیره‌شدهٔ خودکار؛
+               رنگ متن به‌صورت --dt-pa-fg روی مودال هم اعمال می‌شود (آیکون/دکمهٔ ارسال) */
+            $paHexSanM = function (string $v, string $fallback): string {
+                $v = trim($v);
+                if ($v === '') return $fallback;
+                if (! str_starts_with($v, '#')) $v = '#' . $v;
+                if (preg_match('/^#([0-9a-fA-F]{3})$/', $v)) {
+                    $v = '#' . $v[1] . $v[1] . $v[2] . $v[2] . $v[3] . $v[3];
+                }
+                return preg_match('/^#[0-9a-fA-F]{6}$/', $v) ? strtolower($v) : $fallback;
+            };
+            $paDarkenM = function (string $hex, float $amt = 0.18): string {
+                $hex = ltrim($hex, '#');
+                if (strlen($hex) === 3) $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+                if (! preg_match('/^[0-9a-fA-F]{6}$/', $hex)) return '#c8102e';
+                $out = '#';
+                for ($i = 0; $i < 3; $i++) {
+                    $out .= str_pad(dechex((int) max(0, min(255, (int) round(hexdec(substr($hex, $i * 2, 2)) * (1 - $amt))))), 2, '0', STR_PAD_LEFT);
+                }
+                return $out;
+            };
+
+            $paColorKey = (string) (option('dt_price_alert_button_color', 'red') ?: 'red');
+            if ($paColorKey === 'custom') {
+                $paBg  = $paHexSanM((string) option('dt_price_alert_button_color_custom', '#ef394e'), '#ef394e');
+                $paBg2 = $paDarkenM($paBg);
+            } else {
+                [$paBg, $paBg2] = $paColorMap[$paColorKey] ?? $paColorMap['red'];
+            }
+            $paFg = $paHexSanM((string) option('dt_price_alert_button_text_color', '#ffffff'), '#ffffff');
 
             /* /۱۸۰ — آیکون دکمه: اگر mdi بود، فونت MDI باید برای «مهمان» هم لود شود؛
                قبلاً materialdesignicons.css فقط برای کاربر وارد‌شده لود می‌شد و
@@ -710,8 +741,9 @@
 
         @push('styles')
             {{-- /۱۸۰ — نسخهٔ کش (?v=2): قبلاً بدون نسخه بود و تغییرات CSS به مرورگر نمی‌رسید
-                 /۱۸۱ — ?v=3: مقادیر اندازهٔ دکمه (sm/md/lg) به‌روز شد + اعمال اینلاین اندازه --}}
-            <link rel="stylesheet" href="{{ theme_asset('css/pages/products/price-alert.css') }}?v=3">
+                 /۱۸۱ — ?v=3: مقادیر اندازهٔ دکمه (sm/md/lg) به‌روز شد + اعمال اینلاین اندازه
+                 /۱۸۲ — ?v=4: پشتیبانی از رنگ متن (--dt-pa-fg) برای دکمه/آیکون/دکمهٔ ارسال مودال --}}
+            <link rel="stylesheet" href="{{ theme_asset('css/pages/products/price-alert.css') }}?v=4">
             @if(str_starts_with($paBtnIcon, 'mdi'))
                 <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css') }}">
             @endif
@@ -722,7 +754,7 @@
                  data-product="{{ $product->id }}"
                  data-user="{{ $paIsUser ? '1' : '0' }}"
                  data-action="{{ route('front.price-alert.store') }}"
-                 style="--dt-pa-bg: {{ $paBg }}; --dt-pa-bg2: {{ $paBg2 }};">
+                 style="--dt-pa-bg: {{ $paBg }}; --dt-pa-bg2: {{ $paBg2 }}; --dt-pa-fg: {{ $paFg }};">
 
                 <button type="button" class="dt-pa-close" aria-label="بستن" title="بستن">&times;</button>
 

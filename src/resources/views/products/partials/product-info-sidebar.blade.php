@@ -16,9 +16,22 @@
                 $paText       = option('dt_price_alert_button_text', 'هشدار کاهش قیمت') ?: 'هشدار کاهش قیمت';
                 $paIcon       = option('dt_price_alert_button_icon', 'mdi mdi-bell-ring-outline') ?: 'mdi mdi-bell-ring-outline';
                 $paColor      = option('dt_price_alert_button_color', 'red') ?: 'red';
-                $paSize       = option('dt_price_alert_button_size', 'md') ?: 'md';
+                $paSize       = (string) (option('dt_price_alert_button_size', 'md') ?: 'md');
+                $paSize       = in_array($paSize, ['sm', 'md', 'lg'], true) ? $paSize : 'md';
                 $paRadius     = (int) (option('dt_price_alert_button_radius', '10') ?: 10);
                 $paPlacement  = option('dt_price_alert_button_placement', 'below-cart') ?: 'below-cart';
+
+                /* /۱۸۱ — اندازهٔ دکمه حالا به‌صورت «متغیر CSS اینلاین» روی خود دکمه اعمال می‌شود:
+                   قبلاً فقط کلاس dt-pa-btn--{size} رندر می‌شد و اثرش به وجود قاعدهٔ متناظر در
+                   price-alert.css هاست وابسته بود؛ برای اطمینان کامل (مستقل از نسخهٔ CSS هاست)
+                   مقادیر ارتفاع/فونت اینلاین می‌شوند که از هر قاعدهٔ استایل‌شیت قوی‌ترند.
+                   اختلاف مراحل هم محسوس‌تر شده: کوچک ۳۸ / متوسط ۴۸ / بزرگ ۵۸ پیکسل. */
+                $paSizeMap    = [
+                    'sm' => ['h' => '38', 'fs' => '12.5'],
+                    'md' => ['h' => '48', 'fs' => '14'],
+                    'lg' => ['h' => '58', 'fs' => '16'],
+                ];
+                $paSizeCss    = $paSizeMap[$paSize];
 
                 // موقعیت دکمهٔ شناور (۹گانه) + سلکتورهای «تگ دلخواه»
                 $paFloatPos   = (string) (option('dt_price_alert_float_pos', 'bottom-right') ?: 'bottom-right');
@@ -35,7 +48,7 @@
                         ->filter()->unique()->take(10)->values()->all();
                 }
 
-                $paBtnHtml    = '<button type="button" id="dt_price_alert_btn" class="dt-pa-btn dt-pa-btn--'.e($paSize).' dt-pa-btn--'.e($paColor).'" style="--dt-pa-radius: '.e((string) $paRadius).'px">'
+                $paBtnHtml    = '<button type="button" id="dt_price_alert_btn" class="dt-pa-btn dt-pa-btn--'.e($paSize).' dt-pa-btn--'.e($paColor).'" style="--dt-pa-radius: '.e((string) $paRadius).'px; --dt-pa-h: '.e($paSizeCss['h']).'px; --dt-pa-fs: '.e($paSizeCss['fs']).'px">'
                     .'<i class="'.e($paIcon).'" aria-hidden="true"></i><span>'.e($paText).'</span></button>';
             @endphp
 

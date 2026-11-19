@@ -709,8 +709,9 @@
         @endphp
 
         @push('styles')
-            {{-- /۱۸۰ — نسخهٔ کش (?v=2): قبلاً بدون نسخه بود و تغییرات CSS به مرورگر نمی‌رسید --}}
-            <link rel="stylesheet" href="{{ theme_asset('css/pages/products/price-alert.css') }}?v=2">
+            {{-- /۱۸۰ — نسخهٔ کش (?v=2): قبلاً بدون نسخه بود و تغییرات CSS به مرورگر نمی‌رسید
+                 /۱۸۱ — ?v=3: مقادیر اندازهٔ دکمه (sm/md/lg) به‌روز شد + اعمال اینلاین اندازه --}}
+            <link rel="stylesheet" href="{{ theme_asset('css/pages/products/price-alert.css') }}?v=3">
             @if(str_starts_with($paBtnIcon, 'mdi'))
                 <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css') }}">
             @endif

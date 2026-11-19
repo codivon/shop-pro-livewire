@@ -16,8 +16,12 @@
 .dt-pa-btn i{font-size:1.35em;line-height:1}
 .dt-pa-btn:hover{transform:translateY(-1px);filter:brightness(1.07);box-shadow:0 12px 26px -12px var(--dt-pa-bg,#ef394e);color:#fff}
 .dt-pa-btn:active{transform:translateY(0) scale(.99)}
-.dt-pa-btn--sm{--dt-pa-h:40px;--dt-pa-fs:13px}
-.dt-pa-btn--lg{--dt-pa-h:54px;--dt-pa-fs:15px}
+/* /۱۸۱ — اندازهٔ دکمه: کلاس‌ها فقط به‌عنوان fallback نگه داشته می‌شوند؛
+   مقدار واقعی ارتفاع/فونت اینلاین (متغیرهای --dt-pa-h/--dt-pa-fs روی خود دکمه)
+   رندر می‌شود تا مستقل از نسخهٔ CSS هاست، تغییر «اندازه» در پنل قطعاً اعمال شود.
+   اختلاف مراحل محسوس‌تر: کوچک ۳۸ / متوسط ۴۸ / بزرگ ۵۸ پیکسل */
+.dt-pa-btn--sm{--dt-pa-h:38px;--dt-pa-fs:12.5px}
+.dt-pa-btn--lg{--dt-pa-h:58px;--dt-pa-fs:16px}
 /* /۱۸۰ — رنگ دکمه از تنظیمات پنل (تب قابلیت‌های فروشگاه):
    قبلاً کلاس dt-pa-btn--{color} رندر می‌شد ولی هیچ قاعدهٔ CSS برایش وجود نداشت
    ⇒ تغییر رنگ در پنل هیچ اثری روی دکمه نداشت (همیشه قرمزِ fallback).

@@ -156,12 +156,12 @@
                         $paPlacement  = option('dt_price_alert_button_placement', 'below-cart') ?: 'below-cart';
 
                         /*
-                        | /۱۸۲ — رنگ دلخواه + رنگ متن + اندازهٔ درصدی
+                        | /۱۸۲ — رنگ دلخواه + رنگ متن + /۱۸۳ — اندازهٔ دلخواه (طول/عرض پیکسلی)
                         | همه به‌صورت «متغیر CSS اینلاین» روی خود دکمه اعمال می‌شوند تا مستقل از
                         | نسخهٔ CSS هاست قطعاً اثر کنند (مثل فاز ۱۸۱ در SaniarTheme):
                         |  - رنگ دلخواه: --dt-pa-bg/--dt-pa-bg2 (استپ دوم = تیره‌شدهٔ خودکار)
                         |  - رنگ متن:   --dt-pa-fg
-                        |  - اندازه:    --dt-pa-h/--dt-pa-fs (پیش‌فرض یا ۴۸/۱۴ × درصد دلخواه)
+                        |  - اندازه:    --dt-pa-h/--dt-pa-fs (پیش‌فرض ۳۸/۴۸/۵۸ یا طول/عرضِ دلخواه پیکسلی /۱۸۳)
                         */
                         $paHexSan = function (string $v, string $fallback): string {
                             $v = trim($v);
@@ -186,9 +186,11 @@
                         $paColorCustom = $paHexSan((string) option('dt_price_alert_button_color_custom', '#ef394e'), '#ef394e');
                         $paTextColor   = $paHexSan((string) option('dt_price_alert_button_text_color', '#ffffff'), '#ffffff');
 
-                        // اندازه: sm/md/lg ثابت — custom بر اساس درصد (۱۰۰٪ = متوسط)
+                        // /۱۸۳ — اندازه: sm/md/lg ثابت — «دلخواه» = طول/عرضِ دستی پیکسلی (هم‌قرارداد با پنل:
+                        // طول ۲۴ تا ۱۵۰ — پیش‌فرض ۴۸؛ فونت = طول × ۱۴/۴۸ با سقف ۲۴؛ عرض ۰ تا ۵۰۰ — صفر = خودکار)
                         $paSize        = in_array($paSize, ['sm', 'md', 'lg', 'custom'], true) ? $paSize : 'md';
-                        $paSizePercent = (int) min(200, max(50, (int) (option('dt_price_alert_button_size_percent', '100') ?: 100)));
+                        $paSizeHeight  = (int) min(150, max(24, (int) (option('dt_price_alert_button_height', '48') ?: 48)));
+                        $paSizeWidth   = (int) min(500, max(0, (int) (option('dt_price_alert_button_width', '0') ?: 0)));
                         $paSizeMap     = [
                             'sm' => ['h' => '38', 'fs' => '12.5'],
                             'md' => ['h' => '48', 'fs' => '14'],
@@ -196,8 +198,8 @@
                         ];
                         $paSizeCss = $paSize === 'custom'
                             ? [
-                                'h'  => (string) max(24, (int) round(48 * $paSizePercent / 100)),
-                                'fs' => (string) max(7, round(14 * $paSizePercent / 100, 1)),
+                                'h'  => (string) $paSizeHeight,
+                                'fs' => (string) max(7, min(24, round($paSizeHeight * 14 / 48, 1))),
                             ]
                             : $paSizeMap[$paSize];
 
@@ -221,14 +223,21 @@
                             '--dt-pa-h: ' . e($paSizeCss['h']) . 'px',
                             '--dt-pa-fs: ' . e($paSizeCss['fs']) . 'px',
                             '--dt-pa-fg: ' . e($paTextColor),
+                            /* /۱۸۳ — رنگ متن (عنوان دکمه) با !important «اینلاین» روی خود دکمه:
+                               هیچ قاعدهٔ CSS هاست (حتی با !important) نمی‌تواند بازنویسیش کند */
+                            'color: ' . e($paTextColor) . ' !important',
                         ];
+                        if ($paSize === 'custom' && $paSizeWidth > 0) {
+                            $paStyleParts[] = 'width: ' . e((string) $paSizeWidth) . 'px; min-width: 0';
+                        }
                         if ($paColor === 'custom') {
                             $paStyleParts[] = '--dt-pa-bg: ' . e($paColorCustom);
                             $paStyleParts[] = '--dt-pa-bg2: ' . e($paDarken($paColorCustom));
                         }
 
                         $paBtnHtml    = '<button type="button" id="dt_price_alert_btn" class="dt-pa-btn dt-pa-btn--'.e($paSize).' dt-pa-btn--'.e($paColor).'" style="'.implode('; ', $paStyleParts).'">'
-                            .'<i class="'.e($paIcon).'" aria-hidden="true"></i><span>'.e($paText).'</span></button>';
+                            .'<i class="'.e($paIcon).'" style="color: '.e($paTextColor).' !important" aria-hidden="true"></i>'
+                            .'<span style="color: '.e($paTextColor).' !important">'.e($paText).'</span></button>';
                     @endphp
 
                     @if($paEnabled && $paPlacement === 'above-cart')

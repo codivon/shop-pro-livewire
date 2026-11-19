@@ -7,7 +7,7 @@
     $paFloatLabels = \App\Livewire\Admin\Settings\Others::FLOAT_POSITION_LABELS;
 
     /*
-    | /۱۸۲ — رنگ دلخواه (color picker) + رنگ متن + درصد اندازه
+    | /۱۸۲ — رنگ دلخواه (color picker) + رنگ متن
     | تیره‌کردن hex برای استپ دوم گرادیان (هم‌رفتار استپ دومِ پالت در تم‌ها)
     */
     $paDarken = function (string $hex, float $amt = 0.18): string {
@@ -36,14 +36,21 @@
     // رنگ متن پیش‌نمایش (پیش‌فرض سفید)
     $paPreviewFg = preg_match('/^#[0-9a-fA-F]{6}$/', $dt_price_alert_button_text_color) ? strtolower($dt_price_alert_button_text_color) : '#ffffff';
 
-    // اندازهٔ پیش‌نمایش: کوچک/متوسط/بزرگ یا درصد دلخواه (۱۰۰٪ = متوسط)
-    $paSizePct = (int) min(200, max(50, (int) $dt_price_alert_button_size_percent ?: 100));
+    /*
+    | /۱۸۳ — اندازهٔ پیش‌نمایش: کوچک/متوسط/بزرگ یا «دلخواه» با طول/عرضِ دستی پیکسلی
+    | هم‌قرارداد با تم‌ها: طول ۲۴ تا ۱۵۰ (پیش‌فرض ۴۸) · فونت = طول × ۱۴/۴۸ با سقف ۲۴ · عرض ۰ تا ۵۰۰ (۰ = خودکار)
+    */
+    $paCustomH = (int) min(150, max(24, (int) $dt_price_alert_button_height ?: 48));
+    $paCustomW = (int) min(500, max(0, (int) $dt_price_alert_button_width ?: 0));
     $paPreviewSize = match ($dt_price_alert_button_size) {
         'sm'     => ['h' => 38, 'fs' => 12.5],
         'lg'     => ['h' => 58, 'fs' => 16],
-        'custom' => ['h' => (int) max(24, round(48 * $paSizePct / 100)), 'fs' => (float) max(7, round(14 * $paSizePct / 100, 1))],
+        'custom' => ['h' => $paCustomH, 'fs' => (float) max(7, min(24, round($paCustomH * 14 / 48, 1)))],
         default  => ['h' => 48, 'fs' => 14],
     };
+
+    // /۱۸۳ — عرضِ دلخواه فقط وقتی اندازه = «دلخواه» و عرض > ۰ (max-width فقط در پیش‌نمایش، تا از کارت بیرون نزند)
+    $paPreviewWStyle = ($dt_price_alert_button_size === 'custom' && $paCustomW > 0) ? 'width: '.$paCustomW.'px; max-width: 100%;' : '';
 
     // استایل مطلقِ پیش‌نمایش دکمهٔ شناور داخل ماکِت صفحه (فیزیکی، هم‌قرارداد با CSS تم)
     $paFloatPreviewStyle = match ($dt_price_alert_float_pos) {
@@ -115,10 +122,10 @@
                         <div class="h-2 w-1/3 rounded-full bg-surface-2 dark:bg-night-3"></div>
                     </div>
                     {{-- دکمهٔ شناور در گوشهٔ انتخابی (انتقال نرم هنگام تغییر) --}}
-                    {{-- /۱۸۲ — اندازه (پیش‌فرض/درصد دلخواه) + رنگ متن به‌صورت اینلاین، مثل تم --}}
+                    {{-- /۱۸۳ — رنگ متن با !important اینلاین + عرض دلخواه، دقیقاً مثل تم --}}
                     <div class="absolute transition-all duration-300" style="{{ $paFloatPreviewStyle }}">
                         <button type="button" tabindex="-1" class="dt-preview-btn dt-preview-btn--float"
-                                style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; --dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}; color: {{ $paPreviewFg }}">
+                                style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; --dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}; color: {{ $paPreviewFg }} !important; {{ $paPreviewWStyle }}">
                             <i class="{{ $dt_price_alert_button_icon }}"></i>
                             <span>{{ $dt_price_alert_button_text }}</span>
                         </button>
@@ -139,7 +146,7 @@
                     @if ($dt_price_alert_button_placement === 'above-cart')
                         <div class="mb-2 flex items-center justify-center" style="--dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}">
                             <button type="button" tabindex="-1" class="dt-preview-btn"
-                                    style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; color: {{ $paPreviewFg }}">
+                                    style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; color: {{ $paPreviewFg }} !important; {{ $paPreviewWStyle }}">
                                 <i class="{{ $dt_price_alert_button_icon }}"></i>
                                 <span>{{ $dt_price_alert_button_text }}</span>
                             </button>
@@ -154,7 +161,7 @@
                     @if ($dt_price_alert_button_placement !== 'above-cart')
                         <div class="flex items-center justify-center" style="--dt-pa-bg: {{ $paPreviewBg }}; --dt-pa-bg2: {{ $paPreviewBg2 }}">
                             <button type="button" tabindex="-1" class="dt-preview-btn"
-                                    style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; color: {{ $paPreviewFg }}">
+                                    style="--dt-pa-radius: {{ $dt_price_alert_button_radius }}px; --dt-pa-h: {{ $paPreviewSize['h'] }}px; --dt-pa-fs: {{ $paPreviewSize['fs'] }}px; color: {{ $paPreviewFg }} !important; {{ $paPreviewWStyle }}">
                                 <i class="{{ $dt_price_alert_button_icon }}"></i>
                                 <span>{{ $dt_price_alert_button_text }}</span>
                             </button>
@@ -255,24 +262,32 @@
                             <option value="sm">کوچک</option>
                             <option value="md">متوسط</option>
                             <option value="lg">بزرگ</option>
-                            {{-- /۱۸۲ — اندازهٔ دلخواه بر اساس درصد --}}
-                            <option value="custom">دلخواه (درصد)</option>
+                            {{-- /۱۸۳ — گزینهٔ «دلخواه»: طول/عرضِ دستی به پیکسل --}}
+                            <option value="custom">دلخواه</option>
                         </select>
 
-                        {{-- /۱۸۲ — درصد اندازهٔ دلخواه: عدد + اسلایدر (۱۰۰٪ = متوسط) --}}
+                        {{-- /۱۸۳ — طول/عرضِ دستی: اینپوت عددی به پیکسل (هم‌قرارداد با تم‌ها) --}}
                         @if ($dt_price_alert_button_size === 'custom')
                             <div class="mt-2" wire:key="pa-size-custom-input">
-                                <div class="mb-1.5 flex items-center justify-between">
-                                    <span class="text-[11px] font-semibold text-ink-2 dark:text-night-ink">درصد اندازه</span>
-                                    <span class="fa-digits rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] font-bold text-ink-2 dark:bg-night-3 dark:text-night-ink">{{ $dt_price_alert_button_size_percent }}٪</span>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="mb-1 block text-[11px] font-semibold text-ink-2 dark:text-night-ink">طول (ارتفاع)</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="number" min="24" max="150" step="1" wire:model.live="dt_price_alert_button_height"
+                                                   class="fa-digits ap-input text-center" aria-label="طول دکمه به پیکسل">
+                                            <span class="text-[10px] text-ink-3 dark:text-night-ink-2">px</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="mb-1 block text-[11px] font-semibold text-ink-2 dark:text-night-ink">عرض</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="number" min="0" max="500" step="1" wire:model.live="dt_price_alert_button_width"
+                                                   class="fa-digits ap-input text-center" aria-label="عرض دکمه به پیکسل">
+                                            <span class="text-[10px] text-ink-3 dark:text-night-ink-2">px</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <input type="range" min="50" max="200" step="5" wire:model.live="dt_price_alert_button_size_percent"
-                                           class="w-full accent-brand-600" aria-label="درصد اندازهٔ دکمه">
-                                    <input type="number" min="50" max="200" step="5" wire:model.live="dt_price_alert_button_size_percent"
-                                           class="fa-digits ap-input !w-20 text-center" aria-label="عدد درصد اندازهٔ دکمه">
-                                </div>
-                                <p class="mt-1 text-[10.5px] text-ink-3 dark:text-night-ink-2">۱۰۰٪ = اندازهٔ متوسط — بازهٔ مجاز ۵۰ تا ۲۰۰</p>
+                                <p class="mt-1 text-[10.5px] leading-5 text-ink-3 dark:text-night-ink-2">طول ۲۴ تا ۱۵۰ پیکسل — عرض ۰ = خودکار (اندازهٔ متن)</p>
                             </div>
                         @endif
                     </div>
@@ -286,7 +301,7 @@
                     </div>
                 </div>
 
-                {{-- /۱۸۲ — رنگ «متنِ» دکمه (پیش‌فرض سفید) --}}
+                {{-- /۱۸۲ — رنگ متن دکمه (پیش‌فرض سفید) — /۱۸۳: در فرانت با !important اینلاین روی دکمه/متن/آیکون قطعی می‌شود --}}
                 <div>
                     <label class="mb-1.5 block text-xs font-semibold">رنگ متن دکمه</label>
                     <div class="flex items-center gap-2">
@@ -479,7 +494,7 @@
                     </button>
 
                     <div class="mx-auto mb-3 flex size-16 items-center justify-center rounded-2xl text-3xl text-white"
-                         style="background: linear-gradient(135deg, {{ $paPreviewBg }}, {{ $paPreviewBg2 }})">
+                         style="background: linear-gradient(135deg, {{ $paPreviewBg }}, {{ $paPreviewBg2 }}); color: {{ $paPreviewFg }} !important">
                         <i class="mdi mdi-bell-ring-outline"></i>
                     </div>
                     <h4 class="mb-2 text-center text-base font-extrabold text-slate-900 dark:text-white">
@@ -519,7 +534,7 @@
                     </div>
 
                     <button type="button" tabindex="-1" class="flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-[13.5px] font-bold text-white"
-                            style="background: linear-gradient(135deg, {{ $paPreviewBg }}, {{ $paPreviewBg2 }})">
+                            style="background: linear-gradient(135deg, {{ $paPreviewBg }}, {{ $paPreviewBg2 }}); color: {{ $paPreviewFg }} !important">
                         <i class="mdi mdi-bell-check"></i>
                         فعال‌سازی هشدار
                     </button>

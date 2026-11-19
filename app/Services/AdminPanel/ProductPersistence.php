@@ -509,7 +509,11 @@ class ProductPersistence
                             'group_ordering' => $group_ordering,
                             'specification_ordering' => $specification_ordering++,
                             'value' => $specification['value'],
-                            'special' => isset($specification['special']) ? true : false,
+                            // فاز ۱۷۷ — رفع باگ «تیک ویژگی اصلی ذخیره نمی‌شد»:
+                            // در فرم Livewire با برداشتن تیک، کلید special با مقدار false
+                            // در آرایه می‌ماند و isset(false) = true بود ⇒ همیشه true
+                            // ذخیره می‌شد. ! empty هر دو حالت را درست می‌کند.
+                            'special' => ! empty($specification['special']),
                         ],
                     ]);
                 }

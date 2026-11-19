@@ -1022,7 +1022,8 @@ class ProductSellerController extends Controller
                             'group_ordering' => $group_ordering,
                             'specification_ordering' => $specification_ordering++,
                             'value' => $specification['value'],
-                            'special' => isset($specification['special']) ? true : false,
+                            // فاز ۱۷۷ — ! empty به‌جای isset (isset(false)=true — باگ ذخیرهٔ تیک)
+                            'special' => ! empty($specification['special']),
                         ],
                     ]);
                 }

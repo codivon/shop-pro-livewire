@@ -786,7 +786,11 @@
                                     </div>
                                     <div class="col-span-1 flex items-center justify-center">
                                         <label title="نمایش ویژه" class="cursor-pointer">
-                                            <input type="checkbox" wire:model="specificationGroup.{{ $gi }}.specifications.{{ $si }}.special" class="size-4 rounded-md border-line text-amber-500 focus:ring-amber-500/30 dark:border-night-line">
+                                            {{-- فاز ۱۷۷ — رفع باگ «ذخیره‌نشدن تیک ویژگی اصلی»: هم‌زمان با
+                                                 اصلاح isset(false) در ProductPersistence، بایند با .live
+                                                 هر تغییر تیک را بلافاصله همگام می‌کند تا در snapshot
+                                                 مقدار قبلی نماند. --}}
+                                            <input type="checkbox" wire:model.live="specificationGroup.{{ $gi }}.specifications.{{ $si }}.special" class="size-4 rounded-md border-line text-amber-500 focus:ring-amber-500/30 dark:border-night-line">
                                         </label>
                                     </div>
                                     <div class="col-span-12 flex justify-end">

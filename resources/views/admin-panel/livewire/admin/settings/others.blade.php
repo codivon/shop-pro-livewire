@@ -13,7 +13,7 @@
             </span>
             <div>
                 <h2 class="text-base font-bold">تنظیمات دیگر</h2>
-                <p class="text-xs text-ink-3 dark:text-night-ink-2">فاکتور، کاربران، تصاویر، Pusher، ایمیل و قابلیت‌های فروشگاه — تنظیمات چندفروشندگی به تب «چندفروشندگی» در برنامه‌نویس منتقل شد</p>
+                <p class="text-xs text-ink-3 dark:text-night-ink-2">فاکتور، کاربران، تصاویر، Pusher، ایمیل، قابلیت‌های فروشگاه و بنر جستجو — تنظیمات چندفروشندگی به تب «چندفروشندگی» در برنامه‌نویس منتقل شد</p>
             </div>
         </div>
     </div>
@@ -57,6 +57,13 @@
                         x-bind:class="tab === 'features' ? 'is-active' : ''">
                     <x-admin-panel::icon name="trending-down" class="size-4" />
                     قابلیت‌های فروشگاه
+                </button>
+                {{-- فاز ۱۷۷ — تب بنر جستجوی هدر --}}
+                <button type="button" class="ap-tab relative whitespace-nowrap" x-on:click="tab = 'searchbanner'"
+                        x-bind:aria-selected="(tab === 'searchbanner').toString()" role="tab"
+                        x-bind:class="tab === 'searchbanner' ? 'is-active' : ''">
+                    <x-admin-panel::icon name="search" class="size-4" />
+                    بنر جستجو
                 </button>
             </div>
 
@@ -314,6 +321,42 @@
                         </div>
                     </div>
                 </section>
+            </div>
+
+            {{-- ============ بنر جستجو (فاز ۱۷۷) ============
+                 بنر پایین پنل جستجوی لحظه‌ای فرانت (زیر جستجوهای اخیر و پرطرفدار).
+                 داده‌شده فقط وقتی نمایش داده می‌شود که «عنوان» پر باشد؛ خالی = بدون بنر --}}
+            <div x-show="tab === 'searchbanner'" x-cloak class="animate-fade-in space-y-5 p-5 sm:p-6">
+                <div class="flex items-start gap-3 rounded-xl border border-line bg-surface-2 p-4 dark:border-night-line dark:bg-night-3">
+                    <span class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/12 dark:text-brand-400">
+                        <x-admin-panel::icon name="search" class="size-4" />
+                    </span>
+                    <p class="text-xs leading-6 text-ink-3 dark:text-night-ink-2">
+                        این بنر در پایین پنل جستجوی لحظه‌ای فروشگاه (زیر «جستجوهای اخیر» و «جستجوهای پرطرفدار») نمایش داده می‌شود.
+                        اگر تصویر تنظیم شود، به‌جای بنر متنی نمایش داده می‌شود؛ خالی بودن عنوان یعنی بنر به‌کلی نمایش داده نمی‌شود.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold">عنوان بنر</label>
+                        <input type="text" wire:model="dt_search_banner_title" class="ap-input" placeholder="مثال: جشنوارهٔ فروش ویژه">
+                        <p class="mt-1.5 text-[11px] text-ink-3 dark:text-night-ink-2">خالی بماند = بنر در پنل جستجو نمایش داده نمی‌شود.</p>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold">زیرعنوان بنر</label>
+                        <input type="text" wire:model="dt_search_banner_subtitle" class="ap-input" placeholder="مثال: تا ۷۰٪ تخفیف">
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold">لینک بنر</label>
+                        <input type="text" dir="ltr" wire:model="dt_search_banner_link" class="ap-input font-mono" placeholder="https://example.com/off">
+                        <p class="mt-1.5 text-[11px] text-ink-3 dark:text-night-ink-2">خالی بماند = لینک به صفحهٔ تخفیف‌ها داده می‌شود.</p>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold">تصویر بنر (اختیاری — آدرس تصویر)</label>
+                        <input type="text" dir="ltr" wire:model="dt_search_banner_image" class="ap-input font-mono" placeholder="/uploads/banner.jpg">
+                        <p class="mt-1.5 text-[11px] text-ink-3 dark:text-night-ink-2">از فایل‌منیجر کپی کنید؛ اگر تنظیم شود به‌جای بنر متنی نمایش داده می‌شود.</p>
+                    </div>
+                </div>
             </div>
 
             {{-- ============ ایمیل ============ --}}

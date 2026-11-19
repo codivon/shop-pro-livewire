@@ -187,6 +187,16 @@ class Others extends Component
 
     public string $dt_pre_order_badge_text = '';
 
+    // فاز ۱۷۷ — بنر جستجوی هدر (پایین پنل جستجوی لحظه‌ای فرانت)
+    // خالی بودن عنوان یعنی بنر نمایش داده نمی‌شود
+    public string $dt_search_banner_title = '';
+
+    public string $dt_search_banner_subtitle = '';
+
+    public string $dt_search_banner_link = '';
+
+    public string $dt_search_banner_image = '';
+
     public function mount(): void
     {
         auth('adminPanel')->user()?->can('settings.others') ?: abort(403);
@@ -258,6 +268,12 @@ class Others extends Component
         $this->dt_pre_order_status = option('dt_pre_order_status', '1') == '1';
         $this->dt_pre_order_button_text = (string) (option('dt_pre_order_button_text') ?: 'ثبت پیش‌فروش');
         $this->dt_pre_order_badge_text = (string) (option('dt_pre_order_badge_text') ?: 'پیش‌فروش');
+
+        // فاز ۱۷۷ — بنر جستجو
+        $this->dt_search_banner_title = (string) option('dt_search_banner_title', '');
+        $this->dt_search_banner_subtitle = (string) option('dt_search_banner_subtitle', '');
+        $this->dt_search_banner_link = (string) option('dt_search_banner_link', '');
+        $this->dt_search_banner_image = (string) option('dt_search_banner_image', '');
     }
 
     /* ---------------- ذخیره (پورت updateOthers) ---------------- */
@@ -367,6 +383,8 @@ class Others extends Component
             'dt_price_alert_button_color', 'dt_price_alert_button_size', 'dt_price_alert_button_radius',
             'dt_price_alert_button_placement', 'dt_price_alert_modal_title', 'dt_price_alert_modal_desc',
             'dt_pre_order_status', 'dt_pre_order_button_text', 'dt_pre_order_badge_text',
+            // فاز ۱۷۷ — بنر جستجو (عنوان خالی = بدون بنر؛ لینک خالی در فرانت به تخفیف‌ها fallback می‌شود)
+            'dt_search_banner_title', 'dt_search_banner_subtitle', 'dt_search_banner_link', 'dt_search_banner_image',
         ];
 
         /*
@@ -556,6 +574,11 @@ class Others extends Component
             'dt_pre_order_status' => 'قابلیت پیش‌فروش محصولات',
             'dt_pre_order_button_text' => 'متن دکمه پیش‌فروش',
             'dt_pre_order_badge_text' => 'متن نشان پیش‌فروش',
+            // فاز ۱۷۷ — بنر جستجو
+            'dt_search_banner_title' => 'عنوان بنر جستجوی هدر',
+            'dt_search_banner_subtitle' => 'زیرعنوان بنر جستجوی هدر',
+            'dt_search_banner_link' => 'لینک بنر جستجوی هدر',
+            'dt_search_banner_image' => 'تصویر بنر جستجوی هدر',
         ];
 
         return $titles[$key] ?? $key;

@@ -742,8 +742,9 @@
         @push('styles')
             {{-- /۱۸۰ — نسخهٔ کش (?v=2): قبلاً بدون نسخه بود و تغییرات CSS به مرورگر نمی‌رسید
                  /۱۸۱ — ?v=3: مقادیر اندازهٔ دکمه (sm/md/lg) به‌روز شد + اعمال اینلاین اندازه
-                 /۱۸۲ — ?v=4: پشتیبانی از رنگ متن (--dt-pa-fg) برای دکمه/آیکون/دکمهٔ ارسال مودال --}}
-            <link rel="stylesheet" href="{{ theme_asset('css/pages/products/price-alert.css') }}?v=4">
+                 /۱۸۲ — ?v=4: پشتیبانی از رنگ متن (--dt-pa-fg) برای دکمه/آیکون/دکمهٔ ارسال مودال
+                 /۱۸۴ — ?v=5: اندازهٔ متناسب (عرض هم با طول مقیاس می‌شود) + چینش راست/وسط/چپ با dt-pa-wrap --}}
+            <link rel="stylesheet" href="{{ theme_asset('css/pages/products/price-alert.css') }}?v=5">
             @if(str_starts_with($paBtnIcon, 'mdi'))
                 <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css') }}">
             @endif

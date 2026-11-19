@@ -72,6 +72,14 @@
                     $paFloatPos = 'bottom-right';
                 }
 
+                /* ۱۸۴ — پوزیشن افقی دکمه در باکس فروش (راست/وسط/چپ):
+                   فقط جاسازی‌های داخل باکس (below/above/under-price)؛ در RTL
+                   right = flex-start · left = flex-end (هم‌قرارداد با پنل) */
+                $paAlign      = (string) (option('dt_price_alert_button_align', 'center') ?: 'center');
+                if (! in_array($paAlign, ['right', 'center', 'left'], true)) {
+                    $paAlign = 'center';
+                }
+
                 $paSelectors  = [];
                 $paSelRaw     = trim((string) option('dt_price_alert_selectors', ''));
                 if ($paSelRaw !== '') {
@@ -104,7 +112,8 @@
             @endphp
 
             @if($paEnabled && $paPlacement === 'above-cart')
-                {!! $paBtnHtml !!}
+                {{-- ۱۸۴ — پوزیشن افقی (راست/وسط/چپ) داخل باکس فروش --}}
+                <div class="dt-pa-wrap dt-pa-wrap--{{ e($paAlign) }}">{!! $paBtnHtml !!}</div>
             @endif
 
             <div class="product-seller-row product-meta-action">
@@ -147,7 +156,7 @@
 
                 @if($paEnabled && $paPlacement !== 'above-cart')
                     @if($paPlacement === 'under-price')
-                        <div class="dt-pa-under-price">{!! $paBtnHtml !!}</div>
+                        <div class="dt-pa-under-price dt-pa-wrap dt-pa-wrap--{{ e($paAlign) }}">{!! $paBtnHtml !!}</div>
                     @elseif($paPlacement === 'float')
                         {{-- دکمهٔ شناور (fixed) در گوشهٔ انتخابی صفحه --}}
                         <div class="dt-pa-float dt-pa-float--{{ e($paFloatPos) }}">{!! $paBtnHtml !!}</div>
@@ -156,7 +165,8 @@
                         <span id="dt_pa_inject_config" data-selectors="{{ json_encode($paSelectors) }}" hidden aria-hidden="true"></span>
                         {!! str_replace('<button type="button" id="dt_price_alert_btn"', '<button type="button" id="dt_price_alert_btn" hidden', $paBtnHtml) !!}
                     @else
-                        <div class="mt-2">{!! $paBtnHtml !!}</div>
+                        {{-- ۱۸۴ — پوزیشن افقی (راست/وسط/چپ) داخل باکس فروش --}}
+                        <div class="mt-2 dt-pa-wrap dt-pa-wrap--{{ e($paAlign) }}">{!! $paBtnHtml !!}</div>
                     @endif
                 @endif
             </div>

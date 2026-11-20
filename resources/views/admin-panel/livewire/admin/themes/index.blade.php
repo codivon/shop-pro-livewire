@@ -101,7 +101,7 @@
                 <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
                     <p class="flex items-start gap-2 rounded-xl bg-sky-50 p-3 text-[11px] leading-5 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400">
                         <x-admin-panel::icon name="info" class="mt-0.5 size-3.5 shrink-0" />
-                        پس از آپلود، قالب استخراج، نصب و فعال می‌شود (dump-autoload، publish و shop:link خودکار اجرا می‌شود).
+                        پس از آپلود، قالب استخراج، نصب و فعال می‌شود و پیش‌نیازهای اعلان‌شدهٔ خودِ قالب (پکیج‌های composer، بیلد، پاک‌سازی کش و…) به‌صورت خودکار اجرا می‌شود و گزارش کامل نمایش داده خواهد شد.
                     </p>
                     <button type="submit" wire:loading.attr="disabled" wire:target="store" class="ap-btn shrink-0 !py-2.5">
                         <span wire:loading.remove wire:target="store" class="flex items-center gap-2">
@@ -173,14 +173,36 @@
                         </div>
                         <p class="mt-2 line-clamp-2 min-h-10 text-xs leading-5 text-ink-3 dark:text-night-ink-2">{{ $theme['config']['demo']['description'] ?? '' }}</p>
 
+                        {{-- فاز ۱۸۶ — بج پیش‌نیازهای اعلان‌شدهٔ خود قالب (از config/setup.php) --}}
+                        @if (! empty($theme['setup']))
+                            <div class="mt-2 flex flex-wrap items-center gap-1.5">
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-ink-3 dark:text-night-ink-2">
+                                    <x-admin-panel::icon name="package-check" class="size-3" />
+                                    پیش‌نیازها:
+                                </span>
+                                @foreach ($theme['setup'] as $requirement)
+                                    <span class="ltr rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] font-semibold text-ink-2 dark:bg-night-3 dark:text-night-ink-2">{{ $requirement }}</span>
+                                @endforeach
+                            </div>
+                        @endif
+
                         @unless ($isActive)
-                            <div class="mt-3.5 flex items-center gap-2 border-t border-line pt-3.5 dark:border-night-line">
+                            <div class="mt-3.5 flex flex-wrap items-center gap-2 border-t border-line pt-3.5 dark:border-night-line">
                                 <button type="button" wire:click="activate({{ \Illuminate\Support\Js::from($theme['name'])->toHtml() }})"
                                         wire:loading.attr="disabled" wire:target="activate"
                                         class="ap-btn !py-2 !text-xs">
                                     <x-admin-panel::icon name="check-circle" class="size-3.5" />
                                     تنظیم به عنوان قالب
                                 </button>
+                                @can('themes.update')
+                                    <button type="button" wire:click="runSetup({{ \Illuminate\Support\Js::from($theme['name'])->toHtml() }})"
+                                            wire:loading.attr="disabled" wire:target="runSetup"
+                                            class="ap-btn-outline !py-2 !text-xs"
+                                            title="اجرا/بررسی پیش‌نیازها و آماده‌سازی این قالب">
+                                        <x-admin-panel::icon name="package-check" class="size-3.5" />
+                                        پیش‌نیازها
+                                    </button>
+                                @endcan
                                 @can('themes.delete')
                                     <button type="button" wire:click="confirmDelete({{ \Illuminate\Support\Js::from($theme['name'])->toHtml() }})"
                                             class="ap-btn-ghost !py-2 !text-xs text-red-600 hover:!bg-red-50 dark:hover:!bg-red-500/10"
@@ -191,9 +213,20 @@
                                 @endcan
                             </div>
                         @else
-                            <div class="mt-3.5 flex items-center gap-2 rounded-xl bg-brand-50/70 px-3 py-2 text-[11px] font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
-                                <x-admin-panel::icon name="check-circle" class="size-3.5 shrink-0" />
-                                این قالب در حال حاضر روی فروشگاه فعال است.
+                            <div class="mt-3.5 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-brand-50/70 px-3 py-2 text-[11px] font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
+                                <span class="inline-flex items-center gap-1.5">
+                                    <x-admin-panel::icon name="check-circle" class="size-3.5 shrink-0" />
+                                    این قالب فعال است.
+                                </span>
+                                @can('themes.update')
+                                    <button type="button" wire:click="runSetup({{ \Illuminate\Support\Js::from($theme['name'])->toHtml() }})"
+                                            wire:loading.attr="disabled" wire:target="runSetup"
+                                            class="ap-btn-outline !py-1.5 !text-[11px]"
+                                            title="اجرا/بررسی پیش‌نیازها و آماده‌سازی این قالب">
+                                        <x-admin-panel::icon name="package-check" class="size-3" />
+                                        اجرای پیش‌نیازها
+                                    </button>
+                                @endcan
                             </div>
                         @endunless
                     </div>
@@ -239,8 +272,75 @@
         </div>
     </div>
 
+    {{-- مودال گزارش پیش‌نیازها و آماده‌سازی قالب (فاز ۱۸۶) --}}
+    <div x-data="{ open: @entangle('showSetupReport').live }"
+         x-show="open" x-cloak
+         class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" x-show="open" x-on:click="open=false" x-transition.opacity aria-hidden="true"></div>
+        <div x-show="open" x-on:click.stop
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+             class="relative flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-pop dark:border-night-line dark:bg-night-2"
+             role="dialog" aria-modal="true" aria-label="گزارش آماده‌سازی قالب">
+            <div class="flex items-center justify-between gap-3 border-b border-line px-5 py-4 dark:border-night-line">
+                <div class="flex items-center gap-3">
+                    <span class="flex size-10 items-center justify-center rounded-2xl bg-linear-to-br from-brand-500 to-brand-700 text-white shadow-md shadow-brand-500/25">
+                        <x-admin-panel::icon name="package-check" class="size-5" />
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold">گزارش آماده‌سازی قالب</h3>
+                        <p class="ltr mt-0.5 text-[11px] text-ink-3 dark:text-night-ink-2">{{ $setupTheme }}</p>
+                    </div>
+                </div>
+                <button type="button" x-on:click="open=false" class="rounded-lg p-1.5 text-ink-3 transition-colors hover:bg-surface-3 dark:hover:bg-night-3" aria-label="بستن">
+                    <x-admin-panel::icon name="x" class="size-4" />
+                </button>
+            </div>
+
+            <div class="max-h-[55vh] flex-1 space-y-2 overflow-y-auto px-5 py-4">
+                @forelse ($setupResults as $step)
+                    @php
+                        $statusMeta = match ($step['status'] ?? 'info') {
+                            'ok'   => ['icon' => 'check-circle-2',  'class' => 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400', 'text' => 'text-ink-2 dark:text-night-ink-1'],
+                            'warn' => ['icon' => 'alert-triangle',  'class' => 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400',   'text' => 'text-ink-2 dark:text-night-ink-1'],
+                            'fail' => ['icon' => 'x',               'class' => 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400',           'text' => 'text-ink-2 dark:text-night-ink-1'],
+                            'skip' => ['icon' => 'check',           'class' => 'bg-surface-2 text-ink-3 dark:bg-night-3 dark:text-night-ink-2',          'text' => 'text-ink-3 dark:text-night-ink-2'],
+                            default => ['icon' => 'info',           'class' => 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400',           'text' => 'text-ink-3 dark:text-night-ink-2'],
+                        };
+                    @endphp
+                    <div class="flex items-start gap-3 rounded-xl border border-line p-3 dark:border-night-line">
+                        <span class="flex size-7 shrink-0 items-center justify-center rounded-lg {{ $statusMeta['class'] }}">
+                            <x-admin-panel::icon name="{{ $statusMeta['icon'] }}" class="size-4" />
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-bold {{ $statusMeta['text'] }}">{{ $step['label'] ?? '' }}</p>
+                            @if (! empty($step['message']))
+                                <p class="mt-0.5 break-words text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">{{ $step['message'] }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <p class="flex items-center gap-2 rounded-xl bg-surface-2 p-3 text-xs text-ink-3 dark:bg-night-3 dark:text-night-ink-2">
+                        <x-admin-panel::icon name="info" class="size-3.5" />
+                        گزارشی برای نمایش نیست — این قالب گام آماده‌سازی خاصی اعلان نکرده است.
+                    </p>
+                @endforelse
+            </div>
+
+            <div class="border-t border-line px-5 py-3.5 dark:border-night-line">
+                <p class="flex items-start gap-2 text-[10.5px] leading-5 text-ink-3 dark:text-night-ink-2">
+                    <x-admin-panel::icon name="info" class="mt-0.5 size-3 shrink-0" />
+                    گام‌ها از فایل <code class="ltr mx-1 rounded bg-surface-3 px-1 py-0.5 font-bold dark:bg-night-3">config/setup.php</code> خودِ قالب خوانده می‌شود؛ قالب‌هایی که این فایل را ندارند فقط دارایی‌ها و کش‌ها را پردازش می‌کنند. اگر پکیجی در این مرحله نصب شد، یک بار صفحه را رفرش کنید.
+                </p>
+                <div class="mt-3 flex justify-end">
+                    <button type="button" x-on:click="open=false" class="ap-btn-outline !py-2 !text-xs">بستن</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- لودینگ --}}
-    <div wire:loading wire:target="activate, delete"
+    <div wire:loading wire:target="activate, delete, runSetup, store"
          class="pointer-events-none fixed bottom-6 start-6 z-[65] flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2.5 shadow-pop dark:border-night-line dark:bg-night-3">
         <svg class="size-4 animate-spin text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round" />

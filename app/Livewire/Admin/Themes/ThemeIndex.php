@@ -22,6 +22,17 @@ class ThemeIndex extends Component
     /** نام قالب در حال حذف (مودال تایید) */
     public ?string $confirmingDelete = null;
 
+    /* ---------------- پیش‌نیازها (فاز ۱۸۶ — Theme-Driven Setup) ---------------- */
+
+    /** گزارش گام‌به‌گام آخرین اجرای آماده‌سازی (نمایش در مودال گزارش) */
+    public array $setupResults = [];
+
+    /** قالبی که گزارشِ پیش‌نیازهایش باز است */
+    public ?string $setupTheme = null;
+
+    /** باز بودن مودال گزارش پیش‌نیازها */
+    public bool $showSetupReport = false;
+
     /* ---------------- آپلود قالب ---------------- */
 
     /** باز بودن کارت آپلود */
@@ -48,6 +59,8 @@ class ThemeIndex extends Component
             $themes[] = [
                 'name'   => $dir,
                 'config' => customConfig(base_path() . '/themes/' . $dir . '/config/general.php'),
+                // فاز ۱۸۶ — خلاصهٔ پیش‌نیازهای اعلان‌شدهٔ خود تم (بج در کارت تم)
+                'setup'  => \App\Services\ThemeSetupRunner::summary($dir),
             ];
         }
 
@@ -149,6 +162,28 @@ class ThemeIndex extends Component
             }
             Artisan::call('shop:link');
 
+            // فاز ۱۸۶ — اطمینان از برقراری لینک دارایی‌ها (idempotent)
+            try {
+                \App\Services\ThemeAssetLinker::linkOrCopy(
+                    base_path("themes/{$newTheme}/src/resources/assets"),
+                    public_path("themes/{$newTheme}")
+                );
+            } catch (Throwable $e) {
+                report($e);
+            }
+
+            // فاز ۱۸۶ — اجرای پیش‌نیازهای اعلان‌شدهٔ خود قالب (Livewire/composer/بیلد/کش…)
+            try {
+                $this->setupTheme      = $newTheme;
+                $this->setupResults    = \App\Services\ThemeSetupRunner::run($newTheme, 'install');
+                $this->showSetupReport = true;
+
+                \App\Services\ThemeSetupRunner::logResults($newTheme, $this->setupResults, 'install');
+            } catch (Throwable $e) {
+                report($e);
+                $this->dispatch('toast', message: 'اجرای پیش‌نیازهای قالب با خطا مواجه شد: ' . $e->getMessage(), type: 'warning');
+            }
+
             $this->reset(['file']);
             $this->showUpload = false;
 
@@ -235,6 +270,20 @@ class ThemeIndex extends Component
             }
         }
 
+        // فاز ۱۸۶ — اجرای پیش‌نیازهای اعلان‌شدهٔ خود قالب (Theme-Driven Setup):
+        // هر قالب config/setup.php خودش را دارد (مثلاً تم سانیار → Livewire 4).
+        // قالب‌های بدون setup.php فقط دارایی‌ها + کش را پردازش می‌کنند.
+        try {
+            $this->setupTheme      = $theme;
+            $this->setupResults    = \App\Services\ThemeSetupRunner::run($theme, 'activate');
+            $this->showSetupReport = true;
+
+            \App\Services\ThemeSetupRunner::logResults($theme, $this->setupResults, 'activate');
+        } catch (Throwable $e) {
+            report($e);
+            $this->dispatch('toast', message: 'اجرای پیش‌نیازهای قالب با خطا مواجه شد: ' . $e->getMessage(), type: 'warning');
+        }
+
         $this->loadThemes();
 
         if ($linkMode === 'copy') {
@@ -243,6 +292,43 @@ class ThemeIndex extends Component
         } else {
             $this->dispatch('toast', message: 'قالب «' . $theme . '» به عنوان قالب فعال تنظیم شد.', type: 'success');
         }
+    }
+
+    /* ---------------- اجرای دستی پیش‌نیازها (فاز ۱۸۶) ---------------- */
+
+    /**
+     * اجرای مجدد آماده‌سازی/پیش‌نیازهای یک قالب از کارت آن قالب.
+     * برای مواقعی که ادمین می‌خواهد مطمئن شود همه‌چیز (پکیج، لینک دارایی، کش) سر جای خودش است.
+     */
+    public function runSetup(string $theme): void
+    {
+        auth('adminPanel')->user()?->can('themes.update') ?: abort(403);
+
+        if (!is_safe_extension_name($theme)) {
+            $this->dispatch('toast', message: 'نام قالب معتبر نیست.', type: 'error');
+            return;
+        }
+
+        if (!Storage::disk('themes')->exists($theme)) {
+            $this->dispatch('toast', message: 'قالب پیدا نشد.', type: 'error');
+            return;
+        }
+
+        $this->setupTheme = $theme;
+
+        try {
+            $this->setupResults = \App\Services\ThemeSetupRunner::run($theme, 'manual');
+            \App\Services\ThemeSetupRunner::logResults($theme, $this->setupResults, 'manual');
+        } catch (Throwable $e) {
+            report($e);
+            $this->setupResults = [
+                ['label' => 'اجرا', 'status' => \App\Services\ThemeSetupRunner::STATUS_FAIL, 'message' => $e->getMessage()],
+            ];
+        }
+
+        $this->loadThemes();
+
+        $this->showSetupReport = true;
     }
 
     /* ---------------- حذف (پورت ۱:۱ destroy قدیمی) ---------------- */

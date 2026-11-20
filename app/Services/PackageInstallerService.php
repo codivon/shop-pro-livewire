@@ -1684,6 +1684,18 @@ class PackageInstallerService
         // ؛ خط بعدی config:clear هم هست.
         change_env('CURRENT_THEME', $themeDirName, false);
         Artisan::call('config:clear');
+
+        // فاز ۱۸۶ — اجرای پیش‌نیازهای اعلان‌شدهٔ خود قالب (Theme-Driven Setup)
+        // (پکیج‌های composer مثل Livewire، بیلد npm، لینک دارایی، پاک‌سازی کش)
+        // غیرمسمّد است: هر خطا فقط لاگ می‌شود و نصب/فعال‌سازی ادامه می‌یابد.
+        try {
+            \App\Services\ThemeSetupRunner::run($themeDirName, 'activate');
+        } catch (Throwable $e) {
+            Log::warning('ThemeSetupRunner failed during marketplace activation', [
+                'theme' => $themeDirName,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /** حذف قالب غیرفعال (قالب فعال اجازه حذف ندارد) */

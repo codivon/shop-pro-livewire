@@ -83,10 +83,9 @@
                                     <div class="pro_gallery">
                                         <ul class="gallery-options icon-product-box">
                                             <li class="icon-product-box-item">
-                                                <button id="add-to-favorites" type="button" class="btn-option btn-option-wishes bg-transparent border-0 p-0 @if($favorite)btn-option-favorites @endif" data-product="{{$product->id}}" data-action="{{route('front.favorites.store')}}" aria-label="افزودن به علاقه‌مندی">
-                                                    <i class="bi bi-heart"></i>
-                                                    <span class="tooltip-short">افزودن به علاقه‌مندی</span>
-                                                </button>
+                                                {{-- فاز ۱۸۵ — دکمهٔ علاقه‌مندی حالا کامپوننت لایووایر ۴ خود تم است؛
+                                                     مهمان به‌جای خطای ۴۰۱ کنسول، به صفحهٔ ورود هدایت می‌شود --}}
+                                                <livewire:saniar-favorites-button :product="$product" />
                                             </li>
 
                                             @if ($similar_products_count)
@@ -842,15 +841,15 @@
 {{-- پوش ez-plus حذف شد: زوم تصویر محصول کاملأ برداشته شده --}}
 
 @push('scripts')
-     <script src="{{theme_asset('js/theia-sticky-sidebar.min.js')}}"></script>
-     <script src="{{ theme_asset('js/vendor/jquery.fancybox.min.js') }}"></script>
-     <script src="{{ theme_asset('js/plugins/apexcharts/apexcharts.js') }}"></script>
+     <script src="{{theme_asset('js/theia-sticky-sidebar.min.js')}}" data-navigate-once></script>
+     <script src="{{ theme_asset('js/vendor/jquery.fancybox.min.js') }}" data-navigate-once></script>
+     <script src="{{ theme_asset('js/plugins/apexcharts/apexcharts.js') }}" data-navigate-once></script>
      @if(option('dt_price_alert_status', '1') == '1')
         {{-- /۱۸۰ — نسخهٔ کش ?v=2 --}}
-        <script src="{{ theme_asset('js/pages/products/price-alert.js') }}?v=2"></script>
+        <script src="{{ theme_asset('js/pages/products/price-alert.js') }}?v=3"></script>
      @endif
-   <script src="{{ theme_asset('js/pages/products/show.js') }}?v=21"></script>
-   <script src="{{ theme_asset('js/pages/comments.js') }}"></script>
+   <script src="{{ theme_asset('js/pages/products/show.js') }}?v=22"></script>
+   <script src="{{ theme_asset('js/pages/comments.js') }}?v=2"></script>
    {{-- منطق لحظه‌ای قیمت + تعویض تصویر گالری (بدون اسکریپت اینلاین) --}}
-   <script src="{{ theme_asset('js/theme-product.js') }}?v=4"></script>
+   <script src="{{ theme_asset('js/theme-product.js') }}?v=5"></script>
 @endpush

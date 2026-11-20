@@ -160,7 +160,8 @@
             var timer = null;
             var controller = null;
 
-            var fetchSuggest = function (term, done) {
+            /* فاز ۱۸۵ — در صورت خطای شبکه/۵۰۲، یک تلاش مجدد بی‌صدا انجام می‌شود */
+            var fetchSuggest = function (term, done, isRetry) {
                 if (controller && controller.abort) { controller.abort(); }
                 if (window.AbortController) { controller = new AbortController(); }
 
@@ -168,9 +169,14 @@
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     signal: controller ? controller.signal : undefined
                 })
-                    .then(function (res) { return res.ok ? res.json() : {}; })
+                    .then(function (res) { return res.ok ? res.json() : Promise.reject(res); })
                     .then(done)
-                    .catch(function () { /* لغو یا خطای شبکه — پنل دست نمی‌خورد */ });
+                    .catch(function () {
+                        /* ۵۰۲/خطای شبکه → یک تلاش مجدد (فقط یک‌بار) */
+                        if (!isRetry) {
+                            window.setTimeout(function () { fetchSuggest(term, done, true); }, 600);
+                        }
+                    });
             };
 
             /* فوکوس / کلیک با ورودی خالی → پنل اخیر + پرطرفدار */
@@ -215,7 +221,20 @@
                 }, SEARCH_DEBOUNCE);
             });
 
-            /* کلیک روی چیپ‌ها → جستجوی همان عبارت */
+            /* کلیک روی چیپ‌ها → جستجوی همان عبارت
+               فاز ۱۸۵ — رفع ۴۰۴ چیپ‌های «جستجوهای پرطرفدار/اخیر»:
+               مقصد فقط از pathname ساخته می‌شود (نه URL مطلقِ اتریبیوت action).
+               اگر میزبان/proxy «action» را با هاست داخلی تولید کرده باشد،
+               ناوبری با هاست داخلی به ۴۰۴ می‌رسید؛ اکنون همیشه روی همان
+               هاست فعلی به /search می‌رود. */
+            var searchPath = (function () {
+                try {
+                    var a = document.createElement('a');
+                    a.href = form.getAttribute('action') || '/search';
+                    return a.pathname || '/search';
+                } catch (e) { return '/search'; }
+            })();
+
             panel.addEventListener('click', function (e) {
                 var chipEl = e.target.closest('.js-sr2-term');
                 if (!chipEl) { return; }
@@ -223,7 +242,7 @@
                 var term = chipEl.getAttribute('data-term') || '';
                 input.value = term;
                 pushRecent(term);
-                window.location.href = form.getAttribute('action') + '?q=' + encodeURIComponent(term);
+                window.location.href = searchPath + '?q=' + encodeURIComponent(term);
             });
 
             /* ذخیرهٔ عبارت هنگام جستجو */
@@ -269,6 +288,10 @@
     } else {
         initHeaderSearch();
     }
+
+    /* فاز ۱۸۵ (SPA) — بعد از هر ناوبری wire:navigate، هدر تازه است؛
+       اتصال‌های هدر (جستجو/کلیدها/نوار ادمین) دوباره برقرار می‌شوند */
+    (window.saniarReinit = window.saniarReinit || []).push(function () { initHeaderSearch(); });
 
     /* =========================================================
        همگام‌سازی سبد خرید پس از افزودن ای‌جکسی
@@ -356,7 +379,8 @@
        ========================================================= */
     function initBackToTop() {
         var btn = document.getElementById('back-to-top');
-        if (!btn) { return; }
+        if (!btn || btn.dataset.spaBound === '1') { return; }
+        btn.dataset.spaBound = '1';
 
         var toggle = function () {
             if (window.pageYOffset > 350) {
@@ -390,7 +414,6 @@
 
             if (toggle.dataset.bound === '1') { return; }
             toggle.dataset.bound = '1';
-
             toggle.addEventListener('click', function () {
                 var root = document.documentElement;
                 var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -473,4 +496,11 @@
         initThemeToggle();
         initAdminNavbarFocusFix();
     }
+
+    /* فاز ۱۸۵ (SPA) — المان‌های این سه سازنده با هر ناوبری عوض می‌شوند */
+    (window.saniarReinit = window.saniarReinit || []).push(function () {
+        initBackToTop();
+        initThemeToggle();
+        initAdminNavbarFocusFix();
+    });
 })();

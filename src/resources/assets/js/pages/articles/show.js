@@ -1,4 +1,7 @@
-$(document).ready(function() {
+/* فاز ۱۸۵ (SPA) — اجرای فوری به‌جای ready؛ بایندهای مستقیم روی DOM تازه
+   هر ناوبری انجام می‌شوند و هندلرهای delegated با namespace می‌شوند */
+(function () {
+    var initArticleShow = function() {
     const player = new Plyr('.articles-video-player');
 
     // لایک کردن مقاله
@@ -264,7 +267,7 @@ $(document).ready(function() {
 
     });
 
-    $(document).on('click', '.action--child.like', function(e) {
+    $(document).off('click.saniarArtLike').on('click.saniarArtLike', '.action--child.like', function(e) {
         e.preventDefault();
 
         let button = $(this);
@@ -326,7 +329,7 @@ $(document).ready(function() {
     });
 
     // دیسلایک کردن کامنت
-    $(document).on('click', '.action--child.dislike', function(e) {
+    $(document).off('click.saniarArtDislike').on('click.saniarArtDislike', '.action--child.dislike', function(e) {
         e.preventDefault();
 
         let button = $(this);
@@ -388,7 +391,7 @@ $(document).ready(function() {
     });
 
     // دیسلایک کردن کامنت
-    $(document).on('click', '.send-answer', function(e) {
+    $(document).off('click.saniarArtAnswer').on('click.saniarArtAnswer', '.send-answer', function(e) {
         e.preventDefault();
 
         let button = $(this);
@@ -401,4 +404,6 @@ $(document).ready(function() {
 
     });
 
-});
+    };
+    if (document.readyState === 'loading') { $(document).ready(initArticleShow); } else { initArticleShow(); }
+})();

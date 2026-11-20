@@ -202,18 +202,25 @@
           همگام‌سازی می‌شود تا برچسب تنوع/موجودی/قیمت با وضعیت سرور
           قفل شود (مثلاً وقتی گروهی انتخاب پیش‌فرض سرور می‌گیرد).
        --------------------------------------------------------- */
-    document.addEventListener('click', function (event) {
-        if (!event.target.closest('.product-info-block .product-attribute')) return;
-        setTimeout(function () { applyVariantPriceInstantly(false); }, 0);
-    }, true);
+    /* فاز ۱۸۵ (SPA) — شنونده‌های سطح document فقط یک‌بار ثبت می‌شوند؛
+       همهٔ آن‌ها در لحظهٔ رویداد از DOM فعلی کوئری می‌گیرند، پس پس از
+       ناوبری هم روی گره‌های تازه درست کار می‌کنند */
+    if (!window.__saniarProductDocBound) {
+        window.__saniarProductDocBound = true;
 
-    if (window.jQuery) {
-        jQuery(document).on('ajaxComplete', function () {
-            /* فقط وقتی جزیرهٔ دادهٔ تنوع‌ها در صفحه هست (صفحهٔ تک‌محصول) */
-            if (document.getElementById('js-product-variants-data')) {
-                applyVariantPriceInstantly(true);
-            }
-        });
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.product-info-block .product-attribute')) return;
+            setTimeout(function () { applyVariantPriceInstantly(false); }, 0);
+        }, true);
+
+        if (window.jQuery) {
+            jQuery(document).on('ajaxComplete', function () {
+                /* فقط وقتی جزیرهٔ دادهٔ تنوع‌ها در صفحه هست (صفحهٔ تک‌محصول) */
+                if (document.getElementById('js-product-variants-data')) {
+                    applyVariantPriceInstantly(true);
+                }
+            });
+        }
     }
 
     /* ---------------------------------------------------------
@@ -264,11 +271,13 @@
     }
 
     /* کلیک روی تاج → پرش اسلایدر اصلی به همان تصویر */
-    document.addEventListener('click', function (event) {
-        var thumb = event.target.closest('.js-gallery-thumb');
-        if (!thumb) return;
+    if (!window.__saniarGalleryThumbBound) {
+        window.__saniarGalleryThumbBound = true;
+        document.addEventListener('click', function (event) {
+            var thumb = event.target.closest('.js-gallery-thumb');
+            if (!thumb) return;
 
-        event.preventDefault();
+            event.preventDefault();
 
         var $thumbs = $('#gallery_01f .js-gallery-thumb');
         if (!$thumbs.length) {
@@ -290,42 +299,50 @@
         if ($main.length && $.fn.owlCarousel) {
             $main.trigger('to.owl.carousel', [index, 300, true]);
         }
-    });
+        });
+    }
 
     /* ---------------------------------------------------------
        ۳) ویجت ستاره‌ای فرم نظر — متن توصیفی کنار ستاره‌ها
        --------------------------------------------------------- */
-    document.addEventListener('change', function (event) {
-        var target = event.target;
-        if (!target || !target.matches('.review-star-rating input[type="radio"]')) return;
+    if (!window.__saniarRatingTextBound) {
+        window.__saniarRatingTextBound = true;
+        document.addEventListener('change', function (event) {
+            var target = event.target;
+            if (!target || !target.matches('.review-star-rating input[type="radio"]')) return;
 
-        var label = document.querySelector('.review-star-rating .review-star[data-value="' + target.value + '"]');
-        var textNode = document.getElementById('review-rating-text');
-        if (textNode) {
-            textNode.textContent = label && label.dataset.text ? label.dataset.text : '';
-        }
-    });
+            var label = document.querySelector('.review-star-rating .review-star[data-value="' + target.value + '"]');
+            var textNode = document.getElementById('review-rating-text');
+            if (textNode) {
+                textNode.textContent = label && label.dataset.text ? label.dataset.text : '';
+            }
+        });
+    }
 
     /* ---------------------------------------------------------
        ۴) کپی شناسه محصول از ردیف فروشنده (tooltip «کپی شناسه محصول»)
        --------------------------------------------------------- */
-    document.addEventListener('click', function (event) {
-        var skuLabel = event.target.closest('.sku-label');
-        if (!skuLabel) return;
+    if (!window.__saniarSkuCopyBound) {
+        window.__saniarSkuCopyBound = true;
+        document.addEventListener('click', function (event) {
+            var skuLabel = event.target.closest('.sku-label');
+            if (!skuLabel) return;
 
-        var valueNode = skuLabel.querySelector('[dir="ltr"]');
-        if (!valueNode || !navigator.clipboard) return;
+            var valueNode = skuLabel.querySelector('[dir="ltr"]');
+            if (!valueNode || !navigator.clipboard) return;
 
-        navigator.clipboard.writeText(valueNode.textContent.trim()).catch(function () {
-            /* سکوت — کپی فقط افزونهٔ راحتی است */
+            navigator.clipboard.writeText(valueNode.textContent.trim()).catch(function () {
+                /* سکوت — کپی فقط افزونهٔ راحتی است */
+            });
         });
-    });
+    }
 
     /* ---------------------------------------------------------
        ۵) جایگزین product-page-init.js — صفحه‌بند نظرات در حالت
           «بدون هیچ نظری» مخفی شود
        --------------------------------------------------------- */
-    document.addEventListener('DOMContentLoaded', function () {
+    /* فاز ۱۸۵ (SPA) — اجرای فوری + بعد از هر ناوبری (DOMContentLoaded دوباره آتش نمی‌شود) */
+    var hideEmptyPager = function () {
         document.querySelectorAll('#Newscomments').forEach(function (container) {
             var hasReviews = container.querySelectorAll('.comments-list .article').length > 0;
             var pager = container.querySelector('.paginationPager');
@@ -333,5 +350,11 @@
                 pager.classList.add('hide');
             }
         });
-    });
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hideEmptyPager);
+    } else {
+        hideEmptyPager();
+    }
+    (window.saniarReinit = window.saniarReinit || []).push(hideEmptyPager);
 })();

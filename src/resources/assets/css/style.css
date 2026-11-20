@@ -1248,6 +1248,42 @@ header{
     margin-top: 4px;
 }
 
+/* فاز ۱۸۵ — زیرمنوهای تو در تو در دراپ‌داون‌های معمولی منو (child-category):
+   هر زیرمنو زیر زیرمنوی پدرش با فاصلهٔ بصری از تیتر پدر جدا می‌شود */
+.top-menu-menu .back-menu li.snr-sub-group,
+.top-menu-menu .sub-menu li.snr-sub-group {
+    display: block;
+    margin: 0;
+    padding: 0 6px;
+}
+
+.top-menu-menu .back-menu li.snr-sub-group > ul.snr-sub-group-list,
+.top-menu-menu .sub-menu li.snr-sub-group > ul.snr-sub-group-list {
+    display: block;
+    margin: 0 2px 6px 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* فاز ۱۸۵ — رپرِ div کامپوننت لایووایر دکمهٔ علاقه‌مندی، شفاف شود تا
+   چیدمان li دکمه‌های گالری مثل قبل بماند */
+.product-page .gallery-options li.icon-product-box-item > div {
+    display: contents;
+}
+
+.top-menu-menu .back-menu li.snr-sub-group > ul.snr-sub-group-list > li > a,
+.top-menu-menu .sub-menu li.snr-sub-group > ul.snr-sub-group-list > li > a {
+    font-size: 12.5px !important;
+    color: var(--text-muted-two);
+    padding: 4px 14px;
+    display: block;
+}
+
+.top-menu-menu .back-menu li.snr-sub-group > ul.snr-sub-group-list > li > a:hover,
+.top-menu-menu .sub-menu li.snr-sub-group > ul.snr-sub-group-list > li > a:hover {
+    color: var(--main-color-one);
+}
+
 /* /////////// end main menu /////////// */
 
 .top-menu-menu ul.level-one {

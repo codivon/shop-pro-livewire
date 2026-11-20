@@ -5,7 +5,8 @@
 (function () {
     'use strict';
 
-    document.addEventListener('DOMContentLoaded', function () {
+    /* فاز ۱۸۵ (SPA) — اجرای فوری به‌جای DOMContentLoaded (دوباره آتش نمی‌شود) */
+    function initSearchTabs() {
         var STORAGE_KEY = 'activeSearchTab';
         var tabButtons = document.querySelectorAll('#searchTab button[data-bs-toggle="tab"]');
 
@@ -37,5 +38,11 @@
                 window.bootstrap.Tab.getOrCreateInstance(button).show();
             }
         });
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSearchTabs);
+    } else {
+        initSearchTabs();
+    }
 })();

@@ -105,5 +105,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ theme_asset('js/pages/articles/index.js') }}"></script>
+    <script src="{{ theme_asset('js/pages/articles/index.js') }}?v=2"></script>
 @endpush

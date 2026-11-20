@@ -162,5 +162,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ theme_asset('js/pages/products/search.js') }}"></script>
+    <script src="{{ theme_asset('js/pages/products/search.js') }}?v=2"></script>
 @endpush

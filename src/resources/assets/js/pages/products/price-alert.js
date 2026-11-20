@@ -36,13 +36,28 @@
     // دلیگیت روی document — بلوک اطلاعات محصول با AJAX جایگزین می‌شود و
     // بایندهای مستقیم می‌میرند ؛ : همهٔ نمونه‌های دکمه
     // (اصلی + شناور + تزریق‌شده با سلکتور) با کلاس مشترک dt-pa-btn
-    document.addEventListener('click', function (e) {
-        var btn = e.target.closest('.dt-pa-btn');
-        if (btn) {
-            e.preventDefault();
-            openModal();
-        }
-    });
+    /* فاز ۱۸۵ (SPA) — شنونده‌های سطح document فقط یک‌بار ثبت می‌شوند ولی
+       overlay «در لحظهٔ رویداد» از DOM فعلی خوانده می‌شود تا بعد از ناوبری
+       هم مودالِ تازه باز شود (کلوژر قدیمی گره destroyed را نمی‌گیرد) */
+    if (!window.__dtPaDocBound) {
+        window.__dtPaDocBound = true;
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('.dt-pa-btn');
+            if (btn) {
+                e.preventDefault();
+                var liveOverlay = document.getElementById('dt_pa_overlay');
+                if (liveOverlay && typeof window.dtPriceAlertOpen === 'function') {
+                    window.dtPriceAlertOpen();
+                }
+            }
+        });
+        document.addEventListener('keydown', function (e) {
+            var liveOverlay = document.getElementById('dt_pa_overlay');
+            if (e.key === 'Escape' && liveOverlay && liveOverlay.classList.contains('is-open') && typeof window.dtPriceAlertClose === 'function') {
+                window.dtPriceAlertClose();
+            }
+        });
+    }
 
     /* ===== تزریق دکمه در تگ دلخواه (سلکتور کلاس/آیدی) ===== */
     function dtPaInject() {
@@ -86,26 +101,23 @@
     }
 
     window.dtPriceAlertInject = dtPaInject;
+    window.dtPriceAlertOpen = openModal;
+    window.dtPriceAlertClose = closeModal;
     dtPaInject();
 
     // بعد از جایگزینی AJAX بلوک product-info (تغییر تنوع)، منبع دکمه تازه
     // از سرور می‌آید؛ تزریق دوباره انجام شود
-    if (window.jQuery) {
+    if (window.jQuery && !window.__dtPaAjaxBound) {
+        window.__dtPaAjaxBound = true;
         window.jQuery(document).ajaxSuccess(function () {
             if (document.getElementById('dt_pa_inject_config')) {
-                window.setTimeout(dtPaInject, 60);
+                window.setTimeout(window.dtPriceAlertInject || dtPaInject, 60);
             }
         });
     }
 
     overlay.addEventListener('click', function (e) {
         if (e.target === overlay || e.target.closest('.dt-pa-close')) {
-            closeModal();
-        }
-    });
-
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && overlay.classList.contains('is-open')) {
             closeModal();
         }
     });

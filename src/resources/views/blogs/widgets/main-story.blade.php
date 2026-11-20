@@ -61,7 +61,7 @@
 
 @push('scripts')
 
-    <script src="{{theme_asset('js/main-story.js')}}"></script>
+    <script src="{{theme_asset('js/main-story.js')}}?v=2"></script>
 
     <div class="modal fade" id="story-modal" tabindex="-1" aria-labelledby="price-changes-modal-label"
          aria-hidden="true">

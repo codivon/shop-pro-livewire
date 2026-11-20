@@ -1,6 +1,17 @@
 $(document).ready(function () {
+    /* فاز ۱۸۵ (SPA) — بایندهای window/document فقط «یک‌بار» ثبت می‌شوند؛
+       بایندهای «المان-سطح» (هدر/فوتر/اسلایدرها) در window.saniarMainRebind
+       قرار گرفتند و بعد از هر ناوبری wire:navigate دوباره اجرا می‌شوند
+       (المان‌های DOM با هر ناوبری تعویض می‌شوند). */
+    $(document).on('click', function (e) {
+        if ($('.dropdown').hasClass('open')) {
+            $('.dropdown').removeClass('open');
+        }
+    });
+
+    window.saniarMainRebind = function () {
     //    resposive-megamenu-mobile------------------
-    $('.dropdown-toggle').on('click', function (e) {
+    $('.dropdown-toggle').off('click.saniarMenu').on('click.saniarMenu', function (e) {
         e.stopPropagation();
         e.preventDefault();
 
@@ -9,12 +20,6 @@ $(document).ready(function () {
             return false;
         }
         self.parent().toggleClass("open");
-    });
-
-    $(document).on('click', function (e) {
-        if ($('.dropdown').hasClass('open')) {
-            $('.dropdown').removeClass('open');
-        }
     });
 
     $('.nav-btn').on('click', function () {
@@ -78,7 +83,7 @@ $(document).ready(function () {
             $(this).parents('.search-box').find('.search-result-list').fadeIn(0);
         }
     });
-    $(document).click(function (e) {
+    $(document).off('click.saniarSearchClose').on('click.saniarSearchClose', function (e) {
         if ($(e.target).is('.search-box *')) return;
         $('.search-result').hide();
         $('.search-box').removeClass('show-result');
@@ -88,7 +93,7 @@ $(document).ready(function () {
     //    SearchResult-----------------------------
 
     //    header fixed-----------------------------
-    $(window).scroll(function () {
+    $(window).off('scroll.saniarFixed').on('scroll.saniarFixed', function () {
         if ($(this).scrollTop() > 60) {
             $('.header-main-page').addClass('fixed');
         } else {
@@ -96,7 +101,11 @@ $(document).ready(function () {
         }
     });
     var lastScrollTop = 0;
-    window.addEventListener('scroll', function () {
+    /* حذف شنوندهٔ قبلی — با هر ناوبری دوباره ثبت نشود */
+    if (window.__saniarNavScrollFn) {
+        window.removeEventListener('scroll', window.__saniarNavScrollFn);
+    }
+    window.__saniarNavScrollFn = function () {
         var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         if (scrollTop > lastScrollTop && !$('.main-menu').hasClass('is-active')) {
             $('.header-main-page .main-menu').addClass('hidden-nav-main');
@@ -106,7 +115,8 @@ $(document).ready(function () {
             $('.header-main-page .main-menu').slideDown(200);
         }
         lastScrollTop = scrollTop;
-    });
+    };
+    window.addEventListener('scroll', window.__saniarNavScrollFn);
     //    header fixed-----------------------------
     // categorylist----------------------------------
     $('.main-menu').on('mouseenter', function () {
@@ -265,7 +275,7 @@ $(document).ready(function () {
     // advantages-----------------------------
 
     //    Scroll---------------------------
-    $(document).on("scroll", function () {
+    $(document).off('scroll.saniarJump').on('scroll.saniarJump', function () {
         var st = $(this).scrollTop();
         if (st > 10) {
             $(".footer-jump-angle").fadeIn(0, "swing");
@@ -274,10 +284,10 @@ $(document).ready(function () {
             $(".footer-jump-angle").fadeOut(0, "swing");
         }
     });
-    $(".footer-jump-angle").on("click", function () {
+    $(".footer-jump-angle").off('click.saniarJumpTop').on("click.saniarJumpTop", function () {
         $("html,body").animate({ scrollTop: "0px" }, 3000, "swing");
     });
-    $(document).scroll(function () {
+    $(document).off('scroll.saniarNavFix').on('scroll.saniarNavFix', function () {
         var scroll = $(document).scrollTop();
 
         if (scroll > 200) {
@@ -290,7 +300,12 @@ $(document).ready(function () {
     //    Scroll---------------------------
 
     //    quantity-selector---------------------------
-    jQuery('<div class="quantity-nav"><div class="quantity-button quantity-up">+</div><div class="quantity-button quantity-down">-</div></div>').insertAfter('.quantity input');
+    /* گارد: ناوِ تزریقی فقط یک‌بار برای هر .quantity ساخته شود */
+    jQuery('.quantity').each(function () {
+        if (jQuery(this).data('saniarQtyNav')) { return; }
+        jQuery(this).data('saniarQtyNav', 1);
+        jQuery('<div class="quantity-nav"><div class="quantity-button quantity-up">+</div><div class="quantity-button quantity-down">-</div></div>').insertAfter(jQuery(this).find('.quantity input'));
+    });
     jQuery('.quantity').each(function () {
         var spinner = jQuery(this),
             input = spinner.find('input[type="number"]'),
@@ -385,7 +400,10 @@ $(document).ready(function () {
     //    verify-phone-number--------------------
 
     // favorites product----------------------
-    $("ul.gallery-options button.btn-option-wishes").on("click", function () {
+    /* فاز ۱۸۵ — دکمهٔ علاقه‌مندی حالا کامپوننت لایووایر است (data-wire-favorites)؛
+       toggle کلاس jQuery فقط برای دکمه‌های غیرلایووایری اجرا می‌شود تا با
+       state سرورِ کامپوننت تداخل نکند */
+    $("ul.gallery-options button.btn-option-wishes").not('[data-wire-favorites]').on("click", function () {
         $(this).toggleClass("btn-option-favorites");
     });
     // favorites product-----------------------
@@ -452,7 +470,7 @@ $(document).ready(function () {
           محصول) هم روی محتوای تازه کار کند.
        ۳) بایند مستقیم قبلی دو تکه بود و checkout.js هم کپی‌اش را داشت —
           همه به همین یک هندلر رسیدند. */
-    $(document).on('click', '.mask-handler', function (e) {
+    $(document).off('click.saniarMask').on('click.saniarMask', '.mask-handler', function (e) {
         e.preventDefault();
         var $handler = $(this);
         var $box = $handler.closest('.is-masked');
@@ -635,6 +653,11 @@ $(document).ready(function () {
             }
         }
     });
+    };
+
+    /* اجرای اولیه + ثبت برای ناوبری SPA */
+    window.saniarMainRebind();
+    (window.saniarReinit = window.saniarReinit || []).push(function () { window.saniarMainRebind(); });
 });
 
 
@@ -896,12 +919,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+/* فاز ۱۸۵ (SPA) — کاروسل‌های سوایپ‌دار به‌صورت تابع سراسری + گارد، تا بعد
+   از هر ناوبری روی کاروسل تازهٔ صفحهٔ اصلی هم مقداردهی شوند؛ بایندهای
+   document با namespace می‌شوند تا دوبار ثبت نشوند */
 $(function () {
     var THRESHOLD = 50; // حداقل فاصله درگ برای تغییر اسلاید
 
-    function initSwipeCarousel($carousel) {
+    window.saniarInitSwipeCarousel = function ($carousel) {
         // اگر این کاروسل روی صفحه وجود ندارد، رد شو
         if (!$carousel.length) return;
+        if ($carousel.data('saniarSwipe')) return;
+        $carousel.data('saniarSwipe', 1);
 
         // مقداردهی اولیه
         $carousel.carousel({
@@ -958,12 +986,14 @@ $(function () {
             e.preventDefault(); // جلوگیری از درگِ خودِ تصویر توسط مرورگر
         });
 
-        $(document).on('mousemove', function (e) {
+        /* بدون off — هندلرهای قدیمی با کلوژرِ کاروسل destroyed دیگر هیچ‌وقت
+           dragging=true نمی‌شوند (no-op)؛ چند کاروسل هم‌زمان هم کار می‌کنند */
+        $(document).on('mousemove.saniarSwipe', function (e) {
             if (!dragging) return;
             deltaX = e.clientX - startX;
         });
 
-        $(document).on('mouseup', function () {
+        $(document).on('mouseup.saniarSwipe', function () {
             if (!dragging) return;
             dragging = false;
             handleSwipe();
@@ -971,6 +1001,12 @@ $(function () {
     }
 
     // ---------- فعال‌سازی هر دو کاروسل ----------
-    initSwipeCarousel($('#mainCarousel'));
-    initSwipeCarousel($('#carouselExampleIndicators'));
+    window.saniarInitSwipeCarousel($('#mainCarousel'));
+    window.saniarInitSwipeCarousel($('#carouselExampleIndicators'));
+
+    /* بعد از هر ناوبری SPA روی کاروسل‌های تازه اجرا شود */
+    (window.saniarReinit = window.saniarReinit || []).push(function () {
+        window.saniarInitSwipeCarousel($('#mainCarousel'));
+        window.saniarInitSwipeCarousel($('#carouselExampleIndicators'));
+    });
 });

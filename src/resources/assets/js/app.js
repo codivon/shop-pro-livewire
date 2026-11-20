@@ -5,6 +5,10 @@
    مقداردهی می‌شدند؛ در نتیجه هر دکمهٔ ناوبری، «همهٔ» اسلایدرهای صفحه را
    جلو می‌برد و با وجود چند اسلایدر در صفحهٔ اصلی، رفتارها قاطی می‌شد.
    حالا هر نمونه فقط گره‌های داخل خودش را کنترل می‌کند.
+
+   فاز ۱۸۵ (SPA): همهٔ مقداردهی‌ها داخل saniarInitSwipers() قرار گرفتند تا
+   بعد از هر ناوبری wire:navigate (رویداد livewire:navigated) هم روی گره‌های
+   تازه اجرا شوند؛ گارد data-swiper-bound مانع مقداردهی دوبارهٔ همان نمونه است.
    ========================================================================= */
 
 /* ساخت نمونهٔ Swiper با گره‌های اسکوپ‌شدهٔ خودِ المنت */
@@ -19,6 +23,9 @@ function saniarSwiper(el, config) {
     if (config.pagination.el) { config.pagination.clickable = true; }
     return new Swiper(el, config);
 }
+
+window.saniarInitSwipers = function () {
+    if (!window.Swiper) { return; }
 
 /* ========= اسلایدر اصلی صفحهٔ اصلی (js-home-slider کلاس شد تا چند
    نمونهٔ main-slider با id یکتا روی یک صفحه مقداردهی شوند) ========= */
@@ -168,3 +175,8 @@ document.querySelectorAll('.free-mode').forEach(function (el) {
         freeMode: true,
     });
 });
+};
+
+/* اجرای اولیه + ثبت برای ناوبری SPA */
+window.saniarInitSwipers();
+(window.saniarReinit = window.saniarReinit || []).push(function () { window.saniarInitSwipers(); });

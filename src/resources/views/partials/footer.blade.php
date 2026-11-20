@@ -116,13 +116,8 @@
                         <a href="{{ route('front.contact.index') }}" class="main-color-one-color"><i
                                 class="bi bi-arrow-left main-color-one-color me-1"></i> اطلاعات بیشتر</a>
 
-                        <form id="newsletter-form" method="post" action="{{ route('front.newsletter.subscribe') }}"
-                              class="footer-newsletter-form mt-3 d-flex gap-2">
-                            @csrf
-                            <input type="text" name="contact" class="form-control rounded-pill border-0"
-                                   placeholder="آدرس ایمیل یا شماره موبایل خود را وارد کنید">
-                            <button class="btn main-color-one-bg rounded-pill border-0" type="submit">ارسال</button>
-                        </form>
+                        {{-- فاز ۱۸۵ — خبرنامهٔ فوتر حالا کامپوننت لایووایر ۴ خود تم است --}}
+                        <livewire:saniar-newsletter-box />
                     </div>
                 </div>
                 <div class="col-lg-3">

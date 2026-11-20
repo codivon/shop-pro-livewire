@@ -50,6 +50,8 @@
     <meta name="saniar-ajax-search" content="{{ route('front.products.index') }}">
     {{-- اندپوینت جستجوی لحظه‌ای پیشرفته (محصولات/دسته‌بندی/برند) --}}
     <meta name="saniar-suggest" content="{{ route('front.products.suggest') }}">
+    {{-- فاز ۱۸۵ — صفحهٔ ورود برای هدایت مهمان‌ها (علاقه‌مندی و …) --}}
+    <meta name="saniar-login" content="{{ route('login') }}">
 
     {{-- Styles --}}
     @stack('befor-styles')
@@ -64,7 +66,7 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=174">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=175">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
@@ -485,49 +487,59 @@
 </script>
 
 {{-- سانیار — اسکریپت‌های تمپلیت (ترتیب دقیق مطابق index.html) --}}
-<script src="{{theme_asset('js/jquery.min.js')}}"></script>
+{{-- فاز ۱۸۵ (SPA) — همهٔ اسکریپت‌های سراسری data-navigate-once دارند:
+     با هر ناوبری wire:navigate دوباره اجرا نمی‌شوند؛ هندلرهای delegated
+     jQuery روی document زنده می‌مانند و اجزای وابسته به DOM با
+     window.saniarReinit (saniar-spa.js) بعد از هر ناوبری مقداردهی می‌شوند --}}
+<script src="{{theme_asset('js/jquery.min.js')}}" data-navigate-once></script>
 @stack('scripts-top-js')
-<script src="{{theme_asset('js/bootstrap.bundle.min.js')}}"></script>
-<script src="{{theme_asset('plugin/waves/waves.min.js')}}"></script>
-<script src="{{theme_asset('plugin/swiper/swiper-bundle.min.js')}}"></script>
-<script src="{{theme_asset('plugin/timer/timer.js')}}"></script>
-<script src="{{theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js')}}"></script>
-<script src="{{theme_asset('js/app.js')}}?v=164"></script>
-<script src="{{theme_asset('js/jquery-app.js')}}?v=4"></script>
+<script src="{{theme_asset('js/bootstrap.bundle.min.js')}}" data-navigate-once></script>
+<script src="{{theme_asset('plugin/waves/waves.min.js')}}" data-navigate-once></script>
+<script src="{{theme_asset('plugin/swiper/swiper-bundle.min.js')}}" data-navigate-once></script>
+<script src="{{theme_asset('plugin/timer/timer.js')}}" data-navigate-once></script>
+<script src="{{theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js')}}" data-navigate-once></script>
+<script src="{{theme_asset('js/app.js')}}?v=165" data-navigate-once></script>
+<script src="{{theme_asset('js/jquery-app.js')}}?v=5" data-navigate-once></script>
 
 {{-- سانیار — پلاگین‌های جانبی تمپلیت --}}
 {{-- پلاگین go-to-top حذف شد؛ دکمهٔ مستطیلی «برگشت به بالا» در theme-header.js --}}
-<script src="{{theme_asset('plugin/rasta-contact/script.js')}}"></script>
-<script src="{{theme_asset('js/saniar-init.js')}}?v=164"></script>
-<script src="{{theme_asset('js/theme-header.js')}}?v=24"></script>
+<script src="{{theme_asset('plugin/rasta-contact/script.js')}}" data-navigate-once></script>
+<script src="{{theme_asset('js/saniar-init.js')}}?v=165" data-navigate-once></script>
+<script src="{{theme_asset('js/theme-header.js')}}?v=25" data-navigate-once></script>
 
 {{-- اسکریپت‌های عملکردی فروشگاه --}}
-<script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}"></script>
-<script src="{{ theme_asset("js/plugins/jquery.blockUI.js") }}"></script>
-<script src="{{ theme_asset("js/plugins/toastr/toastr.min.js") }}"></script>
-<script src="{{ theme_asset('js/vendor/jquery.fancybox.min.js') }}"></script>
-<script src="{{ theme_asset('js/vendor/jquery.lazyloadxt.min.js') }}"></script>
-<script src="{{theme_asset('js/jquery.countdown.min.js')}}"></script>
-<script src="{{theme_asset('js/owl.carousel.min.js')}}"></script>
-<script src="{{ asset('back/assets/js/customToast.js') }}?v=8"></script>
-<script src="{{ theme_asset("js/scripts.js") }}?v=12"></script>
-<script src="{{theme_asset('js/main.js')}}?v=20"></script>
+<script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}" data-navigate-once></script>
+<script src="{{ theme_asset("js/plugins/jquery.blockUI.js") }}" data-navigate-once></script>
+<script src="{{ theme_asset("js/plugins/toastr/toastr.min.js") }}" data-navigate-once></script>
+<script src="{{ theme_asset('js/vendor/jquery.fancybox.min.js') }}" data-navigate-once></script>
+<script src="{{ theme_asset('js/vendor/jquery.lazyloadxt.min.js') }}" data-navigate-once></script>
+<script src="{{theme_asset('js/jquery.countdown.min.js')}}" data-navigate-once></script>
+<script src="{{theme_asset('js/owl.carousel.min.js')}}" data-navigate-once></script>
+<script src="{{ asset('back/assets/js/customToast.js') }}?v=8" data-navigate-once></script>
+<script src="{{ theme_asset("js/scripts.js") }}?v=12" data-navigate-once></script>
+<script src="{{theme_asset('js/main.js')}}?v=20" data-navigate-once></script>
 @stack('scripts')
 
 {!! option('info_scripts') !!}
 
+{{-- فاز ۱۸۵ — اسکریپت‌های لایووایر (پیش از موتور SPA تم) --}}
+<livewire:scripts />
+
+{{-- موتور SPA تم سانیار (wire:navigate) — باید بعد از livewire:scripts باشد --}}
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=1" data-navigate-once></script>
+
 @if(session('toast-success'))
-    <script>
+    <script data-navigate-once>
         showCustomToast('{{session('toast-success')}}','success');
     </script>
 @endif
 @if(session('toast-error'))
-    <script>
+    <script data-navigate-once>
         showCustomToast('{{session('toast-error')}}','error');
     </script>
 @endif
 @if(session('toast-warning'))
-    <script>
+    <script data-navigate-once>
         showCustomToast('{{session('toast-warning')}}','warning');
     </script>
 @endif

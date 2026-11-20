@@ -2,11 +2,12 @@
    به adminPanel تغییر می‌کند → ادمین وارد شاخه می‌شد ولی auth('web')->user() null بود و صفحه ۵۰۰ می‌داد --}}
 @if(auth('web')->check())
     {{-- خودمیزبانی pusher.min.js: js.pusher.com روی IPهای ایران کند است --}}
-    <script src="{{ asset('vendor/pusher/pusher.min.js') }}"></script>
+    {{-- فاز ۱۸۵ (SPA) — کتابخانه‌های سراسری با data-navigate-once: یک‌بار لود می‌شوند --}}
+    <script src="{{ asset('vendor/pusher/pusher.min.js') }}" data-navigate-once></script>
     <audio id="alert-sound" src="{{ asset('back/app-assets/sounds/notification.ogg') }}" preload="auto"></audio>
 
     {{-- خودمیزبانی jquery.qrcode: cdnjs کند روی IP ایران --}}
-    <script src="{{ asset('vendor/jquery-qrcode/jquery.qrcode.min.js') }}"></script>
+    <script src="{{ asset('vendor/jquery-qrcode/jquery.qrcode.min.js') }}" data-navigate-once></script>
 
     {{-- استایل و منطق پاپ‌آپ در فایل‌های جدا (بدون inline) --}}
     <link rel="stylesheet" href="{{ theme_asset('css/notifications-popup.css') }}">

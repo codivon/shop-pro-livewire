@@ -13,7 +13,9 @@
             @switch($childMenu->type)
                 @case('category')
                     {{-- data-cat-image: تصویر پس‌زمینهٔ دسته برای نمایش پایین-چپ پنل فرعی --}}
-                    <li class="main-menu-sub-active-li" @if(!empty($childMenu->category->background_image) || !empty($childMenu->category->image)) data-cat-image="{{ asset($childMenu->category->background_image ?: $childMenu->category->image) }}" @endif>
+                    {{-- فاز ۱۸۵ — کلاس main-menu-sub-active-li «هنگام لود» روی هیچ ردیفی
+                         نباید باشد؛ فقط با هاور (jquery-app.js) ردیف فعال هایلایت می‌شود --}}
+                    <li @if(!empty($childMenu->category->background_image) || !empty($childMenu->category->image)) data-cat-image="{{ asset($childMenu->category->background_image ?: $childMenu->category->image) }}" @endif>
                         <a href="{{ $childMenu->category->link }}">{{ $childMenu->title ?: $childMenu->category->title }}{!! menu_icon($childMenu->category->icon) !!}</a>
                         {{-- محتوای این ul در پنل ثابت snr-mega-flyout کپی می‌شود (jquery-app.js) --}}
                         <ul class="main-menu-sub back-menu">
@@ -67,7 +69,7 @@
                             <a href="{{ $childMenu->link ?: '#' }}">{{ $childMenu->title }}{!! menu_icon($childMenu->icon) !!}</a>
                         </li>
                     @else
-                        <li class="main-menu-sub-active-li">
+                        <li>
                             <a href="{{ $childMenu->link ?: '#' }}">{{ $childMenu->title }}{!! menu_icon($childMenu->icon) !!}</a>
                             <ul class="main-menu-sub back-menu">
                                 @foreach ($childMenu->childrenmenus as $childMenu2)

@@ -5,8 +5,9 @@
 (function ($) {
     'use strict';
 
-    // ---------- ارسال فرم فیلتر ----------
-    $(document).on('submit', '.products-filter-form', function (e) {
+    /* فاز ۱۸۵ (SPA) — همهٔ بایندها با namespace سانیار؛ با هر اجرای دوبارهٔ
+       اسکریپت (بعد از ناوبری) هندلر قبلی همان namespace برداشته می‌شود */
+    $(document).off('submit.saniarCat').on('submit.saniarCat', '.products-filter-form', function (e) {
         e.preventDefault();
 
         var formData = new FormData(this);
@@ -24,12 +25,12 @@
     });
 
     // ---------- ارسال خودکار با تغییر ورودی‌های فیلتر ----------
-    $(document).on('change', '.products-filter-form input', function () {
+    $(document).off('change.saniarFilter').on('change.saniarFilter', '.products-filter-form input', function () {
         $(this).closest('form').trigger('submit');
     });
 
     // ---------- مرتب‌سازی ----------
-    $(document).on('change', '.category-sort input[name="sort_type"]', function () {
+    $(document).off('change.saniarSort').on('change.saniarSort', '.category-sort input[name="sort_type"]', function () {
         var listWrapper = $('#category-products-div');
         if (!listWrapper.length) {
             return;
@@ -44,7 +45,7 @@
     });
 
     // ---------- سازگاری با تب‌های مرتب‌سازی قدیمی (صفحه فروشنده) ----------
-    $(document).on('click', '.products-list-sort-type .ah-tab-item[data-sort]', function () {
+    $(document).off('click.saniarSortTab').on('click.saniarSortTab', '.products-list-sort-type .ah-tab-item[data-sort]', function () {
         if ($(this).attr('data-ah-tab-active') === 'true') {
             return false;
         }
@@ -92,24 +93,25 @@
     }
 
     // ---------- صفحه‌بندی ایجکس ----------
-    $(document).on('click', '#category-products-div .pagination a', function (e) {
+    $(document).off('click.saniarCatPage').on('click.saniarCatPage', '#category-products-div .pagination a', function (e) {
         e.preventDefault();
         reloadProductsList($(this).attr('href'));
     });
 
-    $(window).on('popstate', function () {
+    $(window).off('popstate.saniarCat').on('popstate.saniarCat', function () {
         location.reload();
     });
 
     // ---------- انتخاب ویژگی → فعال شدن «فقط کالاهای موجود» ----------
-    $(document).on('change', '.attribute_group_input', function () {
+    $(document).off('change.saniarAttr').on('change.saniarAttr', '.attribute_group_input', function () {
         if ($(this).prop('checked')) {
             $('.in_stock').prop('checked', true);
         }
     });
 
     // ---------- نوار بازه قیمت (noUiSlider سانیار) ----------
-    $(document).ready(function () {
+    /* فاز ۱۸۵ (SPA) — اجرای فوری به‌جای ready */
+    var initPriceSliders = function () {
         document.querySelectorAll('.js-price-slider').forEach(function (box) {
             if (typeof noUiSlider === 'undefined') {
                 return;
@@ -203,5 +205,6 @@
                 $('.price_filter').prop('checked', true);
             });
         }
-    });
+    };
+    if (document.readyState === 'loading') { $(document).ready(initPriceSliders); } else { initPriceSliders(); }
 })(jQuery);

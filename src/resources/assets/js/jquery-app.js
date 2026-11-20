@@ -79,7 +79,14 @@ $(function () {
 
         var panel = $(this).children('ul.main-menu').get(0);
         var firstRow = panel ? panel.querySelector(':scope > li') : null;
-        if (firstRow) { showMegaFlyoutRow(panel, firstRow); }
+        if (firstRow) {
+            /* فاز ۱۸۵ — ردیف اول هم «هایلایت» می‌شود تا با محتوای پنل فرعی
+               (که همان ردیف اول است) هم‌خوان باشد؛ قبلاً پنل باز می‌شد ولی
+               هیچ ردیفی هایلایت نداشت */
+            $(panel).children('li').removeClass('main-menu-sub-active-li');
+            $(firstRow).addClass('main-menu-sub-active-li');
+            showMegaFlyoutRow(panel, firstRow);
+        }
     })
     $(document).on('mouseleave', '.top-menu-menu .main-menu-head', function () {
         $(this).children().removeClass('active');
@@ -122,12 +129,22 @@ $(function () {
        TouchSpin با markup خودش input-group تزریق می‌کند و ظاهر سایدبار
        پس از رفرش صفحه به‌هم می‌ریزد و دکمه‌های +/− ای‌جکسی آن از کار
        می‌افتند. شمارندهٔ سبد کشویی منطق اختصاصی خودش را دارد (main.js). */
-    $("input[name='count']").not('.js-mini-qty').not('.cart-canvas input').TouchSpin({
-        min: 1,
-        max: '1000000000000000',
-        buttondown_class: "btn-counter waves-effect waves-light",
-        buttonup_class: "btn-counter waves-effect waves-light"
-    });
+    /* فاز ۱۸۵ — TouchSpin باید بعد از هر ناوبری SPA هم روی inputهای تازه
+       اجرا شود؛ به‌صورت تابع قابل-فراخوانی + گارد per-element.
+       (saniar-spa.js بعد از هر livewire:navigated آن را صدا می‌زند) */
+    window.saniarTouchSpinInit = function () {
+        if (!$.fn.TouchSpin) { return; }
+        $("input[name='count']").not('.js-mini-qty').not('.cart-canvas input').not('[data-touchspin-bound]').each(function () {
+            this.setAttribute('data-touchspin-bound', '1');
+            $(this).TouchSpin({
+                min: 1,
+                max: '1000000000000000',
+                buttondown_class: "btn-counter waves-effect waves-light",
+                buttonup_class: "btn-counter waves-effect waves-light"
+            });
+        });
+    };
+    window.saniarTouchSpinInit();
  
     ///انتخاب گر رنگ
     $(".category-sort .form-checks .form-check").click(function () {

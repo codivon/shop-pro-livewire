@@ -15,7 +15,7 @@ $(document).ready(function () {
     writeColorsName();
 
 
-    $('#CommentsTab .filter-items.nav.nav-tabs li.nav-item').click(function () {
+    $('#CommentsTab .filter-items.nav.nav-tabs li.nav-item').off('click.saniarCmtSort').on('click.saniarCmtSort', function () {
         var GetSortComment= $(this).attr('data-id');
         $('input[name=sortComment]').val(GetSortComment);
         fetch_comments_products(1);
@@ -100,7 +100,10 @@ $(document).ready(function () {
 
 });
 
-$(document).on('click', '.add-to-cart', function () {
+/* فاز ۱۸۵ (SPA) — اسکریپت صفحه با هر ناوبری دوباره اجرا می‌شود؛
+   بلاک‌های ready با اجرای فوری جایگزین شدند و هندلرهای delegated
+   با namespace می‌شوند تا دوبار bind نشوند */
+$(document).off('click.saniarAddToCart').on('click.saniarAddToCart', '.add-to-cart', function () {
     var btn = this;
     var groups = [];
 
@@ -146,7 +149,7 @@ $(document).on('click', '.add-to-cart', function () {
 
 // binding های delegated: بعد از جایگزینی AJAX بلوک product-info (تغییر ویژگی/تنوع)
 // المنت‌ها از نو ساخته می‌شوند؛ binding مستقیم می‌میرد و دکمه کار نمی‌کند.
-$(document).on('click', '#stock_notify_btn', function () {
+$(document).off('click.saniarStockNotifyBtn').on('click.saniarStockNotifyBtn', '#stock_notify_btn', function () {
     var btn = this;
 
     if ($(btn).data('user')) {
@@ -191,7 +194,7 @@ function sendStockNotify() {
     });
 }
 
-$(document).on('click', '#sendStockNotifyBtn', sendStockNotify);
+$(document).off('click.saniarSendStockNotify').on('click.saniarSendStockNotify', '#sendStockNotifyBtn', sendStockNotify);
 
 /*
  * منطق «هشدار کاهش قیمت» از این فایل به show.blade.php منتقل شد
@@ -203,7 +206,8 @@ $(document).on('click', '#sendStockNotifyBtn', sendStockNotify);
 // product prices js codes
 
 //-------------------------- Add to favorites
-$(document).on('click', '#add-to-favorites', function () {
+/* فاز ۱۸۵ — علاقه‌مندی: مهمان → پیغام + هدایت به صفحه ورود (به‌جای خطای خام ۴۰۱ کنسول) */
+$(document).off('click.saniarFavorites').on('click.saniarFavorites', '#add-to-favorites', function () {
     var btn = this;
 
     $.ajax({
@@ -229,6 +233,23 @@ $(document).on('click', '#add-to-favorites', function () {
             );
             block('#add-to-favorites');
         },
+        /* فاز ۱۸۵ — مهمان: پاسخ ۴۰۱ خام سرعت مودال خطا ندارد؛ پیغام واضح
+           + هدایت به صفحهٔ ورود (window.showCustomToast ممکن است لود نشده باشد → fallback) */
+        error: function (xhr) {
+            if (xhr && xhr.status === 401) {
+                if (typeof showCustomToast === 'function') {
+                    showCustomToast('برای افزودن به علاقه‌مندی ابتدا وارد حساب کاربری خود شوید', 'warning');
+                } else {
+                    window.alert('برای افزودن به علاقه‌مندی ابتدا وارد حساب کاربری خود شوید');
+                }
+                var loginUrl = $('meta[name="saniar-login"]').attr('content') || String(BASE_URL || '/').replace(/\/+$/, '') + '/login';
+                window.setTimeout(function () { window.location.href = loginUrl; }, 900);
+                return;
+            }
+            if (typeof showCustomToast === 'function') {
+                showCustomToast('خطایی رخ داده است؛ دوباره تلاش کنید', 'error');
+            }
+        },
         complete: function () {
             unblock('#add-to-favorites');
         }
@@ -236,9 +257,13 @@ $(document).on('click', '#add-to-favorites', function () {
 });
 
 //-------------------------- tabs
-$(document).ready(function () {
-    $('.tabs-product-info .ah-tab-item:first').trigger('click');
-});
+/* فاز ۱۸۵ (SPA) — ready فقط یک‌بار آتش می‌شود؛ اجرای فوری جایگزین شد */
+(function () {
+    var initTabsTrigger = function () {
+        $('.tabs-product-info .ah-tab-item:first').trigger('click');
+    };
+    if (document.readyState === 'loading') { $(document).ready(initTabsTrigger); } else { initTabsTrigger(); }
+})();
 
 $('#price-changes-modal').on('show.bs.modal', function (e) {
     if (!$(this).find('.chart-prices-label label.active').length) {
@@ -435,7 +460,9 @@ function renderPriceChart(discountPrices, realPrices, discounts, categories) {
 
 // product review js codes
 
-$(document).ready(function () {
+/* فاز ۱۸۵ (SPA) — اجرای فوری به‌جای ready (با هر ناوبری روی DOM تازه اجرا می‌شود) */
+(function () {
+    var initReviewInputs = function () {
     var inputs = $('#advantage-input, #disadvantage-input');
     var inputChangeCallback = function () {
         var self = $(this);
@@ -656,7 +683,9 @@ $(document).ready(function () {
             }
         });
     });
-});
+    };
+    if (document.readyState === 'loading') { $(document).ready(initReviewInputs); } else { initReviewInputs(); }
+})();
 
 $('.copy-text-btn').on('click', function () {
     var copyText = document.getElementById('shareLink');
@@ -732,7 +761,7 @@ if (initialStoresCount > 0) {
     $('.count_stores').html('0');
 }
 
-$(document).on('click', '.product-attribute:not(.unavailable)', function () {
+$(document).off('click.saniarProductAttribute').on('click.saniarProductAttribute', '.product-attribute:not(.unavailable)', function () {
     var input = $(this).find('input');
     var product = input.data('product');
     var groups = [];
@@ -1001,17 +1030,21 @@ function showStores() {
 }
 
 // بارگذاری اولیه - اگر رنگ پیش‌فرض وجود داشت، فروشندگان آن را بارگذاری کن
-$(document).ready(function() {
-    var checkedColor = $('.variant-selector:checked').first();
-    if (checkedColor.length) {
-        setTimeout(function() {
-            updateStoresByColor();
-        }, 500);
-    } else {
-        // اگر رنگی انتخاب نشده بود، خط فروشندگان رو مخفی کن
-        $('#seller-count-row').hide();
-    }
-});
+/* فاز ۱۸۵ (SPA) — اجرای فوری به‌جای ready */
+(function () {
+    var initVariantDefaults = function () {
+        var checkedColor = $('.variant-selector:checked').first();
+        if (checkedColor.length) {
+            setTimeout(function() {
+                updateStoresByColor();
+            }, 500);
+        } else {
+            // اگر رنگی انتخاب نشده بود، خط فروشندگان رو مخفی کن
+            $('#seller-count-row').hide();
+        }
+    };
+    if (document.readyState === 'loading') { $(document).ready(initVariantDefaults); } else { initVariantDefaults(); }
+})();
 
 // تزریق استایل اسکلتون حذف شد (لودینگ تغییر تنوع برداشته شد)
 
@@ -1037,7 +1070,7 @@ function activateProductTab($box, index) {
 }
 
 // کلیک روی تب‌های مشخصات کلی/فنی/نظرات/پرسش و پاسخ
-$(document).on('click', '.p-tabs .box-tabs .box-tabs-tab', function (e) {
+$(document).off('click.saniarProductTabs').on('click.saniarProductTabs', '.p-tabs .box-tabs .box-tabs-tab', function (e) {
     e.preventDefault();
     var $li = $(this);
     var index = $li.parent('.box-tabs').children('.box-tabs-tab').index($li);
@@ -1045,7 +1078,7 @@ $(document).on('click', '.p-tabs .box-tabs .box-tabs-tab', function (e) {
 });
 
 // دکمه‌های «X دیدگاه» / «X پرسش و پاسخ» بالای صفحه — پرش به تب مربوطه
-$(document).on('click', '[data-activate-tab]', function (e) {
+$(document).off('click.saniarActivateTab').on('click.saniarActivateTab', '[data-activate-tab]', function (e) {
     e.preventDefault();
     var name = $(this).data('activate-tab');
     var $box = $('.p-tabs').first();
@@ -1070,7 +1103,7 @@ $(document).on('click', '[data-activate-tab]', function (e) {
 // هم‌خوان نبود (‎.product-params-more-handler a روی خودِ <a> بایند
 // می‌شد نه فرزندش)؛ این‌جا delegated و اسکوپ‌شده بایند می‌شود.
 // فاز ۱۷۸ — صفحهٔ محصولِ دانلودی هم پوشش داده شد (کانتینر .product-params).
-$(document).on('click', '.product-params-more-handler', function (e) {
+$(document).off('click.saniarParamsMore').on('click.saniarParamsMore', '.product-params-more-handler', function (e) {
     e.preventDefault();
     var $handler = $(this);
     var $items = $handler.closest('.product-meta-feature-items, .product-params').find('.product-params-more');

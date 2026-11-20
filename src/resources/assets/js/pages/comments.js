@@ -74,8 +74,9 @@ $('.comment-replay-to a').click(function(e) {
     $('#comments-form input[name="comment_id"]').val('');
     $('.comment-replay-to').hide();
 })
-$(document).ready(function () {
-
+/* فاز ۱۸۵ (SPA) — اجرای فوری به‌جای ready؛ بایندها روی DOM تازهٔ هر ناوبری انجام می‌شوند */
+(function () {
+    var initQuestions = function () {
     $('.js-faq-container .filter-items.nav.nav-tabs li.nav-item').click(function () {
         var GetSortComment= $(this).attr('data-id');
         $('input[name=sortQuestions]').val(GetSortComment);
@@ -177,4 +178,6 @@ $(document).ready(function () {
         });
 
     }
-});
+    };
+    if (document.readyState === 'loading') { $(document).ready(initQuestions); } else { initQuestions(); }
+})();

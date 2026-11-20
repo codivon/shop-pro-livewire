@@ -1,4 +1,7 @@
-$(document).ready(function() {
+/* فاز ۱۸۵ (SPA) — اجرای فوری به‌جای ready؛ هندلر delegated با namespace؛
+   popstate فقط یک‌بار ثبت می‌شود (در لحظهٔ رویداد از URL فعلی می‌خواند) */
+(function () {
+    var initArticlesIndex = function() {
     let isLoading = false;
 
     // تابع دریافت پارامترها از URL
@@ -114,7 +117,7 @@ $(document).ready(function() {
     });
 
     // رویداد کلیک روی صفحه‌بندی
-    $(document).on('click', '.pagination a', function(e) {
+    $(document).off('click.saniarArtPage').on('click.saniarArtPage', '.pagination a', function(e) {
         e.preventDefault();
         let href = $(this).attr('href');
         let pageMatch = href.match(/[?&]page=(\d+)/);
@@ -126,8 +129,14 @@ $(document).ready(function() {
     });
 
     // بازگشت به صفحه قبل با دکمه back/forward
-    window.addEventListener('popstate', function() {
-        let filters = getFiltersFromUrl();
-        loadArticles(filters, false);
-    });
-});
+    if (!window.__saniarArtPopstateBound) {
+        window.__saniarArtPopstateBound = true;
+        window.addEventListener('popstate', function() {
+            if (!document.querySelector('.articles-index-page')) { return; }
+            let filters = getFiltersFromUrl();
+            loadArticles(filters, false);
+        });
+    }
+    };
+    if (document.readyState === 'loading') { $(document).ready(initArticlesIndex); } else { initArticlesIndex(); }
+})();

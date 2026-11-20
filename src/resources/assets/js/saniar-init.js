@@ -6,7 +6,9 @@
 (function () {
     'use strict';
 
-    document.addEventListener('DOMContentLoaded', function () {
+    /* فاز ۱۸۵ (SPA) — مقداردهی‌ها تابع قابل-فراخوانی شدند تا بعد از هر
+       ناوبری wire:navigate هم روی گره‌های تازه اجرا شوند */
+    window.saniarTemplateInit = function () {
 
         // ---------- اسلایدر «اسلایدر و دو بنر کناری» ----------
         // مقداردهی مستقل برای هر نمونه با گره‌های خودِ همان اسلایدر تا اگر چند
@@ -56,13 +58,16 @@
             return;
         }
 
-        var style = document.createElement('style');
-        style.textContent =
-            '[data-ap-outline]{animation:apWidgetPulse 1.6s ease-in-out infinite}' +
-            '@keyframes apWidgetPulse{0%,100%{outline-color:rgba(245,158,11,.95);outline-offset:4px}' +
-            '50%{outline-color:rgba(245,158,11,.35);outline-offset:9px}}' +
-            '.ap-widget-guide{outline:1px dashed rgba(148,163,184,.8)!important;outline-offset:2px}';
-        document.head.appendChild(style);
+        if (!document.getElementById('saniar-ap-preview-style')) {
+            var style = document.createElement('style');
+            style.id = 'saniar-ap-preview-style';
+            style.textContent =
+                '[data-ap-outline]{animation:apWidgetPulse 1.6s ease-in-out infinite}' +
+                '@keyframes apWidgetPulse{0%,100%{outline-color:rgba(245,158,11,.95);outline-offset:4px}' +
+                '50%{outline-color:rgba(245,158,11,.35);outline-offset:9px}}' +
+                '.ap-widget-guide{outline:1px dashed rgba(148,163,184,.8)!important;outline-offset:2px}';
+            document.head.appendChild(style);
+        }
 
         function clearHighlight() {
             document.querySelectorAll('[data-ap-outline]').forEach(function (node) {
@@ -87,10 +92,22 @@
             });
         }
 
-        window.addEventListener('message', function (event) {
-            var data = event.data || {};
-            if (data.apWidgetId) { highlightWidget(data.apWidgetId); }
-            if (typeof data.apShowGuides !== 'undefined') { setGuides(data.apShowGuides); }
-        });
-    });
+        /* شنوندهٔ پیام فقط یک‌بار ثبت می‌شود (تابع با هر ناوبری اجرا می‌شود) */
+        if (!window.__saniarApPreviewBound) {
+            window.__saniarApPreviewBound = true;
+            window.addEventListener('message', function (event) {
+                var data = event.data || {};
+                if (data.apWidgetId) { highlightWidget(data.apWidgetId); }
+                if (typeof data.apShowGuides !== 'undefined') { setGuides(data.apShowGuides); }
+            });
+        }
+    };
+
+    /* اجرای اولیه + ثبت برای ناوبری SPA */
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { window.saniarTemplateInit(); });
+    } else {
+        window.saniarTemplateInit();
+    }
+    (window.saniarReinit = window.saniarReinit || []).push(function () { window.saniarTemplateInit(); });
 })();

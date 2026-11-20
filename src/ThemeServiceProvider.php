@@ -79,6 +79,14 @@ class ThemeServiceProvider extends ServiceProvider
         // load views
         $this->loadViewsFrom(__DIR__ . '/resources/views', 'front');
 
+        /* فاز ۱۸۵ — کامپوننت‌های لایووایر ۴ تم سانیار (مستقلِ خودِ تم).
+           همه با پیشوند «saniar-» ثبت می‌شوند تا با کامپوننت‌های هسته/پنل
+           تداخلی پیش نیاید؛ ویوها از front::livewire.* خوانده می‌شوند. */
+        if (class_exists(\Livewire\Livewire::class)) {
+            \Livewire\Livewire::component('saniar-favorites-button', \Themes\SaniarTheme\src\Livewire\FavoritesButton::class);
+            \Livewire\Livewire::component('saniar-newsletter-box', \Themes\SaniarTheme\src\Livewire\NewsletterBox::class);
+        }
+
         // share with views
         // کامپوزرها lazy هستند (فقط هنگام رندر ویو اجرا می‌شوند)؛ بدون ثبت در
         // حالت کنسول، ویوهای تم در تست‌ها با متغیرهای تعریف‌نشده 500 می‌دهند

@@ -136,6 +136,6 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ theme_asset('plugin/nouislider/nouislider.min.js') }}"></script>
-    <script src="{{ theme_asset('js/pages/products/category.js') }}?v=2"></script>
+    <script src="{{ theme_asset('plugin/nouislider/nouislider.min.js') }}" data-navigate-once></script>
+    <script src="{{ theme_asset('js/pages/products/category.js') }}?v=6"></script>
 @endpush

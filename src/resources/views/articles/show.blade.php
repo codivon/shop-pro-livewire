@@ -215,5 +215,5 @@
 @push('scripts')
     <script src="{{theme_asset('js/plugins/plyr/plyr.js')}}"></script>
     <script src="{{ theme_asset('js/pages/comments.js') }}"></script>
-    <script src="{{ theme_asset('js/pages/articles/show.js') }}"></script>
+    <script src="{{ theme_asset('js/pages/articles/show.js') }}?v=2"></script>
 @endpush

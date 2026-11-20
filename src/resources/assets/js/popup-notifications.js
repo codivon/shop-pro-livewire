@@ -115,12 +115,17 @@
                 if (e.target === $overlay) { e.stopPropagation(); }
             });
 
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && $overlay.classList.contains('is-open')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            });
+            /* فاز ۱۸۵ (SPA) — این شنونده با هر ناوبری دوباره ثبت نشود */
+            if (!window.__saniarNpopEscBound) {
+                window.__saniarNpopEscBound = true;
+                document.addEventListener('keydown', function (e) {
+                    var overlay = document.getElementById('npop-overlay');
+                    if (e.key === 'Escape' && overlay && overlay.classList.contains('is-open')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            }
         }
     }
 
@@ -135,10 +140,22 @@
         return;
     }
 
-    var pusherInstance = new Pusher(pusherKey, { cluster: pusherCluster });
-    var channel = pusherInstance.subscribe('inbox-user-' + userId);
+    /* فاز ۱۸۵ (SPA) — این اسکریپت با هر ناوبری اجرا می‌شود؛ اتصال Pusher
+       باید فقط یک‌بار ساخته و subscribe شود (اتصال تکراری = لیک اتصال و
+       چندبرابرشدن کانتر). هندلرها هر بار به DOM فعلی نگاه می‌کنند، پس
+       بعد از ناوبری هم درست کار می‌کنند. */
+    var pusherInstance = window.__saniarPusher;
+    if (!pusherInstance) {
+        pusherInstance = new Pusher(pusherKey, { cluster: pusherCluster });
+        window.__saniarPusher = pusherInstance;
+    }
 
-    channel.bind('send-message-user', function (data) {
+    var channelName = 'inbox-user-' + userId;
+    var channel = pusherInstance.channel(channelName) || pusherInstance.subscribe(channelName);
+
+    if (!channel.__saniarCounterBound) {
+        channel.__saniarCounterBound = true;
+        channel.bind('send-message-user', function (data) {
         var wrapper = document.querySelector('.front-dropdown-notification');
         if (!wrapper) return;
 
@@ -183,5 +200,6 @@
 
         var audio = document.getElementById('alert-sound');
         if (audio) audio.play().catch(function () {});
-    });
+        });
+    }
 })();

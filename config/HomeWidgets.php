@@ -163,6 +163,13 @@ return [
         'image' => 'widgets/special.jpg',
         'options' => [
             [
+                'title'      => 'عنوان قابل نمایش',
+                'key'        => 'title',
+                'input-type' => 'input',
+                'default'    => 'اسلایدر شگفت انگیز',
+                'class'      => 'col-md-4',
+            ],
+            [
                 'title'      => 'تعداد محصولات',
                 'key'        => 'number',
                 'input-type' => 'input',
@@ -300,11 +307,11 @@ return [
         'image' => 'widgets/products-default.jpg',
         'options' => [
             [
-                'title'      => 'عنوان',
+                'title'      => 'عنوان قابل نمایش',
                 'key'        => 'title',
                 'input-type' => 'input',
-                'type'       => 'text',
-                'class'      => 'col-md-4 col-6',
+                'default'    => 'پرفروشترین محصولات فروشگاه',
+                'class'      => 'col-md-4',
             ],
             [
                 'title'      => 'نوع محصولات',
@@ -461,6 +468,13 @@ return [
         'title' => 'کادر محصولات با پس زمینه',
         'image' => 'widgets/special.jpg',
         'options' => [
+            [
+                'title'      => 'عنوان قابل نمایش',
+                'key'        => 'title',
+                'input-type' => 'input',
+                'default'    => 'اسلایدر شگفت انگیز',
+                'class'      => 'col-md-4',
+            ],
             [
                 'title'      => 'نوع محصولات',
                 'key'        => 'products_type',
@@ -633,6 +647,13 @@ return [
         'title' => 'کادر نمایش چندتایی محصولات',
         'image' => 'widgets/multi-block.jpg',
         'options' => [
+            [
+                'title'      => 'عنوان قابل نمایش',
+                'key'        => 'title',
+                'input-type' => 'input',
+                'default'    => 'پرفروشترین محصولات فروشگاه',
+                'class'      => 'col-md-4',
+            ],
             [
                 'title'      => 'نوع محصولات',
                 'key'        => 'products_type',
@@ -1152,10 +1173,11 @@ return [
         'image' => 'widgets/posts.png',
         'options' => [
             [
-                'title'      => 'عنوان',
+                'title'      => 'عنوان قابل نمایش',
                 'key'        => 'title',
                 'input-type' => 'input',
                 'type'       => 'text',
+                'default'    => 'آخرین مطالب وبلاگ',
                 'class'      => 'col-md-4 col-6',
             ],
             [

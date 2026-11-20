@@ -7,18 +7,21 @@
 @if(count($products))
     <div class="products-row py-20">
         <div class="container-fluid">
-            <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
-                <div class="title d-flex align-items-center">
-                    <img loading="lazy" decoding="async" src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
-                    <h5 class="font-16 ms-3"><span class="main-color-one-color d-inline-block ms-1">{{ $widget->title }}</span></h5>
+            @if($widget->option('title'))
+                <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
+                    <div class="title d-flex align-items-center">
+                        <img loading="lazy" decoding="async" src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
+                        <h5 class="font-16 ms-3"><span class="main-color-one-color d-inline-block ms-1">{{ $widget->option('title') }}</span></h5>
+                    </div>
+                    <div class="link">
+                        <a href="{{ route('front.products.index') }}" class="border-animate fromCenter pb-1 fw-bold">
+                            مشاهده همه
+                            <i class="bi bi-chevron-double-left main-color-one-color"></i>
+                        </a>
+                    </div>
                 </div>
-                <div class="link">
-                    <a href="{{ route('front.products.index') }}" class="border-animate fromCenter pb-1 fw-bold">
-                        مشاهده همه
-                        <i class="bi bi-chevron-double-left main-color-one-color"></i>
-                    </a>
-                </div>
-            </div>
+            @endif
+
             <div class="parent">
                 <div class="row g-3">
                     @foreach($products as $product)

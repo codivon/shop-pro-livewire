@@ -366,10 +366,11 @@ function get_widget_uncached($widget)
 
             /* تعداد بنر کناری از تنظیمات خود ابزارک (پیش‌فرض ۲ بنر زیر هم) */
             $variables['index_slider_banners'] = Banner::whereJsonContains('groups', 'index_slider_banners')
+                ->whereJsonContains('places', $widget->option('place'))
                 ->whereJsonContains('pages', $widget->page)
                 ->where('published', true)
                 ->orderBy('ordering', $widget->option('ordering', 'asc'))
-                ->take((int) $widget->option('banner_number', 2) ?: 2)
+                ->take((int) $widget->option('banner_number', 1) ?: 1)
                 ->get();
 
             break;
@@ -377,7 +378,8 @@ function get_widget_uncached($widget)
 
         case 'middle-banners-2': {
             /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
-            $variables['index_middle_2_banners'] = Banner::whereJsonContains('groups', $widget->option('place', 'index_middle_2_banners'))
+            $variables['index_middle_2_banners'] = Banner::whereJsonContains('groups', 'index_middle_2_banners')
+                ->whereJsonContains('places', $widget->option('place'))
                 ->whereJsonContains('pages', $widget->page)
                 ->where('published', true)
                 ->orderBy('ordering', $widget->option('ordering', 'asc'))
@@ -389,7 +391,8 @@ function get_widget_uncached($widget)
 
         case 'middle-banners-3': {
             /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
-            $variables['index_middle_3_banners'] = Banner::whereJsonContains('groups', $widget->option('place', 'index_middle_3_banners'))
+            $variables['index_middle_3_banners'] = Banner::whereJsonContains('groups', 'index_middle_3_banners')
+                ->whereJsonContains('places', $widget->option('place'))
                 ->whereJsonContains('pages', $widget->page)
                 ->where('published', true)
                 ->orderBy('ordering', $widget->option('ordering', 'asc'))
@@ -401,7 +404,8 @@ function get_widget_uncached($widget)
 
         case 'middle-banners-4': {
             /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
-            $variables['index_middle_4_banners'] = Banner::whereJsonContains('groups', $widget->option('place', 'index_middle_4_banners'))
+            $variables['index_middle_4_banners'] = Banner::whereJsonContains('groups', 'index_middle_4_banners')
+                ->whereJsonContains('places', $widget->option('place'))
                 ->whereJsonContains('pages', $widget->page)
                 ->where('published', true)
                 ->orderBy('ordering', $widget->option('ordering', 'asc'))

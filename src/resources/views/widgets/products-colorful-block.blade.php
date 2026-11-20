@@ -24,7 +24,7 @@
         @endif
 
 
-        <div class="parent" style="--before-background-colorful: {{$widget->option('block_color')}};background: url({{asset($widget->option('block_color'))}})">
+        <div class="parent" style="--before-background-colorful: {{$widget->option('block_color')}};background: url({{asset($widget->option('image'))}})">
             <div class="container-fluid">
                 <div class="swiper product-slider-swiper">
                     <div class="swiper-wrapper">

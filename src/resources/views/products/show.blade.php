@@ -85,7 +85,16 @@
                                             <li class="icon-product-box-item">
                                                 {{-- فاز ۱۸۵ — دکمهٔ علاقه‌مندی حالا کامپوننت لایووایر ۴ خود تم است؛
                                                      مهمان به‌جای خطای ۴۰۱ کنسول، به صفحهٔ ورود هدایت می‌شود --}}
-                                                <livewire:saniar-favorites-button :product="$product" />
+                                                {{-- فاز ۱۸۶ — فال‌بک: اگر Livewire هنوز نصب نشده باشد، دکمهٔ AJAX کلاسیک
+                                                     نمایش داده می‌شود تا تگ خام در خروجی آشکار نشود --}}
+                                                @if (class_exists(\Livewire\Livewire::class))
+                                                    <livewire:saniar-favorites-button :product="$product" />
+                                                @else
+                                                    <button id="add-to-favorites" type="button" class="btn-option btn-option-wishes bg-transparent border-0 p-0 @if($favorite)btn-option-favorites @endif" data-product="{{$product->id}}" data-action="{{route('front.favorites.store')}}" aria-label="افزودن به علاقه‌مندی">
+                                                        <i class="bi bi-heart"></i>
+                                                        <span class="tooltip-short">افزودن به علاقه‌مندی</span>
+                                                    </button>
+                                                @endif
                                             </li>
 
                                             @if ($similar_products_count)

@@ -21,6 +21,14 @@
 (function () {
     'use strict';
 
+    /* فاز ۱۸۶ — تشخیص نبود Livewire: SPA فعال نمی‌شود و راهنمای دقیق در کنسول
+       نمایش داده می‌شود تا ادمین بداند باید پیش‌نیازهای قالب را اجرا کند. */
+    if (!window.Livewire) {
+        console.warn('[SaniarTheme] Livewire در دسترس نیست؛ حالت SPA خاموش است. ' +
+            'از پنل مدیریت (قالب‌ها ← اجرای پیش‌نیازها) پیش‌نیازهای قالب را اجرا کنید ' +
+            'یا روی سرور اجرا کنید: composer require livewire/livewire');
+    }
+
     /* اولین سگمنت مسیرهایی که باید «لود کامل» بمانند */
     var SPA_EXCLUDE_SEGMENTS = [
         'cart', 'checkout', 'orderResultInfo',

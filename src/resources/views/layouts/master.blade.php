@@ -523,10 +523,14 @@
 {!! option('info_scripts') !!}
 
 {{-- فاز ۱۸۵ — اسکریپت‌های لایووایر (پیش از موتور SPA تم) --}}
+{{-- فاز ۱۸۶ — گارد: اگر پکیج Livewire هنوز نصب نشده باشد، تگ خام در خروجی نمی‌آید؛
+     پیش‌نیازها از پنل (قالب‌ها ← اجرای پیش‌نیازها) به‌صورت خودکار نصب می‌شود --}}
+@if (class_exists(\Livewire\Livewire::class))
 <livewire:scripts />
+@endif
 
 {{-- موتور SPA تم سانیار (wire:navigate) — باید بعد از livewire:scripts باشد --}}
-<script src="{{theme_asset('js/saniar-spa.js')}}?v=1" data-navigate-once></script>
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=2" data-navigate-once></script>
 
 @if(session('toast-success'))
     <script data-navigate-once>

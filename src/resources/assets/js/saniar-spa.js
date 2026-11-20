@@ -14,6 +14,9 @@
  *    مسیرهای مستثنی (سبد/پرداخت/احراز هویت/پنل کاربری/مقایسه/فرم‌ها/ادمین).
  *  • مسیرهای مستثنی با لود کامل باز می‌شوند — بدون هیچ ریسکی برای
  *    فرایندهای حساس (پرداخت، ورود، نقشهٔ آدرس و …).
+ *  • فاز ۱۸۷: intercept کلیک در فاز capture + فراخوانی مستقیم
+ *    Livewire.navigate — چون Alpine دایرکتیوهای wire:navigate افزوده‌شده
+ *    بعد از بوت را init نمی‌کند، این interceptor مسیر قطعیِ SPA است.
  *  • بعد از هر ناوبری: لینک‌های تازه علامت می‌خورند، initهای تم
  *    (window.saniarReinit) اجرا می‌شوند و head نرمال‌سازی می‌شود.
  * =========================================================================
@@ -96,18 +99,34 @@
         if (a.dataset.spaChecked === '1') { return false; }
         a.dataset.spaChecked = '1';
 
+        return isClickableEligible(a);
+    }
+
+    /* فاز ۱۸۷ — eligibility بدون کشِ dataset؛ برای interceptorِ کلیک که باید
+       هر بار در لحظهٔ کلیک تصمیم بگیرد (نه بر اساس علامت‌گذاری اولیه) */
+    function isClickableEligible(a) {
+        if (!a || a.tagName !== 'A') { return false; }
+
         var href = a.getAttribute('href') || '';
         if (!href) { return false; }
         if (href.charAt(0) === '#') { return false; }
         if (/^(javascript|mailto|tel|sms|data|blob):/i.test(href)) { return false; }
 
         if (a.hasAttribute('download')) { return false; }
-        if (a.target === '_blank') { return false; }
+        /* هر targetی جز _self (blank/_top/iframe) → مداخله نکن */
+        if (a.target && a.target !== '_self') { return false; }
         if ((a.getAttribute('rel') || '').indexOf('external') !== -1) { return false; }
 
         if (a.hasAttribute('data-no-navigate')) { return false; }
         if (a.closest('[data-no-navigate]')) { return false; }
         if (a.closest('.admin-loggedin-navbar')) { return false; }
+
+        /* اکشن‌های خود لایووایر داخل کامپوننت‌ها — هندلر خودش را دارد */
+        if (a.hasAttribute('wire:click') || a.closest('[wire\\:click]')) { return false; }
+
+        if (a.matches(JS_HANDLED_SELECTOR)) { return false; }
+        if (elementHasDirectClickHandler(a)) { return false; }
+        if (matchesDelegatedClick(a)) { return false; }
 
         var url;
         try { url = new URL(a.href, window.location.origin); } catch (e) { return false; }
@@ -116,9 +135,8 @@
         /* فایل استاتیک */
         if (/\.(png|jpe?g|gif|svg|pdf|zip|rar|css|js|ico|webp|mp4|mp3|xlsx|docx?)$/i.test(url.pathname)) { return false; }
 
-        if (a.matches(JS_HANDLED_SELECTOR)) { return false; }
-        if (elementHasDirectClickHandler(a)) { return false; }
-        if (matchesDelegatedClick(a)) { return false; }
+        /* همان صفحه با همان query → پرش hash بومی مرورگر بهتر از رفرشِ نرم است */
+        if (url.pathname === window.location.pathname && url.search === window.location.search) { return false; }
 
         return true;
     }
@@ -160,9 +178,61 @@
         }
     }
 
+    /* فاز ۱۸۷ — رفع اصلی «SPA کار نمی‌کند؛ صفحه‌ها رفرش کامل می‌شوند»:
+       ====================================================================
+       در این هسته، livewire.js اتریبیوت wire:navigate را به دایرکتیو Alpine
+       یعنی x-navigate ترجمه می‌کند ("wire:navigate": "x-navigate"). دایرکتیو
+       Alpine فقط روی المان‌هایی initialize می‌شود که «هنگام بوت Alpine یا
+       هنگام morph» موجودند؛ اما markLinks بعد از بوت Alpine اتریبیوت را روی
+       لینک‌های DOM فعلی می‌گذارد ⇒ Alpine هرگز آن را پردازش نمی‌کند ⇒
+       هیچ هندلر navigateای روی کلیک‌ها فعال نیست ⇒ کلیک = لود کامل.
+
+       راه‌حل (تأییدشده روی فروشگاه live): interceptorِ کلیک در «فاز capture»
+       روی document — قبل از همهٔ هندلرهای jQuery/قدیمی اجرا می‌شود، لینک
+       واجد شرایط را مستقیماً با window.Livewire.navigate(url) باز می‌کند و
+       stopImmediatePropagation جلوی هر هندلر دیگر (از جمله هر مداخله‌گر
+       رفرشِ دستی) را می‌گیرد. اگر navigate خطا بدهد → لود عادی مثل قبل. */
+    function interceptClicks() {
+        if (window.__saniarSpaClickBound) { return; }
+        window.__saniarSpaClickBound = true;
+
+        document.addEventListener('click', function (e) {
+            /* فقط کلیک چپ بدون کلید اصلاحی (ctrl/cmd = tab جدید، shift = پنجرهٔ جدید) */
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
+
+            /* هندلر دیگری قبلاً default را گرفته — بی‌مداخله */
+            if (e.defaultPrevented) { return; }
+
+            var target = e.target;
+            if (!target || !target.closest) { return; }
+
+            var a = target.closest('a[href]');
+            if (!a) { return; }
+
+            if (!isClickableEligible(a)) { return; }
+
+            if (!window.Livewire || typeof window.Livewire.navigate !== 'function') { return; }
+
+            var url;
+            try { url = new URL(a.href, window.location.origin); } catch (err) { return; }
+
+            /* فاز capture = قبل از همه؛ زنجیرهٔ هندلرهای دیگر را قطع می‌کنیم */
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            try {
+                window.Livewire.navigate(url.href);
+            } catch (err) {
+                /* ناوبری نرم ممکن نشد → رفتار عادی مثل قبل (لود کامل) */
+                window.location.href = url.href;
+            }
+        }, true);
+    }
+
     function enhance() {
         if (!window.Livewire) { return; } /* بدون لایووایر → همه‌چیز مثل قبل (لود کامل) */
         markLinks(document);
+        interceptClicks();
     }
 
     function onNavigated() {

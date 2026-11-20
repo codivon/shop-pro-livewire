@@ -529,8 +529,8 @@
 <livewire:scripts />
 @endif
 
-{{-- موتور SPA تم سانیار (wire:navigate) — باید بعد از livewire:scripts باشد --}}
-<script src="{{theme_asset('js/saniar-spa.js')}}?v=2" data-navigate-once></script>
+{{-- موتور SPA تم سانیار (intercept کلیک در فاز capture + Livewire.navigate) — باید بعد از livewire:scripts باشد --}}
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=3" data-navigate-once></script>
 
 @if(session('toast-success'))
     <script data-navigate-once>

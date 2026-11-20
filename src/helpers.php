@@ -338,9 +338,7 @@ function get_widget_uncached($widget)
 
         case 'middle-brands': {
             /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
-            $variables['index_middle_brands'] = Brand::where('published', true)
-                ->orderBy('ordering', $widget->option('ordering', 'asc'))
-                ->take($widget->option('number', 5) ?: 5)
+            $variables['index_middle_brands'] = Brand::take($widget->option('number', 5) ?: 5)
                 ->get();
 
             break;

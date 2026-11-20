@@ -26,7 +26,7 @@
                         @foreach($banners as $banner)
                         <div class="col-md-2 col-4 item">
                             <a href="">
-                                <img src="assets/image/brand1-1.png" alt="" class="img-fluid">
+                                <img src="{{asset($banner->image)}}" alt="" class="img-fluid">
                             </a>
                         </div>
                         @endforeach

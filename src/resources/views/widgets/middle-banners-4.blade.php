@@ -9,7 +9,7 @@
         <div class="container-fluid">
             <div class="row g-3">
                 @foreach($banners as $banner)
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-3">
                         <a href="{{ $banner->link ?: '#' }}">
                             <img loading="lazy" decoding="async" src="{{ asset($banner->image) }}" class="img-fluid rounded-3 shadow-box" alt="{{ $banner->title ?: 'بنر' }}">
                         </a>

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\File;
 use RuntimeException;
+use Throwable;
 
 /**
  * ساخت لینک دارایی‌های قالب (themes/X/src/resources/assets → public/themes/X)
@@ -64,15 +65,22 @@ class ThemeAssetLinker
         // مسیر به‌صورت پوشه/فایل واقعیِ موجود است:
         //  - کپی قدیمی خودمان (دارای مارکر) → نوسازی: پاک و از نو بساز
         //    (به‌روزرسانی تم + ارتقای خودکار کپی→symlink وقتی هاست اجازه داد)
-        //  - پوشه/فایل ناشناس → دست نمی‌زنیم (از بین نبردن فایل دست‌ساز ادمین)
+        //  - پوشهٔ بدون مارکر ولی «بدون هیچ فایلی» → بازسازی (فاز ۱۸۹: پوشهٔ
+        //    خالیِ رهاش‌شده دقیقاً همان علت ۴۰۴ شدن دارایی‌ها بود — لینکر قبلاً
+        //    از ترس پاک‌کردن فایل دست‌ساز ادمین، پوشهٔ خالی را هم دست‌نخورده
+        //    می‌گذاشت و پیام گمراه‌کنندهٔ «از قبل منتشر شده‌اند» می‌داد)
+        //  - پوشه/فایل ناشناس با محتوا → دست نمی‌زنیم (از بین نبردن فایل دست‌ساز ادمین)
         if (file_exists($link)) {
             $isOurStaleCopy = is_dir($link) && is_file(rtrim($link, '/').'/'.self::COPY_MARKER);
 
-            if (! $isOurStaleCopy) {
+            if ($isOurStaleCopy) {
+                File::deleteDirectory($link);
+            } elseif (is_dir($link) && self::dirIsEmpty($link)) {
+                // فاز ۱۸۹ — پوشهٔ خالیِ بدون مارکر: بازسازی کامل (لینک/کپی تازه)
+                File::deleteDirectory($link);
+            } else {
                 return 'existing-dir';
             }
-
-            File::deleteDirectory($link);
         }
 
         File::ensureDirectoryExists(dirname($link));
@@ -125,6 +133,34 @@ class ThemeAssetLinker
         }
 
         return 'copy';
+    }
+
+    /**
+     * آیا پوشه «بدون هیچ فایلی» است؟ (فقط پوشه‌های خالی تودرتو مجاز است)
+     * پوشهٔ ناخوانا/دسترسی‌ناقص → false (دست نمی‌زنیم — محتاطانه)
+     * public شده تا ThemeAssetSync هم برای خودترمیمیِ پوشهٔ خالی از آن استفاده کند.
+     *
+     * پیاده‌سازی lazy است: با اولین فایل false برمی‌گردد (اسکن کامل نمی‌شود) —
+     * چون در هر بوتِ تم برای وضعیت «پوشهٔ بدون مارکر» صدا زده می‌شود.
+     */
+    public static function dirIsEmpty(string $dir): bool
+    {
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::LEAVES_ONLY
+            );
+
+            foreach ($iterator as $file) {
+                if ($file->isFile()) {
+                    return false; // حداقل یک فایل واقعی وجود دارد — کافی است، ادامه نمی‌دهیم
+                }
+            }
+        } catch (Throwable) {
+            return false; // ناخوانا → محتاطانه: دست نزن
+        }
+
+        return true;
     }
 
     /** آیا مسیر به‌عنوان symlink سالم وجود دارد؟ (هدف موجود است) */

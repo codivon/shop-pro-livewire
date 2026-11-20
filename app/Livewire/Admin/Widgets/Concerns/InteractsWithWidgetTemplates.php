@@ -44,7 +44,10 @@ trait InteractsWithWidgetTemplates
                     ? $widgetOption->categories()->pluck('categories.id')->map(fn ($id) => (string) $id)->toArray()
                     : [];
             } elseif ($option['input-type'] !== 'file') {
-                $this->optionValues[$optionKey] = (string) ($widget?->option($optionKey, $option['default'] ?? '') ?? $option['default'] ?? '');
+                // فاز ۱۸۹ — هرگز (string) آرایه نگیر (ریشهٔ «Array to string conversion»)
+                $this->optionValues[$optionKey] = WidgetTemplateRegistry::scalarOrNull(
+                    $widget?->option($optionKey, $option['default'] ?? '') ?? $option['default'] ?? ''
+                );
             }
         }
     }
@@ -70,9 +73,11 @@ trait InteractsWithWidgetTemplates
             if (in_array($option['input-type'], ['post_categories', 'product_categories'], true)) {
                 $this->optionValues[$optionKey] = [];
             } elseif ($option['input-type'] === 'select') {
-                $this->optionValues[$optionKey] = $option['options'][0]['value'] ?? null;
+                // فاز ۱۸۹ — گارد ساختار آیتم‌های select (آرایه‌ی تخت هم پشتیبانی می‌شود)
+                $firstItem = is_array($option['options'][0] ?? null) ? $option['options'][0] : null;
+                $this->optionValues[$optionKey] = WidgetTemplateRegistry::scalarOrNull($firstItem['value'] ?? null);
             } elseif ($option['input-type'] !== 'file') {
-                $this->optionValues[$optionKey] = $option['default'] ?? '';
+                $this->optionValues[$optionKey] = WidgetTemplateRegistry::scalarOrNull($option['default'] ?? '');
             }
         }
     }
@@ -168,9 +173,13 @@ trait InteractsWithWidgetTemplates
                 }
 
                 default: {
+                    // فاز ۱۸۹ — آخرین خط دفاع: هیچ آرایه‌ای به ستون value دیتابیس نرسد؛
+                    // insert آرایه = خطای «Array to string conversion»
                     $widget->options()->create([
                         'key'   => $option['key'],
-                        'value' => $option['value'],
+                        'value' => is_array($option['value'])
+                            ? json_encode($option['value'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                            : $option['value'],
                     ]);
                 }
             }
@@ -193,9 +202,11 @@ trait InteractsWithWidgetTemplates
             $optionKey = $option['key'];
 
             if ($option['input-type'] === 'select' && (($this->optionValues[$optionKey] ?? '') === '')) {
-                $this->optionValues[$optionKey] = $option['options'][0]['value'] ?? null;
+                // فاز ۱۸۹ — گارد ساختار آیتم اول select + هرگز آرایه در optionValues ننشیند
+                $firstItem = is_array($option['options'][0] ?? null) ? $option['options'][0] : null;
+                $this->optionValues[$optionKey] = WidgetTemplateRegistry::scalarOrNull($firstItem['value'] ?? null);
             } elseif ($option['input-type'] === 'input' && ! array_key_exists($optionKey, $this->optionValues)) {
-                $this->optionValues[$optionKey] = $option['default'] ?? null;
+                $this->optionValues[$optionKey] = WidgetTemplateRegistry::scalarOrNull($option['default'] ?? null);
             }
         }
 

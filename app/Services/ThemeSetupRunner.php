@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -248,6 +249,10 @@ class ThemeSetupRunner
         }
 
         try {
+            // فاز ۱۸۹ — تشخیص قبل از اجرا برای گزارش دقیق‌تر:
+            // پوشهٔ public موجود ولی تهی = علت ۴۰۴ شدن دارایی‌ها؛ لینکر الان بازسازی می‌کند
+            $wasEmptyPublicDir = is_dir($link) && ThemeAssetLinker::dirIsEmpty($link);
+
             $mode = ThemeAssetLinker::linkOrCopy($target, $link);
 
             $messages = [
@@ -257,6 +262,24 @@ class ThemeSetupRunner
                 'existing-dir' => 'دارایی‌ها قبلاً در public منتشر شده‌اند.',
                 'copy'         => 'symlink روی این هاست در دسترس نبود؛ دارایی‌ها کپی شدند (public/themes/'.$theme.').',
             ];
+
+            // فاز ۱۸۹ — پیام وضعیتِ «پوشهٔ خالی که بازسازی شد» به‌جای پیام گمراه‌کنندهٔ قبلی
+            if ($wasEmptyPublicDir && in_array($mode, ['symlink', 'exec', 'copy'], true)) {
+                $messages[$mode] .= ' (پوشهٔ قبلی خالی بود و بازسازی شد — ریشهٔ ۴۰۴ شدن دارایی‌ها)';
+            } elseif ($mode === 'existing-dir') {
+                // تعداد فایل‌های موجود برای شفافیت ادمین
+                $fileCount = 0;
+                try {
+                    foreach (File::allFiles($link) as $f) {
+                        $fileCount++;
+                    }
+                } catch (Throwable) {
+                }
+
+                $messages['existing-dir'] = $fileCount > 0
+                    ? "دارایی‌ها قبلاً در public منتشر شده‌اند ({$fileCount} فایل)."
+                    : 'دارایی‌ها قبلاً در public منتشر شده‌اند.';
+            }
 
             $steps[] = [
                 'label'   => 'دارایی‌های تم',

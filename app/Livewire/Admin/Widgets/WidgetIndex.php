@@ -135,7 +135,10 @@ class WidgetIndex extends Component
     public function optionValue(string $optionKey): ?string
     {
         if (array_key_exists($optionKey, $this->optionValues) && $this->optionValues[$optionKey] !== '') {
-            return (string) $this->optionValues[$optionKey];
+            // فاز ۱۸۹ — مقدار آرایه‌ای (مثل کلید مشترک با دسته‌بندی‌ها) هرگز به رشته تبدیل نشود
+            return is_array($this->optionValues[$optionKey])
+                ? implode('، ', $this->optionValues[$optionKey])
+                : (string) $this->optionValues[$optionKey];
         }
 
         $widget = $this->modalWidget;

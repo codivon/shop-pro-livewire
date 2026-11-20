@@ -109,7 +109,10 @@ class WidgetForm extends Component
                     : [];
             } elseif ($option['input-type'] !== 'file') {
                 // فایل‌ها در optionValues نمی‌آیند (مثل فرم قدیمی که file input فقط فایل جدید را submit می‌کند)
-                $this->optionValues[$optionKey] = (string) $this->widget->option($optionKey, $option['default'] ?? '');
+                // فاز ۱۸۹ — هرگز (string) آرایه نگیر (ریشهٔ «Array to string conversion»)
+                $this->optionValues[$optionKey] = WidgetTemplateRegistry::scalarOrNull(
+                    $this->widget->option($optionKey, $option['default'] ?? '')
+                );
             }
         }
     }
@@ -118,7 +121,10 @@ class WidgetForm extends Component
     public function optionValue(string $optionKey): ?string
     {
         if (array_key_exists($optionKey, $this->optionValues) && $this->optionValues[$optionKey] !== '') {
-            return (string) $this->optionValues[$optionKey];
+            // فاز ۱۸۹ — مقدار آرایه‌ای هرگز به رشته تبدیل نشود (Array to string conversion)
+            return is_array($this->optionValues[$optionKey])
+                ? implode('، ', $this->optionValues[$optionKey])
+                : (string) $this->optionValues[$optionKey];
         }
 
         return $this->widget ? $this->widget->option($optionKey) : null;
@@ -170,9 +176,11 @@ class WidgetForm extends Component
             $optionKey = $option['key'];
 
             if ($option['input-type'] === 'select' && (($this->optionValues[$optionKey] ?? '') === '')) {
-                $this->optionValues[$optionKey] = $option['options'][0]['value'] ?? null;
+                // فاز ۱۸۹ — گارد ساختار آیتم اول select + هرگز آرایه در optionValues ننشیند
+                $firstItem = is_array($option['options'][0] ?? null) ? $option['options'][0] : null;
+                $this->optionValues[$optionKey] = WidgetTemplateRegistry::scalarOrNull($firstItem['value'] ?? null);
             } elseif ($option['input-type'] === 'input' && ! array_key_exists($optionKey, $this->optionValues)) {
-                $this->optionValues[$optionKey] = $option['default'] ?? null;
+                $this->optionValues[$optionKey] = WidgetTemplateRegistry::scalarOrNull($option['default'] ?? null);
             }
         }
 
@@ -250,8 +258,13 @@ class WidgetForm extends Component
 
                 if ($field === 'key') {
                     $allWidgets = WidgetTemplateRegistry::mergedForPage($this->page);
-                    $oldValue = $allWidgets[$oldValue]['title'] ?? $oldValue;
-                    $newValue = $allWidgets[$newValue]['title'] ?? $newValue;
+
+                    // فاز ۱۸۹ — گارد: title باید اسکالر باشد (config معیوب هرگز لاگ را نکشد)
+                    $oldTitle = is_scalar($allWidgets[$oldValue]['title'] ?? null) ? $allWidgets[$oldValue]['title'] : null;
+                    $newTitle = is_scalar($allWidgets[$newValue]['title'] ?? null) ? $allWidgets[$newValue]['title'] : null;
+
+                    $oldValue = $oldTitle !== null ? (string) $oldTitle : $oldValue;
+                    $newValue = $newTitle !== null ? (string) $newTitle : $newValue;
                 }
 
                 $mainChanges[$field] = [
@@ -443,9 +456,13 @@ class WidgetForm extends Component
                 }
 
                 default: {
+                    // فاز ۱۸۹ — آخرین خط دفاع: هیچ آرایه‌ای به ستون value دیتابیس نرسد؛
+                    // insert آرایه = خطای «Array to string conversion»
                     $widget->options()->create([
                         'key'   => $option['key'],
-                        'value' => $option['value'],
+                        'value' => is_array($option['value'])
+                            ? json_encode($option['value'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                            : $option['value'],
                     ]);
                 }
             }

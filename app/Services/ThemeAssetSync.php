@@ -38,7 +38,7 @@ class ThemeAssetSync
      * @param  string|null  $linkOverride  مسیر لینک جایگزین (تست‌پذیری)
      * @return array{status: string, stamp?: int}
      *
-     * status ها: no-source | no-link | not-our-copy | fresh | refreshed
+     * status ها: no-source | not-our-copy | fresh | refreshed | rebuilt | link-failed
      */
     public static function syncIfStale(string $theme, ?bool $force = null, ?string $srcOverride = null, ?string $linkOverride = null): array
     {
@@ -49,14 +49,42 @@ class ThemeAssetSync
             return ['status' => 'no-source'];
         }
 
+        /* فاز ۱۸۹ — خودترمیمی: اگر لینک/کپی در public «اصلاً» وجود ندارد،
+         * قبلاً بی‌صدا 'no-link' برمی‌گشت و دارایی‌های تم برای همیشه ۴۰۴ می‌ماندند
+         * (مثلاً بعد از حذف دستی پوشهٔ public/themes/X یا دیپلوی که پوشهٔ public را
+         * پاک می‌کند). الان همان‌جا لینک/کپی از نو ساخته می‌شود — idempotent است. */
         if (! is_dir($link)) {
-            return ['status' => 'no-link'];
+            try {
+                ThemeAssetLinker::linkOrCopy($src, $link);
+
+                return ['status' => 'rebuilt', 'stamp' => self::maxMtime($src)];
+            } catch (Throwable $e) {
+                report($e);
+
+                return ['status' => 'link-failed'];
+            }
         }
 
         $marker = rtrim($link, '/').'/'.ThemeAssetLinker::COPY_MARKER;
 
-        // symlink سالم یا پوشهٔ دست‌سازِ ناشناس → دست نمی‌زنیم
+        // پوشهٔ بدون مارکر → symlink سالم یا پوشهٔ دست‌ساز ادمین
         if (! is_file($marker)) {
+            /* فاز ۱۸۹ — پوشهٔ بدون مارکر ولی «خالی» (هیچ فایلی ندارد) → بازسازی.
+             * این دقیقاً وضعیتی بود که دارایی‌های تم سانیار ۴۰۴ می‌دادند: پوشهٔ
+             * public/themes/X موجود ولی تهی؛ نه لینکر دست می‌زد نه sync. پوشهٔ
+             * دست‌سازِ دارای محتوا مثل قبل دست‌نخورده می‌ماند. */
+            if (ThemeAssetLinker::dirIsEmpty($link)) {
+                try {
+                    ThemeAssetLinker::linkOrCopy($src, $link);
+
+                    return ['status' => 'rebuilt', 'stamp' => self::maxMtime($src)];
+                } catch (Throwable $e) {
+                    report($e);
+
+                    return ['status' => 'link-failed'];
+                }
+            }
+
             return ['status' => 'not-our-copy'];
         }
 

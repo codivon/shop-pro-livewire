@@ -25,8 +25,8 @@
                         class="row gy-2 gx-2 service-logo justify-content-md-end justify-content-center align-items-center">
                         @foreach($brands as $brand)
                         <div class="col-md-2 col-4 item">
-                            <a href="">
-                                <img src="{{asset($brand->image)}}" alt="" class="img-fluid">
+                            <a href="{{ route('front.brands.show',$brand->slug) }}">
+                                <img src="{{asset($brand->image)}}" alt="{{$brand->name}}" class="img-fluid">
                             </a>
                         </div>
                         @endforeach

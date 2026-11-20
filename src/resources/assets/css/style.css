@@ -2451,11 +2451,15 @@ a.image-data-src{
     left: 0;
     right: 0;
     height: 400px;
+}
+
+.site-slider.product-slider-colorful .parent::before {
     background: var(--main-color-one);
 }
 
+
 .site-slider.theme-2 .parent::before {
-    background: var(--main-color-two);
+    background: var(--before-background-colorful, --main-color-two);;
 }
 
 

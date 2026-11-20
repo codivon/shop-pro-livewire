@@ -295,168 +295,6 @@ return [
         ]
     ],
 
-    'products-moment-block' => [
-        'title' => 'کادر محصولات با پیشنهاد لحظه ای',
-        'image' => 'widgets/products-moment.png',
-        'options' => [
-            [
-                'title'      => 'عنوان',
-                'key'        => 'title',
-                'input-type' => 'input',
-                'type'       => 'text',
-                'class'      => 'col-md-4 col-6',
-            ],
-            [
-                'title'      => 'نوع محصولات',
-                'key'        => 'products_type',
-                'input-type' => 'select',
-                'class'      => 'col-md-4 col-6',
-                'options'    => [
-                    [
-                        'value' => 'all',
-                        'title' => 'همه'
-                    ],
-                    [
-                        'value' => 'discount',
-                        'title' => 'تخفیف خورده'
-                    ],
-                    [
-                        'value' => 'special',
-                        'title' => 'پیشنهاد ویژه'
-                    ],
-                    [
-                        'value' => 'moment',
-                        'title' => 'پیشنهاد لحظه ای'
-                    ],
-                ],
-                'attributes' => 'required'
-            ],
-            [
-                'title'      => 'وضعیت موجودی',
-                'key'        => 'inventory_status',
-                'input-type' => 'select',
-                'class'      => 'col-md-4 col-6',
-                'options'    => [
-                    [
-                        'value' => 'all',
-                        'title' => 'همه'
-                    ],
-                    [
-                        'value' => 'available',
-                        'title' => 'موجود'
-                    ],
-                    [
-                        'value' => 'unavailable',
-                        'title' => 'نا موجود'
-                    ],
-                ],
-                'attributes' => 'required'
-            ],
-            [
-                'title'      => 'نوع مرتب سازی',
-                'key'        => 'sort_type',
-                'input-type' => 'select',
-                'class'      => 'col-md-4 col-6',
-                'options'    => [
-                    [
-                        'value' => 'latest',
-                        'title' => 'جدیدترین'
-                    ],
-                    [
-                        'value' => 'sell',
-                        'title' => 'پرفروش ترین'
-                    ],
-                    [
-                        'value' => 'view',
-                        'title' => 'پربازدید ترین'
-                    ],
-                    [
-                        'value' => 'cheapest',
-                        'title' => 'ارزانترین'
-                    ],
-                    [
-                        'value' => 'expensivest',
-                        'title' => 'گرانترین'
-                    ],
-                ],
-                'attributes' => 'required'
-            ],
-            [
-                'title'      => 'لینک',
-                'key'        => 'link',
-                'input-type' => 'input',
-                'type'       => 'text',
-                'class'      => 'col-md-4 col-6',
-            ],
-            [
-                'title'      => 'عنوان لینک',
-                'key'        => 'link_title',
-                'input-type' => 'input',
-                'type'       => 'text',
-                'class'      => 'col-md-4 col-6',
-            ],
-            [
-                'title'      => 'نمایش محصولات موجود در اول',
-                'key'        => 'order_by_stock',
-                'input-type' => 'select',
-                'class'      => 'col-md-4 col-6',
-                'options'    => [
-                    [
-                        'value' => 'yes',
-                        'title' => 'بله'
-                    ],
-                    [
-                        'value' => 'no',
-                        'title' => 'خیر'
-                    ]
-                ],
-                'attributes' => 'required'
-            ],
-            [
-                'title'      => 'تعداد',
-                'key'        => 'number',
-                'input-type' => 'input',
-                'type'       => 'number',
-                'class'      => 'col-md-4 col-6',
-                'default'    => '10',
-                'attributes' => 'required'
-            ],
-            [
-                'title'      => 'انتخاب دسته بندی ها (اختیاری)',
-                'key'        => 'categories',
-                'input-type' => 'product_categories',
-                'class'      => 'col-md-9',
-            ],
-            [
-                'title'      => 'شامل محصولات زیر دسته ها',
-                'key'        => 'sub_category_products',
-                'input-type' => 'select',
-                'class'      => 'col-md-3',
-                'options'    => [
-                    [
-                        'value' => 'yes',
-                        'title' => 'بله'
-                    ],
-                    [
-                        'value' => 'no',
-                        'title' => 'خیر'
-                    ]
-                ],
-            ],
-        ],
-        'rules' => [
-            'products_type'    => 'required|in:all,discount,special,moment',
-            'inventory_status' => 'required|in:all,available,unavailable',
-            'sort_type'        => 'required|in:latest,sell,view,cheapest,expensivest',
-            'order_by_stock'   => 'required|in:yes,no',
-            'link'             => 'nullable|string',
-            'link_title'       => 'nullable|string',
-            'number'           => 'required',
-            'categories'       => 'nullable|array',
-            'categories.*'     => 'exists:categories,id',
-        ]
-    ],
-
     'products-default-block' => [
         'title' => 'کادر محصولات ساده',
         'image' => 'widgets/products-default.jpg',
@@ -791,6 +629,225 @@ return [
         ]
     ],
 
+    'products-multi-block' => [
+        'title' => 'کادر نمایش چندتایی محصولات',
+        'image' => 'widgets/multi-block.jpg',
+        'options' => [
+            [
+                'title'      => 'نوع محصولات',
+                'key'        => 'products_type',
+                'input-type' => 'select',
+                'class'      => 'col-md-4 col-6',
+                'options'    => [
+                    [
+                        'value' => 'all',
+                        'title' => 'همه'
+                    ],
+                    [
+                        'value' => 'discount',
+                        'title' => 'تخفیف خورده'
+                    ],
+                    [
+                        'value' => 'special',
+                        'title' => 'پیشنهاد ویژه'
+                    ],
+                    [
+                        'value' => 'moment',
+                        'title' => 'پیشنهاد لحظه ای'
+                    ],
+                ],
+                'attributes' => 'required'
+            ],
+            [
+                'title'      => 'وضعیت موجودی',
+                'key'        => 'inventory_status',
+                'input-type' => 'select',
+                'class'      => 'col-md-4 col-6',
+                'options'    => [
+                    [
+                        'value' => 'all',
+                        'title' => 'همه'
+                    ],
+                    [
+                        'value' => 'available',
+                        'title' => 'موجود'
+                    ],
+                    [
+                        'value' => 'unavailable',
+                        'title' => 'نا موجود'
+                    ],
+                ],
+                'attributes' => 'required'
+            ],
+            [
+                'title'      => 'نوع مرتب سازی',
+                'key'        => 'sort_type',
+                'input-type' => 'select',
+                'class'      => 'col-md-4 col-6',
+                'options'    => [
+                    [
+                        'value' => 'latest',
+                        'title' => 'جدیدترین'
+                    ],
+                    [
+                        'value' => 'sell',
+                        'title' => 'پرفروش ترین'
+                    ],
+                    [
+                        'value' => 'view',
+                        'title' => 'پربازدید ترین'
+                    ],
+                    [
+                        'value' => 'cheapest',
+                        'title' => 'ارزانترین'
+                    ],
+                    [
+                        'value' => 'expensivest',
+                        'title' => 'گرانترین'
+                    ],
+                ],
+                'attributes' => 'required'
+            ],
+            [
+                'title'      => 'نمایش محصولات موجود در اول',
+                'key'        => 'order_by_stock',
+                'input-type' => 'select',
+                'class'      => 'col-md-4 col-6',
+                'options'    => [
+                    [
+                        'value' => 'yes',
+                        'title' => 'بله'
+                    ],
+                    [
+                        'value' => 'no',
+                        'title' => 'خیر'
+                    ]
+                ],
+                'attributes' => 'required'
+            ],
+            [
+                'title'      => 'لینک',
+                'key'        => 'link',
+                'input-type' => 'input',
+                'type'       => 'text',
+                'class'      => 'col-md-4 col-6',
+            ],
+            [
+                'title'      => 'عنوان لینک',
+                'key'        => 'link_title',
+                'input-type' => 'input',
+                'type'       => 'text',
+                'class'      => 'col-md-4 col-6',
+            ],
+            [
+                'title'      => 'رنگ پس زمینه کادر',
+                'key'        => 'block_color',
+                'input-type' => 'input',
+                'default'    => '#ef394e',
+                'type'       => 'color',
+                'class'      => 'col-md-4 col-6',
+            ],
+            [
+                'title'      => 'تصویر',
+                'key'        => 'image',
+                'input-type' => 'file',
+                'type'       => 'file',
+                'class'      => 'col-md-4 col-6',
+                'attributes' => 'accept="image/*"',
+                'help'       => 'بهترین اندازه 850 * 500'
+            ],
+            [
+                'title'      => 'تعداد',
+                'key'        => 'number',
+                'input-type' => 'input',
+                'type'       => 'number',
+                'class'      => 'col-md-4 col-6',
+                'default'    => '10',
+                'attributes' => 'required'
+            ],
+            [
+                'title'      => 'انتخاب دسته بندی ها (اختیاری)',
+                'key'        => 'categories',
+                'input-type' => 'product_categories',
+                'class'      => 'col-md-9',
+            ],
+            [
+                'title'      => 'شامل محصولات زیر دسته ها',
+                'key'        => 'sub_category_products',
+                'input-type' => 'select',
+                'class'      => 'col-md-3',
+                'options'    => [
+                    [
+                        'value' => 'yes',
+                        'title' => 'بله'
+                    ],
+                    [
+                        'value' => 'no',
+                        'title' => 'خیر'
+                    ]
+                ],
+            ],
+        ],
+        'rules' => [
+            'products_type'    => 'required|in:all,discount,special,moment',
+            'inventory_status' => 'required|in:all,available,unavailable',
+            'sort_type'        => 'required|in:latest,sell,view,cheapest,expensivest',
+            'order_by_stock'   => 'required|in:yes,no',
+            'link'             => 'nullable|string',
+            'link_title'       => 'nullable|string',
+            'block_color'      => 'nullable|string',
+            'number'           => 'required',
+            'image'            => 'nullable|image',
+        ]
+    ],
+
+    'middle-brands' => [
+        'title' => 'برندها',
+        'image' => 'widgets/brand.png',
+        'options' => [
+            [
+                'title'      => 'تعداد قابل نمایش',
+                'key'        => 'number',
+                'input-type' => 'input',
+                'type'       => 'number',
+                'default'    => '1',
+                'class'      => 'col-md-4 col-6',
+                'attributes' => 'required'
+            ],
+            [
+                'title'      => 'عنوان قابل نمایش',
+                'key'        => 'title',
+                'input-type' => 'input',
+                'class'      => 'col-md-4',
+            ],
+            [
+                'title'      => 'زیر عنوان قابل نمایش',
+                'key'        => 'title_below',
+                'input-type' => 'input',
+                'class'      => 'col-md-4',
+            ],
+            [
+                'title'      => 'ترتیب نمایش',
+                'key'        => 'ordering',
+                'input-type' => 'select',
+                'class'      => 'col-md-4',
+                'options'    => [
+                    [
+                        'value' => 'asc',
+                        'title' => 'صعودی'
+                    ],
+                    [
+                        'value' => 'desc',
+                        'title' => 'نزولی'
+                    ]
+                ],
+            ],
+        ],
+        'rules' => [
+            'number' => 'required',
+        ]
+    ],
+
     'middle-banners' => [
         'title' => 'بنر تکی',
         'image' => 'widgets/banner.png',
@@ -857,6 +914,62 @@ return [
                 'input-type' => 'input',
                 'type'       => 'number',
                 'default'    => '2',
+                'class'      => 'col-md-4 col-6',
+                'attributes' => 'required'
+            ],
+            [
+                'title'      => 'ترتیب نمایش',
+                'key'        => 'ordering',
+                'input-type' => 'select',
+                'class'      => 'col-md-4',
+                'options'    => [
+                    [
+                        'value' => 'asc',
+                        'title' => 'صعودی'
+                    ],
+                    [
+                        'value' => 'desc',
+                        'title' => 'نزولی'
+                    ]
+                ],
+            ],
+            [
+                'title'      => 'گروه',
+                'key'        => 'place',
+                'input-type' => 'select',
+                'class'      => 'col-md-4',
+                'options'    => [
+                    [
+                        'value' => 'index_banners_place1',
+                        'title' => 'گروه اول'
+                    ],
+                    [
+                        'value' => 'index_banners_place2',
+                        'title' => 'گروه دوم'
+                    ],
+                    [
+                        'value' => 'index_banners_place3',
+                        'title' => 'گروه سوم'
+                    ]
+                ],
+
+        ],
+            ],
+        'rules' => [
+            'number' => 'required',
+        ]
+    ],
+
+    'middle-banners-3' => [
+        'title' => 'بنر سه‌تایی',
+        'image' => 'widgets/banner-3.jpg',
+        'options' => [
+            [
+                'title'      => 'تعداد قابل نمایش',
+                'key'        => 'number',
+                'input-type' => 'input',
+                'type'       => 'number',
+                'default'    => '3',
                 'class'      => 'col-md-4 col-6',
                 'attributes' => 'required'
             ],
@@ -1084,6 +1197,23 @@ return [
                 'class'      => 'col-md-4 col-6',
                 'default'    => '10',
                 'attributes' => 'required'
+            ],
+            [
+                'title'      => 'رنگ پس زمینه کادر',
+                'key'        => 'block_color',
+                'input-type' => 'input',
+                'default'    => '#ef394e',
+                'type'       => 'color',
+                'class'      => 'col-md-4 col-6',
+            ],
+            [
+                'title'      => 'تصویر',
+                'key'        => 'image',
+                'input-type' => 'file',
+                'type'       => 'file',
+                'class'      => 'col-md-4 col-6',
+                'attributes' => 'accept="image/*"',
+                'help'       => 'بهترین اندازه 850 * 500'
             ],
             [
                 'title'      => 'انتخاب دسته بندی ها (اختیاری)',

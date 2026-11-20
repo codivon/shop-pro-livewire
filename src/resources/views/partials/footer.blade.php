@@ -2,7 +2,7 @@
 <footer class="footer">
     <div class="container-fluid">
 
-        @php
+     {{--   @php
             $sevices_sliders = App\Models\Slider::whereJsonContains('groups', 'sevices_sliders')
                 ->where('published', true)
                 ->get();
@@ -22,7 +22,7 @@
                 </div>
             </div>
         @endif
-
+--}}
         <div class="footer-socail">
             <div class="row gy-3">
                 <div class="col-lg-3">

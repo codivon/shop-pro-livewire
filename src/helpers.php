@@ -335,6 +335,17 @@ function get_widget_uncached($widget)
 
         /* اسلایدر + دو بنر زیر هم کنارش (همان گروه‌های main-slider
            تا اسلایدر/بنرهای آپلودشدهٔ ادمین بدون تنظیم مجدد نمایش داده شوند) */
+
+        case 'middle-brands': {
+            /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
+            $variables['index_middle_brands'] = Brand::where('published', true)
+                ->orderBy('ordering', $widget->option('ordering', 'asc'))
+                ->take($widget->option('number', 5) ?: 5)
+                ->get();
+
+            break;
+        }
+
         case 'slider-side-banners': {
             $variables['main_sliders'] = Slider::whereJsonContains('groups', 'main_sliders')
                 ->whereJsonContains('pages', $widget->page)
@@ -371,6 +382,18 @@ function get_widget_uncached($widget)
                 ->where('published', true)
                 ->orderBy('ordering', $widget->option('ordering', 'asc'))
                 ->take($widget->option('number', 2) ?: 2)
+                ->get();
+
+            break;
+        }
+
+        case 'middle-banners-3': {
+            /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
+            $variables['index_middle_3_banners'] = Banner::whereJsonContains('groups', $widget->option('place', 'index_middle_3_banners'))
+                ->whereJsonContains('pages', $widget->page)
+                ->where('published', true)
+                ->orderBy('ordering', $widget->option('ordering', 'asc'))
+                ->take($widget->option('number', 3) ?: 3)
                 ->get();
 
             break;

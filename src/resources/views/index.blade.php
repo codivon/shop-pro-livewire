@@ -73,6 +73,10 @@
                         @include('front::widgets.middle-banners')
                         @break
 
+                    @case('middle-brands')
+                        @include('front::widgets.middle-brands')
+                        @break
+
                     @case('middle-banners-2')
                         @include('front::widgets.middle-banners-2')
                         @break

@@ -17,7 +17,15 @@
       • کلاس‌های cap-image__img / cap-input__field / data-captcha قرارداد
         JS سراسری (spCaptchaRefreshAll) هستند — تغییر ندهید.
 --}}
+@props(['point' => null, 'driver' => null])
+
 @php
+    /* فاز ۱۸۵ — رفع «Undefined variable $point»:
+       وقتی کامپوننت بدون ‎point فراخوانی می‌شود (فرم تماس، بازیابی رمز و …)
+       متغیر تعریف‌نشده بود و در PHP 8 خطای ErrorException می‌داد.
+       با @props هر دو پراپ با مقدار پیش‌فرض همیشه تعریف‌شده‌اند؛
+       رفتار قبلی (بدون point = کپچای تصویری ساده) دقیقاً حفظ شده است. */
+
     $name = $attributes->get('name', 'captcha');
 
     $driverAware = filled($point);

@@ -2454,12 +2454,12 @@ a.image-data-src{
 }
 
 .site-slider.product-slider-colorful .parent::before {
-    background: var(--main-color-one);
+    background: var(--before-background-colorful, --main-color-two);
 }
 
 
 .site-slider.theme-2 .parent::before {
-    background: var(--before-background-colorful, --main-color-two);;
+    background: var(--main-color-two);
 }
 
 

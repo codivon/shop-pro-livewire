@@ -1,11 +1,11 @@
-{{-- گرید محصولات شماره‌دار سانیار (products-row) --}}
+{{-- اسلایدر محصولات سانیار (product-slider) --}}
 @php
     $variables = get_widget($widget);
     $products = $variables['products'];
 @endphp
 
 @if(count($products))
-    <div class="products-row py-20">
+    <div class="product-slider site-slider py-20">
         <div class="container-fluid">
             <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
                 <div class="title d-flex align-items-center">
@@ -19,33 +19,21 @@
                     </a>
                 </div>
             </div>
-            <div class="parent">
-                <div class="row g-3">
-                    @foreach($products as $product)
-                        <div class="col-lg-3 col-sm-6">
-                            <div class="item bg-white p-2 shadow-box rounded-3">
-                                <div class="row gy-2 align-items-center">
-                                    <div class="col-4">
-                                        <div class="image">
-                                            <img loading="lazy" decoding="async" src="{{ $product->image ? asset($product->image) : asset('/no-image-product.svg') }}" alt="{{ $product->image_alt ?: $product->title }}" class="img-fluid">
-                                        </div>
-                                    </div>
-                                    <div class="col-8">
-                                        <div class="d-flex align-items-center">
-                                            <div class="number me-2">
-                                                <h4 class="font-22 main-color-one-color">{{ $loop->iteration }}</h4>
-                                            </div>
-                                            <a href="{{ route('front.products.show', ['product' => $product]) }}">
-                                                <div class="title">
-                                                    <h6 class="font-14 text-overflow-2">{{ $product->title }}</h6>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
+        </div>
+
+        <div class="parent">
+            <div class="container-fluid">
+                <div class="swiper product-slider-swiper">
+                    <div class="swiper-wrapper">
+                        @foreach($products as $product)
+                            <div class="swiper-slide">
+                                @include('front::partials.product-card', ['product' => $product, 'withTimer' => false, 'hoverBtns' => true])
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
+                    <div class="swiper-button-next d-lg-flex d-none"></div>
+                    <div class="swiper-button-prev d-lg-flex d-none"></div>
+                    <div class="swiper-pagination"></div>
                 </div>
             </div>
         </div>

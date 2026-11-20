@@ -91,7 +91,7 @@ $('#seller-edit-form').submit(function (e) {
                 success: function (data) {
                     if (data == 'success') {
                         $('#post-create-form').data('disabled', true);
-                        window.location.href = form.data('redirect');
+                        window.saniarSoftNavigate ? window.saniarSoftNavigate(form.data('redirect')) : (window.location.href = form.data('redirect'));
                     }
                 },
                 beforeSend: function (xhr) {

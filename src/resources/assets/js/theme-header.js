@@ -242,7 +242,13 @@
                 var term = chipEl.getAttribute('data-term') || '';
                 input.value = term;
                 pushRecent(term);
-                window.location.href = searchPath + '?q=' + encodeURIComponent(term);
+                /* فاز ۱۸۸ — جستجو هم بدون رفرش (SPA)؛ مسیرهای مستثنی مثل قبل لود کامل */
+                var target = searchPath + '?q=' + encodeURIComponent(term);
+                if (window.saniarSoftNavigate) {
+                    window.saniarSoftNavigate(target);
+                } else {
+                    window.location.href = target;
+                }
             });
 
             /* ذخیرهٔ عبارت هنگام جستجو */

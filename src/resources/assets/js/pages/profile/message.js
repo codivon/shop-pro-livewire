@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $(document).on('click', '.show-history', function(e) {
+    $(document).off('click.saniarHistory').on('click.saniarHistory', '.show-history', function(e) {
         e.preventDefault();
 
         var $link = $(this);

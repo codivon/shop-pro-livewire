@@ -113,6 +113,11 @@
 <script src="{{ theme_asset("js/scripts.js") }}?v=12"></script>
 <script src="{{theme_asset('js/main.js')}}?v=20"></script>
 
+{{-- فاز ۱۸۸ — اسکریپت‌های لایووایر و موتور SPA تم، تا ناوبری از چک‌اوت هم بدون رفرش باشد --}}
+@if (class_exists(\Livewire\Livewire::class))
+<livewire:scripts />
+@endif
+
 @stack('scripts')
 
 {!! option('info_scripts') !!}
@@ -132,6 +137,9 @@
         showCustomToast('{{session('toast-warning')}}','warning');
     </script>
 @endif
+
+{{-- فاز ۱۸۸ — موتور SPA تم (intercept کلیک + prefetch) — data-navigate-once تا در ناوبری مجدد اجرا نشود --}}
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=4" data-navigate-once></script>
 
 </body>
 

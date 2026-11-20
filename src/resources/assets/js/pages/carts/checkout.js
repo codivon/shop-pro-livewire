@@ -36,7 +36,9 @@
         });
     }
 
-    $(document).on('change', 'input[name="gateway"]', function () {
+    /* فاز ۱۸۸ — namespace guard: این اسکریپت با هر بازدید SPA از چک‌اوت
+       دوباره اجرا می‌شود؛ هندلرهای delegated قبلی جایگزین می‌شوند نه تکرار */
+    $(document).off('change.saniarGateway').on('change.saniarGateway', 'input[name="gateway"]', function () {
         syncGatewayBoxes();
     });
 
@@ -46,9 +48,12 @@
         syncGatewayBoxes();
 
         // سایدبار / مرسوله‌ها با AJAX جایگزین می‌شوند؛ تولتیپ‌های جدید را فعال کن
-        $(document).ajaxSuccess(function () {
-            setTimeout(initTooltips, 60);
-        });
+        if (!window.__saniarCheckoutAjaxSuccessBound) {
+            window.__saniarCheckoutAjaxSuccessBound = true;
+            $(document).ajaxSuccess(function () {
+                setTimeout(initTooltips, 60);
+            });
+        }
 
         // ---------- هم‌گام‌سازی کلاس disabled دکمه تایید موقعیت نقشه ----------
         // (map-select-scripts.js فقط اتریبیوت disabled را تغییر می‌دهد؛
@@ -64,7 +69,7 @@
         }
 
         // ---------- تایید و ادامه ثبت سفارش ----------
-        $(document).on('click', '#checkout-link', function (e) {
+        $(document).off('click.saniarCheckoutLink').on('click.saniarCheckoutLink', '#checkout-link', function (e) {
             e.preventDefault();
 
             var $form = $('#checkout-form');

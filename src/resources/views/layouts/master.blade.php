@@ -505,7 +505,7 @@
 {{-- پلاگین go-to-top حذف شد؛ دکمهٔ مستطیلی «برگشت به بالا» در theme-header.js --}}
 <script src="{{theme_asset('plugin/rasta-contact/script.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('js/saniar-init.js')}}?v=165" data-navigate-once></script>
-<script src="{{theme_asset('js/theme-header.js')}}?v=25" data-navigate-once></script>
+<script src="{{theme_asset('js/theme-header.js')}}?v=26" data-navigate-once></script>
 
 {{-- اسکریپت‌های عملکردی فروشگاه --}}
 <script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}" data-navigate-once></script>
@@ -530,7 +530,7 @@
 @endif
 
 {{-- موتور SPA تم سانیار (intercept کلیک در فاز capture + Livewire.navigate) — باید بعد از livewire:scripts باشد --}}
-<script src="{{theme_asset('js/saniar-spa.js')}}?v=3" data-navigate-once></script>
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=4" data-navigate-once></script>
 
 @if(session('toast-success'))
     <script data-navigate-once>

@@ -27,13 +27,13 @@ $(function () {
     /* ------------------- انتخاب حالت مودال ------------------- */
 
     /* کلیک روی «افزودن آدرس» → حالت ثبت (اکشن = ذخیره، بدون _method) */
-    $(document).on('click', '#add-address-modal, .user-add-address--box', function () {
+    $(document).off('click.saniarAddrAdd').on('click.saniarAddrAdd', '#add-address-modal, .user-add-address--box', function () {
         $modal.removeData('edit-url');
         $modal.removeData('update-url');
     });
 
     /* کلیک روی «ویرایش» → حالت ویرایش (اکشن = آپدیت + _method=put) */
-    $(document).on('click', '.edit-address-link', function () {
+    $(document).off('click.saniarAddrEdit').on('click.saniarAddrEdit', '.edit-address-link', function () {
         $modal.data('edit-url', $(this).data('url'));
         $modal.data('update-url', $(this).data('updateurl'));
     });
@@ -143,7 +143,7 @@ $(function () {
 
     /* ------------------- آدرس پیش‌فرض ------------------- */
 
-    $(document).on('click', '.profile-address-content .profile-address-info', function () {
+    $(document).off('click.saniarAddrSel').on('click.saniarAddrSel', '.profile-address-content .profile-address-info', function () {
         var item = this;
         $.ajax({
             url: $(item).data('action'),
@@ -175,7 +175,7 @@ $(function () {
 
     /* ------------------- تغییر استان → بارگذاری شهرها ------------------- */
 
-    $(document).on('change', '#province', function () {
+    $(document).off('change.saniarAddrProvince').on('change.saniarAddrProvince', '#province', function () {
         var id = $(this).val();
         var $city = $('#city');
         $city.empty();

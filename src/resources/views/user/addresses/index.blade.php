@@ -322,7 +322,7 @@
     <script src="{{ theme_asset('js/plugins/jquery-validation/jquery.validate.min.js') }}"></script>
 
     <script src="{{ theme_asset('js/plugins/jquery-validation/localization/messages_fa.min.js') }}?v=2"></script>
-    <script src="{{ theme_asset('js/pages/addresses/index.js') }}?v=161"></script>
+    <script src="{{ theme_asset('js/pages/addresses/index.js') }}?v=162"></script>
     <script src="{{ theme_asset('js/pages/addresses/add-edit-address.js?v=2') }}"></script>
 
 @endpush

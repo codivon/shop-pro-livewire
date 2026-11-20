@@ -158,7 +158,7 @@ $('#order-create-form').submit(function (e) {
             data: formData,
             success: function (data) {
                 $('#order-create-form').data('disabled', true);
-                window.location.href = $('#order-create-form').data('redirect');
+                window.saniarSoftNavigate ? window.saniarSoftNavigate($('#order-create-form').data('redirect')) : (window.location.href = $('#order-create-form').data('redirect'));
             },
             beforeSend: function (xhr) {
                 block('#main-card');

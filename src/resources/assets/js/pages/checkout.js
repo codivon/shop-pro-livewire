@@ -45,14 +45,19 @@ function showOrderSubmittingOverlay() {
 /* لوگوی فروشنده‌ها در مرسوله‌ها data-snr-fallback دارد؛ اگر لینک لوگو خراب بود
    (404 یا خالی) با شنوندهٔ capture-phase رویداد error، تصویر پیش‌فرض تم
    جایگزین می‌شود. event error حباب نمی‌خورد، برای همین capture می‌گذاریم. */
-document.addEventListener('error', function (e) {
-    var el = e.target;
-    if (el && el.tagName === 'IMG' && el.dataset && el.dataset.snrFallback
-        && el.src !== el.dataset.snrFallback) {
-        el.src = el.dataset.snrFallback;
-        el.removeAttribute('data-snr-fallback');
-    }
-}, true);
+/* فاز ۱۸۸ — این اسکریپت با هر بازدید SPA از چک‌اوت دوباره اجرا می‌شود؛
+   شنوندهٔ capture فقط یک‌بار ثبت شود */
+if (!window.__saniarImgFallbackBound) {
+    window.__saniarImgFallbackBound = true;
+    document.addEventListener('error', function (e) {
+        var el = e.target;
+        if (el && el.tagName === 'IMG' && el.dataset && el.dataset.snrFallback
+            && el.src !== el.dataset.snrFallback) {
+            el.src = el.dataset.snrFallback;
+            el.removeAttribute('data-snr-fallback');
+        }
+    }, true);
+}
 
 /* چون اسکریپت‌ها انتهای صفحه هستند ممکن است خطای ۴۰۴ بعضی تصاویر قبل از
    ثبت شنونده رخ داده باشد؛ در اولین اجرا هم تصاویر خراب موجود را بررسی کن */
@@ -285,7 +290,7 @@ $(document).ready(function () {
     check_wallet();
 });
 
-$(document).on('change', 'input[name^="carrier_id_"]', function() {
+$(document).off('change.saniarCarrier').on('change.saniarCarrier', 'input[name^="carrier_id_"]', function() {
     const hasPhysical = $('.consignment-container .consignments').length > 0;
     if (!hasPhysical) {
         return; // اگر فقط دانلودی است، کاری نکن
@@ -298,7 +303,7 @@ $(document).on('change', 'input[name^="carrier_id_"]', function() {
     }, 50);
 });
 // رویداد تغییر شهر
-$(document).on('change', '#city, #city_id', function () {
+$(document).off('change.saniarCity').on('change.saniarCity', '#city, #city_id', function () {
     const hasPhysical = $('.consignment-container .consignments').length > 0;
     if (hasPhysical) {
         getFinalPrice(true);
@@ -389,13 +394,16 @@ jQuery('#checkout-form').on('submit', function(e) {
 /* پنل کد تخفیف دیگر مودال/فرم جدا نیست؛ داخل فرم چک‌اوت است و فرم تو در تو
    مجاز نیست، پس ثبت و حذف کد با ایجکسی از طریق دکمه انجام می‌شود. */
 
-$.validator.addMethod('regex', function(value, element, regexp) {
-    var re = new RegExp(regexp);
-    return this.optional(element) || re.test(value);
-}, 'لطفا یک مقدار معتبر وارد کنید');
+/* فاز ۱۸۸ — addMethod دوبار ثبت نشود (در بازدید مجدد SPA خطا می‌داد) */
+if (!$ || !$.validator || !$.validator.methods.regex) {
+    $.validator.addMethod('regex', function(value, element, regexp) {
+        var re = new RegExp(regexp);
+        return this.optional(element) || re.test(value);
+    }, 'لطفا یک مقدار معتبر وارد کنید');
+}
 
 // ثبت کد تخفیف
-$(document).on('click', '#discount-inline-submit', function (e) {
+$(document).off('click.saniarDiscountSubmit').on('click.saniarDiscountSubmit', '#discount-inline-submit', function (e) {
     e.preventDefault();
 
     var $box = $('#discount-inline-box');
@@ -442,7 +450,7 @@ $(document).on('click', '#discount-inline-submit', function (e) {
 });
 
 // حذف کد تخفیف ثبت‌شده
-$(document).on('click', '#discount-inline-remove', function (e) {
+$(document).off('click.saniarDiscountRemove').on('click.saniarDiscountRemove', '#discount-inline-remove', function (e) {
     e.preventDefault();
 
     var $box = $('#discount-inline-box');
@@ -533,7 +541,7 @@ $('.sett-address').click(function () {
 
 // ==================== Reserve ====================
 
-$(document).on('change', 'input[name="reserve"]', function () {
+$(document).off('change.saniarReserve').on('change.saniarReserve', 'input[name="reserve"]', function () {
     var reserve = $('input[name="reserve"]:checked').val();
 
     $.ajax({

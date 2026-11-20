@@ -17,6 +17,10 @@
  *  • فاز ۱۸۷: intercept کلیک در فاز capture + فراخوانی مستقیم
  *    Livewire.navigate — چون Alpine دایرکتیوهای wire:navigate افزوده‌شده
  *    بعد از بوت را init نمی‌کند، این interceptor مسیر قطعیِ SPA است.
+ *  • فاز ۱۸۸: علامت‌گذاری با x-navigate.hover (دایرکتیو واقعی Alpine که
+ *    بعد از boot هم روی تغییر اتریبیوت init می‌شود) ⇒ hover/press-prefetch
+ *    خودکار ⇒ ناوبری ~۱۸ms از cache. پوشش SPA گسترش یافت: صفحات پرداخت
+ *    (سبد/چک‌اوت/نتیجهٔ پرداخت)، کیف پول، مقایسه، پروفایل، فروشنده و نظرات.
  *  • بعد از هر ناوبری: لینک‌های تازه علامت می‌خورند، initهای تم
  *    (window.saniarReinit) اجرا می‌شوند و head نرمال‌سازی می‌شود.
  * =========================================================================
@@ -32,15 +36,23 @@
             'یا روی سرور اجرا کنید: composer require livewire/livewire');
     }
 
-    /* اولین سگمنت مسیرهایی که باید «لود کامل» بمانند */
+    /* اولین سگمنت مسیرهایی که باید «لود کامل» بمانند.
+       فاز ۱۸۸ — فقط مسیرهای واقعاً حساس مستثنی ماندند؛ صفحات پرداخت
+       (سبد/چک‌اوت/نتیجهٔ پرداخت)، کیف پول، نظرات، مقایسه، پروفایل و
+       فروشنده حالا SPA هستند. ورود/ثبت‌نام/کپچا/ادمین لود کامل. */
     var SPA_EXCLUDE_SEGMENTS = [
-        'cart', 'checkout', 'orderResultInfo',
         'login', 'register', 'verify', 'change-username', 'welcome', 'password',
-        'profile', 'wallet', 'reviews', 'compare', 'form', 'contact',
-        'admin', 'install', 'setup', 'newsletter', 'seller'
+        'form', 'contact', 'newsletter',
+        'admin', 'install', 'setup'
     ];
 
-    var NAV_ATTR = 'wire:navigate';
+    /* فاز ۱۸۸ — اتریبیوت واقعیِ دایرکتیو Alpine.
+       در این هسته wire:navigate فقط «هنگام init المان» به x-navigate ترجمه
+       می‌شود؛ اما Alpine بعد از boot فقط «تغییر اتریبیوت» المان‌های موجود
+       را پردازش می‌کند (onAttributesAdded). پس مستقیماً x-navigate.hover
+       می‌گذاریم تا hover-prefetch (۶۰ms) + press-prefetch + کلیکِ نتیجه از
+       خودِ Alpine فعال شود — ناوبری از cache: ~۱۸ms به‌جای ~۵۵۰ms. */
+    var NAV_ATTR = 'x-navigate.hover';
 
     /* لینک‌هایی که رفتار JS خاصی رویشان سوار است — هرگز wire:navigate نگیرند */
     var JS_HANDLED_SELECTOR = [
@@ -62,9 +74,8 @@
         if (SPA_EXCLUDE_SEGMENTS.indexOf(firstSegment(pathname)) !== -1) {
             return true;
         }
-        /* لینک‌های دانلود، مقایسه و نقشهٔ آدرس‌ها */
+        /* لینک‌های دانلود (فایل واقعی — هرگز SPA)؛ فاز ۱۸۸: مقایسه SPA شد */
         if (/\/download(\/|$)/i.test(pathname || '')) { return true; }
-        if (/\/compare(\/|$)/i.test(pathname || '')) { return true; }
         return false;
     }
 
@@ -240,6 +251,25 @@
         normalizeHead();       /* ضدتکرار متا/کنonical برای SEO */
         runReinits();          /* initهای تم روی DOM تازه */
     }
+
+    /* فاز ۱۸۸ — ناوبری نرم عمومی برای ریدایرکت‌های JS تم
+       (مثل data.redirect در جریان سبد/چک‌اوت یا جستجو).
+       اگر مسیر SPA باشد → Livewire.navigate (از prefetch cache هم استفاده می‌کند)؛
+       وگرنه (خارج/مستثنی/نبود Livewire) → لود عادی مثل قبل. */
+    window.saniarSoftNavigate = function (url) {
+        try {
+            var u = new URL(url, window.location.origin);
+            if (u.origin === window.location.origin
+                && !isExcludedPath(u.pathname)
+                && window.Livewire
+                && typeof window.Livewire.navigate === 'function') {
+                window.Livewire.navigate(u.href);
+                return true;
+            }
+        } catch (e) { /* url نامعتبر → لود عادی */ }
+        window.location.href = url;
+        return false;
+    };
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', enhance);

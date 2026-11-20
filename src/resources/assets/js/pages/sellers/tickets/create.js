@@ -29,7 +29,7 @@ $('#ticket-create-form').submit(function(e) {
                     confirmButtonText: 'باشه',
                 }).then(function() {
                     $('#ticket-create-form').data('disabled', true);
-                    window.location.href = form.data('redirect');
+                    window.saniarSoftNavigate ? window.saniarSoftNavigate(form.data('redirect')) : (window.location.href = form.data('redirect'));
                 });
             },
 

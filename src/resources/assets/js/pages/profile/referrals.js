@@ -74,5 +74,5 @@ function shareTwitter(e){
 function shareEmail(e){
     e.preventDefault();
     const url = 'mailto:?subject=' + encodeURIComponent('دعوت به عضویت') + '&body=' + encodeURIComponent('با این لینک ثبت‌نام کن و تخفیف بگیر! ' + referralLink);
-    window.location.href = url;
+    window.saniarSoftNavigate ? window.saniarSoftNavigate(url) : (window.location.href = url);
 }

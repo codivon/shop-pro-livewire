@@ -144,20 +144,26 @@
         initTouchspin();
 
         /* بعد از رندر مجدد ناحیهٔ سبد، شمارشگرها دوباره فعال شوند (حالت موفق) */
-        $(document).ajaxSuccess(function () {
-            initTouchspin();
-        });
+        /* فاز ۱۸۸ — با هر بازدید SPA از صفحهٔ سبد، این اسکریپت دوباره اجرا می‌شود؛
+           ajaxSuccess فقط یک‌بار ثبت شود (وگرنه N بار اجرا می‌شد) */
+        if (!window.__saniarCartAjaxSuccessBound) {
+            window.__saniarCartAjaxSuccessBound = true;
+            $(document).ajaxSuccess(function () {
+                initTouchspin();
+            });
+        }
 
         /* تولتیپ‌های سانیار (Bootstrap 5) */
         initTooltips();
 
         /* تغییر تعداد → ذخیرهٔ خودکار (بدون دکمهٔ بروزرسانی) */
-        $(document).on('change', '#cart-update-form input.cart_quantity', function () {
+        /* فاز ۱۸۸ — namespace guard: با بازدید مجدد SPA، هندلر قبلی جایگزین می‌شود نه تکرار */
+        $(document).off('change.saniarCart').on('change.saniarCart', '#cart-update-form input.cart_quantity', function () {
             scheduleCartSync();
         });
 
         /* دکمهٔ «بروزرسانی سبد خرید» هم بدون رفرش صفحه همان کار را می‌کند */
-        $(document).on('click', '#update-cart', function (e) {
+        $(document).off('click.saniarCartUpdate').on('click.saniarCartUpdate', '#update-cart', function (e) {
             e.preventDefault();
             if (!$('#cart-update-form').length) return;
             clearTimeout(syncTimer);
@@ -170,7 +176,7 @@
            قبلاً این دکمه در صفحهٔ سبد هیچ کاری نمی‌کرد، چون هندلرهای عمومی فقط
            فرم #checkout-form صفحهٔ پرداخت را تریگر می‌کردند که در صفحهٔ سبد
            وجود ندارد (رفع باگ «وارد مرحله بعد نمیشه»). */
-        $(document).on('click', '#checkout-link', function (e) {
+        $(document).off('click.saniarCartCheckout').on('click.saniarCartCheckout', '#checkout-link', function (e) {
             if (!$('#cart-update-form').length) {
                 return; /* صفحهٔ پرداخت — هندلر خودش در checkout.js است */
             }
@@ -191,7 +197,12 @@
                 data: $('#cart-update-form').serialize(),
                 success: function (res) {
                     applyCartPayload(res);
-                    window.location.href = redirectUrl;
+                    /* فاز ۱۸۸ — رفتن به صفحهٔ پرداخت بدون رفرش (SPA) */
+                    if (window.saniarSoftNavigate) {
+                        window.saniarSoftNavigate(redirectUrl);
+                    } else {
+                        window.location.href = redirectUrl;
+                    }
                 },
                 error: function (request) {
                     var res = request.responseJSON;
@@ -220,7 +231,7 @@
 
         /* ------------------ حذف محصول ------------------ */
 
-        $(document).on('click', '.remove-card', function (e) {
+        $(document).off('click.saniarCartRemove').on('click.saniarCartRemove', '.remove-card', function (e) {
             e.preventDefault();
             $('#delete-form').attr('action', $(this).data('action'));
             if (window.jQuery.fn.modal) {
@@ -231,7 +242,7 @@
         });
 
         /* تأیید حذف در مودال → AJAX DELETE بدون رفرش */
-        $(document).on('submit', '#delete-form', function (e) {
+        $(document).off('submit.saniarCartDelete').on('submit.saniarCartDelete', '#delete-form', function (e) {
             e.preventDefault();
 
             var $form = $(this);

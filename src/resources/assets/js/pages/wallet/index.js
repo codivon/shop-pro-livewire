@@ -20,7 +20,7 @@ $('.show-history').on('click', function () {
 
 $('.amount-input').attr('autocomplete', 'off');
 
-$(document).on('keyup', '.amount-input', function () {
+$(document).off('keyup.saniarWallet').on('keyup.saniarWallet', '.amount-input', function () {
     if (!$(this).val()) {
         $(this).next('.form-text').remove();
         return;

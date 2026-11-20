@@ -61,13 +61,12 @@ class SetupFinalizer
                     @unlink($link);
                 }
 
-                // پوشه‌ی واقعیِ کپی‌شده که محتوا دارد؟ کاری نکن
-                if (is_dir($link)) {
-                    $entries = @scandir($link);
-
-                    if (is_array($entries) && count($entries) > 2) {
-                        continue;
-                    }
+                // پوشه‌ی واقعیِ کپی‌شده که «دارایی واقعی» دارد؟ کاری نکن
+                /* فاز ۱۹۰ — شمار scandir مارکر .shoplink-copy را هم «محتوا» می‌گرفت؛
+                 * نتیجه: کپیِ خرابِ فقط-مارکر برای همیشه دست‌نخورده می‌ماند. حالا فقط
+                 * وجود فایل دارایی واقعی (غیر از مارکر) باعث صرف‌نظر می‌شود. */
+                if (is_dir($link) && ThemeAssetLinker::hasRealAssets($link)) {
+                    continue;
                 }
 
                 // والد + خود مسیر تضمین‌شده ساخته شوند (علت اصلی شکست بی‌صدای قبلی)
@@ -80,8 +79,16 @@ class SetupFinalizer
                 }
 
                 if (is_dir($target)) {
-                    \Illuminate\Support\Facades\File::copyDirectory($target, $link);
-                    \Illuminate\Support\Facades\Log::info('SetupFinalizer: theme assets copied to public', ['link' => $link]);
+                    /* فاز ۱۹۰ — کپی تأییدشده: File::copyDirectory در شکست هر فایل
+                     * فقط false برمی‌گرداند و «کپیِ بی‌صدای تهی» همان علت گزارش
+                     * «فقط .shoplink-copy در public ساخته می‌شود» بود. حالا کپی در
+                     * پوشهٔ موقت + جابه‌جایی اتمیک انجام می‌شود و شکست با پیام علت
+                     * لاگ می‌شود (اما زنجیرهٔ نصب را نمی‌شکند — catch پایین). */
+                    ThemeAssetLinker::copyDirectoryVerified($target, $link);
+                    \Illuminate\Support\Facades\Log::info('SetupFinalizer: theme assets copied to public', [
+                        'link'  => $link,
+                        'files' => ThemeAssetLinker::countFiles($link),
+                    ]);
                 }
             } catch (\Throwable $e) {
                 report($e);

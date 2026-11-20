@@ -263,9 +263,25 @@ class ThemeSetupRunner
                 'copy'         => 'symlink روی این هاست در دسترس نبود؛ دارایی‌ها کپی شدند (public/themes/'.$theme.').',
             ];
 
-            // فاز ۱۸۹ — پیام وضعیتِ «پوشهٔ خالی که بازسازی شد» به‌جای پیام گمراه‌کنندهٔ قبلی
+            // فاز ۱۹۰ — پیام وضعیتِ «پوشهٔ خالی که بازسازی شد» به‌جای پیام گمراه‌کنندهٔ قبلی
             if ($wasEmptyPublicDir && in_array($mode, ['symlink', 'exec', 'copy'], true)) {
                 $messages[$mode] .= ' (پوشهٔ قبلی خالی بود و بازسازی شد — ریشهٔ ۴۰۴ شدن دارایی‌ها)';
+            } elseif ($mode === 'copy') {
+                // فاز ۱۹۰ — شمار فایل‌های منتشرشده برای تشخیص سریع کپی خراب
+                $copiedCount = 0;
+
+                try {
+                    foreach (File::allFiles($link) as $f) {
+                        if ($f->getFilename() !== ThemeAssetLinker::COPY_MARKER) {
+                            $copiedCount++;
+                        }
+                    }
+                } catch (Throwable) {
+                }
+
+                $messages['copy'] = $copiedCount > 0
+                    ? 'symlink روی این هاست در دسترس نبود؛ دارایی‌ها کپی شدند (public/themes/'.$theme.' — '.$copiedCount.' فایل).'
+                    : 'symlink روی این هاست در دسترس نبود و کپی هم ناموفق بود (public/themes/'.$theme.' خالی ماند).';
             } elseif ($mode === 'existing-dir') {
                 // تعداد فایل‌های موجود برای شفافیت ادمین
                 $fileCount = 0;

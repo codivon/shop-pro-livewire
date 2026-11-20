@@ -91,6 +91,24 @@ class ThemeAssetSync
         // مارکرهای متنی قدیمی به‌صورت ۰ خوانده می‌شوند → یک‌بار نوسازی خودکار
         $stamp = (int) @file_get_contents($marker);
 
+        /* فاز ۱۹۰ — وضعیت «مارکرِ بی‌محتوا»:
+         * فایل .shoplink-copy هست ولی هیچ فایل دارایی دیگری کنارش کپی نشده
+         * (کپیِ بی‌صدای تهی روی هاست‌های اشتراکی). بدون این گارد، چون مُهر mtime
+         * در مارکر واقعی بود، مقایسهٔ maxMtime همیشه «fresh» برمی‌گرداند و
+         * دارایی‌های تم برای همیشه ۴۰۴ می‌ماندند — دقیقاً گزارش کاربر:
+         * «فقط یک فایل .shoplink-copy در public ساخته می‌شود». */
+        if (! ThemeAssetLinker::hasRealAssets($link)) {
+            try {
+                ThemeAssetLinker::linkOrCopy($src, $link);
+
+                return ['status' => 'rebuilt', 'stamp' => self::maxMtime($src)];
+            } catch (Throwable $e) {
+                report($e);
+
+                return ['status' => 'link-failed'];
+            }
+        }
+
         $maxMtime = Cache::remember(self::SCAN_CACHE_KEY.$theme, self::CACHE_TTL, fn () => self::maxMtime($src));
 
         if ($maxMtime <= $stamp && ! $force) {
@@ -106,7 +124,15 @@ class ThemeAssetSync
             File::deleteDirectory($link);
         }
 
-        ThemeAssetLinker::linkOrCopy($src, $link);
+        /* فاز ۱۹۰ — کپی تأییدشده حالا در شکست استثنا می‌دهد؛ اینجا در بوتِ تم هستیم،
+         * اجازه ندهیم استثنا به فرانت برسد و کل صفحه بخوابد. */
+        try {
+            ThemeAssetLinker::linkOrCopy($src, $link);
+        } catch (Throwable $e) {
+            report($e);
+
+            return ['status' => 'link-failed'];
+        }
 
         return ['status' => 'refreshed', 'stamp' => self::maxMtime($src)];
     }

@@ -74,8 +74,14 @@ class ShopLink extends Command
                         File::makeDirectory($link, 0755, true, true);
                     }
 
-                    File::copyDirectory($target, $link);
-                    $this->line("copied theme assets to: {$link}\n");
+                    /* فاز ۱۹۰ — کپی تأییدشده:
+                     * قبلاً File::copyDirectory در شکست هر فایل فقط false برمی‌گرداند
+                     * و «کپیِ بی‌صدای تهی» فقط مارکر/پوشهٔ خالی می‌ساخت و دارایی‌های تم
+                     * ۴۰۴ می‌ماندند. حالا ناقصی → کپی دستی + ثبت خطای واقعی، و شکست کامل
+                     * → استثنا با پیام علت (در همین خط error و لاگ نمایش داده می‌شود). */
+                    $copied = \App\Services\ThemeAssetLinker::copyDirectoryVerified($target, $link);
+
+                    $this->line("copied theme assets to: {$link} ({$copied} files)\n");
                 } catch (\Throwable $e) {
                     report($e);
                     $this->error("failed to publish theme assets to {$link}: " . $e->getMessage());

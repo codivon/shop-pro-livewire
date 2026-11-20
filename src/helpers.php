@@ -339,6 +339,7 @@ function get_widget_uncached($widget)
         case 'middle-brands': {
             /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
             $variables['index_middle_brands'] = Brand::take($widget->option('number', 5) ?: 5)
+                ->whereNOTNULL('image')
                 ->get();
 
             break;

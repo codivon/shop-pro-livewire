@@ -77,6 +77,36 @@ function saniarSwiper(el, config) {
     if (config.navigation.nextEl === undefined) { config.navigation.nextEl = el.querySelector('.swiper-button-next'); }
     if (config.navigation.prevEl === undefined) { config.navigation.prevEl = el.querySelector('.swiper-button-prev'); }
     if (config.pagination.el) { config.pagination.clickable = true; }
+
+    /* فاز ۱۹۶ — مهار مبتنی بر خودِ Swiper (ضد «سوایپ ← پرش به تک‌صفحه»):
+       ====================================================================
+       حساب‌وکتاب ژست در saniar-spa.js هیچ‌وقت صددرصد نمی‌شود؛ اما خودِ Swiper
+       دقیقاً می‌داند کی ژست «سوایپِ تغییردهندهٔ اسلاید» بوده است. با این دو
+       هندلر: هر slideChange که تا ۹۰۰ms پیش از آن touchStart خورده باشد ⇒
+       window.saniarSuppressAfterSwipe (در saniar-spa.js) پنجرهٔ ۷۰۰ms مهارِ
+       mouseup/click را باز می‌کند. تپ سالم هرگز slideChange نمی‌دهد ⇒
+       هرگز مهار نمی‌شود. هندلرهای شخصی‌سازی‌شدهٔ هر اسلایدر هم حفظ می‌شوند. */
+    var userOn = config.on || {};
+    var userTouchStart = userOn.touchStart;
+    var userSlideChange = userOn.slideChange;
+
+    config.on = userOn;
+    config.on.touchStart = function () {
+        try { this.__snrTouchAt = Date.now(); } catch (e) { /* */ }
+        if (typeof userTouchStart === 'function') { return userTouchStart.apply(this, arguments); }
+    };
+    config.on.slideChange = function () {
+        try {
+            if (this.__snrTouchAt
+                && (Date.now() - this.__snrTouchAt) < 900
+                && typeof window.saniarSuppressAfterSwipe === 'function') {
+                window.saniarSuppressAfterSwipe();
+            }
+        } catch (e) { /* هیچ مهاری نباید اسلایدر را بشکند */ }
+
+        if (typeof userSlideChange === 'function') { return userSlideChange.apply(this, arguments); }
+    };
+
     return new Swiper(el, config);
 }
 
@@ -92,6 +122,7 @@ document.querySelectorAll('.js-home-slider').forEach(function (el) {
         spaceBetween: 30,
         centeredSlides: true,
         loop: el.querySelectorAll('.swiper-slide').length > 1,
+        loopAdditionalSlides: 6, /* فاز ۱۹۶ — به‌درخواست کاربر */
         autoplay: {
             delay: 3000,
             disableOnInteraction: false,
@@ -109,6 +140,7 @@ document.querySelectorAll('.js-moment-slider').forEach(function (el) {
         slidesPerView: 1,
         spaceBetween: 30,
         loop: el.querySelectorAll('.swiper-slide').length > 1,
+        loopAdditionalSlides: 6, /* فاز ۱۹۶ — به‌درخواست کاربر */
         autoplay: {
             delay: 3000,
             disableOnInteraction: false,
@@ -154,6 +186,7 @@ document.querySelectorAll('.amazing-slider').forEach(function (root) {
         effect: "fade",
         speed: 1000,
         loop: sliderEl.querySelectorAll('.swiper-slide').length > 1,
+        loopAdditionalSlides: 6, /* فاز ۱۹۶ — به‌درخواست کاربر */
         autoplay: {
             delay: 5000,
             disableOnInteraction: false,
@@ -171,9 +204,18 @@ document.querySelectorAll('.amazing-slider').forEach(function (root) {
 document.querySelectorAll('.product-slider-swiper').forEach(function (el) {
     if (saniarSliderIsLive(el)) { return; }
     saniarMarkSliderBound(el);
+
+    /* فاز ۱۹۶ — loop + loopAdditionalSlides به‌درخواست کاربر:
+       با loop، سوایپِ عبور از انتهای اسلایدر به‌نرمی می‌پیچد (به‌جای گیر
+       و لرزش روی مرز) و با slidesPerView=۵ فقط وقتی اسلاید کافی باشد فعال
+       می‌شود تا Swiper 11 برای چرخش به اسلاید خالی نیاز پیدا نکند. */
+    var productSlides = el.querySelectorAll('.swiper-slide').length;
+
     saniarSwiper(el, {
         slidesPerView: 5,
         spaceBetween: 10,
+        loop: productSlides > 5,
+        loopAdditionalSlides: 6, /* عدد ۶ طبق درخواست کاربر */
         breakpoints: {
             100:  { slidesPerView: 1, spaceBetween: 20 },
             576:  { slidesPerView: 2, spaceBetween: 20 },
@@ -200,6 +242,7 @@ document.querySelectorAll('.saniar-brands__swiper').forEach(function (el) {
         slidesPerView: 6,
         spaceBetween: 12,
         loop: el.querySelectorAll('.swiper-slide').length > 6,
+        loopAdditionalSlides: 6, /* فاز ۱۹۶ — به‌درخواست کاربر */
         autoplay: autoplayEnabled
             ? { delay: autoplaySpeed, disableOnInteraction: false, pauseOnMouseEnter: true }
             : false,

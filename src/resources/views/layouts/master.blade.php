@@ -513,7 +513,7 @@
 <script src="{{theme_asset('plugin/swiper/swiper-bundle.min.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('plugin/timer/timer.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js')}}" data-navigate-once></script>
-<script src="{{theme_asset('js/app.js')}}?v=166" data-navigate-once></script>
+<script src="{{theme_asset('js/app.js')}}?v=167" data-navigate-once></script>
 <script src="{{theme_asset('js/jquery-app.js')}}?v=5" data-navigate-once></script>
 
 {{-- سانیار — پلاگین‌های جانبی تمپلیت --}}
@@ -545,7 +545,7 @@
 @endif
 
 {{-- موتور SPA تم سانیار (intercept کلیک در فاز capture + Livewire.navigate) — باید بعد از livewire:scripts باشد --}}
-<script src="{{theme_asset('js/saniar-spa.js')}}?v=9" data-navigate-once></script>
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=10" data-navigate-once></script>
 
 @if(session('toast-success'))
     <script data-navigate-once>

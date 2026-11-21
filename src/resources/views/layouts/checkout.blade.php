@@ -149,7 +149,7 @@
 @endif
 
 {{-- فاز ۱۸۸ — موتور SPA تم (intercept کلیک + prefetch) — data-navigate-once تا در ناوبری مجدد اجرا نشود --}}
-<script src="{{theme_asset('js/saniar-spa.js')}}?v=9" data-navigate-once></script>
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=10" data-navigate-once></script>
 
 </body>
 

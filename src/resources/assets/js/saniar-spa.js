@@ -33,6 +33,26 @@
  *    ۲) «خروج خودکار از پنل مشتری»: لینک GET /logout هرگز x-navigate نمی‌گیرد؛
  *       وگرنه فقط هاور روی آیتم «خروج» در منو prefetch را اجرا می‌کرد و کاربر
  *       بدون هیچ کلیکی logout می‌شد.
+ *  • فاز ۱۹۶ — ریشهٔ باقی‌ماندهٔ «سوایپ ← پرش به تک‌صفحه» + تماس/فروشنده:
+ *    ۱) مهار مبتنی بر خودِ Swiper: هر slideChange که تا ۹۰۰ms پیش از آن
+ *       touchStart خورده باشد یعنی سوایپِ واقعی است ⇒ window.
+ *       saniarSuppressAfterSwipe ⇒ هر کلیک/mouseup تا ۷۰۰ms بلعیده می‌شود.
+ *       دیگر هیچ سوایپی — حتی چند پیکسلی — از دست گاردها نمی‌زند، بدون
+ *       آنکه تپ‌های سالم (بدون تغییر اسلاید) قربانی شوند.
+ *    ۲) pointerdown/pointerup در فاز capture: رخدادهای pointer قبل از
+ *       touchend می‌آیند و مکانیزم mousedown→mouseup لایووایر ممکن است
+ *       از همین مسیر مسلح/شلیک شود؛ اکنون در همان مرحله مهار می‌شوند.
+ *    ۳) [data-bs-toggle="tooltip"] دیگر لینک را از SPA مستثنی نمی‌کند
+ *       (tooltip با هاور باز می‌شود نه کلیک) — لینک‌های محصولِ اسلایدر
+ *       حالا SPA می‌گیرند و سوایپ روی‌شان هم مهار می‌شود؛ فقط toggleهای
+ *       کلیک‌محور (dropdown/collapse/modal/tab/pill/button/popover)
+ *       مستثنی می‌مانند.
+ *    ۴) صفحهٔ «تماس با ما» حالا SPA است (حذف contact از مستثنی‌ها).
+ *    ۵) مسیرهای «seller» مستثنی شدند: لایوت پنل فروشندگان CSS خودش را با
+ *       data-navigate-track="reload" لود می‌کند و mergeNewHead لایووایر
+ *       لینک‌های CSS قدیمی تم را حذف نمی‌کند ⇒ بعد از ناوبری نرم، CSS تم
+ *       و ادمین همزمان اعمال و صفحه خراب می‌شد؛ حالا مثل /admin لود کامل —
+ *       استایل‌ها همیشه درست، بدون رفرش دستی.
  * =========================================================================
  */
 (function () {
@@ -51,15 +71,21 @@
        (رفع «صفحهٔ لاگین رفرش می‌شود»). صفحهٔ احراز هویت سند کامل خودش را دارد و
        mergeNewHead لایووایر دارایی‌های آن را مدیریت می‌کند؛ نسخه‌های اسکریپت‌های
        مشترک در همهٔ لایوت‌ها یکسان شده است تا اجرای مجدد/خطای redeclaration رخ ندهد.
-       مسیرهای حساس باقی‌مانده (verify/welcome/change-username/password/contact/admin/…) لود کامل.
        فاز ۱۹۵ — «logout» اضافه شد: روت GET /logout یک اکشن مخربِ نشست است؛ اگر
        لینک خروجِ منو x-navigate.hover بگیرد، فقط ۶۰ms هاور روی آیتم «خروج» (بدون
        هیچ کلیکی) prefetch را اجرا می‌کرد و کاربرِ پروفایل بی‌درنگ logout و به
-       صفحهٔ ورود پرت می‌شد — دقیقاً همان «میفتم بیرون وقتی بین منوها می‌گردم». */
+       صفحهٔ ورود پرت می‌شد — دقیقاً همان «میفتم بیرون وقتی بین منوها می‌گردم».
+       فاز ۱۹۶ — «contact» حذف شد (صفحهٔ تماس با ما حالا SPA است؛ اسکریپت‌های
+       پوش‌شدهٔ آن بعد از هر ناوبری توسط navigate لایووایر دوباره اجرا می‌شوند و
+       نقشه/فرم داخل $(document).ready با jQuery آماده بلافاصله مقداردهی می‌شوند).
+       فاز ۱۹۶ — «seller» اضافه شد: لایوت پنل فروشندگان (مهمان + پنل) CSS خودش
+       (Vite + data-navigate-track="reload") را دارد و mergeNewHead لایووایر
+       CSSهای قدیمی تم را حذف نمی‌کند؛ ناوبری نرم به /seller صفحهٔ خراب می‌داد
+       («استایل‌ها لود نمی‌شه، باید رفرش کنم»). لود کامل ⇒ همیشه درست. */
     var SPA_EXCLUDE_SEGMENTS = [
         'verify', 'welcome', 'change-username', 'password', 'logout',
-        'form', 'contact', 'newsletter',
-        'admin', 'install', 'setup'
+        'form', 'newsletter',
+        'admin', 'seller', 'install', 'setup'
     ];
 
     /* فاز ۱۹۵ — لینک‌هایی که هرگز نباید علامت x-navigate بگیرند حتی اگر
@@ -74,11 +100,22 @@
        خودِ Alpine فعال شود — ناوبری از cache: ~۱۸ms به‌جای ~۵۵۰ms. */
     var NAV_ATTR = 'x-navigate.hover';
 
-    /* لینک‌هایی که رفتار JS خاصی رویشان سوار است — هرگز wire:navigate نگیرند */
+    /* لینک‌هایی که رفتار JS خاصی رویشان سوار است — هرگز wire:navigate نگیرند.
+       فاز ۱۹۶ — [data-bs-toggle] کلی به تفکیک مقدار شکسته شد: tooltip و
+       popoverِ هاوری با کلیک کاری ندارند؛ مستثنی‌کردنشان باعث می‌شد لینک‌های
+       محصول داخل اسلایدرها (که data-bs-toggle="tooltip" دارند) علامت SPA
+       نگیرند و با سوایپ/کلیک، ناوبری بومیِ کامل رخ می‌داد. فقط مقادیرِ
+       کلیک‌محور بوت‌استرپ مستثنی می‌مانند. */
     var JS_HANDLED_SELECTOR = [
         '.showSubMenu',
         '[data-no-navigate]',
-        '[data-bs-toggle]',
+        '[data-bs-toggle="dropdown"]',
+        '[data-bs-toggle="collapse"]',
+        '[data-bs-toggle="modal"]',
+        '[data-bs-toggle="tab"]',
+        '[data-bs-toggle="pill"]',
+        '[data-bs-toggle="button"]',
+        '[data-bs-toggle="popover"]',
         '[data-action]',
         '[data-fancybox]',
         '[data-magnify]',
@@ -318,9 +355,39 @@
         return Date.now() < dragState.suppressUntil;
     }
 
+    /* فاز ۱۹۶ — مهارِ مبتنی بر خودِ Swiper (لایهٔ قطعی ضد «سوایپ ← پرش به تک‌صفحه»):
+       ====================================================================
+       حساب‌وکتاب ژست (travelX/آستانه) هیچ‌وقت صددرصد نمی‌شود: سوایپ‌های چند
+       پیکسلی که Swiper با shortSwipes می‌فهمد ولی زیر آستانهٔ ما هستند و
+       رخدادهای pointer که قبل از touchend می‌آیند، از فیلترهای قبلی می‌گذشتند
+       و کاربر باز «با اسلاید کردن به تک‌صفحه می‌رفت».
+       راه‌حل ریشه‌ای: خودِ Swiper بهترین داور است — اگر slideChange تا ۹۰۰ms
+       بعد از touchStart رخ داده باشد، این ژست قطعاً «سوایپِ تغییردهندهٔ
+       اسلاید» بوده است ⇒ پنجرهٔ مهار ۷۰۰ms باز می‌شود و هر mouseup/clickِ
+       بعدی (مسیر ناوبری x-navigate و ناوبری بومی) بلعیده می‌شود.
+       در مقابل، تپ سالم هیچ slideChangeای نمی‌دهد ⇒ هرگز مهار نمی‌شود ⇒
+       تپ روی محصولات اسلایدر کاملاً سالم می‌ماند (بدون تنشِ آستانه).
+       app.js این تابع را از هندلرهای touchStart/slideChange همهٔ اسلایدرها
+       (saniarSwiper) صدا می‌زند. */
+    window.saniarSuppressAfterSwipe = function () {
+        dragState.suppressUntil = Date.now() + 700;
+        dragState.lastGestureEnd = Date.now();
+    };
+
     function interceptDragEvents() {
         if (window.__saniarSpaDragBound) { return; }
         window.__saniarSpaDragBound = true;
+
+        /* فاز ۱۹۶ — pointerdown (فاز capture): رخدادهای pointer «قبل از» touch
+           می‌آیند. با ثبتِ ژست لمسی در همین مرحله، هر مسیری که از pointer
+           تغذیه شود (از جمله مکانیزم mousedown→mouseup لایووایر در مرورگرهایی
+           که رخدادهای ترکیبی را زودتر می‌فرستند) از لحظهٔ صفر ردیابی می‌شود. */
+        document.addEventListener('pointerdown', function (e) {
+            if (e.pointerType === 'touch') {
+                dragState.isTouch = true;
+                registerDrag(e.clientX, e.clientY);
+            }
+        }, true);
 
         document.addEventListener('touchstart', function (e) {
             var t = e.touches && e.touches[0];
@@ -368,6 +435,23 @@
 
             if (dragState.suppressUntil && Date.now() < dragState.suppressUntil) {
                 try { e.preventDefault(); } catch (err) { /* بی‌اثر */ }
+            }
+        }, true);
+
+        /* فاز ۱۹۶ — pointerup (فاز capture): در دستگاه‌های لمسی، pointerup «قبل
+           از» touchend می‌آید؛ اگر مکانیزم ناوبری از رخدادهای pointer تغذیه
+           شود، مهارِ ما در touchend دیر است. اینجا در همان لحظهٔ pointerup،
+           اگر ژستِ در جریانِ لمسی جابه‌جایی افقی آشکار داشته باشد، مهار قطعی
+           می‌شود: preventDefault (لغو رخدادهای ماوسِ ترکیبی) +
+           stopImmediatePropagation (خفن‌کردن هر هندلر مسلح‌شده روی المان). */
+        document.addEventListener('pointerup', function (e) {
+            if (e.pointerType !== 'touch') { return; }
+
+            finishDrag(e.clientX, e.clientY);
+
+            if (shouldSuppressGesture()) {
+                try { e.preventDefault(); } catch (err) { /* بی‌اثر */ }
+                e.stopImmediatePropagation();
             }
         }, true);
 
@@ -432,8 +516,13 @@
             /* فاز ۱۹۴ — suppress یکپارچهٔ gesture (پنجرهٔ ۵۰۰ms + فالبک ۷۰۰ms تاچ)؛
                روی تاچ همه‌جا فعال؛ روی ماوس فقط داخل اسلایدرها (انتخاب متن بیرون
                اسلایدر آسیب نبیند). */
+            /* فاز ۱۹۶ — شرط ماوس از «!e.pointerType» به «e.pointerType !== 'touch'»
+               تغییر کرد: در کرومِ مدرن click خودش PointerEvent با pointerType
+               'mouse' است؛ شرط قبلی این حالت را از چکِ اسلایدر معاف می‌کرد و
+               کلیکِ بعد از درگ/انتخابِ متنِ بیرون اسلایدر هم بلعیده می‌شد.
+               حالا همهٔ کلیک‌های غیرلمسی فقط داخل اسلایدرها مهار می‌شوند. */
             if (shouldSuppressGesture()) {
-                if (!dragState.isTouch && !e.pointerType) {
+                if (!dragState.isTouch && e.pointerType !== 'touch') {
                     var sliderBox = a.closest('.swiper, .owl-carousel, .amazing-slider, .product-slider, .swiper-container, #mainCarousel, #carouselExampleIndicators');
                     if (!sliderBox) { return; }
                 }

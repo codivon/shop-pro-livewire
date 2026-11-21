@@ -218,5 +218,5 @@
     @endif
 
     <script src="{{ theme_asset('js/pages/blog/contact-page-vars.js') }}"></script>
-    <script src="{{ theme_asset('js/pages/contact.js?v=1') }}"></script>
+    <script src="{{ theme_asset('js/pages/contact.js?v=2') }}"></script>
 @endpush

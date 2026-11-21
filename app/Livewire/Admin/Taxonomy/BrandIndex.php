@@ -34,6 +34,9 @@ class BrandIndex extends Component
 
     public string $createDescription = '';
 
+    /** فاز ۱۹۲ — ترتیب نمایش برند جدید */
+    public int $createOrdering = 0;
+
     /** تصویر برند جدید (Livewire TemporaryUploadedFile) */
     public $createImage = null;
 
@@ -69,7 +72,9 @@ class BrandIndex extends Component
                         ->orWhere('slug', 'like', $term);
                 });
             })
-            ->latest()
+            /* فاز ۱۹۲ — مرتب‌سازی بر اساس ترتیب نمایش (وقتی ستون موجود است)؛
+               وگرنه مثل قبل جدیدترین‌ها اول */
+            ->when(BrandForm::orderingColumnExists(), fn ($query) => $query->orderBy('ordering')->orderBy('id'), fn ($query) => $query->latest())
             ->paginate($this->perPage);
     }
 
@@ -115,10 +120,24 @@ class BrandIndex extends Component
         $data['slug'] = $this->createSlug;
         $data['description'] = $this->createDescription ?: null;
 
-        // الگوی ذخیره قدیمی حفظ شد: public/uploads/brands/{uniqid}_{time}.{ext} + مسیر /uploads/brands/ در DB
+        /* فاز ۱۹۲ — ترتیب نمایش برند جدید (فقط وقتی ستون موجود است) */
+        if (BrandForm::orderingColumnExists()) {
+            $data['ordering'] = max(0, (int) $this->createOrdering);
+        }
+
+        // فاز ۱۹۲ — دیسک صریح «local» (ریشهٔ public/uploads) + تأیید ذخیره؛
+        // آپلود بی‌صدا نباید مسیر خراب در DB بگذارد
         if ($this->createImage) {
             $name = uniqid() . '_' . time() . '.' . $this->createImage->getClientOriginalExtension();
-            $this->createImage->storeAs('brands', $name);
+            $stored = $this->createImage->storeAs('brands', $name, 'local');
+
+            if ($stored === false || ! Storage::disk('local')->exists('brands/' . $name)) {
+                report(new \RuntimeException('برند: ذخیرهٔ تصویر در public/uploads/brands شکست خورد (دسترسی نوشتن پوشه را بررسی کنید).'));
+
+                $this->dispatch('toast', message: 'ذخیرهٔ تصویر برند ناموفق بود؛ دسترسی نوشتن پوشهٔ uploads را بررسی کنید.', type: 'error');
+
+                return;
+            }
 
             $data['image'] = '/uploads/brands/' . $name;
         }
@@ -127,7 +146,7 @@ class BrandIndex extends Component
 
         Brand::create($data);
 
-        $this->reset(['createName', 'createSlug', 'createDescription', 'createImage']);
+        $this->reset(['createName', 'createSlug', 'createDescription', 'createImage', 'createOrdering']);
 
         $this->dispatch('toast', message: 'برند با موفقیت ایجاد شد.', type: 'success');
     }
@@ -172,7 +191,7 @@ class BrandIndex extends Component
 
         if ($brand) {
             if ($brand->image) {
-                Storage::disk('public')->delete(ltrim($brand->image, '/'));
+                Storage::disk('local')->delete(ltrim($brand->image, '/'));
             }
 
             // برابری FK قدیمی (products.brand_id onDelete set null) — قابل‌حمل بین SQLite/MySQL

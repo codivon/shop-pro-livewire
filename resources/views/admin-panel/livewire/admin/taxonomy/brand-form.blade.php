@@ -55,30 +55,49 @@
                 @error('description') <p class="mt-1.5 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            {{-- فاز ۱۹۱ — نمایش در صفحهٔ اصلی --}}
-            @php $showOnHomeColumn = \App\Livewire\Admin\Taxonomy\BrandForm::showOnHomeColumnExists(); @endphp
-            <label class="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-line p-3.5 transition-colors hover:border-brand-300 dark:border-night-line dark:hover:border-brand-500/40"
-                   for="brand-show-on-home">
-                <span class="flex items-start gap-2.5">
-                    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
-                        <x-admin-panel::icon name="house" class="size-4" />
-                    </span>
-                    <span>
-                        <span class="block text-xs font-bold">نمایش در صفحهٔ اصلی</span>
-                        <span class="mt-0.5 block text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
-                            @if ($showOnHomeColumn)
-                                فقط برندهای فعال‌شده در ویجت «برندها»ی صفحهٔ اصلی نمایش داده می‌شوند.
-                            @else
-                                <span class="text-amber-600 dark:text-amber-400">ستون <code class="ltr">show_on_home</code> هنوز به جدول برندها اضافه نشده است؛ پس از افزودن ستون، این گزینه فعال می‌شود.</span>
-                            @endif
+            {{-- فاز ۱۹۲ — ترتیب نمایش + فاز ۱۹۱ نمایش در صفحهٔ اصلی (کنار هم) --}}
+            @php
+                $showOnHomeColumn = \App\Livewire\Admin\Taxonomy\BrandForm::showOnHomeColumnExists();
+                $orderingColumn   = \App\Livewire\Admin\Taxonomy\BrandForm::orderingColumnExists();
+            @endphp
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold" for="brand-ordering">ترتیب نمایش</label>
+                    <input id="brand-ordering" type="number" min="0" step="1" wire:model="ordering"
+                           class="ap-input fa-digits" placeholder="0" @if (! $orderingColumn) disabled @endif>
+                    <p class="mt-1.5 text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
+                        @if ($orderingColumn)
+                            عدد کوچک‌تر = اولویت بالاتر در ویجت «برندها»ی صفحهٔ اصلی و لیست ادمین.
+                        @else
+                            <span class="text-amber-600 dark:text-amber-400">ستون <code class="ltr">ordering</code> هنوز به جدول برندها اضافه نشده است؛ پس از اجرای مایگریشن، این فیلد فعال می‌شود.</span>
+                        @endif
+                    </p>
+                    @error('ordering') <p class="mt-1.5 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <label class="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-line p-3.5 transition-colors hover:border-brand-300 dark:border-night-line dark:hover:border-brand-500/40"
+                       for="brand-show-on-home">
+                    <span class="flex items-start gap-2.5">
+                        <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
+                            <x-admin-panel::icon name="house" class="size-4" />
+                        </span>
+                        <span>
+                            <span class="block text-xs font-bold">نمایش در صفحهٔ اصلی</span>
+                            <span class="mt-0.5 block text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
+                                @if ($showOnHomeColumn)
+                                    فقط برندهای فعال‌شده در ویجت «برندها»ی صفحهٔ اصلی نمایش داده می‌شوند.
+                                @else
+                                    <span class="text-amber-600 dark:text-amber-400">ستون <code class="ltr">show_on_home</code> هنوز به جدول برندها اضافه نشده است؛ پس از افزودن ستون، این گزینه فعال می‌شود.</span>
+                                @endif
+                            </span>
                         </span>
                     </span>
-                </span>
-                <input id="brand-show-on-home" type="checkbox" wire:model="show_on_home"
-                       class="peer sr-only" @if (! $showOnHomeColumn) disabled @endif>
-                <span class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-surface-3 transition-colors peer-checked:bg-brand-600 dark:bg-night-3 dark:peer-checked:bg-brand-500
-                             after:absolute after:top-0.5 after:start-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-[-20px] rtl:peer-checked:after:translate-x-[-20px] ltr:peer-checked:after:translate-x-5"></span>
-            </label>
+                    <input id="brand-show-on-home" type="checkbox" wire:model="show_on_home"
+                           class="peer sr-only" @if (! $showOnHomeColumn) disabled @endif>
+                    <span class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-surface-3 transition-colors peer-checked:bg-brand-600 dark:bg-night-3 dark:peer-checked:bg-brand-500
+                                 after:absolute after:top-0.5 after:start-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-[-20px] rtl:peer-checked:after:translate-x-[-20px] ltr:peer-checked:after:translate-x-5"></span>
+                </label>
+            </div>
 
             {{-- تصویر فعلی + جایگزینی --}}
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -86,6 +105,7 @@
                     <p class="mb-1.5 text-xs font-semibold">تصویر فعلی</p>
                     <img src="{{ $brand->image ? asset($brand->image) : asset('/empty.svg') }}"
                          alt="{{ $brand->name }}"
+                         onerror="this.onerror=null;this.src='{{ asset('/empty.svg') }}';"
                          class="h-24 w-24 rounded-2xl border border-line object-cover dark:border-night-line">
                 </div>
                 <div>

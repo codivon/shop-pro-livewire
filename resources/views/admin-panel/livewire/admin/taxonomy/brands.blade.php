@@ -56,11 +56,20 @@
                                       file:text-xs file:font-semibold file:text-white hover:file:bg-brand-700 dark:border-night-line">
                         @error('createImage') <p class="mt-1.5 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" wire:loading.attr="disabled" wire:target="createBrand" class="ap-btn w-full !py-2">
-                            <x-admin-panel::icon name="plus" class="size-4" />
-                            ایجاد برند
-                        </button>
+                    {{-- فاز ۱۹۲ — ترتیب نمایش + دکمهٔ ایجاد --}}
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold" for="brand-create-ordering">ترتیب</label>
+                            <input id="brand-create-ordering" type="number" min="0" step="1" wire:model="createOrdering"
+                                   class="ap-input !py-2 fa-digits" placeholder="0"
+                                   @if (! \App\Livewire\Admin\Taxonomy\BrandForm::orderingColumnExists()) disabled @endif>
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" wire:loading.attr="disabled" wire:target="createBrand" class="ap-btn w-full !py-2">
+                                <x-admin-panel::icon name="plus" class="size-4" />
+                                ایجاد
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -127,6 +136,7 @@
                         <th class="w-16 px-3 py-3 text-start font-bold">ID</th>
                         <th class="w-16 px-3 py-3 text-start font-bold">تصویر</th>
                         <th class="px-3 py-3 text-start font-bold">نام</th>
+                        <th class="w-20 px-3 py-3 text-start font-bold">ترتیب</th>
                         <th class="px-3 py-3 text-start font-bold">اسلاگ</th>
                         <th class="px-3 py-3 text-start font-bold">توضیحات</th>
                         <th class="px-3 py-3 text-start font-bold">تاریخ ثبت</th>
@@ -141,10 +151,14 @@
                             <td class="px-3 py-3">
                                 <img src="{{ $brand->image ? asset($brand->image) : asset('/empty.svg') }}"
                                      alt="{{ $brand->name }}"
+                                     onerror="this.onerror=null;this.src='{{ asset('/empty.svg') }}';"
                                      class="size-10 rounded-xl border border-line object-cover dark:border-night-line">
                             </td>
                             <td class="max-w-40 px-3 py-3">
                                 <p class="truncate font-semibold">{{ $brand->name }}</p>
+                            </td>
+                            <td class="px-3 py-3">
+                                <span class="fa-digits inline-flex size-7 items-center justify-center rounded-lg bg-surface-2 text-xs font-bold text-ink-2 dark:bg-night-3 dark:text-night-ink-2">{{ $brand->ordering ?? 0 }}</span>
                             </td>
                             <td class="max-w-40 px-3 py-3">
                                 <code class="truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $brand->slug ?? '—' }}</code>
@@ -179,7 +193,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">
+                            <td colspan="8">
                                 <div class="flex flex-col items-center gap-2 py-14 text-ink-3 dark:text-night-ink-2">
                                     <x-admin-panel::icon name="tags" class="size-10 opacity-40" />
                                     <p class="text-sm font-medium">برندی برای نمایش وجود ندارد</p>

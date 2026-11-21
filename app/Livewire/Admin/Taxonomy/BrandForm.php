@@ -29,6 +29,9 @@ class BrandForm extends Component
     /** فاز ۱۹۱ — «نمایش در صفحهٔ اصلی»: فقط برندهای انتخاب‌شده در ویجت برندهای صفحهٔ اصلی نمایش داده می‌شوند */
     public bool $show_on_home = false;
 
+    /** فاز ۱۹۲ — ترتیب نمایش برند (ویجت برندهای صفحهٔ اصلی + لیست ادمین) */
+    public int $ordering = 0;
+
     /** تصویر جدید (اختیاری — در صورت انتخاب، تصویر قبلی حذف می‌شود مثل قدیمی) */
     public $image = null;
 
@@ -49,6 +52,23 @@ class BrandForm extends Component
         return $exists;
     }
 
+    /** فاز ۱۹۲ — آیا ستون ordering روی جدول brands موجود است؟
+     *  (تا قبل از اجرای مایگریشن ویرایش‌شده، فرم/لیست نباید کرش کند) */
+    public static function orderingColumnExists(): bool
+    {
+        static $exists = null;
+
+        if ($exists === null) {
+            try {
+                $exists = Schema::hasColumn((new Brand)->getTable(), 'ordering');
+            } catch (\Throwable) {
+                $exists = false;
+            }
+        }
+
+        return $exists;
+    }
+
     public function mount(Brand $brand): void
     {
         auth('adminPanel')->user()?->can('products.brands') ?: abort(403);
@@ -60,6 +80,9 @@ class BrandForm extends Component
 
         /* فاز ۱۹۱ — مقدار فعلی «نمایش در صفحهٔ اصلی» */
         $this->show_on_home = self::showOnHomeColumnExists() && (bool) $brand->show_on_home;
+
+        /* فاز ۱۹۲ — مقدار فعلی ترتیب نمایش */
+        $this->ordering = (int) ($brand->ordering ?? 0);
     }
 
     public function generateSlug(): void
@@ -78,10 +101,12 @@ class BrandForm extends Component
             'name'        => 'required|unique:brands,name,' . $this->brand->id,
             'slug'        => 'required|unique:brands,slug,' . $this->brand->id,
             'description' => 'nullable|string',
+            'ordering'    => 'nullable|integer|min:0',
         ], [], [
             'name'        => 'نام',
             'slug'        => 'آدرس (slug)',
             'description' => 'توضیحات',
+            'ordering'    => 'ترتیب نمایش',
         ]);
 
         $data['description'] = $this->description ?: null;
@@ -91,15 +116,30 @@ class BrandForm extends Component
             $data['show_on_home'] = $this->show_on_home;
         }
 
+        /* فاز ۱۹۲ — ترتیب نمایش؛ فقط وقتی ستون موجود است ذخیره می‌شود */
+        if (self::orderingColumnExists()) {
+            $data['ordering'] = max(0, (int) $this->ordering);
+        }
+
         if ($this->image) {
             // حذف تصویر قبلی مثل قدیمی (با نرمال‌سازی اسلش ابتدای مسیر)
             if ($this->brand->image) {
-                Storage::disk('public')->delete(ltrim($this->brand->image, '/'));
+                Storage::disk('local')->delete(ltrim($this->brand->image, '/'));
             }
 
-            // الگوی ذخیره قدیمی حفظ شد: public/uploads/brands/{uniqid}_{time}.{ext} + مسیر /uploads/brands/ در DB
+            // فاز ۱۹۲ — دیسک صریح «local» (ریشهٔ public/uploads) تا تغییر
+            // FILESYSTEM_DRIVER در .env مسیر ذخیره را از مسیر DB جدا نکند
             $name = uniqid() . '_' . time() . '.' . $this->image->getClientOriginalExtension();
-            $this->image->storeAs('brands', $name);
+            $stored = $this->image->storeAs('brands', $name, 'local');
+
+            if ($stored === false || ! Storage::disk('local')->exists('brands/' . $name)) {
+                // فاز ۱۹۲ — آپلود بی‌صدا نباید شکست بخورد؛ مسیر خراب در DB ذخیره نشود
+                report(new \RuntimeException('برند: ذخیرهٔ تصویر در public/uploads/brands شکست خورد (دسترسی نوشتن پوشه را بررسی کنید).'));
+
+                session()->flash('np-toast', ['type' => 'error', 'message' => 'ذخیرهٔ تصویر برند ناموفق بود؛ دسترسی نوشتن پوشهٔ uploads را بررسی کنید.']);
+
+                return;
+            }
 
             $data['image'] = '/uploads/brands/' . $name;
         }

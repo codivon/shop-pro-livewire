@@ -2,70 +2,86 @@
 
 @section('user-content')
 
-    {{-- بازدیدهای اخیر — ساختار کارکردی قبلی با کارت‌های قالب سانیار (favorite.html) --}}
-    <div class="ui-boxs">
-        <div class="ui-box">
-            <div class="ui-box-item ui-box-white">
-                <div class="ui-box-item-title">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="fw-bold">بازدیدهای اخیر</h4>
-                    </div>
-                </div>
-                <div class="ui-box-item-desc">
-                    @if(count($products))
-                        <div class="product-list-row">
-                            @foreach($products as $product)
-                                <div class="product-row">
-                                    <div class="product-row-desc">
-                                        <a href="{{ route('front.products.show', ['product' => $product]) }}">
-                                            <div class="product-row-desc-item">
-                                                <div class="product-row-img">
-                                                    <img src="{{ $product->image ? asset($product->image) : asset('/no-image-product.svg') }}"
-                                                         alt="{{ $product->title }}" width="100">
-                                                </div>
-                                                <div class="product-row-title">
-                                                    <h6>{{ $product->title }}</h6>
-                                                    <div class="d-flex align-items-center gap-1">
-                                                        @for($i=1;$i<=$product->rating;$i++)
-                                                            <i class="bi bi-star-fill text-warning font-12"></i>
-                                                        @endfor
-                                                        @for($i=$product->rating;$i<5;$i++)
-                                                            <i class="bi bi-star text-muted font-12"></i>
-                                                        @endfor
-                                                    </div>
-                                                    <div class="product-price">
-                                                        <p>{{ $product->getLowestPrice() }}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </a>
-                                        <div class="product-row-icon">
-                                            <a href="{{ route('front.products.show', ['product' => $product]) }}"
-                                               class="btn main-color-one-bg btn-sm history-same-product-modal">مشاهده کالا</a>
-                                            <a class="btn btn-danger btn-sm remove-item-profile-history viewer-remove-btn cursor-pointer"
-                                               data-bs-toggle="modal" data-bs-target="#comment-delete-modal"
-                                               data-action="{{ route('front.user.user-history.delete', ['slug' => $product->slug]) }}"
-                                               title="حذف"><i class="bi bi-trash text-white"></i></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="text-center text-muted py-4">چیزی برای نمایش وجود ندارد!</p>
-                    @endif
+    {{-- بازدید های اخیر — بازطراحی کامل فاز ۲۰۰ --}}
+    <div class="usp-scope">
+
+        {{-- سربرگ صفحه --}}
+        <div class="usp-page-head">
+            <div class="usp-page-head-title">
+                <span class="usp-page-head-icon" aria-hidden="true"><i class="bi bi-clock-history"></i></span>
+                <div>
+                    <h2>بازدید های اخیر</h2>
+                    <p>محصولاتی که به‌تازگی مشاهده کرده‌اید</p>
                 </div>
             </div>
         </div>
-    </div>
 
-    @if ($products->links()->paginator->hasPages())
-        <div class="my-paginate mt-4">
-            <nav aria-label="Page navigation">
-                {{$products->links()}}
-            </nav>
+        {{-- لیست محصولات دیده‌شده --}}
+        <div class="usp-card">
+            <div class="usp-card-body">
+                @if(count($products))
+                    <div class="product-list-row">
+                        @foreach($products as $product)
+                            <div class="product-row">
+                                <div class="product-row-desc">
+                                    <a href="{{ route('front.products.show', ['product' => $product]) }}">
+                                        <div class="product-row-desc-item">
+                                            <div class="product-row-img">
+                                                <img src="{{ $product->image ? asset($product->image) : asset('/no-image-product.svg') }}"
+                                                     alt="{{ $product->title }}" width="100">
+                                            </div>
+                                            <div class="product-row-title">
+                                                <h6>{{ $product->title }}</h6>
+                                                <div class="d-flex align-items-center gap-1">
+                                                    @for($i=1;$i<=$product->rating;$i++)
+                                                        <i class="bi bi-star-fill text-warning font-12"></i>
+                                                    @endfor
+                                                    @for($i=$product->rating;$i<5;$i++)
+                                                        <i class="bi bi-star text-muted font-12"></i>
+                                                    @endfor
+                                                </div>
+                                                <div class="product-price">
+                                                    <p>{{ $product->getLowestPrice() }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <div class="product-row-icon">
+                                        <a href="{{ route('front.products.show', ['product' => $product]) }}"
+                                           class="btn main-color-one-bg btn-sm history-same-product-modal">مشاهده کالا</a>
+                                        <a class="btn btn-danger btn-sm remove-item-profile-history viewer-remove-btn cursor-pointer"
+                                           data-bs-toggle="modal" data-bs-target="#comment-delete-modal"
+                                           data-action="{{ route('front.user.user-history.delete', ['slug' => $product->slug]) }}"
+                                           title="حذف"><i class="bi bi-trash text-white"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    {{-- حالت خالی --}}
+                    <div class="usp-empty">
+                        <span class="usp-empty-icon" aria-hidden="true"><i class="bi bi-clock-history"></i></span>
+                        <h6>چیزی برای نمایش وجود ندارد!</h6>
+                        <p>محصولاتی که مشاهده می‌کنید به‌تدریج در این صفحه نمایش داده می‌شوند.</p>
+                        <a href="{{ route('front.products.index') }}" class="btn border-0 main-color-one-bg waves-effect waves-light">
+                            <i class="bi bi-shop text-white"></i> شروع خرید
+                        </a>
+                    </div>
+                @endif
+            </div>
         </div>
-    @endif
+
+        {{-- صفحه‌بندی --}}
+        @if ($products->links()->paginator->hasPages())
+            <div class="my-paginate mt-4">
+                <nav aria-label="Page navigation">
+                    {{$products->links()}}
+                </nav>
+            </div>
+        @endif
+
+    </div>
 
 @endsection
 

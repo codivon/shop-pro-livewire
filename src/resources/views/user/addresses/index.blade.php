@@ -8,96 +8,109 @@
 
 @section('user-content')
 
-    {{-- آدرس های من — ریسکین‌شده با کامپوننت آدرس‌های قالب سانیار (address.html) --}}
-    <div class="ui-boxs">
-        <div class="ui-box">
-            <div class="ui-box-item ui-box-white">
-                <div class="ui-box-item-title">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="fw-bold">آدرس ها</h4>
+    {{-- آدرس های من — بازطراحی کامل فاز ۲۰۰ --}}
+    <div class="usp-scope">
 
-                        <span id="add-address-modal"
-                              class="btn main-color-one-bg btn-sm waves-effect waves-light openMap cursor-pointer"
-                              data-UpdateUrl="{{route('front.addresses.store')}}"
-                              data-bs-toggle="modal" data-bs-target="#add-edit-address-modal">ثبت آدرس جدید <i class="bi bi-plus-circle text-white"></i></span>
-                    </div>
+        {{-- سربرگ صفحه --}}
+        <div class="usp-page-head">
+            <div class="usp-page-head-title">
+                <span class="usp-page-head-icon" aria-hidden="true"><i class="bi bi-pin-map"></i></span>
+                <div>
+                    <h2>آدرس های من</h2>
+                    <p>آدرس‌های ثبت‌شده برای ارسال مرسوله‌های شما</p>
                 </div>
-                <div class="ui-box-item-desc">
-                    <div class="row">
-                        @if($addresses->count())
-                            @foreach($addresses as $address)
-                                <div class="col-md-6 col-12">
-                                    <div class="bg-white card addresses-item mb-4 shadow-sm @if($address->active) profile-stats active border-2 @else profile-stats @endif">
-                                        <div class="p-4">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <h6 class="mb-0">{{@$address->fullname}}</h6>
-                                                <button class="btn btn-danger btn-sm btn-remove-address favorite-remove-btn"
-                                                        data-action="{{ route('front.addresses.destroy', ['address' => $address]) }}"
-                                                        data-bs-toggle="modal" data-bs-target="#addresses-delete-modal">حذف</button>
-                                            </div>
+            </div>
+            <span id="add-address-modal"
+                  class="btn main-color-one-bg btn-sm waves-effect waves-light openMap cursor-pointer"
+                  data-UpdateUrl="{{route('front.addresses.store')}}"
+                  data-bs-toggle="modal" data-bs-target="#add-edit-address-modal">ثبت آدرس جدید <i class="bi bi-plus-circle text-white"></i></span>
+        </div>
 
-                                            <div class="profile-address-content">
-                                                <ul class="profile-address-info list-unstyled m-0" data-action="{{route('front.addresses.active',$address)}}">
-                                                    <li>
-                                                        <div class="profile-address-info-item location d-flex align-items-start py-2">
-                                                            <i class="bi bi-geo-alt main-color-one-color me-2"></i>
-                                                            <span>{{$address->address}}</span>
-                                                        </div>
-                                                    </li>
-                                                    <li>
-                                                        <div class="profile-address-info-item location d-flex align-items-center py-2">
-                                                            <i class="bi bi-envelope main-color-one-color me-2"></i>
-                                                            <span>{{$address->postal_code}}</span>
-                                                        </div>
-                                                    </li>
-                                                    <li>
-                                                        <div class="profile-address-info-item location d-flex align-items-center py-2">
-                                                            <i class="bi bi-telephone main-color-one-color me-2"></i>
-                                                            <span>{{$address->mobile}}</span>
-                                                        </div>
-                                                    </li>
-                                                    <li class="d-flex">
-                                                        <div class="profile-address-info-item location py-2">
-                                                            استان:
-                                                            {{$address->province_name}}
-                                                        </div>
-                                                        <div class="profile-address-info-item location py-2 ms-4">
-                                                            شهر:
-                                                            {{$address->city_name}}
-                                                        </div>
-                                                    </li>
-
-                                                </ul>
-                                                <ul class="list-unstyled mb-0 mt-2">
-                                                    <li class="location-link">
-                                                        <span class="edit-address-link cursor-pointer openMap btn btn-sm btn-outline-secondary"
-                                                              data-UpdateUrl="{{route('front.addresses.update',$address->id)}}"
-                                                              data-url="{{route('front.addresses.show',$address->id)}}"
-                                                              data-bs-toggle="modal" data-bs-target="#add-edit-address-modal">ویرایش
-                                                            نشانی</span>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
+        {{-- لیست آدرس ها --}}
+        @if($addresses->count())
+            <div class="row">
+                @foreach($addresses as $address)
+                    <div class="col-md-6 col-12">
+                        <div class="bg-white card addresses-item mb-4 shadow-sm @if($address->active) profile-stats active border-2 @else profile-stats @endif">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <h6 class="mb-0">{{@$address->fullname}}</h6>
+                                        @if($address->active)
+                                            <span class="usp-badge is-info"><i class="bi bi-check-circle"></i> آدرس پیش‌فرض</span>
+                                        @endif
                                     </div>
+                                    <button class="btn btn-danger btn-sm btn-remove-address favorite-remove-btn"
+                                            data-action="{{ route('front.addresses.destroy', ['address' => $address]) }}"
+                                            data-bs-toggle="modal" data-bs-target="#addresses-delete-modal">حذف</button>
                                 </div>
 
-                            @endforeach
-                        @else
-                            <div class="col-12">
-                                <p class="text-center text-muted py-4">چیزی برای نمایش وجود ندارد!</p>
+                                <div class="profile-address-content">
+                                    <ul class="profile-address-info list-unstyled m-0" data-action="{{route('front.addresses.active',$address)}}">
+                                        <li>
+                                            <div class="profile-address-info-item location d-flex align-items-start py-2">
+                                                <i class="bi bi-geo-alt main-color-one-color me-2"></i>
+                                                <span>{{$address->address}}</span>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="profile-address-info-item location d-flex align-items-center py-2">
+                                                <i class="bi bi-envelope main-color-one-color me-2"></i>
+                                                <span>{{$address->postal_code}}</span>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="profile-address-info-item location d-flex align-items-center py-2">
+                                                <i class="bi bi-telephone main-color-one-color me-2"></i>
+                                                <span>{{$address->mobile}}</span>
+                                            </div>
+                                        </li>
+                                        <li class="d-flex">
+                                            <div class="profile-address-info-item location py-2">
+                                                استان:
+                                                {{$address->province_name}}
+                                            </div>
+                                            <div class="profile-address-info-item location py-2 ms-4">
+                                                شهر:
+                                                {{$address->city_name}}
+                                            </div>
+                                        </li>
+
+                                    </ul>
+                                    <ul class="list-unstyled mb-0 mt-2">
+                                        <li class="location-link">
+                                            <span class="edit-address-link cursor-pointer openMap btn btn-sm btn-outline-secondary"
+                                                  data-UpdateUrl="{{route('front.addresses.update',$address->id)}}"
+                                                  data-url="{{route('front.addresses.show',$address->id)}}"
+                                                  data-bs-toggle="modal" data-bs-target="#add-edit-address-modal">ویرایش
+                                                نشانی</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                        @endif
+                        </div>
                     </div>
 
-                    <div class="my-paginate mt-2 pb-2">
-                        <nav aria-label="Page navigation">
-                            {{$addresses->links("pagination::bootstrap-4")}}
-                        </nav>
+                @endforeach
+            </div>
+
+            <div class="my-paginate mt-2 pb-2">
+                <nav aria-label="Page navigation">
+                    {{$addresses->links("pagination::bootstrap-4")}}
+                </nav>
+            </div>
+        @else
+            <div class="usp-card">
+                <div class="usp-card-body">
+                    <div class="usp-empty">
+                        <span class="usp-empty-icon" aria-hidden="true"><i class="bi bi-geo-alt"></i></span>
+                        <h6>هنوز آدرسی ثبت نکرده‌اید</h6>
+                        <p>برای خرید و ارسال مرسوله‌ها، با دکمهٔ «ثبت آدرس جدید» نخستین آدرس خود را اضافه کنید.</p>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
+
     </div>
 
     <input name="map_api" type="hidden" value="{{ option('map_api') }}">

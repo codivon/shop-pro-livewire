@@ -263,12 +263,14 @@ function get_widget_uncached($widget)
         }
 
         case 'middle-banners': {
-            /* گروه بنرها از تنظیمات خود ابزارک («گروه») + تعداد قابل نمایش */
+            /* گروه بنرها از تنظیمات خود ابزارک («گروه»)
+               فاز ۲۰۰ — تعداد ثابت = ۱ (اسم ابزارک: بنر تکی)
+               (فیلد «تعداد قابل نمایش» از تنظیمات ابزارک حذف شد) */
             $variables['index_middle_banners'] = Banner::whereJsonContains('groups', $widget->option('place', 'index_middle_banners'))
                 ->whereJsonContains('pages', $widget->page)
                 ->where('published', true)
                 ->orderBy('ordering', $widget->option('ordering', 'asc'))
-                ->take($widget->option('number', 1) ?: 1)
+                ->take(1)
                 ->get();
 
             break;
@@ -409,39 +411,39 @@ function get_widget_uncached($widget)
         }
 
         case 'middle-banners-2': {
-            /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
+            /* گروه بنرها از تنظیمات خود ابزارک — فاز ۲۰۰: تعداد ثابت = ۲ */
             $variables['index_middle_2_banners'] = Banner::whereJsonContains('groups', 'index_middle_2_banners')
                 ->whereJsonContains('places', $widget->option('place'))
                 ->whereJsonContains('pages', $widget->page)
                 ->where('published', true)
                 ->orderBy('ordering', $widget->option('ordering', 'asc'))
-                ->take($widget->option('number', 2) ?: 2)
+                ->take(2)
                 ->get();
 
             break;
         }
 
         case 'middle-banners-3': {
-            /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
+            /* گروه بنرها از تنظیمات خود ابزارک — فاز ۲۰۰: تعداد ثابت = ۳ */
             $variables['index_middle_3_banners'] = Banner::whereJsonContains('groups', 'index_middle_3_banners')
                 ->whereJsonContains('places', $widget->option('place'))
                 ->whereJsonContains('pages', $widget->page)
                 ->where('published', true)
                 ->orderBy('ordering', $widget->option('ordering', 'asc'))
-                ->take($widget->option('number', 3) ?: 3)
+                ->take(3)
                 ->get();
 
             break;
         }
 
         case 'middle-banners-4': {
-            /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
+            /* گروه بنرها از تنظیمات خود ابزارک — فاز ۲۰۰: تعداد ثابت = ۴ */
             $variables['index_middle_4_banners'] = Banner::whereJsonContains('groups', 'index_middle_4_banners')
                 ->whereJsonContains('places', $widget->option('place'))
                 ->whereJsonContains('pages', $widget->page)
                 ->where('published', true)
                 ->orderBy('ordering', $widget->option('ordering', 'asc'))
-                ->take($widget->option('number', 4) ?: 4)
+                ->take(4)
                 ->get();
 
             break;
@@ -1287,7 +1289,8 @@ function widget_seeder()
     $homeWidgets = [
         [
             'widget' => ['title' => 'بنر تکی', 'key' => 'middle-banners', 'theme' => $theme, 'ordering' => 1],
-            'options' => [['key' => 'number', 'value' => '1'], ['key' => 'place', 'value' => 'index_banners_place1']]
+            /* فاز ۲۰۰ — گزینهٔ number حذف شد (تعداد برای بنرها ثابت است) */
+            'options' => [['key' => 'place', 'value' => 'index_banners_place1']]
         ],
         [
             'widget' => ['title' => 'اسلایدر اصلی و بنر کناری', 'key' => 'main-slider', 'theme' => $theme, 'ordering' => 2],
@@ -1306,7 +1309,7 @@ function widget_seeder()
         ],
         [
             'widget' => ['title' => 'بنر چهارتایی', 'key' => 'middle-banners-4', 'theme' => $theme, 'ordering' => 5],
-            'options' => [['key' => 'place', 'value' => 'index_banners_place1'], ['key' => 'number', 'value' => '4']]
+            'options' => [['key' => 'place', 'value' => 'index_banners_place1']]
         ],
         [
             'widget' => ['title' => 'محصولات ویژه دو', 'key' => 'products-colorful-block', 'theme' => $theme, 'ordering' => 6],
@@ -1339,7 +1342,7 @@ function widget_seeder()
         ],
         [
             'widget' => ['title' => 'بنر 4 تایی', 'key' => 'middle-banners-4', 'theme' => $theme, 'ordering' => 10],
-            'options' => [['key' => 'place', 'value' => 'index_banners_place2'], ['key' => 'number', 'value' => '4']]
+            'options' => [['key' => 'place', 'value' => 'index_banners_place2']]
         ],
         [
             'widget' => ['title' => 'جدید ترین محصولات', 'key' => 'products-default-block', 'theme' => $theme, 'ordering' => 11],
@@ -1347,7 +1350,7 @@ function widget_seeder()
         ],
         [
             'widget' => ['title' => 'بنر دوتایی', 'key' => 'middle-banners-2', 'theme' => $theme, 'ordering' => 12],
-            'options' => [['key' => 'place', 'value' => 'index_banners_place1'], ['key' => 'number', 'value' => '2']]
+            'options' => [['key' => 'place', 'value' => 'index_banners_place1']]
         ],
         [
             'widget' => ['title' => 'اسلایدر لوگو همکاران', 'key' => 'coworker-sliders', 'theme' => $theme, 'ordering' => 13],
@@ -1355,7 +1358,7 @@ function widget_seeder()
         ],
         [
             'widget' => ['title' => 'بنر تکی', 'key' => 'middle-banners', 'theme' => $theme, 'ordering' => 14],
-            'options' => [['key' => 'place', 'value' => 'index_banners_place2'], ['key' => 'number', 'value' => '10']]
+            'options' => [['key' => 'place', 'value' => 'index_banners_place2']]
         ],
     ];
 

@@ -21,6 +21,8 @@
                             {{-- فاز ۱۸۵ — زیرمنوی تو در تو مثل مگامنو: هر زیرمنو «زیر زیرمنوی پدرش»
                                  در ستون چپ (پنل فرعی) رندر می‌شود؛ دسته‌ای که خودش فرزند دارد
                                  به‌صورت گروه با تیتر پررنگ و فرزندان زیر خودش می‌آید --}}
+                            {{-- فاز ۲۰۰ — همهٔ زیرمنوهای درجه ۲ کلاس snr-mega-group و تگ a
+                                 کلاس title می‌گیرند (به‌درخواست کاربر)؛ فلش فقط برای گروه‌های دارای فرزند --}}
                             @foreach ($category->categories->where('published', true)->values() as $childCategory)
                                 @if (front_category_children($childCategory)->isNotEmpty())
                                     <li class="snr-mega-group">
@@ -32,7 +34,9 @@
                                         </ul>
                                     </li>
                                 @else
-                                    <li><a href="{{ $childCategory->link }}">{{ $childCategory->title }}</a></li>
+                                    <li class="snr-mega-group">
+                                        <a class="title" href="{{ $childCategory->link }}">{{ $childCategory->title }}</a>
+                                    </li>
                                 @endif
                             @endforeach
                         </ul>

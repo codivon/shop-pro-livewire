@@ -116,24 +116,39 @@
         ];
     @endphp
 
-    {{-- جزییات سفارش — ریسکین‌شده با کامپوننت‌های قالب سانیار (order-detail.html) --}}
+    {{-- جزییات سفارش — بازطراحی فاز ۲۰۰ (usp-page-head + کارت‌های قالب سانیار) --}}
+    <div class="usp-scope">
+
+        {{-- سربرگ صفحه --}}
+        <div class="usp-page-head">
+            <div class="usp-page-head-title">
+                <span class="usp-page-head-icon" aria-hidden="true"><i class="bi bi-bag-check"></i></span>
+                <div>
+                    <h2>سفارش #{{ $order->id }}</h2>
+                    <p>ثبت‌شده در {{ jdate($order->created_at)->format('%d %B %Y') }} • وضعیت:
+                        @if($order->status == 'paid')
+                            پرداخت شده
+                        @elseif($order->status == 'unpaid')
+                            در انتظار پرداخت
+                        @else
+                            لغو شده
+                        @endif
+                    </p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <a href="{{ route('front.orders.index') }}" class="btn btn-sm btn-light" title="بازگشت به سفارش‌ها">
+                    <i class="bi bi-arrow-right"></i> بازگشت
+                </a>
+                <a href="{{ route('front.orders.print', $order->id) }}" class="btn btn-sm border-0 main-color-one-bg waves-effect waves-light" target="_blank">
+                    <i class="bi bi-printer text-white"></i> مشاهده فاکتور
+                </a>
+            </div>
+        </div>
+
     <div class="ui-boxs">
         <div class="ui-box">
             <div class="ui-box-item ui-box-white">
-                <div class="ui-box-item-title">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap">
-                        <div class="d-flex align-items-center">
-                            <a href="{{ route('front.orders.index') }}" class="text-dark me-3" title="بازگشت به سفارش‌ها">
-                                <i class="bi bi-arrow-right fs-5"></i>
-                            </a>
-                            <h4 class="fw-bold mb-0">جزئیات سفارش #{{ $order->id }}</h4>
-                        </div>
-                        <a href="{{ route('front.orders.print', $order->id) }}" class="main-color-one-color text-decoration-none" target="_blank">
-                            <i class="bi bi-printer me-1"></i> مشاهده فاکتور
-                        </a>
-                    </div>
-                </div>
-
                 <div class="ui-box-item-desc">
                     {{-- پیام‌ها --}}
                     @if(session('message') == 'ok')
@@ -237,7 +252,7 @@
                                 <div class="text-muted small">نوع پرداخت</div>
                                 <div class="fw-bold">
                                     @if($isInstallment)
-                                        <span class="badge bg-info"><i class="bi bi-cash-coin"></i> اقساطی</span>
+                                        <span class="usp-badge is-info"><i class="bi bi-cash-coin"></i> اقساطی</span>
                                     @elseif ($order->walletHistory)
                                         کیف پول
                                     @else
@@ -251,20 +266,20 @@
                                 <div class="text-muted small">وضعیت پرداخت</div>
                                 <div>
                                     @if($order->status == 'paid')
-                                        <span class="badge bg-success">پرداخت شده</span>
+                                        <span class="usp-badge is-success"><i class="bi bi-check-circle"></i> پرداخت شده</span>
 
                                         @if($isInstallment && $installmentPlan->isActive())
                                             <small class="text-muted d-block mt-1">پیش‌پرداخت انجام شد - طرح اقساطی فعال</small>
                                         @endif
                                     @elseif($order->status == 'unpaid')
                                         @if($isInstallment)
-                                            <span class="badge bg-warning">در انتظار پیش‌پرداخت</span>
+                                            <span class="usp-badge is-warning"><i class="bi bi-clock"></i> در انتظار پیش‌پرداخت</span>
                                             <small class="text-muted d-block mt-1">مهلت پرداخت: تا ۱ ساعت (در غیر این صورت سفارش لغو می‌شود)</small>
                                         @else
-                                            <span class="badge bg-danger">پرداخت نشده</span>
+                                            <span class="usp-badge is-danger"><i class="bi bi-x-circle"></i> پرداخت نشده</span>
                                         @endif
                                     @else
-                                        <span class="badge bg-secondary">لغو شده</span>
+                                        <span class="usp-badge is-muted"><i class="bi bi-slash-circle"></i> لغو شده</span>
                                     @endif
                                 </div>
                             </div>
@@ -378,13 +393,13 @@
                                     @endif
                                     <div>
                                         <span class="fw-bold">{{ $group['seller_name'] }}</span>
-                                        <span class="badge bg-secondary ms-2">مرسوله {{ $loop->iteration }}</span>
+                                        <span class="usp-badge is-info ms-2">مرسوله {{ $loop->iteration }}</span>
                                     </div>
                                 </div>
 
                                 @if($order->status == 'paid')
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <span class="badge" style="background-color: {{ $progressColor }};">{{ $statusSteps[$currentStatus]['label'] }}</span>
+                                        <span class="usp-badge" style="background-color: {{ $progressColor }}; color: #fff;">{{ $statusSteps[$currentStatus]['label'] }}</span>
                                     </div>
                                 @endif
 
@@ -684,7 +699,7 @@
                                         <div class="bg-danger bg-opacity-10 border-0 p-2 rounded-3">
                                             <div class="d-flex align-items-center gap-2">
                                                 <i class="bi bi-slash-circle text-danger fs-5"></i>
-                                                <span class="text-white fw-bold">سفارش لغو شده است</span>
+                                                <span class="text-danger fw-bold">سفارش لغو شده است</span>
                                             </div>
                                             @if($group['cancel_reason'])
                                                 <div class="mt-1 small text-muted">
@@ -782,7 +797,7 @@
                             <div class="d-flex align-items-center gap-2">
                                 <i class="bi bi-chevron-down small"></i>
                                 <span class="fw-bold">تاریخچه تراکنش‌ها</span>
-                                <span class="badge bg-secondary">{{ $order->transactions->count() }}</span>
+                                <span class="usp-badge is-muted">{{ $order->transactions->count() }}</span>
                             </div>
                         </div>
                         <div id="transactions" class="collapse">
@@ -833,6 +848,8 @@
             </div>
         </div>
     </div>
+    </div>
+
     </div>
 
 @endsection

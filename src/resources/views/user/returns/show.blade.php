@@ -10,9 +10,18 @@
 
 <div class="returns-page">
 
-    <div class="returns-header">
-        <a href="{{ route('front.returns.index') }}"><i class="bi bi-arrow-right"></i></a>
-        <h4><i class="fas fa-undo-alt"></i> جزئیات مرجوعی #{{ $returnRequest->id }}</h4>
+    {{-- سربرگ صفحه (فاز ۲۰۰) --}}
+    <div class="usp-page-head">
+        <div class="usp-page-head-title">
+            <span class="usp-page-head-icon is-amber" aria-hidden="true"><i class="bi bi-eye"></i></span>
+            <div>
+                <h2>جزئیات مرجوعی #{{ $returnRequest->id }}</h2>
+                <p>روند بررسی و جزئیات مبلغ بازگشتی این درخواست</p>
+            </div>
+        </div>
+        <a href="{{ route('front.returns.index') }}" class="btn btn-sm btn-light">
+            <i class="bi bi-arrow-right"></i> بازگشت به مرجوعی‌ها
+        </a>
     </div>
 
     @if(session('success'))

@@ -2,20 +2,30 @@
 
 @section('user-content')
 
-    {{-- لیست تیکت ها — ریسکین‌شده با جدول قالب سانیار (ticket.html) --}}
-    <div class="ui-boxs">
-        <div class="ui-box">
-            <div class="ui-box-item ui-box-white">
-                <div class="ui-box-item-title">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="fw-bold">لیست تیکت‌ ها</h4>
-                        <a href="{{ route('front.tickets.create') }}" class="btn btn-sm main-color-one-bg waves-effect waves-light">ثبت تیکت جدید <i class="bi bi-plus-circle text-white"></i></a>
-                    </div>
+    {{-- لیست تیکت ها — بازطراحی کامل فاز ۲۰۰ --}}
+    <div class="usp-scope">
+
+        {{-- سربرگ صفحه --}}
+        <div class="usp-page-head">
+            <div class="usp-page-head-title">
+                <span class="usp-page-head-icon" aria-hidden="true"><i class="bi bi-question-circle"></i></span>
+                <div>
+                    <h2>تیکت های شما</h2>
+                    <p>پیگیری درخواست‌ها و گفت‌وگو با تیم پشتیبانی</p>
                 </div>
-                <div class="ui-box-item-desc p-0">
+            </div>
+            <a href="{{ route('front.tickets.create') }}" class="btn btn-sm main-color-one-bg waves-effect waves-light">
+                <i class="bi bi-plus-circle text-white"></i> ثبت تیکت جدید
+            </a>
+        </div>
+
+        {{-- لیست تیکت ها --}}
+        @if($tickets->count())
+            <div class="usp-card">
+                <div class="usp-card-body p-0">
                     <div class="responsive-table p-0">
-                        <table class="table main-table rounded-0">
-                            <thead class="text-bg-dark bg-opacity-75 text-center">
+                        <table class="table main-table">
+                            <thead>
                             <tr>
                                 <th>#</th>
                                 <th>شماره تیکت</th>
@@ -26,53 +36,63 @@
                                 <th>جزییات</th>
                             </tr>
                             </thead>
-                            <tbody class="text-center">
-                            @if($tickets->count())
-                                @foreach ($tickets as $ticket)
-                                    <tr>
-                                        <td class="font-14">{{ $loop->iteration}}</td>
-                                        <td class="font-14 main-color-one-color">{{ $ticket->id }}</td>
-                                        <td class="font-14">{{ $ticket->subject }}</td>
-                                        <td class="font-14">{{ jdate($ticket->created_at)->format('%d %B %Y') }}</td>
-                                        <td class="font-14">{{ $ticket->priorityText() }}</td>
-                                        <td class="font-14">
-                                            @switch($ticket->status)
-                                                @case('pending')
-                                                    <span class="badge bg-secondary rounded-0">در انتظار پاسخ</span>
-                                                    @break
-                                                @case('answered')
-                                                    <span class="badge bg-success rounded-0">پاسخ داده شده</span>
-                                                    @break
-                                                @case('open')
-                                                    <span class="badge bg-info rounded-0">باز</span>
-                                                    @break
-                                                @default
-                                                    <span class="badge bg-danger rounded-0">بسته</span>
-                                            @endswitch
-                                        </td>
-                                        <td class="font-14">
-                                            <a href="{{ route('front.tickets.show', ['ticket' => $ticket]) }}"
-                                               class="btn btn-sm border-0 main-color-three-bg waves-effect waves-light"> <i class="bi bi-eye me-1 text-white"></i> نمایش</a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            @else
+                            <tbody>
+                            @foreach ($tickets as $ticket)
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">چیزی برای نمایش وجود ندارد!</td>
+                                    <td class="font-14">{{ $loop->iteration}}</td>
+                                    <td class="font-14 main-color-one-color">{{ $ticket->id }}</td>
+                                    <td class="font-14">{{ $ticket->subject }}</td>
+                                    <td class="font-14">{{ jdate($ticket->created_at)->format('%d %B %Y') }}</td>
+                                    <td class="font-14">{{ $ticket->priorityText() }}</td>
+                                    <td class="font-14">
+                                        @switch($ticket->status)
+                                            @case('pending')
+                                                <span class="usp-badge is-warning"><i class="bi bi-hourglass-split"></i> در انتظار پاسخ</span>
+                                                @break
+                                            @case('answered')
+                                                <span class="usp-badge is-success"><i class="bi bi-check-circle"></i> پاسخ داده شده</span>
+                                                @break
+                                            @case('open')
+                                                <span class="usp-badge is-info"><i class="bi bi-envelope-open"></i> باز</span>
+                                                @break
+                                            @default
+                                                <span class="usp-badge is-danger"><i class="bi bi-x-circle"></i> بسته</span>
+                                        @endswitch
+                                    </td>
+                                    <td class="font-14">
+                                        <a href="{{ route('front.tickets.show', ['ticket' => $ticket]) }}"
+                                           class="btn btn-sm border-0 main-color-three-bg waves-effect waves-light"> <i class="bi bi-eye me-1 text-white"></i> نمایش</a>
+                                    </td>
                                 </tr>
-                            @endif
+                            @endforeach
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
 
-                    <div class="my-paginate mt-4 pb-3">
-                        <nav aria-label="Page navigation">
-                            {{$tickets->links("pagination::bootstrap-4")}}
-                        </nav>
+            {{-- صفحه‌بندی --}}
+            <div class="my-paginate mt-4 pb-3">
+                <nav aria-label="Page navigation">
+                    {{$tickets->links("pagination::bootstrap-4")}}
+                </nav>
+            </div>
+        @else
+            {{-- حالت خالی --}}
+            <div class="usp-card">
+                <div class="usp-card-body">
+                    <div class="usp-empty">
+                        <span class="usp-empty-icon" aria-hidden="true"><i class="bi bi-inbox"></i></span>
+                        <h6>هیچ تیکتی ثبت نشده است</h6>
+                        <p>برای ارتباط با تیم پشتیبانی، نخستین تیکت خود را ثبت کنید.</p>
+                        <a href="{{ route('front.tickets.create') }}" class="btn border-0 main-color-one-bg waves-effect waves-light">
+                            <i class="bi bi-plus-circle text-white"></i> ثبت تیکت جدید
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
+
     </div>
 
 @endsection

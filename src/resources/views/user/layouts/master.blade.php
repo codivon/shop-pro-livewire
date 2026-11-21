@@ -1,8 +1,13 @@
 @extends('front::layouts.master')
 
+@push('styles')
+    {{-- فاز ۲۰۰ — استایل بازطراحی‌شدهٔ پنل مشتری (فقط صفحات پنل) --}}
+    <link rel="stylesheet" href="{{ theme_asset('css/user-panel.css') }}?v=200">
+@endpush
+
 @section('content')
 
-    {{-- پنل کاربر — ریسکین‌شده با کامپوننت‌های قالب سانیار (user-panel.html) --}}
+    {{-- پنل کاربر — بازطراحی کامل (فاز ۲۰۰) --}}
     <div class="content">
         <div class="container-fluid">
 
@@ -22,94 +27,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
                     <div class="offcanvas-body">
-                        <div class="panel-side">
-                            <div class="content-box pb-0">
-                                <div class="container-fluid">
-
-                                    <div class="panel-box">
-                                        <div class="d-flex align-items-center">
-                                            <img src="{{ auth('web')->user()->image_url ?? theme_asset('image/user.png') }}"
-                                                 class="img-fluid img-profile-panel rounded-circle me-3 shadow-md" alt="">
-                                            <div class="d-grid gap-2">
-                                                <h6 class="font-14 main-color-one-color">حساب کاربری من</h6>
-                                                <h6 class="font-14">{{ $user->fullname }}</h6>
-                                                <h6 class="font-14 text-muted">{{ $user->mobile }}</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <a href="{{ route('front.wallet.index') }}" class="text-decoration-none">
-                                        <div class="panel-box mt-3">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi bi-wallet2 main-color-one-color font-20 me-2"></i>
-                                                    <h6 class="font-14 mb-0">کیف پول</h6>
-                                                </div>
-                                                <div class="d-flex align-items-baseline">
-                                                    <strong class="font-14 ms-1" title="{{convert_number($user->getWallet()->balance())}}">{{ number_format($user->getWallet()->balance()) }}</strong>
-                                                    <span class="font-12 text-muted">تومان</span>
-                                                </div>
-                                            </div>
-                                            <p class="font-12 text-muted mb-0 mt-2">افزایش موجودی <i class="bi bi-chevron-left font-12"></i></p>
-                                        </div>
-                                    </a>
-
-                                    <div class="profile-box mt-3">
-                                        <nav class="navbar profile-box-nav">
-                                            <ul class="navbar-nav flex-column">
-                                                <li class="nav-item @if(@$active=="profile") active @endif"><a href="{{ route('front.user.profile') }}" class="nav-link">
-                                                        <i class="bi bi-house-door"></i>پروفایل</a>
-                                                </li>
-                                                <li class="nav-item @if(@$active=="orders") active @endif"><a href="{{ route('front.orders.index') }}" class="nav-link">
-                                                        <i class="bi bi-cart-check"></i>همه سفارش ها</a>
-                                                </li>
-
-                                                @if(class_exists(\App\Services\FrontModuleMenuRegistry::class))
-                                                    @foreach(\App\Services\FrontModuleMenuRegistry::all() as $menuView)
-                                                        @if(view()->exists($menuView))
-                                                            @include($menuView)
-                                                        @endif
-                                                    @endforeach
-                                                @endif
-
-                                                <li class="nav-item @if(@$active=="wallet") active @endif"><a href="{{ route('front.wallet.index') }}" class="nav-link">
-                                                        <i class="bi bi-credit-card"></i>کیف پول</a>
-                                                </li>
-                                                <li class="nav-item @if(@$active=="favorites") active @endif"><a href="{{ route('front.favorites.index') }}" class="nav-link">
-                                                        <i class="bi bi-heart"></i>لیست علاقه مندی ها</a>
-                                                </li>
-                                                <li class="nav-item @if(@$active=="comments") active @endif">
-                                                    <a href="{{ route('front.comments.index') }}" class="nav-link">
-                                                        <i class="bi bi-chat-dots"></i>نقد و نظرات</a>
-                                                </li>
-                                                {{-- : «کد های تخفیف معرفی» به پکیج باشگاه مشتریان منتقل شد — بخش معرفی اکنون در صفحهٔ باشگاه مشتریان پنل مشتری است. --}}
-                                                @if(false)
-                                                    <li>
-                                                        <a href="{{ route('front.user.referrals.index') }}" class="nav-link">
-                                                            <i class="bi bi-gift"></i>کد های تخفیف معرفی
-                                                        </a>
-                                                    </li>
-                                                @endif
-                                                <li class="nav-item @if(@$active=="messages") active @endif">
-                                                    <a href="{{ route('front.messages.index') }}" class="nav-link">
-                                                        <i class="bi bi-bell"></i>پیام ها و اطلاعیه ها</a>
-                                                </li>
-                                                <li class="nav-item @if(@$active=="addresses") active @endif"><a href="{{ route('front.addresses.index') }}" class="nav-link">
-                                                        <i class="bi bi-pin-map"></i>آدرس ها</a>
-                                                </li>
-                                                <li class="nav-item @if(@$active=="user-history") active @endif"><a href="{{route('front.user.user-history')}}" class="nav-link"><i class="bi bi-clock-history"></i>بازدید های اخیر</a></li>
-                                                <li class="nav-item @if(@$active=="tickets") active @endif"><a href="{{route('front.tickets.index')}}" class="nav-link"><i class="bi bi-question-circle"></i>تیکت های شما</a></li>
-                                                <li class="nav-item @if(@$active=="profileEdit") active @endif"><a href="{{ route('front.user.profile.edit') }}" class="nav-link">
-                                                        <i class="bi bi-person-gear"></i>اطلاعات شخصی</a>
-                                                </li>
-                                                <li class="nav-item"><a href="{{ route('logout') }}" data-no-navigate class="nav-link"><i class="bi bi-arrow-right-square"></i>خروج از حساب کاربری</a></li>
-                                            </ul>
-                                        </nav>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
+                        @include('front::user.partials.panel-sidebar')
                     </div>
                 </div>
             </div>
@@ -121,94 +39,7 @@
 
                     {{-- start sidebar --}}
                     <div class="col-lg-3 d-lg-block d-none">
-                        <div class="panel-side">
-                            <div class="content-box pb-0">
-                                <div class="container-fluid">
-
-                                    <div class="panel-box">
-                                        <div class="d-flex align-items-center">
-                                            <img src="{{ auth('web')->user()->image_url ?? theme_asset('image/user.png') }}"
-                                                 class="img-fluid img-profile-panel rounded-circle me-3 shadow-md" alt="">
-                                            <div class="d-grid gap-2">
-                                                <h6 class="font-14 main-color-one-color">حساب کاربری من</h6>
-                                                <h6 class="font-14">{{ $user->fullname }}</h6>
-                                                <h6 class="font-14 text-muted">{{ $user->mobile }}</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <a href="{{ route('front.wallet.index') }}" class="text-decoration-none">
-                                        <div class="panel-box mt-3">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi bi-wallet2 main-color-one-color font-20 me-2"></i>
-                                                    <h6 class="font-14 mb-0">کیف پول</h6>
-                                                </div>
-                                                <div class="d-flex align-items-baseline">
-                                                    <strong class="font-14 ms-1" title="{{convert_number($user->getWallet()->balance())}}">{{ number_format($user->getWallet()->balance()) }}</strong>
-                                                    <span class="font-12 text-muted">تومان</span>
-                                                </div>
-                                            </div>
-                                            <p class="font-12 text-muted mb-0 mt-2">افزایش موجودی <i class="bi bi-chevron-left font-12"></i></p>
-                                        </div>
-                                    </a>
-
-                                    <div class="profile-box mt-3">
-                                        <nav class="navbar profile-box-nav">
-                                            <ul class="navbar-nav flex-column">
-                                                <li class="nav-item @if(@$active=="profile") active @endif"><a href="{{ route('front.user.profile') }}" class="nav-link">
-                                                        <i class="bi bi-house-door"></i>پروفایل</a>
-                                                </li>
-                                                <li class="nav-item @if(@$active=="orders") active @endif"><a href="{{ route('front.orders.index') }}" class="nav-link">
-                                                        <i class="bi bi-cart-check"></i>همه سفارش ها</a>
-                                                </li>
-
-                                                @if(class_exists(\App\Services\FrontModuleMenuRegistry::class))
-                                                    @foreach(\App\Services\FrontModuleMenuRegistry::all() as $menuView)
-                                                        @if(view()->exists($menuView))
-                                                            @include($menuView)
-                                                        @endif
-                                                    @endforeach
-                                                @endif
-
-                                                <li class="nav-item @if(@$active=="wallet") active @endif"><a href="{{ route('front.wallet.index') }}" class="nav-link">
-                                                        <i class="bi bi-credit-card"></i>کیف پول</a>
-                                                </li>
-                                                <li class="nav-item @if(@$active=="favorites") active @endif"><a href="{{ route('front.favorites.index') }}" class="nav-link">
-                                                        <i class="bi bi-heart"></i>لیست علاقه مندی ها</a>
-                                                </li>
-                                                <li class="nav-item @if(@$active=="comments") active @endif">
-                                                    <a href="{{ route('front.comments.index') }}" class="nav-link">
-                                                        <i class="bi bi-chat-dots"></i>نقد و نظرات</a>
-                                                </li>
-                                                {{-- : «کد های تخفیف معرفی» به پکیج باشگاه مشتریان منتقل شد — بخش معرفی اکنون در صفحهٔ باشگاه مشتریان پنل مشتری است. --}}
-                                                @if(false)
-                                                    <li>
-                                                        <a href="{{ route('front.user.referrals.index') }}" class="nav-link">
-                                                            <i class="bi bi-gift"></i>کد های تخفیف معرفی
-                                                        </a>
-                                                    </li>
-                                                @endif
-                                                <li class="nav-item @if(@$active=="messages") active @endif">
-                                                    <a href="{{ route('front.messages.index') }}" class="nav-link">
-                                                        <i class="bi bi-bell"></i>پیام ها و اطلاعیه ها</a>
-                                                </li>
-                                                <li class="nav-item @if(@$active=="addresses") active @endif"><a href="{{ route('front.addresses.index') }}" class="nav-link">
-                                                        <i class="bi bi-pin-map"></i>آدرس ها</a>
-                                                </li>
-                                                <li class="nav-item @if(@$active=="user-history") active @endif"><a href="{{route('front.user.user-history')}}" class="nav-link"><i class="bi bi-clock-history"></i>بازدید های اخیر</a></li>
-                                                <li class="nav-item @if(@$active=="tickets") active @endif"><a href="{{route('front.tickets.index')}}" class="nav-link"><i class="bi bi-question-circle"></i>تیکت های شما</a></li>
-                                                <li class="nav-item @if(@$active=="profileEdit") active @endif"><a href="{{ route('front.user.profile.edit') }}" class="nav-link">
-                                                        <i class="bi bi-person-gear"></i>اطلاعات شخصی</a>
-                                                </li>
-                                                <li class="nav-item"><a href="{{ route('logout') }}" data-no-navigate class="nav-link"><i class="bi bi-arrow-right-square"></i>خروج از حساب کاربری</a></li>
-                                            </ul>
-                                        </nav>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
+                        @include('front::user.partials.panel-sidebar')
                     </div>
                     {{-- end sidebar --}}
 

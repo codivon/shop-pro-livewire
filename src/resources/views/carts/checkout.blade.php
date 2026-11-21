@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="{{ asset('vendor/mapir/css/mapp.min.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/mapir/css/fa/style.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/map-selected-styles.css') }}" />
-    <link rel="stylesheet" href="{{ theme_asset('css/checkout.css') }}?v=174" />
+    <link rel="stylesheet" href="{{ theme_asset('css/checkout.css') }}?v=175" />
 @endpush
 
 @section('content')

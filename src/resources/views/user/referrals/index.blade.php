@@ -13,6 +13,17 @@
     <div class="content-box">
         <div class="container-fluid py-3">
 
+            {{-- سربرگ صفحه (فاز ۲۰۰) --}}
+            <div class="usp-page-head">
+                <div class="usp-page-head-title">
+                    <span class="usp-page-head-icon is-green" aria-hidden="true"><i class="bi bi-gift"></i></span>
+                    <div>
+                        <h2>باشگاه مشتریان</h2>
+                        <p>کد معرف خود را با دوستان به اشتراک بگذارید و از جوایز خرید موفق بهره‌مند شوید</p>
+                    </div>
+                </div>
+            </div>
+
             {{-- ================= خلاصه آماری ================= --}}
             <div class="row g-3 mb-4">
                 <div class="col-md-4 col-6">

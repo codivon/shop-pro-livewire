@@ -26,6 +26,11 @@
                                 {{-- فاز ۱۷۷ — زیرمنوی تو در تو مثل نمونه: دسته‌ای که خودش
                                      فرزند دارد، به‌صورت گروه با تیتر پررنگ و فرزندان زیر خودش
                                      رندر می‌شود (مثل «گوشی های اپل → آیفون …») --}}
+                                {{-- فاز ۲۰۰ — همهٔ زیرمنوهای درجه ۲ باید کلاس snr-mega-group
+                                     و تگ a کلاس title بگیرند (به‌درخواست کاربر)؛ قبلاً فقط
+                                     گروه‌هایی که فرزند درجه ۳ داشتند این کلاس‌ها را می‌گرفتند.
+                                     تیتر پررنگ با نوار رنگی حالا روی «همهٔ» ستون‌ها یکدست است.
+                                     فلش فقط برای گروه‌هایی که فرزند دارند نمایش داده می‌شود. --}}
                                 @foreach (front_category_children($childMenu->category) as $childCategory)
                                     @if (front_category_children($childCategory)->isNotEmpty())
                                         <li class="snr-mega-group">
@@ -37,26 +42,29 @@
                                             </ul>
                                         </li>
                                     @else
-                                        <li><a href="{{ $childCategory->link }}">{{ $childCategory->title }}</a></li>
+                                        <li class="snr-mega-group">
+                                            <a class="title" href="{{ $childCategory->link }}">{{ $childCategory->title }}</a>
+                                        </li>
                                     @endif
                                 @endforeach
                             @endif
 
                             @foreach ($childMenu->childrenmenus as $childMenu2)
                                 @if($childMenu2->type === 'normal')
-                                    @if($childMenu2->menus->isEmpty())
-                                        <li><a href="{{ $childMenu2->link ?: '#' }}">{{ $childMenu2->title }}</a></li>
-                                    @else
-                                        {{-- گروه با تیتر پررنگ؛ فرزندان داخل همان بلوک می‌مانند --}}
-                                        <li class="snr-mega-group">
-                                            <a class="title" href="{{ $childMenu2->link ?: '#' }}">{{ $childMenu2->title }}</a>
+                                    {{-- فاز ۲۰۰ — همهٔ آیتم‌های درجه ۲ کلاس snr-mega-group و
+                                         تگ a کلاس title می‌گیرند؛ لیست فرزندان فقط وقتی رندر
+                                         می‌شود که آیتم واقعاً فرزند داشته باشد (منطق قدیمی
+                                         menus->isEmpty() حفظ شده) --}}
+                                    <li class="snr-mega-group">
+                                        <a class="title" href="{{ $childMenu2->link ?: '#' }}">{{ $childMenu2->title }}</a>
+                                        @if(!$childMenu2->menus->isEmpty())
                                             <ul class="snr-mega-group-list">
                                                 @foreach ($childMenu2->childrenmenus as $childMenu3)
                                                     <li><a href="{{ $childMenu3->type === 'category' ? $childMenu3->category->link : ($childMenu3->link ?: '#') }}">{{ $childMenu3->type === 'category' ? ($childMenu3->title ?: $childMenu3->category->title) : $childMenu3->title }}</a></li>
                                                 @endforeach
                                             </ul>
-                                        </li>
-                                    @endif
+                                        @endif
+                                    </li>
                                 @endif
                             @endforeach
                         </ul>

@@ -9,12 +9,14 @@
     {{-- پیام ها و اطلاعیه ها — ریسکین‌شده با کامپوننت اطلاعیه قالب سانیار (notification.html) --}}
     <div class="user-msg-page">
 
-        {{-- Header --}}
-        <div class="ump-header">
-            <div class="ump-header-icon"><i class="bi bi-envelope-paper"></i></div>
-            <div>
-                <h2>{{ trans('front::messages.profile.all-message') }}</h2>
-                <p>مشاهده و مدیریت پیام‌های دریافتی شما</p>
+        {{-- سربرگ صفحه (فاز ۲۰۰) --}}
+        <div class="usp-page-head">
+            <div class="usp-page-head-title">
+                <span class="usp-page-head-icon" aria-hidden="true"><i class="bi bi-bell"></i></span>
+                <div>
+                    <h2>{{ trans('front::messages.profile.all-message') }}</h2>
+                    <p>مشاهده و مدیریت پیام‌های دریافتی شما</p>
+                </div>
             </div>
         </div>
 

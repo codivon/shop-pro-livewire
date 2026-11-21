@@ -164,6 +164,24 @@ return [
                 ],
             ],
             [
+                /* فاز ۲۰۰ — گروه «بنر سه‌تایی» به گروه‌های نمایش اضافه شد:
+                   فرم افزودن/ویرایش بنر در پنل مدیریت، گروه‌ها را از همین
+                   کانفیگ (general.bannerGroups) می‌خواند؛ چون گروه
+                   index_middle_3_banners اینجا نبود، ادمین نمی‌توانست بنری
+                   را به ویجت «بنر سه‌تایی» متصل کند */
+                'group' => 'index_middle_3_banners',
+                'name' => 'بنر سه‌تایی',
+                'width' => 540,
+                'height' => 300,
+                'count' => 3,
+                'size' => '300 * 540',
+                'images' => [
+                    $default_images_path . 'banner3.jpg',
+                    $default_images_path . 'banner4.jpg',
+                    $default_images_path . 'banner5.jpg',
+                ],
+            ],
+            [
                 'group' => 'index_middle_4_banners',
                 'name' => 'بنر چهارتایی',
                 'width' => 320,

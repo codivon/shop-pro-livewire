@@ -844,8 +844,10 @@
 }
 
 .snr-checkout-logo img {
-    max-height: 42px;
-    max-width: 150px;
+    /* فاز ۲۰۰ — محدودیت اندازهٔ لوگو به‌درخواست کاربر:
+       حداکثر 200px عرض (ارتفاع متناسب با object-fit حفظ می‌شود) */
+    max-height: 48px;
+    max-width: 200px;
     object-fit: contain;
 }
 
@@ -861,8 +863,8 @@
     }
 
     .snr-checkout-logo img {
-        max-height: 32px;
-        max-width: 120px;
+        max-height: 36px;
+        max-width: 160px;
     }
 
     .snr-checkout-back span {

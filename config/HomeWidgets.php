@@ -922,16 +922,10 @@ return [
     'middle-banners' => [
         'title' => 'بنر تکی',
         'image' => 'widgets/banner.png',
+        /* فاز ۲۰۰ — فیلد «تعداد قابل نمایش» از ابزارک‌های بنر حذف شد:
+           اسم ابزارک خودش تعداد را مشخص می‌کند (بنر تکی = ۱، دوتایی = ۲،
+           سه‌تایی = ۳، چهارتایی = ۴)؛ تعداد در helpers.php ثابت شده است */
         'options' => [
-            [
-                'title'      => 'تعداد قابل نمایش',
-                'key'        => 'number',
-                'input-type' => 'input',
-                'type'       => 'number',
-                'default'    => '1',
-                'class'      => 'col-md-4 col-6',
-                'attributes' => 'required'
-            ],
             [
                 'title'      => 'ترتیب نمایش',
                 'key'        => 'ordering',
@@ -970,24 +964,13 @@ return [
 
         ],
             ],
-        'rules' => [
-            'number' => 'required',
-        ]
     ],
 
     'middle-banners-2' => [
         'title' => 'بنر دوتایی',
         'image' => 'widgets/banner-2.jpg',
+        /* فاز ۲۰۰ — فیلد «تعداد قابل نمایش» حذف شد (تعداد = ۲ ثابت است) */
         'options' => [
-            [
-                'title'      => 'تعداد قابل نمایش',
-                'key'        => 'number',
-                'input-type' => 'input',
-                'type'       => 'number',
-                'default'    => '2',
-                'class'      => 'col-md-4 col-6',
-                'attributes' => 'required'
-            ],
             [
                 'title'      => 'ترتیب نمایش',
                 'key'        => 'ordering',
@@ -1026,24 +1009,13 @@ return [
 
         ],
             ],
-        'rules' => [
-            'number' => 'required',
-        ]
     ],
 
     'middle-banners-3' => [
         'title' => 'بنر سه‌تایی',
         'image' => 'widgets/banner-3.jpg',
+        /* فاز ۲۰۰ — فیلد «تعداد قابل نمایش» حذف شد (تعداد = ۳ ثابت است) */
         'options' => [
-            [
-                'title'      => 'تعداد قابل نمایش',
-                'key'        => 'number',
-                'input-type' => 'input',
-                'type'       => 'number',
-                'default'    => '3',
-                'class'      => 'col-md-4 col-6',
-                'attributes' => 'required'
-            ],
             [
                 'title'      => 'ترتیب نمایش',
                 'key'        => 'ordering',
@@ -1082,24 +1054,13 @@ return [
 
         ],
             ],
-        'rules' => [
-            'number' => 'required',
-        ]
     ],
 
     'middle-banners-4' => [
         'title' => 'بنر چهارتایی',
         'image' => 'widgets/banner-4.png',
+        /* فاز ۲۰۰ — فیلد «تعداد قابل نمایش» حذف شد (تعداد = ۴ ثابت است) */
         'options' => [
-            [
-                'title'      => 'تعداد قابل نمایش',
-                'key'        => 'number',
-                'input-type' => 'input',
-                'type'       => 'number',
-                'default'    => '4',
-                'class'      => 'col-md-4 col-6',
-                'attributes' => 'required'
-            ],
             [
                 'title'      => 'ترتیب نمایش',
                 'key'        => 'ordering',
@@ -1139,9 +1100,6 @@ return [
         ],
 
             ],
-        'rules' => [
-            'number' => 'required',
-        ]
     ],
 
     'coworker-sliders' => [

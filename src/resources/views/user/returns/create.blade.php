@@ -29,9 +29,18 @@
 
 <div class="returns-page">
 
-    <div class="returns-header">
-        <a href="{{ route('front.orders.show', $order) }}"><i class="bi bi-arrow-right"></i></a>
-        <h4><i class="fas fa-undo-alt"></i> درخواست مرجوعی</h4>
+    {{-- سربرگ صفحه (فاز ۲۰۰) --}}
+    <div class="usp-page-head">
+        <div class="usp-page-head-title">
+            <span class="usp-page-head-icon is-amber" aria-hidden="true"><i class="bi bi-plus-circle"></i></span>
+            <div>
+                <h2>درخواست مرجوعی</h2>
+                <p>ثبت درخواست مرجوعی برای سفارش #{{ $order->id }}</p>
+            </div>
+        </div>
+        <a href="{{ route('front.orders.show', $order) }}" class="btn btn-sm btn-light">
+            <i class="bi bi-arrow-right"></i> بازگشت به سفارش
+        </a>
     </div>
 
     @if(session('error'))

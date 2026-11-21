@@ -7,15 +7,23 @@
 
 @section('user-content')
 
-    {{-- مرجوعی‌های من — ریسکین‌شده با جدول قالب سانیار --}}
+    {{-- مرجوعی‌های من — بازطراحی فاز ۲۰۰ (usp-page-head + جدول قالب سانیار) --}}
+    <div class="usp-scope">
+
+        {{-- سربرگ صفحه --}}
+        <div class="usp-page-head">
+            <div class="usp-page-head-title">
+                <span class="usp-page-head-icon is-amber" aria-hidden="true"><i class="bi bi-arrow-counterclockwise"></i></span>
+                <div>
+                    <h2>مرجوعی‌های من</h2>
+                    <p>پیگیری درخواست‌های مرجوعی و بازگشت مبالغ</p>
+                </div>
+            </div>
+        </div>
+
     <div class="ui-boxs">
         <div class="ui-box">
             <div class="ui-box-item ui-box-white">
-                <div class="ui-box-item-title">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="fw-bold">مرجوعی‌های من</h4>
-                    </div>
-                </div>
                 <div class="ui-box-item-desc p-0">
 
                     @if(session('success'))
@@ -106,4 +114,7 @@
             </div>
         </div>
     </div>
+
+    </div>
+
 @endsection

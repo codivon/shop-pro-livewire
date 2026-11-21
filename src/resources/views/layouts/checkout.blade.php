@@ -106,7 +106,9 @@
 </script>
 
 {{-- اسکریپت‌های پایه (jQuery + بوت‌استرپ + پلاگین‌های عملکردی چک‌اوت) --}}
-<script src="{{theme_asset('js/jquery.min.js')}}"></script>
+{{-- فاز ۱۹۴ — data-navigate-once: اجرای مجدد jQuery در ناوبری SPA، window.jQuery
+     را بازتعریف می‌کند و هندلرهای delegated صفحهٔ قبلی می‌میرند --}}
+<script src="{{theme_asset('js/jquery.min.js')}}" data-navigate-once></script>
 @stack('scripts-top-js')
 <script src="{{theme_asset('js/bootstrap.bundle.min.js')}}" data-navigate-once></script>
 

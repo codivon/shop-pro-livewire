@@ -40,11 +40,13 @@
     }
 
     /* اولین سگمنت مسیرهایی که باید «لود کامل» بمانند.
-       فاز ۱۸۸ — فقط مسیرهای واقعاً حساس مستثنی ماندند؛ صفحات پرداخت
-       (سبد/چک‌اوت/نتیجهٔ پرداخت)، کیف پول، نظرات، مقایسه، پروفایل و
-       فروشنده حالا SPA هستند. ورود/ثبت‌نام/کپچا/ادمین لود کامل. */
+       فاز ۱۹۴ — «login» و «register» حذف شدند: صفحهٔ ورود/ثبت‌نام هم حالا SPA است
+       (رفع «صفحهٔ لاگین رفرش می‌شود»). صفحهٔ احراز هویت سند کامل خودش را دارد و
+       mergeNewHead لایووایر دارایی‌های آن را مدیریت می‌کند؛ نسخه‌های اسکریپت‌های
+       مشترک در همهٔ لایوت‌ها یکسان شده است تا اجرای مجدد/خطای redeclaration رخ ندهد.
+       مسیرهای حساس باقی‌مانده (verify/welcome/change-username/password/contact/admin/…) لود کامل. */
     var SPA_EXCLUDE_SEGMENTS = [
-        'login', 'register', 'verify', 'change-username', 'welcome', 'password',
+        'verify', 'welcome', 'change-username', 'password',
         'form', 'contact', 'newsletter',
         'admin', 'install', 'setup'
     ];
@@ -270,6 +272,22 @@
         }
     }
 
+    /* فاز ۱۹۴ — آیا این gesture باید بلعیده شود؟ (mouseup/click پس از سوایپ) */
+    function shouldSuppressGesture() {
+        if (Date.now() < dragState.suppressUntil) { return true; }
+
+        /* فالبک: click/mouseupِ تاچی که خیلی زود بعد از ژستِ دارای حرکت افقی dispatch
+           شده ولی پنجرهٔ suppress فعال نیست (تأخیر dispatch در iOS/برخی اندرویدها) */
+        if (dragState.isTouch
+            && dragState.lastGestureEnd
+            && Date.now() - dragState.lastGestureEnd < 700
+            && dragState.travelX >= 6) {
+            return true;
+        }
+
+        return false;
+    }
+
     function suppressDragClick() {
         return Date.now() < dragState.suppressUntil;
     }
@@ -292,9 +310,26 @@
             trackMove(t.clientX, t.clientY);
         }, { capture: true, passive: true });
 
+        /* فاز ۱۹۴ — preventDefault روی touchendِ سوایپ:
+           ====================================================================
+           ریشهٔ واقعیِ «با سوایپ به تک‌صفحهٔ محصول می‌رود» این بود که دایرکتیو
+           x-navigate لایووایر ناوبری را با جفت «mousedown → mouseup» انجام می‌دهد
+           (whenThisLinkIsPressed: در mousedown هندلر mouseup مسلح می‌شود و در
+           mouseup ناوبری start می‌شود) — نه با کلیک!
+           در سوایپِ لمسی، مرورگر mouseup ترکیبی را «روی خودِ لینکِ محصول» دیسپچ
+           می‌کند (کارت‌های اسلایدر بزرگ‌اند و انگشت معمولاً روی همان کارت بلند
+           می‌شود) ⇒ هندلر مسلح‌شده ناوبری را شروع می‌کرد در حالی که
+           suppressorِ کلیکِ فاز ۱۹۱/۱۹۲ هرگز آن را نمی‌دید.
+           preventDefault روی touchend از تولیدِ همهٔ رخدادهای ماوسِ ترکیبی
+           (mousedown/mouseup/click) جلوگیری می‌کند — رفع در منبع.
+           listener عمداً غیر-passive است. */
         document.addEventListener('touchend', function (e) {
             var t = e.changedTouches && e.changedTouches[0];
             finishDrag(t ? t.clientX : undefined, t ? t.clientY : undefined);
+
+            if (dragState.suppressUntil && Date.now() < dragState.suppressUntil) {
+                try { e.preventDefault(); } catch (err) { /* بی‌اثر */ }
+            }
         }, true);
 
         /* touchcancel — ژست توسط مرورگر گرفته شد؛ click نخواهد آمد ولی
@@ -314,8 +349,22 @@
             if (dragState.tracking) { trackMove(e.clientX, e.clientY); }
         }, { capture: true, passive: true });
 
+        /* فاز ۱۹۴ — mouseup در فاز capture زودتر از هر هندلر دیگری دیده می‌شود.
+           دراگ ماوسی روی اسلایدرها (یا mouseup ترکیبیِ تاچ که با avoid بالا از
+           تولیدش جلوگیری نشده) هرگز نباید به هندلر مسلح‌شدهٔ x-navigate برسد؛
+           وگرنه همان پرش به تک‌صفحه اتفاق می‌افتد. روی ماوس فقط داخل اسلایدرها
+           (تا انتخاب متن عادی بیرون اسلایدر آسیب نبیند). */
         document.addEventListener('mouseup', function (e) {
             finishDrag(e.clientX, e.clientY);
+
+            if (shouldSuppressGesture()) {
+                if (!dragState.isTouch) {
+                    var el = e.target && e.target.closest ? e.target.closest('.swiper, .owl-carousel, .amazing-slider, .product-slider, .swiper-container, #mainCarousel, #carouselExampleIndicators') : null;
+                    if (!el) { return; }
+                }
+                try { e.preventDefault(); } catch (err) { /* بی‌اثر */ }
+                e.stopImmediatePropagation();
+            }
         }, true);
     }
 
@@ -341,23 +390,14 @@
             /* فاز ۱۹۱ — کلیکِ پس از درگ/سوایپ اسلایدر: ببلع و تمام.
                روی تاچ همه‌جا فعال است؛ روی ماوس فقط داخل اسلایدرها
                (تا انتخابِ متن عادی بیرون اسلایدر آسیب نبیند). */
-            if (suppressDragClick()) {
-                if (!e.pointerType && !('ontouchstart' in window)) {
+            /* فاز ۱۹۴ — suppress یکپارچهٔ gesture (پنجرهٔ ۵۰۰ms + فالبک ۷۰۰ms تاچ)؛
+               روی تاچ همه‌جا فعال؛ روی ماوس فقط داخل اسلایدرها (انتخاب متن بیرون
+               اسلایدر آسیب نبیند). */
+            if (shouldSuppressGesture()) {
+                if (!dragState.isTouch && !e.pointerType) {
                     var sliderBox = a.closest('.swiper, .owl-carousel, .amazing-slider, .product-slider, .swiper-container, #mainCarousel, #carouselExampleIndicators');
                     if (!sliderBox) { return; }
                 }
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                return;
-            }
-
-            /* فاز ۱۹۲ — فالبک دوم: کلیکِ تاچی که خیلی زود بعد از ژستِ دارای
-               حرکت افقی dispatch شده ولی پنجرهٔ suppress فعال نیست
-               (تأخیر dispatch شدن click در iOS/برخی اندرویدها > ۵۰۰ms). */
-            if (dragState.isTouch
-                && dragState.lastGestureEnd
-                && Date.now() - dragState.lastGestureEnd < 700
-                && dragState.travelX >= 6) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 return;

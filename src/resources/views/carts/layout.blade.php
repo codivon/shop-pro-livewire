@@ -57,27 +57,32 @@
     var IS_RTL = {{ $current_local['direction'] == 'rtl' ? 1 : 0 }};
 </script>
 <!--shopping-->
-<script src="{{theme_asset('js/jquery-3.2.1.min.js')}}"></script>
+{{-- فاز ۱۹۴ — jquery-3.2.1 حذف شد؛ نسخهٔ ۳.۶.۰ (jquery.min.js) با بقیهٔ لایوت‌ها
+     یکسان شد. دو jQuery متفاوت بعد از ناوبری SPA هر دو لود می‌شدند و نسخهٔ قدیمی‌تر
+     window.jQuery را بازنویسی می‌کرد ⇒ هندلرهای delegated صفحهٔ قبل می‌مردند. --}}
+<script src="{{theme_asset('js/jquery.min.js')}}" data-navigate-once></script>
 @stack('scripts-top-js')
-<script src="{{theme_asset('js/owl.carousel.min.js')}}"></script>
-<script src="{{theme_asset('js/jquery.countdown.min.js')}}"></script>
-<script src="{{theme_asset('js/popper.min.js')}}"></script>
+<script src="{{theme_asset('js/owl.carousel.min.js')}}" data-navigate-once></script>
+<script src="{{theme_asset('js/jquery.countdown.min.js')}}" data-navigate-once></script>
+<script src="{{theme_asset('js/popper.min.js')}}" data-navigate-once></script>
 
 
-<script type="text/javascript" src="{{ theme_asset('js/plugins/map.ir/mapp.env.js') }}"></script>
-<script type="text/javascript" src="{{ theme_asset('js/plugins/map.ir/mapp.min.js') }}"></script>
-<script src="{{theme_asset('js/pages/addresses/map-select-scripts.js')}}"></script>
+<script type="text/javascript" src="{{ theme_asset('js/plugins/map.ir/mapp.env.js') }}" data-navigate-once></script>
+<script type="text/javascript" src="{{ theme_asset('js/plugins/map.ir/mapp.min.js') }}" data-navigate-once></script>
+<script src="{{theme_asset('js/pages/addresses/map-select-scripts.js')}}" data-navigate-once></script>
 
-<script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}"></script>
-<script src="{{ theme_asset("js/plugins/jquery.blockUI.js") }}"></script>
-<script src="{{ theme_asset("js/plugins/toastr/toastr.min.js") }}"></script>
-<script src="{{ theme_asset('js/vendor/jquery.fancybox.min.js') }}"></script>
-<script src="{{theme_asset('js/bootstrap.js')}}"></script>
+<script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}" data-navigate-once></script>
+<script src="{{ theme_asset("js/plugins/jquery.blockUI.js") }}" data-navigate-once></script>
+<script src="{{ theme_asset("js/plugins/toastr/toastr.min.js") }}" data-navigate-once></script>
+<script src="{{ theme_asset('js/vendor/jquery.fancybox.min.js') }}" data-navigate-once></script>
+<script src="{{theme_asset('js/bootstrap.js')}}" data-navigate-once></script>
 @stack('scripts')
-<script src="{{ asset('back/assets/js/customToast.js') }}?v=8"></script>
-<script src="{{ theme_asset("js/scripts.js") }}?v=11"></script>
-<script src="{{theme_asset('js/main.js')}}"></script>
-<script src="{{theme_asset('js/theia-sticky-sidebar.min.js')}}"></script>
+{{-- فاز ۱۹۴ — نسخه‌ها با لایوت اصلی یکسان شد (scripts.js قبلاً v=11 بود؛ تفاوت نسخه
+     باعث re-execute و خطای redeclaration در ناوبری SPA می‌شد) --}}
+<script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
+<script src="{{ theme_asset("js/scripts.js") }}?v=13" data-navigate-once></script>
+<script src="{{theme_asset('js/main.js')}}?v=21" data-navigate-once></script>
+<script src="{{theme_asset('js/theia-sticky-sidebar.min.js')}}" data-navigate-once></script>
 
 
 {!! option('info_scripts') !!}

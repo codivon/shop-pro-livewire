@@ -91,6 +91,15 @@
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/rasta-contact/style.css') }}">
 
+    {{-- فاز ۱۹۴ — CSS ویجت شناور و پیام popup به head منتقل شد:
+         قبلاً <link> داخل body بود؛ در morph لایووایر لحظه‌ای حذف/جایگزین می‌شد
+         و تا اعمال مجدد CSS، پنل ویجت (که با opacity:0 مخفی می‌شود) کاملاً
+         دیده می‌شد و سپس با ترنزیشن جمع می‌شد — همان «باز و بسته شدن خودکار»
+         ویجت پشتیبانی پس از هر ناوبری SPA (حتی دوبار). در head، mergeNewHead
+         تگ یکسان را dedupe می‌کند و هرگز unload نمی‌شود. --}}
+    <link rel="stylesheet" href="{{ theme_asset('css/floating-widget.css') }}?v=176">
+    <link rel="stylesheet" href="{{ theme_asset('css/notifications-popup.css') }}?v=2">
+
     {!! option('info_header_codes', '') !!}
 
     @if(auth('adminPanel')->check())
@@ -510,7 +519,7 @@
 {{-- سانیار — پلاگین‌های جانبی تمپلیت --}}
 {{-- پلاگین go-to-top حذف شد؛ دکمهٔ مستطیلی «برگشت به بالا» در theme-header.js --}}
 <script src="{{theme_asset('plugin/rasta-contact/script.js')}}" data-navigate-once></script>
-<script src="{{theme_asset('js/saniar-init.js')}}?v=166" data-navigate-once></script>
+<script src="{{theme_asset('js/saniar-init.js')}}?v=167" data-navigate-once></script>
 <script src="{{theme_asset('js/theme-header.js')}}?v=27" data-navigate-once></script>
 
 {{-- اسکریپت‌های عملکردی فروشگاه --}}
@@ -521,8 +530,8 @@
 <script src="{{ theme_asset('js/vendor/jquery.lazyloadxt.min.js') }}" data-navigate-once></script>
 <script src="{{theme_asset('js/jquery.countdown.min.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('js/owl.carousel.min.js')}}" data-navigate-once></script>
-<script src="{{ asset('back/assets/js/customToast.js') }}?v=8" data-navigate-once></script>
-<script src="{{ theme_asset("js/scripts.js") }}?v=12" data-navigate-once></script>
+<script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
+<script src="{{ theme_asset("js/scripts.js") }}?v=13" data-navigate-once></script>
 <script src="{{theme_asset('js/main.js')}}?v=21" data-navigate-once></script>
 @stack('scripts')
 
@@ -536,7 +545,7 @@
 @endif
 
 {{-- موتور SPA تم سانیار (intercept کلیک در فاز capture + Livewire.navigate) — باید بعد از livewire:scripts باشد --}}
-<script src="{{theme_asset('js/saniar-spa.js')}}?v=7" data-navigate-once></script>
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=8" data-navigate-once></script>
 
 @if(session('toast-success'))
     <script data-navigate-once>

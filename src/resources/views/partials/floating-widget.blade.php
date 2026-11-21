@@ -23,7 +23,8 @@
     $main_color = option('fw_main_color', '#5b6af7');
 @endphp
 
-<link rel="stylesheet" href="{{ theme_asset('css/floating-widget.css') }}?v=175">
+{{-- فاز ۱۹۴ — <link> این فایل به head لایوت منتقل شد؛ لینک داخلِ body در morph
+     لحظه‌ای unload می‌شد و پنل ویجت «خودش باز و بسته می‌شد». --}}
 
 
 <div class="fw-wrapper" data-main-color="{{ $main_color }}">

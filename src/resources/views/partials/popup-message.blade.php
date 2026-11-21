@@ -10,7 +10,7 @@
     <script src="{{ asset('vendor/jquery-qrcode/jquery.qrcode.min.js') }}" data-navigate-once></script>
 
     {{-- استایل و منطق پاپ‌آپ در فایل‌های جدا (بدون inline) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/notifications-popup.css') }}">
+    {{-- فاز ۱۹۴ — link به head لایوت منتقل شد (لینک body در morph unload می‌شد) --}}
 
     @php
         $notifications = auth('web')->user()->unreadNotifications;

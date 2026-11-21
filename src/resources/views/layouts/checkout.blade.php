@@ -108,16 +108,18 @@
 {{-- اسکریپت‌های پایه (jQuery + بوت‌استرپ + پلاگین‌های عملکردی چک‌اوت) --}}
 <script src="{{theme_asset('js/jquery.min.js')}}"></script>
 @stack('scripts-top-js')
-<script src="{{theme_asset('js/bootstrap.bundle.min.js')}}"></script>
+<script src="{{theme_asset('js/bootstrap.bundle.min.js')}}" data-navigate-once></script>
 
 {{-- پلاگین‌های عملکردی موردنیاز چک‌اوت (block/unblock + toast + sweetalert) --}}
-<script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}"></script>
-<script src="{{ theme_asset("js/plugins/jquery.blockUI.js") }}"></script>
-<script src="{{ theme_asset("js/plugins/toastr/toastr.min.js") }}"></script>
-<script src="{{ asset('back/assets/js/customToast.js') }}?v=8"></script>
+{{-- فاز ۱۹۴ — نسخه‌ها + data-navigate-once با لایوت اصلی یکسان شد تا اجرای مجدد
+     اسکریپت‌های مشترک در ناوبری SPA (خطای redeclaration مثل TOAST_MAX/performSearch) رخ ندهد --}}
+<script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}" data-navigate-once></script>
+<script src="{{ theme_asset("js/plugins/jquery.blockUI.js") }}" data-navigate-once></script>
+<script src="{{ theme_asset("js/plugins/toastr/toastr.min.js") }}" data-navigate-once></script>
+<script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
 {{-- block()/unblock() در scripts.js تعریف شده‌اند --}}
-<script src="{{ theme_asset("js/scripts.js") }}?v=12"></script>
-<script src="{{theme_asset('js/main.js')}}?v=20"></script>
+<script src="{{ theme_asset("js/scripts.js") }}?v=13" data-navigate-once></script>
+<script src="{{theme_asset('js/main.js')}}?v=21" data-navigate-once></script>
 
 {{-- فاز ۱۸۸ — اسکریپت‌های لایووایر و موتور SPA تم، تا ناوبری از چک‌اوت هم بدون رفرش باشد --}}
 @if (class_exists(\Livewire\Livewire::class))
@@ -145,7 +147,7 @@
 @endif
 
 {{-- فاز ۱۸۸ — موتور SPA تم (intercept کلیک + prefetch) — data-navigate-once تا در ناوبری مجدد اجرا نشود --}}
-<script src="{{theme_asset('js/saniar-spa.js')}}?v=4" data-navigate-once></script>
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=8" data-navigate-once></script>
 
 </body>
 

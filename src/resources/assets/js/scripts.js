@@ -159,7 +159,10 @@ function debounce(func, delay) {
 }
 
 // جستجوی اصلی
-const performSearch = debounce(function() {
+/* فاز ۱۹۴ — var به‌جای const: اگر این فایل بعد از ناوبری SPA دوبار اجرا شود
+   (تگ ناهماهنگ layouts)، top-level const/let خطای «Identifier has already
+   been declared» می‌دهد؛ var بی‌خطر است و فقط بازنویسی می‌شود. */
+var performSearch = debounce(function() {
     let q = $.trim($(this).val());
 
     if (q.length < 3) {
@@ -372,7 +375,8 @@ function number_format(nStr) {
     }
     return x1 + x2;
 }
-let intervals = {};
+/* فاز ۱۹۴ — var به‌جای let (دلیل بالا) */
+var intervals = {};
 
 $('.product-special-end-date').each(function (index, el) {
     // Set the date we're counting down to

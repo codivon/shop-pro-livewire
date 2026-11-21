@@ -124,4 +124,63 @@
         window.saniarTemplateInit();
     }
     (window.saniarReinit = window.saniarReinit || []).push(function () { window.saniarTemplateInit(); });
+
+    /* ================================================================
+       فاز ۱۹۴ — زنده‌نگه‌داشتن نشست (ضد «لاگ‌اوت خودکار بعد از چند دقیقه»)
+       ================================================================
+       کاربر واردشده که روی صفحه‌ای بی‌اکشن مانده (مثلاً صفحات پروفایل) بعد از
+       انقضای SESSION_LIFETIME خودکار logout می‌شد و درخواست بعدی هم با ۴۱۹
+       (CSRF منقضی) متوقف می‌شد.
+       رفع: هر ۱۲۰ ثانیه — فقط وقتی تب مرئی است — یک GET به /session/ping:
+         • هر درخواستِ دارای سشن، last activity را تازه می‌کند ⇒ نشست منقضی نمی‌شود.
+         • توکن CSRF تازه در پاسخ meta را به‌روز می‌کند.
+         • endpoint بدون نیاز به ورود است؛ برای مهمان‌ها هم بی‌ضرر است ولی برای
+           پرهیز از ترافیک بیهوده فقط برای کاربر واردشده پینگ می‌کنیم. */
+    (function startSessionKeepAlive() {
+        if (window.__saniarKeepAliveBound) { return; }
+        window.__saniarKeepAliveBound = true;
+
+        var PING_URL = '/session/ping';
+        var INTERVAL_MS = 120 * 1000;
+        var authMeta = document.querySelector('meta[name="Auth"]');
+
+        function isGuest() {
+            var m = document.querySelector('meta[name="Auth"]');
+            return !m || (m.getAttribute('content') || '').indexOf('Yes') === -1;
+        }
+
+        function ping() {
+            if (document.visibilityState !== 'visible') { return; } /* تب پشت‌زمینه — پینگ نکن */
+            if (isGuest()) { return; }
+
+            try {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', PING_URL, true);
+                xhr.setRequestHeader('Accept', 'application/json');
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.onload = function () {
+                    try {
+                        var data = JSON.parse(xhr.responseText || '{}');
+                        if (data && data.csrf) {
+                            var meta = document.querySelector('meta[name="csrf-token"]');
+                            if (meta && meta.getAttribute('content') !== data.csrf) {
+                                meta.setAttribute('content', data.csrf);
+                            }
+                        }
+                    } catch (e) { /* پاسخ نامعتبر — بی‌اثر */ }
+                };
+                xhr.send();
+            } catch (e) { /* شبکه در دسترس نیست — دورهٔ بعد دوباره */ }
+        }
+
+        setInterval(ping, INTERVAL_MS);
+
+        /* اولین پینگ کمی بعد از لود تا نشست تازه‌تر از lifetime بماند */
+        setTimeout(ping, 15 * 1000);
+
+        /* بعد از هر ناوبری SPA هم مطمئن شویم meta تازه است */
+        document.addEventListener('livewire:navigated', function () {
+            authMeta = document.querySelector('meta[name="Auth"]');
+        });
+    })();
 })();

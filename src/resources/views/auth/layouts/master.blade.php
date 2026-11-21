@@ -28,22 +28,23 @@
     </title>
 
     {{-- حالت روز/شب: مقداردهی قبل از رندر برای جلوگیری از فلش --}}
-    <script src="{{ theme_asset('js/theme-init.js') }}"></script>
+    <script src="{{ theme_asset('js/theme-init.js') }}?v=2"></script>
 
     {{-- قالب سانیار — همان فایل‌های css صفحات قالب (register.html) --}}
+    {{-- فاز ۱۹۴ — نسخه‌ها با لایوت اصلی یکسان شد تا در mergeNewHead dedupe شود --}}
     <link rel="stylesheet" href="{{ theme_asset('css/bootstrap.rtl.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('font/bootstrap-icon/bootstrap-icons.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/waves/waves.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=176">
+    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/auth.css') }}">
 
     {{-- دارک مود در صفحات ورود/ثبت‌نام --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=27">
 
     @yield('style')
     @stack('styles')
@@ -67,25 +68,28 @@
     {{-- این br ها برای ایجاد اسکرول در صفحه هستند که تمام اجزای فرم به بدرستی نمایش داده شود --}}
     <br><br><br><br><br><br><br><br>
 
-    <script src="{{theme_asset('js/jquery.min.js')}}"></script>
-    <script src="{{theme_asset('js/bootstrap.bundle.min.js')}}"></script>
-    <script src="{{theme_asset('plugin/waves/waves.min.js')}}"></script>
-    <script src="{{theme_asset('plugin/swiper/swiper-bundle.min.js')}}"></script>
-    <script src="{{theme_asset('plugin/timer/timer.js')}}"></script>
-    <script src="{{theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js')}}"></script>
-    <script src="{{theme_asset('js/app.js')}}"></script>
-    <script src="{{theme_asset('js/jquery-app.js')}}"></script>
-    <script src="{{ theme_asset('js/vendor/ResizeSensor.min.js') }}"></script>
-    <script src="{{ theme_asset('js/plugins/jquery.blockUI.js') }}"></script>
-    <script src="{{ theme_asset('js/plugins/sweetalert2.all.min.js') }}"></script>
-    <script src="{{ theme_asset('js/plugins/toastr/toastr.min.js') }}"></script>
-    <script src="{{ theme_asset('js/plugins/jquery-validation/jquery.validate.min.js') }}"></script>
-    <script src="{{ theme_asset('js/plugins/jquery-validation/localization/messages_fa.min.js') }}?v=2"></script>
-    <script src="{{ asset('back/assets/js/customToast.js') }}?v=8"></script>
-    <script src="{{ theme_asset("js/scripts.js") }}?v=11"></script>
-    <script src="{{theme_asset('js/jquery.countdown.min.js')}}"></script>
-    <script src="{{theme_asset('js/owl.carousel.min.js')}}"></script>
-    <script src="{{theme_asset('js/main.js')}}"></script>
+    {{-- فاز ۱۹۴ — ورود/ثبت‌نام حالا SPA است؛ نسخه‌های اسکریپت‌های مشترک +
+         data-navigate-once با لایوت اصلی یکسان شد تا در ناوبری SPA اجرای مجدد
+         (خطای redeclaration) یا دوبار لود رخ ندهد --}}
+    <script src="{{theme_asset('js/jquery.min.js')}}" data-navigate-once></script>
+    <script src="{{theme_asset('js/bootstrap.bundle.min.js')}}" data-navigate-once></script>
+    <script src="{{theme_asset('plugin/waves/waves.min.js')}}" data-navigate-once></script>
+    <script src="{{theme_asset('plugin/swiper/swiper-bundle.min.js')}}" data-navigate-once></script>
+    <script src="{{theme_asset('plugin/timer/timer.js')}}" data-navigate-once></script>
+    <script src="{{theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js')}}" data-navigate-once></script>
+    <script src="{{theme_asset('js/app.js')}}" data-navigate-once></script>
+    <script src="{{theme_asset('js/jquery-app.js')}}?v=5" data-navigate-once></script>
+    <script src="{{ theme_asset('js/vendor/ResizeSensor.min.js') }}" data-navigate-once></script>
+    <script src="{{ theme_asset('js/plugins/jquery.blockUI.js') }}" data-navigate-once></script>
+    <script src="{{ theme_asset('js/plugins/sweetalert2.all.min.js') }}" data-navigate-once></script>
+    <script src="{{ theme_asset('js/plugins/toastr/toastr.min.js') }}" data-navigate-once></script>
+    <script src="{{ theme_asset('js/plugins/jquery-validation/jquery.validate.min.js') }}" data-navigate-once></script>
+    <script src="{{ theme_asset('js/plugins/jquery-validation/localization/messages_fa.min.js') }}?v=2" data-navigate-once></script>
+    <script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
+    <script src="{{ theme_asset("js/scripts.js") }}?v=13" data-navigate-once></script>
+    <script src="{{theme_asset('js/jquery.countdown.min.js')}}" data-navigate-once></script>
+    <script src="{{theme_asset('js/owl.carousel.min.js')}}" data-navigate-once></script>
+    <script src="{{theme_asset('js/main.js')}}?v=21" data-navigate-once></script>
 
     <script>
         var BASE_URL = "{{ route('front.index') }}";

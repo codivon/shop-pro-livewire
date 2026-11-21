@@ -1,5 +1,13 @@
-const TOAST_MAX = 5;
-let toastList = null;
+/* فاز ۱۹۴ — var به‌جای const/let: اگر این فایل به هر دلیلی دوبار اجرا شود
+   (Livewire navigate بدون data-navigate-once، تگ تکراری، …) top-level const/let
+   خطای «Identifier has already been declared» می‌دهد؛ var بی‌خطر است و فقط بازنویسی می‌شود. */
+var TOAST_MAX = 5;
+var toastList = null;
+
+/* فاز ۱۹۴ — همیشه روی window منتشر شود تا در اجرای مجدد هم گم نشود */
+window.getToastList = getToastList;
+window.showCustomToast = showCustomToast;
+window.hideCustomToast = hideCustomToast;
 
 function getToastList() {
     if (!toastList || !document.body.contains(toastList)) {

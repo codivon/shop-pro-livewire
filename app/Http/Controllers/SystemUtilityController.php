@@ -35,6 +35,28 @@ class SystemUtilityController extends Controller
     }
 
     /**
+     * فاز ۱۹۴ — پینگ زنده‌نگه‌داشتن نشست (session keep-alive)
+     *
+     * کاربرِ واردشده که روی صفحه‌ای بی‌اکشن مانده (مثلاً صفحات پروفایل) بعد از
+     * انقضای SESSION_LIFETIME به‌صورت خودکار logout می‌شود؛ در درخواست بعدی هم
+     * CSRF منقضی شده و Livewire با خطای ۴۱۹ متوقف می‌شود.
+     * اسکریپت تم هر ۲ دقیقه (فقط وقتی تب مرئی است) این endpoint را صدا می‌زند:
+     *   • هر درخواستِ دارای سشن، last activity آن را تازه می‌کند ⇒ نشست منقضی نمی‌شود.
+     *   • توکن CSRF تازهٔ همین نشست برگردانده می‌شود تا meta تازه شود.
+     * بدون نیاز به ورود — مهمان هم فقط سشن بیهده‌ای می‌سازد که ضرری ندارد.
+     */
+    public function sessionPing(): JsonResponse
+    {
+        return response()->json([
+            'ok'                 => true,
+            'lifetime'           => (int) config('session.lifetime', 120),
+            'csrf'               => csrf_token(),
+            'authenticated'      => auth('web')->check() || auth('adminPanel')->check(),
+            'serverTime'         => now()->toIso8601String(),
+        ]);
+    }
+
+    /**
      * iframe فایل‌منیجر — صفحه‌ی مستقل که داخل مدیریت فایل‌ها پنل جدید رندر می‌شود
      * (قبلاً MainController::fileManagerIframe در پنل قدیمی بود).
      */

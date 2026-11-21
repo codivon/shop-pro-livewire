@@ -111,9 +111,21 @@
                 <div>
                     <label class="mb-1.5 block text-xs font-semibold" for="brand-image">تصویر جدید (اختیاری)</label>
                     <input id="brand-image" type="file" accept="image/*" wire:model="image"
+                           data-ap-preview="brand-edit-preview"
                            class="block w-full cursor-pointer rounded-xl border border-line bg-transparent text-xs text-ink-2
                                   file:me-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-brand-600 file:px-3 file:py-1.5
                                   file:text-xs file:font-semibold file:text-white hover:file:bg-brand-700 dark:border-night-line">
+                    {{-- فاز ۱۹۴ — پیش‌نمایش آنی سمت کلاینت (FileReader)؛ مستقل از آپلود لایووایر --}}
+                    <div id="brand-edit-preview" class="mt-2 hidden">
+                        <div class="flex items-center gap-3 rounded-xl border border-dashed border-brand-300 bg-brand-50/40 p-3 dark:border-brand-500/40 dark:bg-brand-500/10">
+                            <img data-ap-preview-img alt="پیش‌نمایش تصویر جدید" class="size-14 rounded-lg border border-line bg-white object-contain dark:border-night-line dark:bg-night-2">
+                            <div class="min-w-0 flex-1 text-xs">
+                                <p class="font-bold">پیش‌نمایش فایل انتخاب‌شده</p>
+                                <p data-ap-preview-name class="mt-0.5 truncate font-mono text-[10px] text-ink-3 dark:text-night-ink-2" dir="ltr"></p>
+                            </div>
+                            <button type="button" data-ap-preview-clear class="shrink-0 rounded-lg border border-line px-2 py-1 font-semibold text-red-500 hover:bg-red-50 dark:border-night-line dark:hover:bg-red-500/10">حذف</button>
+                        </div>
+                    </div>
                     <p class="mt-1.5 text-[11px] text-ink-3 dark:text-night-ink-2">در صورت انتخاب، تصویر قبلی حذف و این تصویر جایگزین می‌شود.</p>
                     @error('image') <p class="mt-1.5 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
                     @if ($image)

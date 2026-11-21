@@ -51,9 +51,22 @@
                     <div>
                         <label class="mb-1.5 block text-xs font-semibold" for="brand-create-image">تصویر</label>
                         <input id="brand-create-image" type="file" accept="image/*" wire:model="createImage"
+                               data-ap-preview="brand-create-preview"
                                class="block w-full cursor-pointer rounded-xl border border-line bg-transparent text-xs text-ink-2
                                       file:me-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-brand-600 file:px-3 file:py-1.5
                                       file:text-xs file:font-semibold file:text-white hover:file:bg-brand-700 dark:border-night-line">
+                        {{-- فاز ۱۹۴ — پیش‌نمایش آنی سمت کلاینت (FileReader)؛ مستقل از آپلود لایووایر،
+                            بلافاصله بعد از انتخاب فایل نشان داده می‌شود حتی اگر آپلود کند/خطا داشته باشد --}}
+                        <div id="brand-create-preview" class="mt-2 hidden">
+                            <div class="flex items-center gap-3 rounded-xl border border-dashed border-brand-300 bg-brand-50/40 p-3 dark:border-brand-500/40 dark:bg-brand-500/10">
+                                <img data-ap-preview-img alt="پیش‌نمایش تصویر" class="size-14 rounded-lg border border-line bg-white object-contain dark:border-night-line dark:bg-night-2">
+                                <div class="min-w-0 flex-1 text-xs">
+                                    <p class="font-bold">پیش‌نمایش فایل انتخاب‌شده</p>
+                                    <p data-ap-preview-name class="mt-0.5 truncate font-mono text-[10px] text-ink-3 dark:text-night-ink-2" dir="ltr"></p>
+                                </div>
+                                <button type="button" data-ap-preview-clear class="shrink-0 rounded-lg border border-line px-2 py-1 font-semibold text-red-500 hover:bg-red-50 dark:border-night-line dark:hover:bg-red-500/10">حذف</button>
+                            </div>
+                        </div>
                         @error('createImage') <p class="mt-1.5 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
                     </div>
                     {{-- فاز ۱۹۲ — ترتیب نمایش + دکمهٔ ایجاد --}}
@@ -79,9 +92,9 @@
                 </div>
                 @if ($createImage)
                     <div class="flex items-center gap-3 rounded-xl border border-line bg-surface-2 p-3 dark:border-night-line dark:bg-night-3">
-                        <img src="{{ $createImage->temporaryUrl() }}" alt="پیش‌نمایش تصویر" class="size-12 rounded-lg border border-line object-cover dark:border-night-line">
+                        <img src="{{ $createImage->temporaryUrl() }}" alt="تصویر بارگذاری‌شده" class="size-12 rounded-lg border border-line object-cover dark:border-night-line">
                         <div class="text-xs">
-                            <p class="font-semibold">تصویر انتخاب‌شده</p>
+                            <p class="font-semibold">تصویر بارگذاری‌شده روی سرور</p>
                             <button type="button" wire:click="$set('createImage', null)" class="mt-0.5 flex items-center gap-1 font-semibold text-red-500 hover:underline">
                                 <x-admin-panel::icon name="x" class="size-3.5" />
                                 حذف فایل انتخاب‌شده

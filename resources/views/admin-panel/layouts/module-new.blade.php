@@ -438,9 +438,11 @@
 
 @stack('plugin-scripts')
 
-<script src="{{ asset('back/assets/js/helpers.js') }}?v=8"></script>
-<script src="{{ asset('back/assets/js/customToast.js') }}?v=8"></script>
-<script src="{{ asset('back/assets/js/scripts.js') }}?v=12"></script>
+<script src="{{ asset('back/assets/js/helpers.js') }}?v=9" data-navigate-once></script>
+<script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
+<script src="{{ asset('back/assets/js/scripts.js') }}?v=13" data-navigate-once></script>
+{{-- فاز ۱۹۴ — پیش‌نمایش آنی آپلود + شنوندهٔ خطای آپلود لایووایر --}}
+<script src="{{ asset('back/assets/js/livewire-uploads.js') }}?v=1" data-navigate-once></script>
 
 <!-- END: Theme JS-->
 
@@ -458,8 +460,8 @@
 @if (file_exists(public_path('mix-manifest.json')))
     <script src="{{ asset(mix('js/app.js')) }}"></script>
 @endif
-<script src="{{ asset('back/assets/js/echo.js') }}"></script>
-<script src="{{ asset('back/assets/js/web-push.js') }}"></script>
+<script src="{{ asset('back/assets/js/echo.js') }}" data-navigate-once></script>
+<script src="{{ asset('back/assets/js/web-push.js') }}" data-navigate-once></script>
 
 @if (session('toast-success'))
     <script>

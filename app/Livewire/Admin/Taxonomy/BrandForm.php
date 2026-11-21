@@ -102,11 +102,14 @@ class BrandForm extends Component
             'slug'        => 'required|unique:brands,slug,' . $this->brand->id,
             'description' => 'nullable|string',
             'ordering'    => 'nullable|integer|min:0',
+            /* فاز ۱۹۴ — قواعد تصویر: پیام خطای واضح به‌جای آپلود بی‌صدا + سقف ۴MB */
+            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp,gif,svg|max:4096',
         ], [], [
             'name'        => 'نام',
             'slug'        => 'آدرس (slug)',
             'description' => 'توضیحات',
             'ordering'    => 'ترتیب نمایش',
+            'image'       => 'تصویر',
         ]);
 
         $data['description'] = $this->description ?: null;
@@ -122,22 +125,18 @@ class BrandForm extends Component
         }
 
         if ($this->image) {
-            // حذف تصویر قبلی مثل قدیمی — فاز ۱۹۳: مسیر DB «uploads/brands/…» است ولی
-            // ریشهٔ دیسک «local» خودِ پوشهٔ uploads است؛ پس پیشوند uploads/ باید
-            // برداشته شود وگرنه حذف هرگز اتفاق نمی‌افتد و فایل‌های یتیم انباشته می‌شوند
-            if ($this->brand->image) {
-                $relativeImage = preg_replace('#^/?uploads/#', '', ltrim($this->brand->image, '/'));
-                Storage::disk('local')->delete($relativeImage);
-            }
+            // فاز ۱۹۴ — تضمین وجود پوشهٔ مقصد؛ آپلود در پوشهٔ غایب بی‌صدا fail می‌شد
+            Storage::disk('local')->makeDirectory('brands', 0755, true);
 
             // فاز ۱۹۲ — دیسک صریح «local» (ریشهٔ public/uploads) تا تغییر
             // FILESYSTEM_DRIVER در .env مسیر ذخیره را از مسیر DB جدا نکند
-            $name = uniqid() . '_' . time() . '.' . $this->image->getClientOriginalExtension();
+            $name = uniqid() . '_' . time() . '.' . strtolower($this->image->getClientOriginalExtension() ?: 'png');
             $stored = $this->image->storeAs('brands', $name, 'local');
 
             if ($stored === false || ! Storage::disk('local')->exists('brands/' . $name)) {
                 // فاز ۱۹۲ — آپلود بی‌صدا نباید شکست بخورد؛ مسیر خراب در DB ذخیره نشود
-                report(new \RuntimeException('برند: ذخیرهٔ تصویر در public/uploads/brands شکست خورد (دسترسی نوشتن پوشه را بررسی کنید).'));
+                report(new \RuntimeException('برند: ذخیرهٔ تصویر در public/uploads/brands شکست خورد (دسترسی نوشتن پوشه را بررسی کنید). مسیر مطلق مقصد: '
+                    . Storage::disk('local')->path('brands/' . $name)));
 
                 session()->flash('np-toast', ['type' => 'error', 'message' => 'ذخیرهٔ تصویر برند ناموفق بود؛ دسترسی نوشتن پوشهٔ uploads را بررسی کنید.']);
 
@@ -145,6 +144,13 @@ class BrandForm extends Component
             }
 
             $data['image'] = '/uploads/brands/' . $name;
+
+            // فاز ۱۹۴ — حذف تصویر قبلی فقط «بعد از» موفقیت ذخیرهٔ فایل جدید؛
+            // اگر قبلاً قبل از ذخیره حذف می‌شد و ذخیره شکست می‌خورد، برند بی‌تصویر می‌شد
+            if ($this->brand->image) {
+                $relativeImage = preg_replace('#^/?uploads/#', '', ltrim($this->brand->image, '/'));
+                Storage::disk('local')->delete($relativeImage);
+            }
         }
 
         $this->brand->update($data);

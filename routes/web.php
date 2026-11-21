@@ -76,6 +76,11 @@ foreach ([
 Route::get('refresh-csrf', [\App\Http\Controllers\SystemUtilityController::class, 'refreshCsrf'])
     ->name('csrf')->middleware('throttle:30,1');
 
+// فاز ۱۹۴ — پینگ زنده‌نگه‌داشتن نشست (ضد «لاگ‌اوت خودکار بعد از چند دقیقه بی‌اکشنی»):
+// هر درخواستِ دارای سشن، last activity را تازه می‌کند؛ توکن CSRF تازه هم برمی‌گردد
+Route::get('session/ping', [\App\Http\Controllers\SystemUtilityController::class, 'sessionPing'])
+    ->name('session.ping')->middleware('throttle:10,1');
+
 Route::get('/captcha/image', [\App\Http\Controllers\CaptchaController::class, 'image'])
     ->name('captcha.image')
     ->middleware('throttle:120,1'); // ضد درخواست‌های انبوه

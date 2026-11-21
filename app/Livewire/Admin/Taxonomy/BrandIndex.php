@@ -128,11 +128,15 @@ class BrandIndex extends Component
         // فاز ۱۹۲ — دیسک صریح «local» (ریشهٔ public/uploads) + تأیید ذخیره؛
         // آپلود بی‌صدا نباید مسیر خراب در DB بگذارد
         if ($this->createImage) {
-            $name = uniqid() . '_' . time() . '.' . $this->createImage->getClientOriginalExtension();
+            // فاز ۱۹۴ — تضمین وجود پوشهٔ مقصد؛ آپلود در پوشهٔ غایب بی‌صدا fail می‌شد
+            Storage::disk('local')->makeDirectory('brands', 0755, true);
+
+            $name = uniqid() . '_' . time() . '.' . strtolower($this->createImage->getClientOriginalExtension() ?: 'png');
             $stored = $this->createImage->storeAs('brands', $name, 'local');
 
             if ($stored === false || ! Storage::disk('local')->exists('brands/' . $name)) {
-                report(new \RuntimeException('برند: ذخیرهٔ تصویر در public/uploads/brands شکست خورد (دسترسی نوشتن پوشه را بررسی کنید).'));
+                report(new \RuntimeException('برند: ذخیرهٔ تصویر در public/uploads/brands شکست خورد (دسترسی نوشتن پوشه را بررسی کنید). مسیر مطلق مقصد: '
+                    . Storage::disk('local')->path('brands/' . $name)));
 
                 $this->dispatch('toast', message: 'ذخیرهٔ تصویر برند ناموفق بود؛ دسترسی نوشتن پوشهٔ uploads را بررسی کنید.', type: 'error');
 

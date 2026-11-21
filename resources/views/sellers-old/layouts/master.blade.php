@@ -65,7 +65,7 @@
 <script src="{{ theme_asset('js/vendor/jquery.fancybox.min.js') }}"></script>
 <script src="{{ theme_asset('js/vendor/jquery.lazyloadxt.min.js') }}"></script>
 <script src="{{theme_asset('js/bootstrap.js')}}"></script>
-<script src="{{ asset('back/assets/js/customToast.js') }}?v=8"></script>
+<script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
 <script src="{{ theme_asset("js/scripts.js") }}?v=11"></script>
 <script src="{{theme_asset('js/main.js')}}"></script>
 @stack('scripts')

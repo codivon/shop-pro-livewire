@@ -47,6 +47,11 @@ class BrandIndex extends Component
     public function mount(): void
     {
         auth('adminPanel')->user()?->can('products.brands') ?: abort(403);
+
+        /* فاز ۱۹۶ — خودترمیمی پرم فایل‌های تصویر برندها:
+           فایل‌های قبلی با پرم private (فایل 0600/پوشه 0700) ساخته شده بودند و
+           وب‌سرور نمی‌توانست بخواند → 404. اولین بازدید این صفحه همه را سالم می‌کند. */
+        shop_heal_brands_upload_permissions();
     }
 
     public function updating(string $name, $value): void
@@ -142,6 +147,12 @@ class BrandIndex extends Component
 
                 return;
             }
+
+            /* فاز ۱۹۶ — ریشهٔ «فایل هست ولی 404 می‌خورد»: دیسک local بدون visibility
+               فایل را 0600 و پوشه را 0700 می‌سازد (پیش‌فرض PRIVATE) و وب‌سرور نمی‌تواند
+               بخواند. visibility در config حالا public است، اما این chmod قطعیِ
+               تضمین است — حتی با config:cache کهنه روی سرور هم پرم درست می‌شود. */
+            shop_make_upload_web_readable('brands/' . $name);
 
             $data['image'] = '/uploads/brands/' . $name;
         }

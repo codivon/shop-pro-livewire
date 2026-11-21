@@ -73,6 +73,9 @@ class BrandForm extends Component
     {
         auth('adminPanel')->user()?->can('products.brands') ?: abort(403);
 
+        /* فاز ۱۹۶ — خودترمیمی پرم فایل‌های تصویر برندها (فایل هست ولی وب 404 می‌داد) */
+        shop_heal_brands_upload_permissions();
+
         $this->brand = $brand;
         $this->name = (string) $brand->name;
         $this->slug = (string) $brand->slug;
@@ -142,6 +145,10 @@ class BrandForm extends Component
 
                 return;
             }
+
+            /* فاز ۱۹۶ — ریشهٔ «فایل هست ولی 404 می‌خورد»: فایل/پوشه باید حتماً
+               خواندنیِ وب شوند (0644/0755)؛ تضمین قطعی حتی با config:cache کهنه */
+            shop_make_upload_web_readable('brands/' . $name);
 
             $data['image'] = '/uploads/brands/' . $name;
 

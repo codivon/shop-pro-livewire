@@ -3077,3 +3077,76 @@ if (! function_exists('en_digits')) {
         ]);
     }
 }
+
+if (! function_exists('shop_make_upload_web_readable')) {
+    /**
+     * فاز ۱۹۶ — تضمین خواندنی‌بودنِ وبِ فایل‌های آپلودی دیسک «local» (ریشهٔ public/uploads).
+     *
+     * ریشهٔ باگ «تصویر برند ذخیره می‌شود، فایل هم هست، ولی 404 می‌خورد»:
+     * دیسک local تا قبل از فاز ۱۹۶ کلید visibility نداشت؛ طبق پیش‌فرض Laravel
+     * (Visibility::PRIVATE) فایل با 0600 و پوشه با 0700 ساخته می‌شد. وب‌سرور
+     * (مالک دیگری از پروسهٔ PHP) حق خواندن ندارد → تست !-f در htaccess رد
+     * می‌شود → درخواست به index.php می‌رسد → Laravel 404 می‌دهد.
+     * تصاویر products چون از دیسک public (visibility=public) می‌روند سالم‌اند.
+     *
+     * این helper بعد از هر آپلود صدا زده می‌شود تا حتی اگر config:cache سرور
+     * کهنه بماند (و visibility جدید را نخواند)، پرم‌ها قطعاً درست باشند.
+     */
+    function shop_make_upload_web_readable(string $relativePath): void
+    {
+        try {
+            $uploadsRoot = public_path('uploads');
+            $absolute = $uploadsRoot.'/'.ltrim($relativePath, '/');
+
+            if (is_file($absolute)) {
+                @chmod($absolute, 0644);
+            }
+
+            /* همهٔ پوشه‌های والدِ داخل uploads هم خواندنی شوند (0755) */
+            $dir = dirname($absolute);
+            while (is_dir($dir) && str_starts_with($dir, $uploadsRoot)) {
+                @chmod($dir, 0755);
+
+                if ($dir === $uploadsRoot) {
+                    break;
+                }
+
+                $dir = dirname($dir);
+            }
+        } catch (Throwable $e) {
+            /* شکست chmod هرگز آپلود را نبکند */
+        }
+    }
+}
+
+if (! function_exists('shop_heal_brands_upload_permissions')) {
+    /**
+     * فاز ۱۹۶ — خودترمیمی پرم فایل‌های «موجود» تصاویر برندها.
+     *
+     * فایل‌هایی که قبل از این فاز آپلود شده‌اند (0600/0700 private) با همین
+     * helper قابل‌خواندنِ وب می‌شوند — بدون نیاز به دستور دستی روی سرور.
+     * مالکِ فایل‌ها همان پروسهٔ PHP است، پس chmod همیشه موفق است.
+     * در mount صفحهٔ برندها و فرم برند صدا زده می‌شود؛ اولین بازدید ادمین
+     * تصاویر را برای front هم سالم می‌کند.
+     */
+    function shop_heal_brands_upload_permissions(): void
+    {
+        try {
+            $dir = public_path('uploads/brands');
+
+            if (! is_dir($dir)) {
+                return;
+            }
+
+            @chmod($dir, 0755);
+
+            foreach (glob($dir.'/*') ?: [] as $file) {
+                if (is_file($file)) {
+                    @chmod($file, 0644);
+                }
+            }
+        } catch (Throwable $e) {
+            /* هرگز صفحهٔ ادمین را نبکند */
+        }
+    }
+}

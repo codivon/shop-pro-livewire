@@ -39,6 +39,12 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => public_path('uploads'),
+            /* فاز ۱۹۶ — ریشهٔ 404 تصویر برند: این دیسک کلید visibility نداشت و
+               طبق پیش‌فرض Laravel/Flysystem (Visibility::PRIVATE) فایل‌ها 0600 و
+               پوشه‌ها 0700 ساخته می‌شدند؛ وب‌سرور نمی‌توانست بخواند، درخواست به
+               index.php می‌رسید و Laravel 404 می‌داد — «فایل هست ولی 404 می‌خورد».
+               public یعنی فایل 0644 و پوشه 0755 مثل تصاویر products. */
+            'visibility' => 'public',
             'throw' => false,
         ],
 

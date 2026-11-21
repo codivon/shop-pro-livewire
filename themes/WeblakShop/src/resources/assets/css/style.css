@@ -17049,3 +17049,138 @@ img.captcha {
 .story-comments-modal{
     z-index: 11000;
 }
+
+/* ============================================================
+   فاز ۲۰۱ — هم‌شکل‌سازی منوهای تزریق‌شدهٔ پکیج‌ها با منوهای پنل مشتری
+   پکیج‌ها (اقساط، باشگاه مشتریان و …) آیتم‌های منو را با ساختار
+   <li class="nav-item"><a class="profile-menu-url"> تزریق می‌کنند؛
+   این قواعد همان ظاهر آیتم‌های داخلی را به آن‌ها می‌دهد.
+   ============================================================ */
+ul.profile-menu-items li.nav-item {
+    list-style: none;
+    display: block;
+    width: 100%;
+    float: none;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+
+ul.profile-menu-items li.nav-item > a.profile-menu-url,
+ul.profile-menu-items li.nav-item > a {
+    font-size: 14px;
+    text-decoration: none;
+    color: #0e0e0e;
+    display: block;
+    padding: 10px 5px;
+    font-weight: bold;
+    height: 45px;
+    line-height: 25px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+ul.profile-menu-items li.nav-item > a:hover,
+ul.profile-menu-items li.nav-item > a:focus {
+    color: #009ec9 !important;
+}
+
+ul.profile-menu-items li.nav-item > a span {
+    font-size: 20px;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+ul.profile-menu-items li.nav-item > a.active-profile,
+ul.profile-menu-items li.nav-item > a.active-profile:hover {
+    color: #009ec9 !important;
+}
+
+/* نسخهٔ موبایل — تورفتگی هم‌اندازه با آیتم‌های داخلی */
+.profile-menu-items-mobile .toggle-box-active > ul > li ul li.nav-item > a {
+    margin-right: 7px;
+    margin-top: 0;
+    margin-bottom: 0;
+    height: 45px;
+    line-height: 25px;
+}
+
+/* ============================================================
+   پنل مشتری — نوار اکشن مودال افزودن/ویرایش آدرس
+   «انصراف و بازگشت» دکمه‌مانند می‌شود و «ثبت آدرس» به سمت چپ می‌رود
+   ============================================================ */
+#add-edit-address-modal .address-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 6px 0 15px;
+    clear: both;
+    overflow: hidden;
+}
+
+#add-edit-address-modal .address-form-actions .form-checkout-valid-row {
+    float: none;
+    margin: 0;
+}
+
+#add-edit-address-modal .address-form-actions .parent-btn button {
+    width: auto;
+    min-width: 220px;
+    margin-top: 0;
+}
+
+#add-edit-address-modal .address-form-actions a.cancel-edit-address {
+    float: none;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 47px;
+    padding: 0 22px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .25s ease, color .25s ease, background .25s ease;
+}
+
+#add-edit-address-modal .address-form-actions a.cancel-edit-address:hover,
+#add-edit-address-modal .address-form-actions a.cancel-edit-address:focus {
+    border-color: #1ca2bd;
+    color: #1ca2bd;
+    text-decoration: none;
+}
+
+/* ============================================================
+   فوتر — دکمهٔ ارسال خبرنامه: عنوان سفید در همهٔ حالت‌ها
+   ============================================================ */
+footer .footer-form form .btn-footer-post,
+footer .footer-form form .btn-footer-post:hover,
+footer .footer-form form .btn-footer-post:focus,
+footer .footer-form form .btn-footer-post:disabled {
+    color: #fff !important;
+}
+
+/* ---------- استایل‌های سرصفحهٔ صفحات پکیج‌ها (usp / ccr) ---------- */
+.usp-page-head .bi{
+    color:#fff
+}
+.ccr-hero-title{
+    color:#fff
+}
+.ccr-hero-sub{
+    color:#fff
+}
+.ccr-hero-ico{
+    color:#fff
+}

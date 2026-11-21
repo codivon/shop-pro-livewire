@@ -385,9 +385,12 @@ $(document).ready(function () {
     //    verify-phone-number--------------------
 
     // favorites product----------------------
-    $("ul.gallery-options button.btn-option-wishes").on("click", function () {
-        $(this).toggleClass("btn-option-favorites");
-    });
+    // حذف شد: toggleClass صرفاً بصری بود و با هندلر واقعی AJAX در
+    // pages/products/show.js تداخل داشت (روی همان #add-to-favorites بایند می‌شد
+    // و رنگ قلب را مستقل از پاسخ سرور عوض می‌کرد — نتیجه: کلیک، قلب قرمز می‌شد
+    // ولی محصول به لیست علاقه‌مندی‌ها اضافه/کم نمی‌شد یا برعکس).
+    // منطق درست: فقط هندلر AJAX (show.js/show2.js) کلاس btn-option-favorites
+    // را بر اساس پاسخ سرور (action=create/delete) ست/پاک می‌کند.
     // favorites product-----------------------
 
     //single-product------------------
@@ -662,52 +665,64 @@ $(document).on('click', '.add-to-cart-single', function () {
     });
 });
 
-$('#newsletter-form').on('submit', function(e) {
+// خبرنامهٔ فوتر — نسخهٔ مقاوم:
+//  • بایند delegate تا اگر فرم دیر رندر شد هم کار کند
+//  • سلکتور دکمه با fallback (button[type=submit] یا هر button داخل فرم)
+//  • unblock + بازگرداندن متن دکمه «همیشه» در complete اجرا می‌شود
+//    (قبلاً اگر showCustomToast خطا می‌داد، اورلی blockUI روی فرم گیر می‌کرد)
+//  • پیام‌ها با showCustomToast (کاستوم‌تست موجود) نمایش داده می‌شوند
+$(document).on('submit', '#newsletter-form', function (e) {
     e.preventDefault();
-    block('#newsletter-form');
+
     var form = $(this);
-    var submitBtn = form.find('button[type="submit"]');
-    var originalText = submitBtn.text();
+    var submitBtn = form.find('button[type="submit"]').length
+        ? form.find('button[type="submit"]')
+        : form.find('button');
+    var originalText = submitBtn.html();
 
     submitBtn.text('در حال ثبت...').prop('disabled', true);
+    block('#newsletter-form');
 
     $.ajax({
         url: form.attr('action'),
         method: 'POST',
         data: form.serialize(),
-        success: function(response) {
-            if (response.success){
-                showCustomToast(response.message,'success');
-                form[0].reset();
-            }else {
-                showCustomToast(response.message,'error');
+        success: function (response) {
+            var msg = (response && response.message) ? response.message : 'خطایی رخ داده است';
+            var type = (response && response.success) ? 'success' : 'error';
 
+            if (typeof showCustomToast === 'function') {
+                showCustomToast(msg, type);
             }
-
-
-            unblock('#newsletter-form');
+            if (response && response.success) {
+                form[0].reset();
+            }
         },
         beforeSend: function (xhr) {
             xhr.setRequestHeader(
                 'X-CSRF-TOKEN',
                 $('meta[name="csrf-token"]').attr('content')
             );
-            block('#newsletter-form');
         },
-        error: function(xhr) {
+        error: function (xhr) {
             var errorMessage = 'خطایی رخ داده است';
 
-            if (xhr.status === 422) {
+            if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
                 var errors = xhr.responseJSON.errors;
-                errorMessage = errors.contact;
+                errorMessage = Array.isArray(errors.contact)
+                    ? errors.contact[0]
+                    : (errors.contact || errorMessage);
             } else if (xhr.responseJSON && xhr.responseJSON.error) {
                 errorMessage = xhr.responseJSON.error;
             }
-            showCustomToast(errorMessage,'error');
-            unblock('#newsletter-form');
+
+            if (typeof showCustomToast === 'function') {
+                showCustomToast(errorMessage, 'error');
+            }
         },
-        complete: function() {
-            submitBtn.text(originalText).prop('disabled', false);
+        complete: function () {
+            unblock('#newsletter-form');
+            submitBtn.html(originalText).prop('disabled', false);
         }
     });
 });

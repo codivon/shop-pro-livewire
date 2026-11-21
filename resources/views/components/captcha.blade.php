@@ -68,11 +68,13 @@
 
                 <div class="cap-image {{ $isMath ? 'cap-image--math' : '' }}">
                     <img src="{{ route($imageRoute) }}" alt="{{ $isMath ? 'عبارت ریاضی' : 'کد امنیتی' }}" class="cap-image__img">
-                    <button type="button" class="cap-refresh" title="تولید کد جدید" aria-label="تولید کد جدید">
-                        <i class="mdi mdi-refresh" aria-hidden="true"></i>
-                    </button>
                     <span class="cap-image__loading"><i class="mdi mdi-loading"></i></span>
                 </div>
+
+                {{-- دکمهٔ تولید کد جدید — خارج از تصویر است تا روی کدها نیفتد (فاز ۲۰۱) --}}
+                <button type="button" class="cap-refresh" title="تولید کد جدید" aria-label="تولید کد جدید">
+                    <i class="mdi mdi-refresh" aria-hidden="true"></i>
+                </button>
             </div>
 
             @if($__capErrors->has($inputName))
@@ -177,11 +179,14 @@
             }
             .cap-field[data-captcha] .cap-row:focus-within .cap-input > i { color: #7c3aed !important; }
 
-            /* ---- تصویر چالش ---- */
+            /* ---- تصویر چالش ----
+               فاز ۲۰۱ — عرض تصویر از ۱۵۰ به ۱۹۰px (ریاضی ۲۱۵px) بزرگ شد تا
+               آخرین کاراکتر کد هم خوانا بماند؛ دکمهٔ گردش تازه از روی تصویر
+               بیرون آمده و به‌صورت المان مستقل کنار تصویر قرار گرفته است. */
             .cap-field[data-captcha] .cap-image {
                 position: relative !important;
                 flex: 0 0 auto !important;
-                width: 150px !important;
+                width: 190px !important;
                 height: 52px !important;
                 border-radius: 14px !important;
                 overflow: hidden !important;
@@ -193,7 +198,7 @@
                 padding: 0 !important;
             }
             /* حالت ریاضی — تصویر پهن‌تر تا کل عبارت خوانا بماند */
-            .cap-field[data-captcha] .cap-image--math { width: 175px !important; }
+            .cap-field[data-captcha] .cap-image--math { width: 215px !important; }
             .cap-field[data-captcha] .cap-image__img {
                 display: block !important;
                 width: 100% !important;
@@ -205,38 +210,35 @@
                 border: 0 !important;
             }
 
-            /* ---- دکمهٔ تولید جدید — شیشه‌ای داخل تصویر (بدون شکستن ردیف در کارت‌های باریک) ---- */
+            /* ---- دکمهٔ تولید جدید — المان مستقلِ کنار تصویر (فاز ۲۰۱)
+               دیگر روی تصویر قرار نمی‌گیرد تا هیچ کاراکتری از کد پوشیده نشود ---- */
             .cap-field[data-captcha] .cap-refresh {
-                position: absolute !important;
-                top: 50% !important;
-                inset-inline-start: 6px !important;
-                transform: translateY(-50%) !important;
-                width: 34px !important;
-                height: 34px !important;
-                border: none !important;
-                border-radius: 10px !important;
-                background: rgba(255, 255, 255, .18) !important;
-                color: #fff !important;
+                position: relative !important;
+                flex: 0 0 auto !important;
+                width: 52px !important;
+                height: 52px !important;
+                border: 1.5px solid #e2e8f0 !important;
+                border-radius: 14px !important;
+                background: #fff !important;
+                color: #475569 !important;
                 cursor: pointer !important;
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                backdrop-filter: blur(3px);
-                -webkit-backdrop-filter: blur(3px);
-                transition: background .2s ease, color .2s ease, transform .25s ease !important;
-                z-index: 2;
+                transition: background .2s ease, color .2s ease, border-color .2s ease, transform .25s ease !important;
             }
-            .cap-field[data-captcha] .cap-refresh i { font-size: 18px !important; line-height: 1 !important; }
+            .cap-field[data-captcha] .cap-refresh i { font-size: 20px !important; line-height: 1 !important; }
             .cap-field[data-captcha] .cap-refresh:hover {
-                background: #fff !important;
-                color: #0f172a !important;
-                transform: translateY(-50%) rotate(90deg) !important;
+                background: #f8fafc !important;
+                color: #7c3aed !important;
+                border-color: #7c3aed !important;
+                transform: rotate(90deg) !important;
             }
             .cap-field[data-captcha] .cap-refresh:focus-visible {
-                outline: 2px solid rgba(255, 255, 255, .8) !important;
-                outline-offset: 1px;
+                outline: 2px solid #7c3aed !important;
+                outline-offset: 1px !important;
             }
 
             /* ---- لودینگ ---- */
@@ -280,6 +282,7 @@
                 .cap-field[data-captcha] .cap-input { flex: 1 1 100% !important; min-width: 100% !important; }
                 .cap-field[data-captcha] .cap-image,
                 .cap-field[data-captcha] .cap-image--math { flex: 1 1 auto !important; width: auto !important; }
+                .cap-field[data-captcha] .cap-refresh { width: 48px !important; }
             }
 
             /* احترام به کاهش انیمیشن */

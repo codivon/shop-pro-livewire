@@ -248,16 +248,21 @@
 
 
 
-                                            <div class="form-checkout-valid-row">
-                                                <div class="parent-btn">
-                                                    <button class="dk-btn dk-btn-info">
-                                                        ثبت آدرس
-                                                        <i class="fa fa-check sign-in"></i>
-                                                    </button>
+                                            {{-- نوار اکشن: انصراف سمت راست، ثبت سمت چپ (استایل در style.css: ‎#add-edit-address-modal .address-form-actions‎) --}}
+                                            <div class="address-form-actions">
+                                                <a class="cancel-edit-address cursor-pointer" data-dismiss="modal">
+                                                    <i class="mdi mdi-arrow-right" aria-hidden="true"></i>
+                                                    انصراف و بازگشت
+                                                </a>
+                                                <div class="form-checkout-valid-row">
+                                                    <div class="parent-btn">
+                                                        <button class="dk-btn dk-btn-info">
+                                                            ثبت آدرس
+                                                            <i class="fa fa-check sign-in"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-
-                                            <a class="cancel-edit-address cursor-pointer" data-dismiss="modal">انصراف و بازگشت</a>
                                         </div>
                                     </div>
 

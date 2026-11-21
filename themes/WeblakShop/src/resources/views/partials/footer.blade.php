@@ -52,7 +52,8 @@
                     <form id="newsletter-form" method="post" action="{{route('front.newsletter.subscribe')}}">
                         <input type="text" name="contact" class="input-footer" placeholder="آدرس ایمیل یا شماره موبایل خود را وارد کنید">
 
-                        <button class="btn-footer-post">ارسال</button>
+                        {{-- type="submit" صریح — بدون آن، سلکتور button[type=submit] در main.js دکمه را نمی‌بیند و state دکمه گیر می‌کند --}}
+                        <button type="submit" class="btn-footer-post">ارسال</button>
                     </form>
                 </div>
 

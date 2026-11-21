@@ -45,12 +45,14 @@ $(function () {
         if (!rect.width) { return; }
 
         /* ستون ردیف‌ها ۲۰۰px از لبهٔ راست پنل است؛ پنل فرعی دقیقاً از همان‌جا
-           تا لبهٔ چپ خود پنل باز می‌شود و هم‌قدِ آن می‌ماند (یک صفحهٔ ثابت).
-           چیدمان ۳ ستونه برای جا شدن ستون‌ها به عرض کامل نیاز دارد */
+           تا لبهٔ چپ خود پنل باز می‌شود.
+           فاز ۱۹۸ — «height» دیگر ست نمی‌شود: ارتفاع پنل فرعی باید «قدِ محتوای
+           خودش» باشد (به‌درخواست کاربر: اگر دسته زیرمنوی کوتاه یا بدون زیرمنو
+           دارد، پنل بچسبد و جای خالی نماند). قبلاً ارتفاع پنلِ ردیف‌ها کپی
+           می‌شد؛ با محتوای کوتاه، پایین پنل فرعی ۲۰۰-۳۰۰px خالی می‌ماند. */
         flyout.style.top = Math.round(rect.top) + 'px';
         flyout.style.right = Math.round(window.innerWidth - rect.right + 200) + 'px';
         flyout.style.left = Math.round(rect.left) + 'px';
-        flyout.style.height = Math.round(rect.height) + 'px';
     }
 
     function showMegaFlyoutRow(panel, row) {
@@ -62,6 +64,9 @@ $(function () {
 
         var img = row.getAttribute('data-cat-image');
         flyout.style.backgroundImage = img ? 'url("' + img + '")' : '';
+        /* فاز ۱۹۸ — فقط وقتی تصویر دسته وجود دارد، فضای پایین-چپ پنل برای
+           نمایش تصویر رزرو می‌شود؛ دسته‌های بدون تصویر پنل فشرده می‌گیرند */
+        flyout.classList.toggle('has-cat-image', !!img);
 
         placeMegaFlyout(panel);
         flyout.classList.add('main-menu-sub-active');

@@ -38,7 +38,7 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=176">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=178">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/auth.css') }}">
@@ -78,7 +78,7 @@
     <script src="{{theme_asset('plugin/timer/timer.js')}}" data-navigate-once></script>
     <script src="{{theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js')}}" data-navigate-once></script>
     <script src="{{theme_asset('js/app.js')}}" data-navigate-once></script>
-    <script src="{{theme_asset('js/jquery-app.js')}}?v=5" data-navigate-once></script>
+    <script src="{{theme_asset('js/jquery-app.js')}}?v=7" data-navigate-once></script>
     <script src="{{ theme_asset('js/vendor/ResizeSensor.min.js') }}" data-navigate-once></script>
     <script src="{{ theme_asset('js/plugins/jquery.blockUI.js') }}" data-navigate-once></script>
     <script src="{{ theme_asset('js/plugins/sweetalert2.all.min.js') }}" data-navigate-once></script>

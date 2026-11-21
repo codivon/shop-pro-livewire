@@ -1160,31 +1160,52 @@ header{
     background: #fdfdfb;
 }
 
-/* --- پنل ثابت فرعی (۳ ستونه) --- */
-.top-menu-menu ul.main-menu>ul.snr-mega-flyout {
+/* --- پنل ثابت فرعی (۳ ستونه) ---
+   فاز ۱۹۸ — ریشه‌یابی «خیلی جای خالی داره» (گزارش کاربر با اسکرین‌شات):
+   چیدمان قبلی flex با flex-wrap:wrap و آیتم‌های width:33.333% بود؛ در flex
+   ردیفی، ارتفاعِ هر ردیف = بلندترین آیتم آن ردیف می‌شود؛ نتیجه: کنارِ هر
+   «گروه بلند» (مثل گوشی موبایل + ۶ برند)، تک‌لینک‌هایی مثل «مچ بند» در سلول
+   هم‌عرض خودشان قفل می‌شدند و زیرشان سلول خالیِ ۲۰۰-۳۰۰px می‌ماند — دقیقاً
+   «جای خالی» ای که کاربر گزارش کرده بود.
+   ⇒ جایگزینی با چیدمان «چندستونه» (CSS Multi-Column):
+      • آیتم‌ها مثل دیجی‌کالا از بالا به پایین هر ستون می‌چسبند (بدون سلول خالی)
+      • ترتیب پر کردن ستون‌ها در rtl از راست به چپ است (ستون اول = سمت راست)
+      • column-count ثابت ۳؛ ارتفاع پنل = قدِ محتوا (min-height حذف شد) تا
+        دسته‌ای که زیرمنوی کوتاه یا بدون زیرمنو دارد، پنلش «بچسبد» و کش نیاید
+      • break-inside:avoid روی همهٔ ردیف‌ها؛ گروه‌ها (تیتر + فرزندان) هرگز
+        بین دو ستون نصف نمی‌شوند
+      • بدون max-height: با ارتفاع محدود، multicol سرریز را به «ستون‌های
+        اضافهٔ افقی» می‌برد و با overflow-x:hidden لینک‌ها گم می‌شدند؛
+        پنل ردیف‌ها سقف ارتفاع خودش را دارد و ستون فرعی آزاد رشد می‌کند */
+.top-menu-menu ul.main-menu > ul.snr-mega-flyout {
     position: fixed;
     top: 0;
     right: 200px;
     left: 12px;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    align-items: flex-start;
-    min-height: 400px;
-    max-height: 480px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    display: block;
+    columns: 3;
+    column-gap: 10px;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
     direction: rtl;
     background-color: #fff;
     background-repeat: no-repeat;
     background-position: bottom left;
     background-size: 260px auto;
-    padding: 18px 18px 96px; /* فاصلهٔ پایین برای جای تصویر دسته */
+    padding: 16px 16px 22px; /* فاصلهٔ استاندارد؛ با تصویر دسته بیشتر می‌شود (has-cat-image) */
     margin: 0;
     list-style: none;
     border-radius: 0 0 10px 10px;
     box-shadow: var(--shadow-md);
     z-index: 20;
+}
+
+/* دسته‌ای که تصویر پس‌زمینه دارد (data-cat-image) به فضای پایین-چپ برای
+   نمایش تصویر نیاز دارد؛ jquery-app.js این کلاس را تگ می‌کند */
+.top-menu-menu ul.main-menu > ul.snr-mega-flyout.has-cat-image {
+    padding-bottom: 110px;
 }
 
 /* پنل فرعی فقط وقتی باز است که خود مگا پنل هم باز باشد */
@@ -1203,18 +1224,20 @@ header{
     background: none;
 }
 
-/* آیتم‌های ردیف اول پنل — یک‌سوم عرض (چیدمان ۳ ستونه مثل نمونه) */
+/* فاز ۱۹۸ — ردیف‌های پنل فرعی در چیدمان چندستونه: عرض ستون را می‌گیرند و
+   از بالا به پایین می‌چسبند؛ هیچ ردیفی بین دو ستون نصف نمی‌شود */
 .top-menu-menu ul.main-menu > ul.snr-mega-flyout > li {
-    width: 33.333%;
-    padding: 2px 4px 12px 14px;
+    width: auto;
+    padding: 2px 4px 6px;
     break-inside: avoid;
+    page-break-inside: avoid;
 }
 
 .top-menu-menu ul.main-menu > ul.snr-mega-flyout li a {
     display: block;
-    padding: 5px 10px;
+    padding: 4px 10px;
     font-size: 13px;
-    line-height: 1.9;
+    line-height: 1.8;
     color: #63676e;
     border-radius: 8px;
     transition: 0.15s all ease-in-out;

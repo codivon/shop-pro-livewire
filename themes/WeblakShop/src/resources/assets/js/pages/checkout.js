@@ -1,3 +1,6 @@
+/* فاز ۱۹۳ — کل فایل در IIFE — let گلوبال (isUpdatingPrice/isFirstLoad) در اجرای مجدد SPA خطا می‌دهد. */
+(function () {
+    'use strict';
 // ==================== متغیرهای سراسری ====================
 let isUpdatingPrice = false;
 let isFirstLoad = true; // مشخص می‌کند اولین بار است یا نه
@@ -435,3 +438,5 @@ $(document).on('change', 'input[name="reserve"]', function () {
         }
     });
 });
+
+})();

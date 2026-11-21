@@ -190,8 +190,11 @@ class BrandIndex extends Component
         $brand = Brand::find($this->confirmingDelete);
 
         if ($brand) {
+            // فاز ۱۹۳ — مسیر DB «uploads/brands/…» است ولی ریشهٔ دیسک «local»
+            // خودِ پوشهٔ uploads؛ پیشوند uploads/ برداشته شود تا حذف واقعی شود
             if ($brand->image) {
-                Storage::disk('local')->delete(ltrim($brand->image, '/'));
+                $relativeImage = preg_replace('#^/?uploads/#', '', ltrim($brand->image, '/'));
+                Storage::disk('local')->delete($relativeImage);
             }
 
             // برابری FK قدیمی (products.brand_id onDelete set null) — قابل‌حمل بین SQLite/MySQL

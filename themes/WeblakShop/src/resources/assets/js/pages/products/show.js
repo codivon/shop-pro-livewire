@@ -1,3 +1,6 @@
+/* فاز ۱۹۳ — کل فایل در IIFE — اجرای مجددِ اسکریپت‌های صفحه بعد از هر ناوبری SPA نباید let/const گلوبال (cachedStores و ajaxInProgress) را دوباره تعریف کند. */
+(function () {
+    'use strict';
 $(document).ready(function () {
 
     function writeColorsName() {
@@ -1017,3 +1020,5 @@ if (!document.querySelector('#stores-loading-style')) {
     `;
     document.head.appendChild(style);
 }
+
+})();

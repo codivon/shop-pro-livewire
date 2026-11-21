@@ -73,7 +73,9 @@ $('.comment-replay-to a').click(function(e) {
     e.preventDefault();
     $('#comments-form input[name="comment_id"]').val('');
     $('.comment-replay-to').hide();
-})
+});
+/* فاز ۱۹۳ — سمیکالن انتهایی الزامی؛ اگر بعداً بلاک بعدی با «(» شروع شود
+   بدون سمیکالن به‌صورت زنجیرهٔ فراخوانی تجزیه می‌شود (باگ ASI نسخهٔ تم سانیار) */
 $(document).ready(function () {
 
     $('.js-faq-container .filter-items.nav.nav-tabs li.nav-item').click(function () {

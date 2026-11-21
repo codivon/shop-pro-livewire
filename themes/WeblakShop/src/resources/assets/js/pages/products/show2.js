@@ -1,3 +1,6 @@
+/* فاز ۱۹۳ — کل فایل در IIFE — همان دلیل show.js (redeclaration در اجرای مجدد SPA). */
+(function () {
+    'use strict';
 $(document).ready(function () {
 
     function writeColorsName() {
@@ -1004,3 +1007,5 @@ if (!document.querySelector('#stores-loading-style')) {
     `;
     document.head.appendChild(style);
 }
+
+})();

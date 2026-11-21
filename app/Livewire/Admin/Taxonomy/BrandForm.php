@@ -122,9 +122,12 @@ class BrandForm extends Component
         }
 
         if ($this->image) {
-            // حذف تصویر قبلی مثل قدیمی (با نرمال‌سازی اسلش ابتدای مسیر)
+            // حذف تصویر قبلی مثل قدیمی — فاز ۱۹۳: مسیر DB «uploads/brands/…» است ولی
+            // ریشهٔ دیسک «local» خودِ پوشهٔ uploads است؛ پس پیشوند uploads/ باید
+            // برداشته شود وگرنه حذف هرگز اتفاق نمی‌افتد و فایل‌های یتیم انباشته می‌شوند
             if ($this->brand->image) {
-                Storage::disk('local')->delete(ltrim($this->brand->image, '/'));
+                $relativeImage = preg_replace('#^/?uploads/#', '', ltrim($this->brand->image, '/'));
+                Storage::disk('local')->delete($relativeImage);
             }
 
             // فاز ۱۹۲ — دیسک صریح «local» (ریشهٔ public/uploads) تا تغییر

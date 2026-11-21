@@ -124,7 +124,9 @@ $(document).ready(function() {
             },
             cache: false,
             contentType: false,
-            processData: false
+            /* فاز ۱۹۳ — کامای گم‌شده پس از processData: کل فایل SyntaxError می‌داد
+               و همهٔ JS صفحهٔ مقاله (ارسال دیدگاه، لایک‌ها و …) مرده بود */
+            processData: false,
             complete: function(xhr) {
                 unblock('#comment-form')
             }

@@ -1,3 +1,6 @@
+/* فاز ۱۹۳ — کل فایل در IIFE — let گلوبال (autoCompleteUrl/productsCount) در اجرای مجدد SPA خطا می‌دهد. */
+(function () {
+    'use strict';
 let autoCompleteUrl = $('#order-create-form').data('auto-complete-url');
 
 $('#order-create-form input[name="username"]')
@@ -178,3 +181,5 @@ $('#order-create-form').submit(function (e) {
 });
 
 $('#province').trigger('change');
+
+})();

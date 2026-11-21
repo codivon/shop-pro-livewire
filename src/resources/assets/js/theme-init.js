@@ -35,6 +35,15 @@
     /* اجرای اولیه (قبل از رندر بادی) */
     applyTheme();
 
+    /* فاز ۱۹۲ — همگرایی: اگر کوکی با localStorage فرق دارد یا نبود،
+       کوکی همگام شود تا رندر سمت سرور ناوبری‌های بعدی هم درست باشد */
+    try {
+        if (document.cookie.indexOf('saniar-theme=' + currentTheme()) === -1) {
+            document.cookie = 'saniar-theme=' + currentTheme() +
+                ';path=/;max-age=31536000;SameSite=Lax';
+        }
+    } catch (e) { /* کوکی در دسترس نیست */ }
+
     /* فاز ۱۹۲ — پس از هر ناوبری SPA هم اعمال شود (بelt & suspenders
        برای وقتی کوکی/سرور مقدار درست را رندر نکرده باشد) */
     if (window.Livewire) {

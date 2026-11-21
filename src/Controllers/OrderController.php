@@ -792,6 +792,31 @@ class OrderController extends Controller
             ]);
         }
 
+        // =====================================================================
+        // خالی‌کردن سبد خرید پس از ثبت سفارش در جدول orders (فاز ۱۹۱)
+        // سفارش ثبت شد؛ آیتم‌ها از این لحظه متعلق به «سفارش» هستند و باید از
+        // سبد خرید حذف شوند — چه پرداختِ پیشِ رو موفق باشد چه ناموفق.
+        // تلاش مجدد پرداخت از صفحهٔ خود سفارش (orders.show / orders.pay) انجام
+        // می‌شود و نیازی به سبد نیست.
+        // =====================================================================
+        try {
+            $cart->products()->detach();
+            $cart->forceFill(['discount_id' => null])->save();
+
+            Log::info('سبد خرید پس از ثبت سفارش خالی شد', [
+                'order_id' => $order->id,
+                'cart_id' => $cart->id,
+                'user_id' => $user->id,
+            ]);
+        } catch (Exception $e) {
+            Log::warning('خطا در خالی‌کردن سبد خرید پس از ثبت سفارش', [
+                'order_id' => $order->id,
+                'cart_id' => $cart->id ?? null,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         return $this->resolvePaymentGateway($request, $order);
         // return $this->pay($order, $request);
 
@@ -1092,6 +1117,9 @@ class OrderController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
+            // پرداخت ناموفق — همگام‌سازی سبد خرید با سفارش ثبت‌شده (فاز ۱۹۱)
+            $this->clearCartForOrder($order);
+
             return redirect()
                 ->route('front.orderResultInfo', ['order' => $order])
                 ->with('transaction-error', $e->getMessage())
@@ -1136,6 +1164,9 @@ class OrderController extends Controller
                 'message' => $transaction->message.'<br>'.$exception->getMessage(),
                 'updated_at' => Carbon::now(),
             ]);
+
+            // پرداخت ناموفق — همگام‌سازی سبد خرید با سفارش ثبت‌شده (فاز ۱۹۱)
+            $this->clearCartForOrder($order);
 
             return redirect()->route('front.orderResultInfo', ['order' => $order])->with('transaction-error', $exception->getMessage());
         }
@@ -1201,6 +1232,9 @@ class OrderController extends Controller
                 }
             )->pay()->render();
         } catch (Exception $e) {
+            // پرداخت ناموفق — همگام‌سازی سبد خرید با سفارش ثبت‌شده (فاز ۱۹۱)
+            $this->clearCartForOrder($order);
+
             return redirect()->route('front.orderResultInfo', ['order' => $order])
                 ->with('transaction-error', $e->getMessage())
                 ->with('order_id', $order->id);
@@ -1309,6 +1343,9 @@ class OrderController extends Controller
             // ارسال ایونت پرداخت موفق
             event(new OrderPaidEvent($order));
 
+            // پرداخت موفق — همگام‌سازی سبد خرید با سفارش ثبت‌شده (فاز ۱۹۱)
+            $this->clearCartForOrder($order);
+
             return redirect()->route('front.orderResultInfo', ['order' => $order])
                 ->with('message', 'پرداخت با موفقیت انجام شد');
 
@@ -1323,6 +1360,66 @@ class OrderController extends Controller
 
             // ========== لغو سفارش و برگشت هزینه ==========
             return $this->cancelOrderAndRefund($order, $e->getMessage());
+        }
+    }
+
+    /**
+     * خالی‌کردن سبد خرید پس از ثبت سفارش در جدول orders (فاز ۱۹۱)
+     *
+     * طبق درخواست محصول: به‌محض ثبت سفارش در جدول orders، آیتم‌های سفارش باید
+     * از سبد خرید حذف شوند — چه پرداخت موفق باشد چه ناموفق.
+     *
+     * نکتهٔ مهم: در مسیرهای پس از ثبت سفارش (orderPaid / خطای درگاه / لغو)،
+     * سبد فقط وقتی خالی می‌شود که «محتوای فعلی سبد همان آیتم‌های همین سفارش»
+     * باشد؛ به این ترتیب اگر کاربر بعد از ثبت سفارش آیتم جدیدی به سبد اضافه
+     * کرده باشد، آیتم‌های جدیدش پاک نمی‌شوند. خالی‌کردنِ بی‌قیدوشرط در لحظهٔ
+     * ثبت سفارش (انتهای store) انجام می‌شود.
+     */
+    private function clearCartForOrder(Order $order): void
+    {
+        try {
+            $user = $order->user;
+
+            if (! $user) {
+                return;
+            }
+
+            $cart = $user->cart;
+
+            if (! $cart && method_exists($user, 'getCart')) {
+                $cart = $user->getCart();
+            }
+
+            if (! $cart || ! $cart->products->count()) {
+                return;
+            }
+
+            $orderProductIds = $order->items->pluck('product_id')->unique()->values();
+            $cartProductIds = $cart->products->pluck('id')->unique()->values();
+
+            if ($orderProductIds->isEmpty() || $cartProductIds->isEmpty()) {
+                return;
+            }
+
+            // فقط وقتی سبد دقیقاً همان آیتم‌های این سفارش را دارد خالی شود
+            // (سبدِ «شبح» باقی‌مانده از سفارش‌های قدیمی) — آیتم‌های جدید دست‌نخورده می‌مانند
+            $cartIsOnlyThisOrder = $cartProductIds->diff($orderProductIds)->isEmpty();
+
+            if ($cartIsOnlyThisOrder) {
+                $cart->products()->detach();
+                $cart->forceFill(['discount_id' => null])->save();
+
+                Log::info('سبد خرید پس از نتیجهٔ پرداخت همگام‌سازی شد', [
+                    'order_id' => $order->id,
+                    'cart_id' => $cart->id,
+                    'user_id' => $order->user_id,
+                ]);
+            }
+        } catch (Exception $e) {
+            Log::warning('خطا در همگام‌سازی سبد خرید با نتیجهٔ پرداخت', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -1407,6 +1504,9 @@ class OrderController extends Controller
             // $this->sendOrderCancellationNotifications($order, $errorMessage, $refundAmount);
 
             // 6. ارسال نوتیفیکیشن به ادمین (در ایونت هندل می‌شود)
+
+            // سفارش لغو شد — همگام‌سازی سبد خرید با سفارش ثبت‌شده (فاز ۱۹۱)
+            $this->clearCartForOrder($order);
 
             return redirect()->route('front.orders.show', ['order' => $order])
                 ->with('error', "سفارش شما لغو شد: {$errorMessage}")

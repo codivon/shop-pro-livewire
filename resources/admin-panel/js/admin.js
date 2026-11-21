@@ -169,6 +169,82 @@ document.addEventListener('DOMContentLoaded', () => ApDatepicker.start());
 document.addEventListener('livewire:navigated', () => ApDatepicker.start());
 
 /* ------------------------------------------------------------------
+ | فاز ۱۹۵ — پیش‌نمایش آنی فایل انتخاب‌شده (FileReader)
+ | فرم تصویر برند (ایجاد + ویرایش) مارک‌آپ پیش‌نمایش را دارد:
+ |   <input type="file" data-ap-preview="<target-id>">
+ |   <div id="<target-id>" class="hidden"> … data-ap-preview-img / -name / -clear
+ | ولی هندلر JS آن هرگز پیاده‌سازی نشده بود؛ در نتیجه جعبهٔ پیش‌نمایش برای همیشه
+ | hidden می‌ماند و ادمین فکر می‌کرد آپلود کار نمی‌کند. این ماژول همان حلقهٔ گم‌شده است:
+ |   • change روی هر input دارای data-ap-preview → خواندن فایل و پرکردن جعبهٔ هدف
+ |   • دکمهٔ data-ap-preview-clear → پنهان‌کردن جعبه + خالی‌کردن input
+ |   • شنونده‌ها delegated روی document هستند تا بعد از morph لایووایر هم زنده بمانند
+ ------------------------------------------------------------------ */
+window.ApFilePreview = {
+    bind() {
+        if (this.__bound) return;
+        this.__bound = true;
+
+        /* انتخاب فایل → نمایش پیش‌نمایش */
+        document.addEventListener('change', (e) => {
+            const input = e.target;
+            if (!input || input.tagName !== 'INPUT' || input.type !== 'file') return;
+            if (!input.hasAttribute('data-ap-preview')) return;
+
+            const box = document.getElementById(input.getAttribute('data-ap-preview'));
+            if (!box) return;
+
+            const img = box.querySelector('[data-ap-preview-img]');
+            const name = box.querySelector('[data-ap-preview-name]');
+            const file = input.files && input.files[0];
+
+            if (!file) {
+                box.classList.add('hidden');
+                return;
+            }
+
+            const fill = (url) => {
+                if (img) img.src = url;
+                if (name) name.textContent = file.name + ' — ' + Math.max(1, Math.round(file.size / 1024)) + 'KB';
+                box.classList.remove('hidden');
+            };
+
+            if (file.type && file.type.indexOf('image/') === 0) {
+                const reader = new FileReader();
+                reader.onload = () => fill(reader.result);
+                reader.onerror = () => fill('');
+                reader.readAsDataURL(file);
+            } else {
+                fill('');
+            }
+        });
+
+        /* دکمهٔ حذف پیش‌نمایش */
+        document.addEventListener('click', (e) => {
+            const btn = e.target instanceof Element && e.target.closest('[data-ap-preview-clear]');
+            if (!btn) return;
+
+            /* جعبهٔ پیش‌نمایش: نزدیک‌ترین والد دارای id (خودِ جعبهٔ هدف) */
+            const box = btn.closest('[id]');
+            if (box) box.classList.add('hidden');
+
+            /* input مرتبط: از data-ap-preview معکوس پیدا کن و خالی کن تا
+               انتخاب دوبارهٔ همان فایل هم رویداد change بدهد */
+            const input = box ? document.querySelector('input[type="file"][data-ap-preview="' + box.id + '"]') : null;
+            if (input) {
+                input.value = '';
+            }
+        });
+    },
+
+    start() {
+        this.bind();
+    },
+};
+
+document.addEventListener('DOMContentLoaded', () => ApFilePreview.start());
+document.addEventListener('livewire:navigated', () => ApFilePreview.start());
+
+/* ------------------------------------------------------------------
  | CKEditor 5 — ویرایشگر کامل (همه قابلیت‌های پنل قدیمی)
  | <div id="ap-ckeditor" data-editor-value="..."> → جایگزین textarea قدیمی
  | پراپ لایووایر با data-editor-prop قابل تغییر است (پیش‌فرض: description)

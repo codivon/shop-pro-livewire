@@ -435,6 +435,47 @@ $(document).ready(function () {
     $("ul.gallery-options button.btn-option-wishes").not('[data-wire-favorites]').on("click", function () {
         $(this).toggleClass("btn-option-favorites");
     });
+
+    /* فاز ۲۰۱ — فال‌بک علاقه‌مندی کارت‌ها وقتی Livewire نصب نیست:
+       دکمهٔ .js-card-favorites در partials/product-card — toggle واقعی AJAX
+       (در حالت عادی Livewire خودش wire:click=toggle را مدیریت می‌کند). */
+    $(document).off('click.saniarFavCard').on('click.saniarFavCard', '.js-card-favorites', function (e) {
+        e.preventDefault();
+        var btn = $(this);
+
+        $.ajax({
+            type: 'POST',
+            url: btn.data('action'),
+            data: { product_id: btn.data('product') },
+            success: function (data) {
+                if (data && data.action === 'create') {
+                    btn.addClass('btn-option-favorites');
+                    btn.attr('aria-label', 'حذف از علاقه‌مندی‌ها');
+                    if (typeof showCustomToast === 'function') showCustomToast('به علاقه‌مندی‌ها اضافه شد', 'success');
+                } else if (data && data.action === 'delete') {
+                    btn.removeClass('btn-option-favorites');
+                    btn.attr('aria-label', 'افزودن به علاقه‌مندی');
+                    if (typeof showCustomToast === 'function') showCustomToast('از علاقه‌مندی‌ها حذف شد', 'info');
+                } else if (typeof showCustomToast === 'function') {
+                    showCustomToast('خطایی رخ داده است؛ دوباره تلاش کنید', 'error');
+                }
+            },
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr('content'));
+                block(btn);
+            },
+            error: function (xhr) {
+                if (xhr && xhr.status === 401) {
+                    if (typeof showCustomToast === 'function') showCustomToast('برای افزودن به علاقه‌مندی ابتدا وارد حساب کاربری شوید', 'warning');
+                    return;
+                }
+                if (typeof showCustomToast === 'function') showCustomToast('خطایی رخ داده است؛ دوباره تلاش کنید', 'error');
+            },
+            complete: function () {
+                unblock(btn);
+            }
+        });
+    });
     // favorites product-----------------------
 
     //single-product------------------

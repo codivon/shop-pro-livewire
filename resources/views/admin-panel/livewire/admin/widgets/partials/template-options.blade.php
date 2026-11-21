@@ -1,7 +1,18 @@
 {{-- رندر داینامیک options ابزارک بر اساس template config — پورت ۱:۱ back/widgets/template.blade.php + partials --}}
 {{-- متغیرها: $options (لیست option های template)، $widget (Model|null)، $this → کامپوننت WidgetForm --}}
+{{-- فاز ۱۹۱ — دفاع نهایی در لایهٔ ویو: حتی اگر دادهٔ خام/نرمال‌نشده به اینجا برسد
+     (deployment ناقص، opcache قدیمی، config معیوب جدید)، هیچ آرایه‌ای echo نمی‌شود
+     و خطای «Array to string conversion» در این ویو عملاً غیرممکن است. --}}
 @php
     $errors = $errors ?? (new \Illuminate\Support\ViewErrorBag())->put('default', new \Illuminate\Support\MessageBag());
+
+    /* همهٔ مقادیر اسکالر مورد استفادهٔ ویو با کمک رجیستری امن می‌شوند */
+    $apOptString = fn ($value) => \App\Services\WidgetTemplateRegistry::scalarString($value);
+    $apOptScalar = fn ($value) => \App\Services\WidgetTemplateRegistry::scalarOrNull($value);
+    $apOptAttrs  = function ($value) {
+        /* attributes یک نقطهٔ تزریق raw HTML است — فقط رشتهٔ واقعی مجاز است */
+        return is_string($value) ? $value : '';
+    };
 @endphp
 @foreach ($options as $option)
     @php $optionKey = $option['key']; $errorKey = 'optionValues.' . $optionKey; @endphp
@@ -10,18 +21,18 @@
 
         @case('input')
             {{-- پورت back/widgets/partials/input.blade.php : عرض یکنواخت w-full --}}
-            <div class="{{ ap_clean_legacy_class($option['class'] ?? null) ?: 'w-full' }}">
+            <div class="{{ ap_clean_legacy_class($apOptScalar($option['class'] ?? null)) ?: 'w-full' }}">
                 <label class="mb-1.5 block text-xs font-semibold" for="option-input-{{ $optionKey }}">
-                    {{ $option['title'] }}
+                    {{ $apOptString($option['title'] ?? $optionKey) }}
                 </label>
                 <input id="option-input-{{ $optionKey }}"
-                       type="{{ $option['type'] ?? 'text' }}"
+                       type="{{ $apOptScalar($option['type'] ?? 'text') }}"
                        wire:model="optionValues.{{ $optionKey }}"
                        class="ap-input w-full"
-                       value="{{ $this->optionValue($optionKey) ?? $option['default'] ?? '' }}"
-                       {!! $option['attributes'] ?? '' !!}>
+                       value="{{ $this->optionValue($optionKey) ?? $apOptScalar($option['default'] ?? '') }}"
+                       {!! $apOptAttrs($option['attributes'] ?? null) !!}>
                 @isset($option['help'])
-                    <p class="mt-1 text-[11px] text-ink-3 dark:text-night-ink-2">{{ $option['help'] }}</p>
+                    <p class="mt-1 text-[11px] text-ink-3 dark:text-night-ink-2">{{ $apOptString($option['help']) }}</p>
                 @endisset
                 @error($errorKey) <p class="mt-1.5 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
             </div>
@@ -29,22 +40,23 @@
 
         @case('select')
             {{-- پورت back/widgets/partials/select.blade.php : عرض یکنواخت w-full --}}
-            <div class="{{ ap_clean_legacy_class($option['class'] ?? null) ?: 'w-full' }}">
+            <div class="{{ ap_clean_legacy_class($apOptScalar($option['class'] ?? null)) ?: 'w-full' }}">
                 <label class="mb-1.5 block text-xs font-semibold" for="option-select-{{ $optionKey }}">
-                    {{ $option['title'] }}
+                    {{ $apOptString($option['title'] ?? $optionKey) }}
                 </label>
                 <select id="option-select-{{ $optionKey }}"
                         wire:model="optionValues.{{ $optionKey }}"
                         class="ap-input w-full"
-                        {!! $option['attributes'] ?? '' !!}>
-                    @foreach ($option['options'] as $item)
-                        <option value="{{ $item['value'] }}" @selected($this->optionValue($optionKey) == $item['value'])>
-                            {{ $item['title'] }}
+                        {!! $apOptAttrs($option['attributes'] ?? null) !!}>
+                    @foreach (($option['options'] ?? []) as $item)
+                        @php $item = is_array($item) ? $item : ['value' => $item, 'title' => $item]; @endphp
+                        <option value="{{ $apOptScalar($item['value'] ?? null) }}" @selected($this->optionValue($optionKey) == $item['value'])>
+                            {{ $apOptString($item['title'] ?? ($item['value'] ?? '')) }}
                         </option>
                     @endforeach
                 </select>
                 @isset($option['help'])
-                    <p class="mt-1 text-[11px] text-ink-3 dark:text-night-ink-2">{{ $option['help'] }}</p>
+                    <p class="mt-1 text-[11px] text-ink-3 dark:text-night-ink-2">{{ $apOptString($option['help']) }}</p>
                 @endisset
                 @error($errorKey) <p class="mt-1.5 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
             </div>
@@ -62,7 +74,7 @@
                        class="block w-full cursor-pointer rounded-xl border border-line bg-transparent text-xs text-ink-2
                               file:me-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-brand-600 file:px-3 file:py-1.5
                               file:text-xs file:font-semibold file:text-white hover:file:bg-brand-700 dark:border-night-line"
-                       {!! $option['attributes'] ?? '' !!}>
+                       {!! $apOptAttrs($option['attributes'] ?? null) !!}>
 
                 @if (isset($this->fileUploads[$optionKey]))
                     <p class="mt-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-brand-600 dark:text-brand-400">
@@ -98,7 +110,7 @@
             @endphp
             {{-- : col-span-full (سازگار با گرید تک‌ستونه مودال و گرید دوستونه فرم) --}}
             <div class="col-span-full">
-                <label class="mb-1.5 block text-xs font-semibold">{{ $option['title'] }}</label>
+                <label class="mb-1.5 block text-xs font-semibold">{{ $apOptString($option['title'] ?? $optionKey) }}</label>
                 {{-- : انتخابگر کارتی به‌جای چک‌باکس خام --}}
                 <div class="max-h-72 overflow-y-auto rounded-xl border border-line p-3 dark:border-night-line">
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -120,7 +132,7 @@
                     </div>
                 </div>
                 @isset($option['help'])
-                    <p class="mt-1 text-[11px] text-ink-3 dark:text-night-ink-2">{{ $option['help'] }}</p>
+                    <p class="mt-1 text-[11px] text-ink-3 dark:text-night-ink-2">{{ $apOptString($option['help']) }}</p>
                 @endisset
                 @error($errorKey) <p class="mt-1.5 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
             </div>

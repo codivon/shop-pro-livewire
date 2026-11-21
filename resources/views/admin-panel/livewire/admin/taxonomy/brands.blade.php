@@ -155,6 +155,15 @@
                             <td class="px-3 py-3 fa-digits whitespace-nowrap">{{ $this->jdate($brand->created_at) }}</td>
                             <td class="px-3 py-3">
                                 <div class="flex items-center gap-0.5">
+                                    {{-- فاز ۱۹۱ — نمایش در صفحهٔ اصلی (toggle سریع) --}}
+                                    <button type="button" wire:click="toggleShowOnHome({{ $brand->id }})"
+                                            wire:loading.attr="disabled" wire:target="toggleShowOnHome"
+                                            class="rounded-lg p-1.5 transition-colors {{ (\App\Livewire\Admin\Taxonomy\BrandForm::showOnHomeColumnExists() && $brand->show_on_home)
+                                                ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                                : 'text-ink-3 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-500/10' }}"
+                                            title="نمایش در صفحهٔ اصلی" aria-label="نمایش در صفحهٔ اصلی">
+                                        <x-admin-panel::icon name="house" class="size-4" />
+                                    </button>
                                     <a href="{{ route('np.brands.edit', ['brand' => $brand]) }}" wire:navigate
                                        class="rounded-lg p-1.5 text-ink-3 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-500/10"
                                        title="ویرایش برند" aria-label="ویرایش">

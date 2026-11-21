@@ -524,7 +524,16 @@ class Product extends Model
 
     public function increaseViewCount()
     {
-        $this->increment('view');
+        /* فاز ۱۹۱ — شمارش بازدید هرگز نباید صفحهٔ محصول را ۵۰۰ کند.
+           روی هاست اشتراکی بعد از ALTER TABLE (مثلاً اضافه‌کردن ستون‌های جدید)
+           ممکن است به‌صورت گذرا «Prepared statement needs to be re-prepared»
+           (SQLSTATE HY000 1615) رخ دهد؛ این خطا فقط یک آمار بازدید است،
+           نه محتوای صفحه — شکستش نادیده گرفته می‌شود. */
+        try {
+            $this->increment('view');
+        } catch (\Throwable) {
+            // آمار بازدید غیرحیاتی است — صفحهٔ محصول باید رندر شود
+        }
     }
 
     public function getLabels()

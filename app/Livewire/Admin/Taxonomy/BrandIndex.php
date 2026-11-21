@@ -132,6 +132,29 @@ class BrandIndex extends Component
         $this->dispatch('toast', message: 'برند با موفقیت ایجاد شد.', type: 'success');
     }
 
+    /* ---------------- toggle سریع «نمایش در صفحهٔ اصلی» (فاز ۱۹۱) ---------------- */
+
+    public function toggleShowOnHome(int $id): void
+    {
+        auth('adminPanel')->user()?->can('products.brands') ?: abort(403);
+
+        if (! BrandForm::showOnHomeColumnExists()) {
+            $this->dispatch('toast', message: 'ستون show_on_home هنوز به جدول برندها اضافه نشده است.', type: 'error');
+
+            return;
+        }
+
+        $brand = Brand::find($id);
+
+        if ($brand) {
+            $brand->update(['show_on_home' => ! $brand->show_on_home]);
+
+            $this->dispatch('toast', message: $brand->show_on_home
+                ? 'برند در صفحهٔ اصلی نمایش داده می‌شود.'
+                : 'برند از صفحهٔ اصلی حذف شد.', type: 'success');
+        }
+    }
+
     /* ---------------- حذف (پورت destroy قدیمی) ---------------- */
 
     public function confirmDelete(int $id): void

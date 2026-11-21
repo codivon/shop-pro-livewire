@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Taxonomy;
 
 use App\Models\Brand;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -25,8 +26,28 @@ class BrandForm extends Component
 
     public string $description = '';
 
+    /** فاز ۱۹۱ — «نمایش در صفحهٔ اصلی»: فقط برندهای انتخاب‌شده در ویجت برندهای صفحهٔ اصلی نمایش داده می‌شوند */
+    public bool $show_on_home = false;
+
     /** تصویر جدید (اختیاری — در صورت انتخاب، تصویر قبلی حذف می‌شود مثل قدیمی) */
     public $image = null;
+
+    /** فاز ۱۹۱ — آیا ستون show_on_home روی جدول brands موجود است؟
+     *  (ادمین ستون را دستی اضافه می‌کند؛ تا قبل از آن، فرم/لیست نباید کرش کند) */
+    public static function showOnHomeColumnExists(): bool
+    {
+        static $exists = null;
+
+        if ($exists === null) {
+            try {
+                $exists = Schema::hasColumn((new Brand)->getTable(), 'show_on_home');
+            } catch (\Throwable) {
+                $exists = false;
+            }
+        }
+
+        return $exists;
+    }
 
     public function mount(Brand $brand): void
     {
@@ -36,6 +57,9 @@ class BrandForm extends Component
         $this->name = (string) $brand->name;
         $this->slug = (string) $brand->slug;
         $this->description = (string) $brand->description;
+
+        /* فاز ۱۹۱ — مقدار فعلی «نمایش در صفحهٔ اصلی» */
+        $this->show_on_home = self::showOnHomeColumnExists() && (bool) $brand->show_on_home;
     }
 
     public function generateSlug(): void
@@ -61,6 +85,11 @@ class BrandForm extends Component
         ]);
 
         $data['description'] = $this->description ?: null;
+
+        /* فاز ۱۹۱ — «نمایش در صفحهٔ اصلی»؛ فقط وقتی ستون موجود است ذخیره می‌شود */
+        if (self::showOnHomeColumnExists()) {
+            $data['show_on_home'] = $this->show_on_home;
+        }
 
         if ($this->image) {
             // حذف تصویر قبلی مثل قدیمی (با نرمال‌سازی اسلش ابتدای مسیر)

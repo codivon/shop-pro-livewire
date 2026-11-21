@@ -23,7 +23,7 @@
     $main_color = option('fw_main_color', '#5b6af7');
 @endphp
 
-<link rel="stylesheet" href="{{ theme_asset('css/floating-widget.css') }}?v=174">
+<link rel="stylesheet" href="{{ theme_asset('css/floating-widget.css') }}?v=175">
 
 
 <div class="fw-wrapper" data-main-color="{{ $main_color }}">
@@ -143,4 +143,4 @@
 
 </div>
 
-<script src="{{ theme_asset('js/floating-widget.js') }}"></script>
+<script src="{{ theme_asset('js/floating-widget.js') }}?v=2"></script>

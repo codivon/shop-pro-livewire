@@ -33,6 +33,12 @@
             <div id="category-products-div" data-action="">
                 <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
                     <div class="title d-flex align-items-center">
+                        {{-- فاز ۱۹۲ — لوگوی برند در سربرگ صفحهٔ برند (اگر تصویر داشته باشد) --}}
+                        @if ($brand->image)
+                            <img src="{{ asset($brand->image) }}" alt="{{ $brandName }}"
+                                 class="brand-page-logo img-fluid" loading="eager" decoding="async"
+                                 onerror="this.style.display='none'">
+                        @endif
                         <img src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
                         <h1 class="font-16 ms-3 mb-0">همه محصولات برند <span class="main-color-one-color d-inline-block">{{ $brandName }}</span></h1>
                     </div>

@@ -4,15 +4,40 @@
    تا اگر کاربر حالت شب را انتخاب کرده بود، صفحه از همان قاب
    اول تیره رندر شود (بدون چشمک/فلش پس‌زمینهٔ روشن).
    هیچ وابستگی به DOM ندارد؛ فقط attribute روی <html> می‌گذارد.
+
+   فاز ۱۹۲ — رفع «تم روشن بعد از ناوبری تا رفرش»:
+   • منبع اولیه: کوکی saniar-theme (سمت سرور روی <html> رندر شده)؛
+     اگر کوکی نبود، localStorage مرجع است.
+   • بعد از هر ناوبری SPA مقدار هم دوباره اعمال می‌شود (حتی اگر
+     morph اتریبیوت <html> را به مقدار پیش‌فرض برگرداند).
    ============================================================ */
 (function () {
     'use strict';
 
-    var theme = 'light';
+    function currentTheme() {
+        var theme = 'light';
 
-    try {
-        theme = localStorage.getItem('saniar-theme') === 'dark' ? 'dark' : 'light';
-    } catch (e) { /* localStorage در دسترس نیست — حالت پیش‌فرض */ }
+        try {
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                theme = 'dark';
+            }
+            theme = localStorage.getItem('saniar-theme') === 'dark' ? 'dark'
+                : (localStorage.getItem('saniar-theme') === 'light' ? 'light' : theme);
+        } catch (e) { /* localStorage در دسترس نیست — مقدار سرور/پیش‌فرض */ }
 
-    document.documentElement.setAttribute('data-theme', theme);
+        return theme;
+    }
+
+    function applyTheme() {
+        document.documentElement.setAttribute('data-theme', currentTheme());
+    }
+
+    /* اجرای اولیه (قبل از رندر بادی) */
+    applyTheme();
+
+    /* فاز ۱۹۲ — پس از هر ناوبری SPA هم اعمال شود (بelt & suspenders
+       برای وقتی کوکی/سرور مقدار درست را رندر نکرده باشد) */
+    if (window.Livewire) {
+        document.addEventListener('livewire:navigated', applyTheme);
+    }
 })();

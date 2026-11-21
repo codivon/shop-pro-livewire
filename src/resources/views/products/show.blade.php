@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ theme_asset('css/vendor/fancybox.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/owl.carousel.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/pages/products/show.css') }}?v=21">
+    <link rel="stylesheet" href="{{ theme_asset('css/pages/products/show.css') }}?v=22">
 @endpush
 
 @section('content')
@@ -860,5 +860,5 @@
    <script src="{{ theme_asset('js/pages/products/show.js') }}?v=22"></script>
    <script src="{{ theme_asset('js/pages/comments.js') }}?v=2"></script>
    {{-- منطق لحظه‌ای قیمت + تعویض تصویر گالری (بدون اسکریپت اینلاین) --}}
-   <script src="{{ theme_asset('js/theme-product.js') }}?v=5"></script>
+   <script src="{{ theme_asset('js/theme-product.js') }}?v=6"></script>
 @endpush

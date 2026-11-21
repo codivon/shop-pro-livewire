@@ -1,0 +1,465 @@
+/* ============================================================
+   SaniarTheme — css/pages/contact.css (فاز ۱۹۲)
+   بازطراحی مدرن صفحهٔ تماس با ما:
+   • هیروی گرادیانی با حلقه‌های تزئینی
+   • کارت‌های راه‌های ارتباطی (تلفن/ایمیل/آدرس) با هاور نرم
+   • فرم تماس در کارت شیشه‌ای با فیلدهای مدرن
+   • کارت نقشهٔ کنار فرم (ارتفاع ثابت برای رندر درست مپ)
+   • سازگار با دارک مود (html[data-theme="dark"])
+   ============================================================ */
+
+.cnt-page {
+    --cnt-radius: 18px;
+}
+
+/* ---------- هیرو ---------- */
+.cnt-hero {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(120deg,
+        var(--main-color-one, #275fe0) 0%,
+        color-mix(in srgb, var(--main-color-one, #275fe0) 72%, #0e2a63) 100%);
+    color: #fff;
+    padding: 42px 36px;
+    box-shadow: 0 16px 38px -14px color-mix(in srgb, var(--main-color-one, #275fe0) 55%, transparent);
+}
+
+.cnt-hero__ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, .16);
+    pointer-events: none;
+}
+
+.cnt-hero__ring--1 {
+    width: 220px;
+    height: 220px;
+    top: -70px;
+    inset-inline-end: -50px;
+    border-width: 22px;
+    border-color: rgba(255, 255, 255, .08);
+}
+
+.cnt-hero__ring--2 {
+    width: 150px;
+    height: 150px;
+    bottom: -60px;
+    inset-inline-end: 22%;
+    border-color: rgba(255, 255, 255, .12);
+}
+
+.cnt-hero__body {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+}
+
+.cnt-hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .22);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+}
+
+.cnt-hero__badge i { font-size: 15px; }
+
+.cnt-hero__title {
+    font-size: 30px;
+    font-weight: 900;
+    margin: 0 0 10px;
+    color: #fff;
+}
+
+.cnt-hero__text {
+    font-size: 14px;
+    line-height: 2;
+    color: rgba(255, 255, 255, .85);
+}
+
+/* ---------- یادداشت‌های بالای/پایین صفحه ---------- */
+.cnt-note {
+    background: #fff;
+    border: 1px solid rgba(120, 130, 145, .12);
+    padding: 18px 22px;
+    font-size: 13px;
+    line-height: 2.1;
+    color: var(--color-site, #333);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, .05));
+}
+
+/* ---------- کارت‌های راه‌های ارتباطی ---------- */
+.cnt-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 100%;
+    background: #fff;
+    border: 1px solid rgba(120, 130, 145, .12);
+    border-radius: var(--cnt-radius, 18px);
+    padding: 18px 20px;
+    text-decoration: none;
+    color: var(--color-site, #333);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, .05));
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.cnt-card--static { cursor: default; }
+
+.cnt-card:not(.cnt-card--static):hover,
+.cnt-card:not(.cnt-card--static):focus-visible {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--main-color-one, #275fe0) 35%, transparent);
+    box-shadow: 0 14px 30px -12px rgba(15, 23, 42, .25);
+    outline: none;
+}
+
+.cnt-card__ico {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    font-size: 22px;
+}
+
+.cnt-card__ico--phone {
+    background: color-mix(in srgb, var(--main-color-one, #275fe0) 12%, #fff);
+    color: var(--main-color-one, #275fe0);
+}
+
+.cnt-card__ico--mail {
+    background: color-mix(in srgb, #189d0e 12%, #fff);
+    color: #189d0e;
+}
+
+.cnt-card__ico--pin {
+    background: color-mix(in srgb, #ffa41b 15%, #fff);
+    color: #ed9209;
+}
+
+.cnt-card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.cnt-card__label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted, #565757);
+}
+
+.cnt-card__value {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--color-site, #333);
+    word-break: break-word;
+}
+
+.cnt-card__hint {
+    font-size: 11px;
+    color: var(--text-muted-two, #929292);
+}
+
+/* ---------- شبکه‌های اجتماعی ---------- */
+.cnt-socials {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid rgba(120, 130, 145, .12);
+    border-radius: var(--cnt-radius, 18px);
+    padding: 14px 20px;
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, .05));
+}
+
+.cnt-socials__title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted, #565757);
+}
+
+.cnt-socials__list {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cnt-social {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--main-color-one, #275fe0) 10%, #fff);
+    color: var(--main-color-one, #275fe0);
+    font-size: 18px;
+    text-decoration: none;
+    transition: transform .2s ease, background .2s ease, color .2s ease;
+}
+
+.cnt-social:hover,
+.cnt-social:focus-visible {
+    transform: translateY(-3px);
+    background: var(--main-color-one, #275fe0);
+    color: #fff;
+    outline: none;
+}
+
+/* ---------- کارت فرم ---------- */
+.cnt-form-card {
+    height: 100%;
+    background: #fff;
+    border: 1px solid rgba(120, 130, 145, .12);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, .05));
+    padding: 26px 26px 30px;
+}
+
+.cnt-form-card__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed rgba(120, 130, 145, .2);
+}
+
+.cnt-form-card__ico {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--main-color-one, #275fe0) 12%, #fff);
+    color: var(--main-color-one, #275fe0);
+    font-size: 21px;
+}
+
+.cnt-form-card__title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--color-site, #333);
+    margin: 0 0 4px;
+}
+
+.cnt-form-card__sub {
+    font-size: 12px;
+    color: var(--text-muted, #565757);
+}
+
+/* فیلدها */
+.cnt-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-site, #333);
+    margin-bottom: 7px;
+}
+
+.cnt-req { color: #e03131; }
+
+.cnt-page .cnt-input {
+    background: #f8f9fc;
+    border: 1.5px solid rgba(120, 130, 145, .16);
+    border-radius: 12px;
+    font-size: 13px;
+    padding: 11px 16px;
+    color: var(--color-site, #333);
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.cnt-page .cnt-input--ltr { text-align: left; }
+
+.cnt-page .cnt-textarea { resize: vertical; min-height: 140px; }
+
+.cnt-page .cnt-input:focus {
+    background: #fff;
+    border-color: var(--main-color-one, #275fe0);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--main-color-one, #275fe0) 12%, transparent);
+    outline: none;
+}
+
+.cnt-page .cnt-input.error {
+    border-color: #e03131;
+}
+
+/* دکمهٔ ارسال */
+.cnt-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    justify-content: center;
+    background: linear-gradient(120deg,
+        var(--main-color-one, #275fe0),
+        color-mix(in srgb, var(--main-color-one, #275fe0) 80%, #0e2a63));
+    color: #fff;
+    border: 0;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 13px 30px;
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.cnt-submit i { font-size: 17px; }
+
+.cnt-submit:hover,
+.cnt-submit:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px -10px color-mix(in srgb, var(--main-color-one, #275fe0) 65%, transparent);
+    filter: brightness(1.05);
+    outline: none;
+}
+
+/* ---------- کارت نقشه ---------- */
+.cnt-map-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid rgba(120, 130, 145, .12);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, .05));
+    overflow: hidden;
+}
+
+.cnt-map-card__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 22px;
+    border-bottom: 1px solid rgba(120, 130, 145, .12);
+}
+
+.cnt-map-card__ico {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: color-mix(in srgb, #ffa41b 15%, #fff);
+    color: #ed9209;
+    font-size: 17px;
+}
+
+.cnt-map-card__title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--color-site, #333);
+}
+
+/* ارتفاع قطعی نقشه — بدون آن مپ ۰px رندر می‌شد */
+.cnt-page .cnt-map,
+.cnt-page #map {
+    width: 100%;
+    min-height: 420px;
+    height: 100%;
+    flex: 1 1 auto;
+}
+
+/* ============================================================
+   ریسپانسیو
+   ============================================================ */
+@media (max-width: 575.98px) {
+    .cnt-hero { padding: 30px 22px; }
+
+    .cnt-hero__title { font-size: 24px; }
+
+    .cnt-hero__text { font-size: 13px; }
+
+    .cnt-form-card { padding: 20px 16px 24px; }
+
+    .cnt-page .cnt-map,
+    .cnt-page #map { min-height: 300px; }
+}
+
+/* ============================================================
+   دارک مود
+   ============================================================ */
+html[data-theme="dark"] .cnt-note,
+html[data-theme="dark"] .cnt-card,
+html[data-theme="dark"] .cnt-socials,
+html[data-theme="dark"] .cnt-form-card,
+html[data-theme="dark"] .cnt-map-card {
+    background: var(--dk-surface, #1e222b);
+    border-color: var(--dk-border, #2e3442);
+    box-shadow: none;
+}
+
+html[data-theme="dark"] .cnt-card,
+html[data-theme="dark"] .cnt-card__label,
+html[data-theme="dark"] .cnt-card__value,
+html[data-theme="dark"] .cnt-socials__title,
+html[data-theme="dark"] .cnt-form-card__title,
+html[data-theme="dark"] .cnt-form-card__sub,
+html[data-theme="dark"] .cnt-label,
+html[data-theme="dark"] .cnt-map-card__title,
+html[data-theme="dark"] .cnt-note {
+    color: var(--dk-text, #e6e8ee);
+}
+
+html[data-theme="dark"] .cnt-card__label,
+html[data-theme="dark"] .cnt-form-card__sub,
+html[data-theme="dark"] .cnt-label {
+    color: var(--dk-text-soft, #a7adbb);
+}
+
+html[data-theme="dark"] .cnt-card:not(.cnt-card--static):hover {
+    box-shadow: var(--dk-shadow, 0 8px 24px rgba(0, 0, 0, .45));
+}
+
+html[data-theme="dark"] .cnt-page .cnt-input {
+    background: var(--dk-bg-soft, #181b22);
+    border-color: var(--dk-border, #2e3442);
+    color: var(--dk-text, #e6e8ee);
+}
+
+html[data-theme="dark"] .cnt-page .cnt-input:focus {
+    background: var(--dk-surface-2, #242936);
+    border-color: var(--main-color-one, #5b8af5);
+}
+
+html[data-theme="dark"] .cnt-card__ico--phone,
+html[data-theme="dark"] .cnt-form-card__ico {
+    background: color-mix(in srgb, var(--main-color-one, #5b8af5) 18%, transparent);
+    color: var(--main-color-one, #5b8af5);
+}
+
+html[data-theme="dark"] .cnt-card__ico--mail {
+    background: color-mix(in srgb, #189d0e 22%, transparent);
+    color: #4ade80;
+}
+
+html[data-theme="dark"] .cnt-card__ico--pin,
+html[data-theme="dark"] .cnt-map-card__ico {
+    background: color-mix(in srgb, #ffa41b 18%, transparent);
+    color: #fbbf24;
+}
+
+html[data-theme="dark"] .cnt-social {
+    background: color-mix(in srgb, var(--main-color-one, #5b8af5) 14%, transparent);
+}
+
+html[data-theme="dark"] .cnt-map-card__head {
+    border-bottom-color: var(--dk-border, #2e3442);
+}
+
+html[data-theme="dark"] .cnt-form-card__head {
+    border-bottom-color: var(--dk-border, #2e3442);
+}

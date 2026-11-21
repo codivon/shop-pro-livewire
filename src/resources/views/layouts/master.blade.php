@@ -1,8 +1,14 @@
 @php
     $cart = get_cart();
+    /* فاز ۱۹۲ — حالت روز/شب از کوکی (همراه localStorage) در سمت سرور:
+       Livewire.navigate اتریبیوت‌های <html> را از HTML صفحهٔ جدید می‌گیرد؛
+       اگر data-theme سمت سرور رندر نشود، بعد از هر ناوبری تم روشن می‌شد
+       تا کاربر رفرش کند. اکنون کوکی saniar-theme مقدار اولیهٔ صحیح را
+       هم در لود کامل و هم در ناوبری SPA تضمین می‌کند. */
+    $saniar_theme_attr = ($_COOKIE['saniar-theme'] ?? '') === 'dark' ? 'dark' : 'light';
 @endphp
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="rtl" data-theme="{{ $saniar_theme_attr }}">
 
 <head>
     <meta charset="UTF-8">
@@ -10,7 +16,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
     {{-- حالت روز/شب: مقداردهی قبل از رندر برای جلوگیری از فلش --}}
-    <script src="{{ theme_asset('js/theme-init.js') }}"></script>
+    <script src="{{ theme_asset('js/theme-init.js') }}?v=2"></script>
 
     {{-- Favicon --}}
     <link rel="icon" type="image/png" sizes="32x32" href="{{ option('info_icon', theme_asset('image/logo.png')) }}">
@@ -505,7 +511,7 @@
 {{-- پلاگین go-to-top حذف شد؛ دکمهٔ مستطیلی «برگشت به بالا» در theme-header.js --}}
 <script src="{{theme_asset('plugin/rasta-contact/script.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('js/saniar-init.js')}}?v=165" data-navigate-once></script>
-<script src="{{theme_asset('js/theme-header.js')}}?v=26" data-navigate-once></script>
+<script src="{{theme_asset('js/theme-header.js')}}?v=27" data-navigate-once></script>
 
 {{-- اسکریپت‌های عملکردی فروشگاه --}}
 <script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}" data-navigate-once></script>
@@ -530,7 +536,7 @@
 @endif
 
 {{-- موتور SPA تم سانیار (intercept کلیک در فاز capture + Livewire.navigate) — باید بعد از livewire:scripts باشد --}}
-<script src="{{theme_asset('js/saniar-spa.js')}}?v=5" data-navigate-once></script>
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=6" data-navigate-once></script>
 
 @if(session('toast-success'))
     <script data-navigate-once>

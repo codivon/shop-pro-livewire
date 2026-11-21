@@ -40,7 +40,8 @@
     .fw-fab.fw-open svg { opacity: 0; }
     .fw-fab.fw-open .fw-fab-close { opacity: 1; }
 
-    /* Pulse ring */
+    /* Pulse ring — فاز ۱۹۲: فقط ۳ تکرار در ابتدای لود (تا «باز و بسته شدن
+       خودکار ویجت» حس نشود)؛ پس از آن دکمه ثابت است */
     .fw-fab::before {
         content: '';
         position: absolute;
@@ -48,7 +49,7 @@
         border-radius: 50%;
         border: 2px solid var(--fw-primary);
         opacity: 0;
-        animation: fw-pulse 2.4s ease-out infinite;
+        animation: fw-pulse 2.4s ease-out 3;
     }
     @keyframes fw-pulse {
         0%   { transform: scale(1);    opacity: .6; }

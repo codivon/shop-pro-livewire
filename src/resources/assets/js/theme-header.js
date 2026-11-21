@@ -427,6 +427,13 @@
                 root.setAttribute('data-theme', next);
                 try { localStorage.setItem('saniar-theme', next); } catch (e) { /* حافظه در دسترس نیست */ }
 
+                /* فاز ۱۹۲ — کوکی همگام: بعد از ناوبری SPA اتریبیوت <html> از
+                   HTML سرور (که با همین کوکی رندر می‌شود) درست می‌ماند */
+                try {
+                    document.cookie = 'saniar-theme=' + next +
+                        ';path=/;max-age=31536000;SameSite=Lax';
+                } catch (e) { /* کوکی در دسترس نیست — localStorage کافی است */ }
+
                 /* همگام‌سازی همهٔ کلیدهای موجود در صفحه */
                 document.querySelectorAll('.theme-toggle-btn').forEach(function (btn) {
                     btn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');

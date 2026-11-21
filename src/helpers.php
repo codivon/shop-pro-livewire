@@ -356,8 +356,22 @@ function get_widget_uncached($widget)
                 $brandsQuery->where('show_on_home', true);
             }
 
+            /* فاز ۱۹۲ — ترتیب نمایش از ستون ordering (مایگریشن ویرایش‌شدهٔ برندها):
+               - اگر ستون ordering روی جدول موجود باشد → مرتب‌سازی دستی ادمین
+               - در غیر این صورت (هاست‌هایی که هنوز ستون را اضافه نکرده‌اند) →
+                 فالبک به created_at تا صفحهٔ اصلی هرگز ۴۲S22 نگیرد
+               (هات‌فیکس قبلی orderBy('created_at') با این تغییر دیگر لازم نیست) */
+            static $brandsOrderingColumn = null;
+            if ($brandsOrderingColumn === null) {
+                try {
+                    $brandsOrderingColumn = Schema::hasColumn((new Brand)->getTable(), 'ordering');
+                } catch (\Throwable) {
+                    $brandsOrderingColumn = false;
+                }
+            }
+
             $variables['index_middle_brands'] = $brandsQuery
-                ->orderBy('created_at', $widget->option('ordering', 'asc'))
+                ->orderBy($brandsOrderingColumn ? 'ordering' : 'created_at', $widget->option('ordering', 'asc'))
                 ->take((int) ($widget->option('number', 5) ?: 5))
                 ->get();
 

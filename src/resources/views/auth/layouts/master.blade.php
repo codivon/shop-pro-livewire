@@ -1,5 +1,11 @@
+@php
+    /* فاز ۱۹۲ — حالت روز/شب از کوکی (همراه localStorage) در سمت سرور:
+       Livewire.navigate اتریبیوت‌های <html> را از HTML صفحهٔ جدید می‌گیرد؛
+       اکنون کوکی saniar-theme مقدار اولیهٔ صحیح را تضمین می‌کند. */
+    $saniar_theme_attr = ($_COOKIE['saniar-theme'] ?? '') === 'dark' ? 'dark' : 'light';
+@endphp
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="rtl" data-theme="{{ $saniar_theme_attr }}">
 
 <head>
     <meta charset="UTF-8">

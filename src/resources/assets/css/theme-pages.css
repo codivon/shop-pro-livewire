@@ -1,1 +1,21 @@
 /* theme-pages.css — اصلاحات صفحات عمومی */
+
+
+/* ============================================================
+   فاز ۱۹۲ — صفحهٔ برند: لوگوی برند در سربرگ (brands/show.blade.php)
+   ============================================================ */
+.brand-page-logo {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    background: #f8f9fc;
+    border: 1px solid rgba(120, 130, 145, .14);
+    border-radius: 12px;
+    padding: 6px;
+    flex-shrink: 0;
+}
+
+html[data-theme="dark"] .brand-page-logo {
+    background: var(--dk-surface-2, #242936);
+    border-color: var(--dk-border, #2e3442);
+}

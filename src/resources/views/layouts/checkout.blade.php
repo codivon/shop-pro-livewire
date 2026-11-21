@@ -1,3 +1,9 @@
+@php
+    /* فاز ۱۹۲ — حالت روز/شب از کوکی (همراه localStorage) در سمت سرور:
+       Livewire.navigate اتریبیوت‌های <html> را از HTML صفحهٔ جدید می‌گیرد؛
+       اکنون کوکی saniar-theme مقدار اولیهٔ صحیح را تضمین می‌کند. */
+    $saniar_theme_attr = ($_COOKIE['saniar-theme'] ?? '') === 'dark' ? 'dark' : 'light';
+@endphp
 {{--
     لایهٔ اختصاصی صفحهٔ چک‌اوت و بعد از آن (نتیجهٔ پرداخت)
     طبق نیاز محصول: نه هدر اصلی سایت و نه فوتر؛ فقط یک هدر ساده
@@ -7,7 +13,7 @@
     $cart = get_cart();
 @endphp
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="rtl" data-theme="{{ $saniar_theme_attr }}">
 
 <head>
     <meta charset="UTF-8">

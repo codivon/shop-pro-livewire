@@ -207,29 +207,66 @@
        stopImmediatePropagation جلوی هر هندلر دیگر (از جمله هر مداخله‌گر
        رفرشِ دستی) را می‌گیرد. اگر navigate خطا بدهد → لود عادی مثل قبل. */
     /* فاز ۱۹۱ — تشخیص درگ/سوایپ افقی: با شروع و پایان لمس/درگ ماوس،
-       جابه‌جایی افقی ثبت می‌شود؛ اگر بیش از آستانه بود، برای ~۳۵۰ms هر کلیکی
+       جابه‌جایی افقی ثبت می‌شود؛ اگر بیش از آستانه بود، برای مدت کوتاه هر کلیکی
        که روی لینک درون اسلایدرها برسد «بلعیده» می‌شود (هرگز ناوبری نه،
        نه SPA و نه لود کامل). این همان ریشهٔ «با اسلاید کردن به تک‌صفحهٔ
        محصول می‌رود» بود: پیش‌تر interceptor در capture-document زودتر از
-       preventClicks خودِ Swiper اجرا می‌شد و ناوبری را شروع می‌کرد. */
-    var dragState = { x: 0, y: 0, tracking: false, suppressUntil: 0 };
+       preventClicks خودِ Swiper اجرا می‌شد و ناوبری را شروع می‌کرد.
+
+    فاز ۱۹۲ — تقویت نهایی (رفع باقی‌ماندهٔ پرش به تک‌صفحه هنگام سوایپ):
+       ====================================================================
+       نسخهٔ ۱۹۱ فقط «اختلاف بین مختصات touchstart و touchend» را می‌سنجید و
+       سه شکاف داشت:
+       ۱) سوایپ‌های کوتاه (۷-۹ پیکسل) از آستانهٔ ۱۰px رد می‌شدند ولی Swiper
+          آن‌ها را «تغییر اسلاید» حساب می‌کرد و کلیکِ انتهای لمس ناوبری را
+          شروع می‌کرد؛
+       ۲) پنجرهٔ ۳۵۰ms در iOS/برخی اندرویدها قبل از dispatch شدن click
+          تمام می‌شد؛
+       ۳) حرکتِ وسطِ ژست (touchmove) دیده نمی‌شد — فقط نقاط شروع/پایان.
+       اکنون: مسافت کلِ افقیِ طی‌شده در طول ژست (touchmove) انباشته می‌شود،
+       آستانه به ۶px و پنجرهٔ چشم‌پوشی به ۵۰۰ms رسیده و اگر click در نقطه‌ای
+       دورتر از آخرین مختصات لمس رخ دهد هم سوایپ حساب می‌شود. */
+    var dragState = {
+        x: 0, y: 0,               /* نقطهٔ شروع ژست */
+        lastX: 0, lastY: 0,       /* آخرین مختصات دیده‌شده */
+        travelX: 0,               /* مسافت کل افقی طی‌شده در ژست */
+        tracking: false,
+        suppressUntil: 0,
+        lastGestureEnd: 0,        /* زمان پایان آخرین ژست لمسی */
+        isTouch: false            /* فاز ۱۹۲ — آخرین ژست لمسی بوده یا ماوس؟ */
+    };
 
     function registerDrag(x, y) {
         dragState.x = x;
         dragState.y = y;
+        dragState.lastX = x;
+        dragState.lastY = y;
+        dragState.travelX = 0;
         dragState.tracking = true;
+    }
+
+    /* فاز ۱۹۲ — مسافت افقیِ طی‌شده در طول ژست انباشته می‌شود
+       (نه فقط اختلاف ابتدا و انتها) */
+    function trackMove(x, y) {
+        if (!dragState.tracking) { return; }
+        dragState.travelX += Math.abs(x - dragState.lastX);
+        dragState.lastX = x;
+        dragState.lastY = y;
     }
 
     function finishDrag(x, y) {
         if (!dragState.tracking) { return; }
         dragState.tracking = false;
 
-        var dx = Math.abs(x - dragState.x);
-        var dy = Math.abs(y - dragState.y);
+        if (typeof x === 'number') { trackMove(x, y); }
 
-        /* سوایپِ واقعی = جابه‌جایی افقی آشکار */
-        if (dx >= 10 && dx > dy * 1.2) {
-            dragState.suppressUntil = Date.now() + 350;
+        dragState.lastGestureEnd = Date.now();
+
+        /* سوایپِ واقعی = جابه‌جایی افقی آشکار — آستانهٔ ۶px و غلبهٔ افقی بر عمودی */
+        var dy = Math.abs(dragState.lastY - dragState.y);
+
+        if (dragState.travelX >= 6 && dragState.travelX >= dy) {
+            dragState.suppressUntil = Date.now() + 500;
         }
     }
 
@@ -244,18 +281,38 @@
         document.addEventListener('touchstart', function (e) {
             var t = e.touches && e.touches[0];
             if (!t) { return; }
+            dragState.isTouch = true;
             registerDrag(t.clientX, t.clientY);
         }, true);
 
+        /* فاز ۱۹۲ — حرکت وسط ژست هم شمرده می‌شود (سوایپ کوتاه از قلم نیفتد) */
+        document.addEventListener('touchmove', function (e) {
+            var t = e.touches && e.touches[0];
+            if (!t) { return; }
+            trackMove(t.clientX, t.clientY);
+        }, { capture: true, passive: true });
+
         document.addEventListener('touchend', function (e) {
             var t = e.changedTouches && e.changedTouches[0];
-            if (!t) { return; }
-            finishDrag(t.clientX, t.clientY);
+            finishDrag(t ? t.clientX : undefined, t ? t.clientY : undefined);
+        }, true);
+
+        /* touchcancel — ژست توسط مرورگر گرفته شد؛ click نخواهد آمد ولی
+           شمارنده‌ها باید ریست شوند تا ژست بعدی درست سنجیده شود */
+        document.addEventListener('touchcancel', function () {
+            dragState.tracking = false;
+            dragState.travelX = 0;
+            dragState.lastGestureEnd = Date.now();
         }, true);
 
         document.addEventListener('mousedown', function (e) {
+            dragState.isTouch = false;
             registerDrag(e.clientX, e.clientY);
         }, true);
+
+        document.addEventListener('mousemove', function (e) {
+            if (dragState.tracking) { trackMove(e.clientX, e.clientY); }
+        }, { capture: true, passive: true });
 
         document.addEventListener('mouseup', function (e) {
             finishDrag(e.clientX, e.clientY);
@@ -289,6 +346,18 @@
                     var sliderBox = a.closest('.swiper, .owl-carousel, .amazing-slider, .product-slider, .swiper-container, #mainCarousel, #carouselExampleIndicators');
                     if (!sliderBox) { return; }
                 }
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return;
+            }
+
+            /* فاز ۱۹۲ — فالبک دوم: کلیکِ تاچی که خیلی زود بعد از ژستِ دارای
+               حرکت افقی dispatch شده ولی پنجرهٔ suppress فعال نیست
+               (تأخیر dispatch شدن click در iOS/برخی اندرویدها > ۵۰۰ms). */
+            if (dragState.isTouch
+                && dragState.lastGestureEnd
+                && Date.now() - dragState.lastGestureEnd < 700
+                && dragState.travelX >= 6) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 return;

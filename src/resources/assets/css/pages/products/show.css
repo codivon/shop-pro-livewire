@@ -578,6 +578,13 @@ tr.table-suppliers-row.in-filter.shown {
     display: none;
 }
 
+/* فاز ۱۹۲ — حالت بازِ فالبک مستقل jQuery (کلاس snr-open روی کانتینر):
+   وقتی هندلرهای jQuery در دسترس نباشند، توگل با کلاس کار می‌کند نه انیمیشن */
+.product-meta-feature-items.snr-open .product-params-more,
+.product-params.snr-open .product-params-more {
+    display: list-item;
+}
+
 /* ---------- فاز ۱۷۹ — توگل «بیشتر/کمتر» کوچکِ متنی (مشخصات + توضیحات + نقد) ----------
    فاز ۱۷۸ لینک متنی ریز ساخت؛ فاز ۱۷۹ مقادیر دقیقِ کاربر اعمال شد:
    margin-top: 0 (بدون فاصلهٔ اضافی از متن بالا)، margin-right: 0،

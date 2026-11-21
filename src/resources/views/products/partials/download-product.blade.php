@@ -207,7 +207,7 @@
                                                     @if ($product->specialSpecifications()->count() > 5)
                                                         <li class="product-params-more-handler">
                                                             {{-- فاز ۱۷۸ — هم‌ساخت توگل کوچک صفحهٔ محصول --}}
-                                                            <a class="link-border snr-more-toggle" href="">
+                                                            <a role="button" tabindex="0" class="link-border snr-more-toggle">
                                                                 <span class="show-more">موارد بیشتر...<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
                                                                 <span class="show-less">موارد کمتر<i class="bi bi-chevron-up snr-toggle-icon"></i></span>
                                                             </a>
@@ -221,8 +221,8 @@
                                                 @if ($product->short_description)
                                                     <div class="product-additional-info">
                                                         <div class="product-additional-item is-masked">
-                                                            <p style="max-height:150px">{!! nl2br($product->short_description) !!}</p>
-                                                            <a class="mask-handler link-border" href=''>
+                                                            <p>{!! nl2br($product->short_description) !!}</p>
+                                                            <a role="button" tabindex="0" class="mask-handler link-border">
                                                                 <span class="show-more">مشاهده بیشتر</span>
                                                                 <span class="show-less">مشاهده کمتر</span>
                                                             </a>

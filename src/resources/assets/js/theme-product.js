@@ -357,4 +357,102 @@
         hideEmptyPager();
     }
     (window.saniarReinit = window.saniarReinit || []).push(hideEmptyPager);
+
+    /* ---------------------------------------------------------
+       ۶) فاز ۱۹۲ — فالبک مستقلِ jQuery برای دکمه‌های «موارد بیشتر /
+          مشاهده بیشتر» صفحهٔ محصول (مشخصات کالا + ماسک توضیحات)
+       ---------------------------------------------------------
+       هندلرهای jQuery همین توگل‌ها در main.js / pages/products/show.js
+       delegated هستند؛ این فالبک فقط وقتی دست می‌زند که هیچ‌کدام از
+       آن‌ها (به هر دلیل — خطای JS پیش از بایند، حذف handler توسط
+       off، …) روی document زنده نباشند؛ در حالت عادی هیچ کاری
+       نمی‌کند و رفتار دوگانه رخ نمی‌دهد. پشتیبانی کیبورد
+       (Enter/Space) هم اضافه شد (role=button در بلید).
+       --------------------------------------------------------- */
+    var togglesBound = false;
+
+    function jqueryHasDelegate(selector) {
+        try {
+            if (!window.jQuery || !window.jQuery._data) { return false; }
+            var evs = window.jQuery._data(document, 'events');
+            if (!evs || !evs.click) { return false; }
+            for (var i = 0; i < evs.click.length; i++) {
+                if (evs.click[i] && evs.click[i].selector === selector) { return true; }
+            }
+            return false;
+        } catch (e) { return false; }
+    }
+
+    function toggleParamsMore(handler) {
+        var container = handler.closest('.product-meta-feature-items, .product-params');
+        if (!container) { return; }
+        var willOpen = !container.classList.contains('snr-open');
+        container.classList.toggle('snr-open', willOpen);
+        handler.classList.toggle('open', willOpen);
+    }
+
+    function toggleMask(box, handler) {
+        if (!box) { return; }
+        var targets = [];
+        var summary = box.querySelector('.mask-text-product-summary');
+        if (summary) { targets.push(summary); }
+        var shadow = box.querySelector(':scope > .shadow-box');
+        var anyActive = false;
+
+        box.querySelectorAll(':scope > p, .checkout-contact').forEach(function (el) {
+            el.classList.toggle('active');
+            if (el.classList.contains('active')) { anyActive = true; }
+        });
+        if (summary) {
+            summary.classList.toggle('active');
+            if (summary.classList.contains('active')) { anyActive = true; }
+        }
+
+        if (shadow) { shadow.style.display = anyActive ? 'none' : ''; }
+        handler.classList.toggle('open', anyActive);
+    }
+
+    function initProductToggles() {
+        if (togglesBound) { return; }
+        togglesBound = true;
+
+        /* اگر jQuery هندلر خودش را روی document دارد → دست نزن */
+        var paramsOwned = jqueryHasDelegate('.product-params-more-handler');
+        var maskOwned = jqueryHasDelegate('.mask-handler');
+
+        document.addEventListener('click', function (e) {
+            var handler = e.target.closest('.product-params-more-handler, .mask-handler');
+            if (!handler) { return; }
+
+            /* فقط داخل صفحهٔ محصول — ماسک‌های چک‌اوت دست jQuery اصلی بمانند */
+            if (!document.querySelector('.product-page')) { return; }
+
+            if (handler.classList.contains('product-params-more-handler') && paramsOwned) { return; }
+            if (handler.classList.contains('mask-handler') && maskOwned) { return; }
+
+            e.preventDefault();
+
+            if (handler.classList.contains('product-params-more-handler')) {
+                toggleParamsMore(handler);
+            } else {
+                toggleMask(handler.closest('.is-masked'), handler);
+            }
+        }, false);
+
+        /* کیبورد: Enter/Space روی توگل‌های بدون href */
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Enter' && e.key !== ' ') { return; }
+            var el = e.target;
+            if (!el || !el.matches) { return; }
+            if (!el.matches('a.snr-more-toggle[role="button"]')) { return; }
+            e.preventDefault();
+            el.click();
+        }, false);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initProductToggles);
+    } else {
+        initProductToggles();
+    }
 })();

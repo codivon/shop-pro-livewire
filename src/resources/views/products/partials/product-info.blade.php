@@ -65,7 +65,7 @@
                         </ul>
                         @if ($product->specialSpecifications()->count() > 5)
                             {{-- فاز ۱۷۸ — توگل کوچک متنی (CSS)؛ آیکون بعد از متن = انتهای سطر مثل نمونه --}}
-                            <a class="link-border snr-more-toggle product-params-more-handler" href="">
+                            <a role="button" tabindex="0" class="link-border snr-more-toggle product-params-more-handler" >
                                 <span class="show-more">موارد بیشتر...<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
                                 <span class="show-less">موارد کمتر<i class="bi bi-chevron-up snr-toggle-icon"></i></span>
                             </a>
@@ -79,7 +79,7 @@
                             {{-- فاز ۱۷۸ — پیش‌فرض حداقل ۵ خط دیده می‌شود (CSS) --}}
                             <p class="mb-0 font-13">{!! nl2br($product->short_description) !!}</p>
                             {{-- توگل کوچک متنی؛ آیکون بعد از متن = انتهای سطر مثل نمونه --}}
-                            <a class="mask-handler link-border snr-more-toggle" href="">
+                            <a role="button" tabindex="0" class="mask-handler link-border snr-more-toggle" >
                                 <span class="show-more">مشاهده بیشتر<i class="bi bi-chevron-down snr-toggle-icon"></i></span>
                                 <span class="show-less">مشاهده کمتر<i class="bi bi-chevron-up snr-toggle-icon"></i></span>
                             </a>

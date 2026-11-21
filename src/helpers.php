@@ -357,7 +357,7 @@ function get_widget_uncached($widget)
             }
 
             $variables['index_middle_brands'] = $brandsQuery
-                ->orderBy('ordering', $widget->option('ordering', 'asc'))
+                ->orderBy('created_at', $widget->option('ordering', 'asc'))
                 ->take((int) ($widget->option('number', 5) ?: 5))
                 ->get();
 

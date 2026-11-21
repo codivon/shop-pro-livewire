@@ -831,7 +831,7 @@ return [
                 'key'        => 'number',
                 'input-type' => 'input',
                 'type'       => 'number',
-                'default'    => '1',
+                'default'    => '12',
                 'class'      => 'col-md-4 col-6',
                 'attributes' => 'required'
             ],
@@ -862,6 +862,56 @@ return [
                         'title' => 'نزولی'
                     ]
                 ],
+            ],
+            [
+                'title'      => 'نحوهٔ نمایش',
+                'key'        => 'display_mode',
+                'input-type' => 'select',
+                'class'      => 'col-md-4',
+                'options'    => [
+                    [
+                        'value' => 'slider',
+                        'title' => 'اسلایدر (با فلش ناوبری)'
+                    ],
+                    [
+                        'value' => 'marquee',
+                        'title' => 'رونده (حرکت بی‌پایان - مارکی)'
+                    ]
+                ],
+            ],
+            [
+                'title'      => 'پخش خودکار اسلایدر',
+                'key'        => 'autoplay',
+                'input-type' => 'select',
+                'class'      => 'col-md-4',
+                'options'    => [
+                    [
+                        'value' => 'yes',
+                        'title' => 'فعال'
+                    ],
+                    [
+                        'value' => 'no',
+                        'title' => 'غیرفعال'
+                    ]
+                ],
+            ],
+            [
+                'title'      => 'سرعت پخش خودکار (میلی‌ثانیه)',
+                'key'        => 'autoplay_speed',
+                'input-type' => 'input',
+                'type'       => 'number',
+                'default'    => '3000',
+                'class'      => 'col-md-4 col-6',
+                'help'       => 'فاصلهٔ زمانی بین اسلایدها در حالت اسلایدر؛ ۳۰۰۰ = ۳ ثانیه',
+            ],
+            [
+                'title'      => 'سرعت حرکت رونده (ثانیه)',
+                'key'        => 'marquee_speed',
+                'input-type' => 'input',
+                'type'       => 'number',
+                'default'    => '30',
+                'class'      => 'col-md-4 col-6',
+                'help'       => 'زمان یک دور کامل حرکت رونده (animation-duration)؛ ۳۰ = ۳۰ ثانیه',
             ],
         ],
         'rules' => [

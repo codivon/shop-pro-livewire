@@ -66,7 +66,7 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=175">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=176">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
@@ -498,7 +498,7 @@
 <script src="{{theme_asset('plugin/swiper/swiper-bundle.min.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('plugin/timer/timer.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js')}}" data-navigate-once></script>
-<script src="{{theme_asset('js/app.js')}}?v=165" data-navigate-once></script>
+<script src="{{theme_asset('js/app.js')}}?v=166" data-navigate-once></script>
 <script src="{{theme_asset('js/jquery-app.js')}}?v=5" data-navigate-once></script>
 
 {{-- سانیار — پلاگین‌های جانبی تمپلیت --}}
@@ -517,7 +517,7 @@
 <script src="{{theme_asset('js/owl.carousel.min.js')}}" data-navigate-once></script>
 <script src="{{ asset('back/assets/js/customToast.js') }}?v=8" data-navigate-once></script>
 <script src="{{ theme_asset("js/scripts.js") }}?v=12" data-navigate-once></script>
-<script src="{{theme_asset('js/main.js')}}?v=20" data-navigate-once></script>
+<script src="{{theme_asset('js/main.js')}}?v=21" data-navigate-once></script>
 @stack('scripts')
 
 {!! option('info_scripts') !!}
@@ -530,7 +530,7 @@
 @endif
 
 {{-- موتور SPA تم سانیار (intercept کلیک در فاز capture + Livewire.navigate) — باید بعد از livewire:scripts باشد --}}
-<script src="{{theme_asset('js/saniar-spa.js')}}?v=4" data-navigate-once></script>
+<script src="{{theme_asset('js/saniar-spa.js')}}?v=5" data-navigate-once></script>
 
 @if(session('toast-success'))
     <script data-navigate-once>

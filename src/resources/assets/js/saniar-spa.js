@@ -23,6 +23,9 @@
  *    (سبد/چک‌اوت/نتیجهٔ پرداخت)، کیف پول، مقایسه، پروفایل، فروشنده و نظرات.
  *  • بعد از هر ناوبری: لینک‌های تازه علامت می‌خورند، initهای تم
  *    (window.saniarReinit) اجرا می‌شوند و head نرمال‌سازی می‌شود.
+ *  • فاز ۱۹۱: تشخیص سوایپ/درگ — کلیکی که در پایانِ کشیدنِ انگشت/ماوس روی
+ *    اسلایدرها (Swiper/Owl) تولید می‌شود هرگز نباید ناوبری کند؛ وگرنه با هر
+ *    سوایپ، کلیکِ روی تصویر/عنوان محصول به «تک‌صفحهٔ محصول» می‌رسید.
  * =========================================================================
  */
 (function () {
@@ -203,9 +206,67 @@
        واجد شرایط را مستقیماً با window.Livewire.navigate(url) باز می‌کند و
        stopImmediatePropagation جلوی هر هندلر دیگر (از جمله هر مداخله‌گر
        رفرشِ دستی) را می‌گیرد. اگر navigate خطا بدهد → لود عادی مثل قبل. */
+    /* فاز ۱۹۱ — تشخیص درگ/سوایپ افقی: با شروع و پایان لمس/درگ ماوس،
+       جابه‌جایی افقی ثبت می‌شود؛ اگر بیش از آستانه بود، برای ~۳۵۰ms هر کلیکی
+       که روی لینک درون اسلایدرها برسد «بلعیده» می‌شود (هرگز ناوبری نه،
+       نه SPA و نه لود کامل). این همان ریشهٔ «با اسلاید کردن به تک‌صفحهٔ
+       محصول می‌رود» بود: پیش‌تر interceptor در capture-document زودتر از
+       preventClicks خودِ Swiper اجرا می‌شد و ناوبری را شروع می‌کرد. */
+    var dragState = { x: 0, y: 0, tracking: false, suppressUntil: 0 };
+
+    function registerDrag(x, y) {
+        dragState.x = x;
+        dragState.y = y;
+        dragState.tracking = true;
+    }
+
+    function finishDrag(x, y) {
+        if (!dragState.tracking) { return; }
+        dragState.tracking = false;
+
+        var dx = Math.abs(x - dragState.x);
+        var dy = Math.abs(y - dragState.y);
+
+        /* سوایپِ واقعی = جابه‌جایی افقی آشکار */
+        if (dx >= 10 && dx > dy * 1.2) {
+            dragState.suppressUntil = Date.now() + 350;
+        }
+    }
+
+    function suppressDragClick() {
+        return Date.now() < dragState.suppressUntil;
+    }
+
+    function interceptDragEvents() {
+        if (window.__saniarSpaDragBound) { return; }
+        window.__saniarSpaDragBound = true;
+
+        document.addEventListener('touchstart', function (e) {
+            var t = e.touches && e.touches[0];
+            if (!t) { return; }
+            registerDrag(t.clientX, t.clientY);
+        }, true);
+
+        document.addEventListener('touchend', function (e) {
+            var t = e.changedTouches && e.changedTouches[0];
+            if (!t) { return; }
+            finishDrag(t.clientX, t.clientY);
+        }, true);
+
+        document.addEventListener('mousedown', function (e) {
+            registerDrag(e.clientX, e.clientY);
+        }, true);
+
+        document.addEventListener('mouseup', function (e) {
+            finishDrag(e.clientX, e.clientY);
+        }, true);
+    }
+
     function interceptClicks() {
         if (window.__saniarSpaClickBound) { return; }
         window.__saniarSpaClickBound = true;
+
+        interceptDragEvents();
 
         document.addEventListener('click', function (e) {
             /* فقط کلیک چپ بدون کلید اصلاحی (ctrl/cmd = tab جدید، shift = پنجرهٔ جدید) */
@@ -219,6 +280,19 @@
 
             var a = target.closest('a[href]');
             if (!a) { return; }
+
+            /* فاز ۱۹۱ — کلیکِ پس از درگ/سوایپ اسلایدر: ببلع و تمام.
+               روی تاچ همه‌جا فعال است؛ روی ماوس فقط داخل اسلایدرها
+               (تا انتخابِ متن عادی بیرون اسلایدر آسیب نبیند). */
+            if (suppressDragClick()) {
+                if (!e.pointerType && !('ontouchstart' in window)) {
+                    var sliderBox = a.closest('.swiper, .owl-carousel, .amazing-slider, .product-slider, .swiper-container, #mainCarousel, #carouselExampleIndicators');
+                    if (!sliderBox) { return; }
+                }
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return;
+            }
 
             if (!isClickableEligible(a)) { return; }
 

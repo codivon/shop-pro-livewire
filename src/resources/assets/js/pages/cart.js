@@ -20,10 +20,54 @@
        خطادار اجرا نمی‌شود و به همین دلیل بعد از خطای موجودی، استایل کادر تعداد
        به‌کلی می‌ریخت (اینپوت خام بدون دکمهٔ +/−). */
 
+    /* فاز ۱۹۱ — بازخورد مرز min/max:
+       تاچ‌اسپین در سقف/کف موجودی «بی‌صدا» هیچ کار نمی‌کند و کاربر فکر می‌کند
+       دکمهٔ +/− خراب است (دقیقاً گزارش «دکمهٔ زیاد/کم کردن تعداد کار نمی‌کند»).
+       حالا:
+       ۱) دکمهٔ مربوطه در مرز، ظاهرِ غیرفعال می‌گیرد (کلاس + aria-disabled)
+       ۲) پیغام شفاف «بیشترین موجودی …» / «حداقل تعداد …» نمایش داده می‌شود */
+
+    function applyTouchSpinBounds($input) {
+        if (!$input || !$input.length) { return; }
+
+        var $wrap = $input.closest('.bootstrap-touchspin');
+        if (!$wrap.length) { return; }
+
+        var val = parseFloat(String($input.val()).replace(/[^0-9.\-]/g, ''));
+        var min = $input.attr('min');
+        var max = $input.attr('max');
+
+        min = (min === '' || min === null || isNaN(parseFloat(min))) ? null : parseFloat(min);
+        max = (max === '' || max === null || isNaN(parseFloat(max))) ? null : parseFloat(max);
+
+        var $up = $wrap.find('.bootstrap-touchspin-up');
+        var $down = $wrap.find('.bootstrap-touchspin-down');
+
+        var atMax = max !== null && !isNaN(val) && val >= max;
+        var atMin = min !== null && !isNaN(val) && val <= min;
+
+        $up.toggleClass('saniar-qty-capped', atMax).attr('aria-disabled', atMax ? 'true' : 'false');
+        $down.toggleClass('saniar-qty-capped', atMin).attr('aria-disabled', atMin ? 'true' : 'false');
+    }
+
+    function qtyBoundMessage($input, which) {
+        var max = $input.attr('max');
+        var min = $input.attr('min');
+
+        if (which === 'max') {
+            showCustomToast(max ? ('بیشترین تعداد قابل سفارش این محصول ' + max + ' عدد است.') : 'به سقف تعداد مجاز رسیدید.', 'info');
+        } else {
+            showCustomToast(min ? ('حداقل تعداد این محصول ' + min + ' عدد است.') : 'حداقل تعداد مجاز ۱ عدد است.', 'info');
+        }
+    }
+
     function initTouchspin() {
         $('#cart-update-form input.cart_quantity').each(function () {
             var $input = $(this);
-            if ($input.attr('data-touchspin-initialized')) return;
+            if ($input.attr('data-touchspin-initialized')) {
+                applyTouchSpinBounds($input);
+                return;
+            }
 
             $input.TouchSpin({
                 min: parseFloat($input.attr('min')) || 1,
@@ -38,6 +82,7 @@
             });
 
             $input.attr('data-touchspin-initialized', '1');
+            applyTouchSpinBounds($input);
         });
     }
 
@@ -161,6 +206,24 @@
         $(document).off('change.saniarCart').on('change.saniarCart', '#cart-update-form input.cart_quantity', function () {
             scheduleCartSync();
         });
+
+        /* فاز ۱۹۱ — مرز min/max شمارشگر: پیغام شفاف + وضعیت بصری دکمه‌ها
+           (قبلاً در سقف موجودی، کلیک بی‌صدا هیچ کاری نمی‌کرد و کاربر دکمه را
+           «خراب» گزارش می‌کرد) */
+        $(document).off('touchspin.on.max.saniarQty touchspin.on.min.saniarQty')
+            .on('touchspin.on.max.saniarQty', '#cart-update-form input.cart_quantity', function () {
+                applyTouchSpinBounds($(this));
+                qtyBoundMessage($(this), 'max');
+            })
+            .on('touchspin.on.min.saniarQty', '#cart-update-form input.cart_quantity', function () {
+                applyTouchSpinBounds($(this));
+                qtyBoundMessage($(this), 'min');
+            });
+
+        $(document).off('change.saniarQtyState input.saniarQtyState')
+            .on('change.saniarQtyState input.saniarQtyState', '#cart-update-form input.cart_quantity', function () {
+                applyTouchSpinBounds($(this));
+            });
 
         /* دکمهٔ «بروزرسانی سبد خرید» هم بدون رفرش صفحه همان کار را می‌کند */
         $(document).off('click.saniarCartUpdate').on('click.saniarCartUpdate', '#update-cart', function (e) {

@@ -9,7 +9,36 @@ $(document).ready(function () {
         }
     });
 
+    /* فاز ۱۹۱ — بازتأبید snapshot پس از back/forward:
+       گره‌های DOM از HTML کپی می‌شوند؛ markup تولیدشدهٔ owl (stage/outer/کلون‌ها)
+       همراه گره می‌آید ولی نمونهٔ زنده و jQuery data از بین رفته است ⇒
+       مقداردهی دوباره روی چنین markupی ساختار دوتایی/خراب می‌سازد.
+       قبل از هر init، ردپاهای owl پاک‌سازی می‌شود (idempotent). */
+    window.saniarOwlReset = function (selector) {
+        if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.owlCarousel) { return; }
+
+        window.jQuery(selector).each(function () {
+            var $el = window.jQuery(this);
+
+            if ($el.data('owl.carousel')) {
+                try { $el.owlCarousel('destroy'); } catch (e) { /* */ }
+            } else if ($el.hasClass('owl-loaded') || $el.find('.owl-stage').length) {
+                /* markup بازتأبیدشده بدون نمونهٔ زنده — پاک‌سازی دستی */
+                $el.find('.owl-item.cloned').remove();
+                $el.find('.owl-item').children().unwrap();
+                $el.find('.owl-stage').children().unwrap();
+                $el.find('.owl-stage-outer').children().unwrap();
+            }
+
+            $el.removeClass('owl-loaded owl-drag owl-grab owl-rtl owl-responsive');
+        });
+    };
+
     window.saniarMainRebind = function () {
+
+        /* فاز ۱۹۱ — قبل از هر init، بقایای owl گره‌های بازتأبیدشده پاک شود */
+        window.saniarOwlReset('#gallery-slider, #suggestion-slider, .product-carousel-story, .product-carousel, .posts-category-carousel, .suggestions-post-carousel-one-block');
+
     //    resposive-megamenu-mobile------------------
     $('.dropdown-toggle').off('click.saniarMenu').on('click.saniarMenu', function (e) {
         e.stopPropagation();

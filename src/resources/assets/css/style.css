@@ -7182,3 +7182,13 @@ a:hover .snr-play{
         font-size: 17px;
     }
 }
+
+/* ===== فاز ۱۹۱ — شمارشگر تعداد سبد: حالت «رسیدن به مرز» ===== */
+/* وقتی تعداد در سقف/کف مجاز است، دکمهٔ +/− مربوطه ظاهر غیرفعال می‌گیرد */
+.btn-counter.saniar-qty-capped,
+button.saniar-qty-capped {
+    opacity: .35;
+    pointer-events: auto;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}

@@ -9,6 +9,7 @@ use App\Models\Widget;
 use App\Models\Brand;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use App\Services\WidgetRegistry;
 use App\Models\Tag;
 
@@ -337,10 +338,27 @@ function get_widget_uncached($widget)
            تا اسلایدر/بنرهای آپلودشدهٔ ادمین بدون تنظیم مجدد نمایش داده شوند) */
 
         case 'middle-brands': {
-            /* گروه بنرها از تنظیمات خود ابزارک + تعداد قابل نمایش */
-            $variables['index_middle_brands'] = Brand::take($widget->option('number', 5) ?: 5)
-                ->whereNotNull('image')
-                ->where('image', '!=', '')
+            /* فاز ۱۹۱ — بازطراحی ویجت برند:
+               - فیلتر «نمایش در صفحهٔ اصلی» (show_on_home) — فقط وقتی ستون اضافه شده باشد
+               - ترتیب نمایش از تنظیمات خود ابزارک (asc/desc)
+               - تعداد از تنظیمات ابزارک */
+            $brandsQuery = Brand::whereNotNull('image')
+                ->where('image', '!=', '');
+
+            /* ستون show_on_home اختیاری است (ادمین خودش مایگریشن را اجرا می‌کند)؛
+               تا وقتی ستون نبود، همهٔ برندهای دارای تصویر نمایش داده می‌شوند */
+            static $brandsShowOnHomeColumn = null;
+            if ($brandsShowOnHomeColumn === null) {
+                $brandsShowOnHomeColumn = Schema::hasColumn((new Brand)->getTable(), 'show_on_home');
+            }
+
+            if ($brandsShowOnHomeColumn) {
+                $brandsQuery->where('show_on_home', true);
+            }
+
+            $variables['index_middle_brands'] = $brandsQuery
+                ->orderBy('ordering', $widget->option('ordering', 'asc'))
+                ->take((int) ($widget->option('number', 5) ?: 5))
                 ->get();
 
             break;

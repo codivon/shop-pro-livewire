@@ -11,6 +11,62 @@
    تازه اجرا شوند؛ گارد data-swiper-bound مانع مقداردهی دوبارهٔ همان نمونه است.
    ========================================================================= */
 
+/* فاز ۱۹۱ — بازگشت مرورگر (back/forward) اسلایدرها را «بی‌پاسخ» می‌کند:
+   ====================================================================
+   Livewire روی back/forward صفحهٔ قبلی را بازسازی می‌کند؛ در این حالت نمونهٔ
+   Swiper ممکن است روی همان گره‌ها زنده بماند ولی وضعیت داخلی‌اش (progress,
+   realIndex, چرخهٔ loop) بعد از restore خراب می‌ماند — اسلایدر «هست» ولی
+   فلش‌ها/سوایپ/اتوپلی هیچ اثری ندارند (تأییدشده روی فروشگاه live).
+
+   راه‌حل نهایی: شمارندهٔ «چرخهٔ ناوبری» — هر اسلایدر فقط یک‌بار در هر چرخهٔ
+   ناوبری مقداردهی می‌شود؛ با بازگشت به صفحهٔ قبلی، token اسلایدر قدیمی است
+   ⇒ پاک‌سازی کامل markup و مقداردهی تازه انجام می‌شود. */
+var saniarNavSeq = 0;
+document.addEventListener('livewire:navigated', function () { saniarNavSeq++; });
+
+function saniarCleanupSwiperMarkup(el) {
+    try { if (el.swiper) { el.swiper.destroy(true, true); } } catch (e) { /* */ }
+
+    el.querySelectorAll('.swiper-slide-duplicate').forEach(function (n) { n.remove(); });
+
+    var wrapper = el.querySelector('.swiper-wrapper');
+    if (wrapper) { wrapper.removeAttribute('style'); }
+
+    el.querySelectorAll('.swiper-slide').forEach(function (s) {
+        s.removeAttribute('style');
+        s.classList.remove(
+            'swiper-slide-active', 'swiper-slide-next', 'swiper-slide-prev',
+            'swiper-slide-duplicate-active', 'swiper-slide-duplicate-next',
+            'swiper-slide-duplicate-prev', 'swiper-slide-visible', 'swiper-slide-fully-visible'
+        );
+    });
+
+    var pg = el.querySelector('.swiper-pagination');
+    if (pg) { pg.innerHTML = ''; }
+
+    el.querySelectorAll('.swiper-notification').forEach(function (n) { n.remove(); });
+}
+
+/* true = این اسلایدر در همین چرخهٔ ناوبری قبلاً مقداردهی شده و سالم است */
+function saniarSliderIsLive(el) {
+    if (el.dataset.swiperNavToken === String(saniarNavSeq)
+        && el.swiper && el.swiper.el === el && el.isConnected) {
+        return true; /* دوبار init در همان چرخه جلوگیری می‌شود */
+    }
+
+    /* بازگشت به صفحهٔ قبلی یا markup قدیمی — ردپاهای ساختاری پاک شود */
+    saniarCleanupSwiperMarkup(el);
+    delete el.dataset.swiperBound;
+
+    return false;
+}
+
+/* مقداردهی هر اسلایدر: token چرخهٔ ناوبری ذخیره می‌شود */
+function saniarMarkSliderBound(el) {
+    el.dataset.swiperBound = '1';
+    el.dataset.swiperNavToken = String(saniarNavSeq);
+}
+
 /* ساخت نمونهٔ Swiper با گره‌های اسکوپ‌شدهٔ خودِ المنت */
 function saniarSwiper(el, config) {
     if (!el || !window.Swiper) { return null; }
@@ -30,8 +86,8 @@ window.saniarInitSwipers = function () {
 /* ========= اسلایدر اصلی صفحهٔ اصلی (js-home-slider کلاس شد تا چند
    نمونهٔ main-slider با id یکتا روی یک صفحه مقداردهی شوند) ========= */
 document.querySelectorAll('.js-home-slider').forEach(function (el) {
-    if (el.dataset.swiperBound === '1') { return; }
-    el.dataset.swiperBound = '1';
+    if (saniarSliderIsLive(el)) { return; }
+    saniarMarkSliderBound(el);
     saniarSwiper(el, {
         spaceBetween: 30,
         centeredSlides: true,
@@ -46,8 +102,8 @@ document.querySelectorAll('.js-home-slider').forEach(function (el) {
 
 /* ============== پیشنهاد لحظه‌ای ============== */
 document.querySelectorAll('.js-moment-slider').forEach(function (el) {
-    if (el.dataset.swiperBound === '1') { return; }
-    el.dataset.swiperBound = '1';
+    if (saniarSliderIsLive(el)) { return; }
+    saniarMarkSliderBound(el);
     var progressBar = el.querySelector('.swiper-progress-bar');
     saniarSwiper(el, {
         slidesPerView: 1,
@@ -79,8 +135,8 @@ document.querySelectorAll('.js-moment-slider').forEach(function (el) {
 /* ============== اسلایدر شگفت انگیز (امازینگ) ============== */
 /* جفت اصلی/فهرست کنار هم در یک ریشهٔ .amazing-slider مقداردهی می‌شوند */
 document.querySelectorAll('.amazing-slider').forEach(function (root) {
-    if (root.dataset.swiperBound === '1') { return; }
-    root.dataset.swiperBound = '1';
+    if (saniarSliderIsLive(root)) { return; }
+    saniarMarkSliderBound(root);
 
     var linkEl = root.querySelector('.amazing-slider-link');
     var sliderEl = root.querySelector('.amazing-slider-slider');
@@ -113,8 +169,8 @@ document.querySelectorAll('.amazing-slider').forEach(function (root) {
 
 /* ========= اسلایدر ردیف محصولات (چند نمونه در صفحه) ========= */
 document.querySelectorAll('.product-slider-swiper').forEach(function (el) {
-    if (el.dataset.swiperBound === '1') { return; }
-    el.dataset.swiperBound = '1';
+    if (saniarSliderIsLive(el)) { return; }
+    saniarMarkSliderBound(el);
     saniarSwiper(el, {
         slidesPerView: 5,
         spaceBetween: 10,
@@ -129,10 +185,38 @@ document.querySelectorAll('.product-slider-swiper').forEach(function (el) {
     });
 });
 
+/* ========= اسلایدر برندهای صفحهٔ اصلی (فاز ۱۹۱ — ویجت بازطراحی‌شده) ========= */
+/* پخش خودکار + سرعت از تنظیمات خود ابزارک می‌آید (data-autoplay / data-autoplay-speed) */
+document.querySelectorAll('.saniar-brands__swiper').forEach(function (el) {
+    if (saniarSliderIsLive(el)) { return; }
+    saniarMarkSliderBound(el);
+
+    var autoplayEnabled = el.dataset.autoplay === '1';
+    var autoplaySpeed = parseInt(el.dataset.autoplaySpeed || '3000', 10);
+    if (!isFinite(autoplaySpeed) || autoplaySpeed < 800) { autoplaySpeed = 3000; }
+
+    saniarSwiper(el, {
+        rtl: true,
+        slidesPerView: 6,
+        spaceBetween: 12,
+        loop: el.querySelectorAll('.swiper-slide').length > 6,
+        autoplay: autoplayEnabled
+            ? { delay: autoplaySpeed, disableOnInteraction: false, pauseOnMouseEnter: true }
+            : false,
+        breakpoints: {
+            100:  { slidesPerView: 2, spaceBetween: 10 },
+            576:  { slidesPerView: 3, spaceBetween: 10 },
+            768:  { slidesPerView: 4, spaceBetween: 12 },
+            992:  { slidesPerView: 5, spaceBetween: 12 },
+            1200: { slidesPerView: 6, spaceBetween: 12 },
+        },
+    });
+});
+
 /* ============ گالری تصاویر صفحهٔ محصول ============ */
 document.querySelectorAll('.product-gallery-thumb').forEach(function (el) {
-    if (el.dataset.swiperBound === '1') { return; }
-    el.dataset.swiperBound = '1';
+    if (saniarSliderIsLive(el)) { return; }
+    saniarMarkSliderBound(el);
     saniarSwiper(el, {
         spaceBetween: 10,
         slidesPerView: 4,
@@ -146,8 +230,8 @@ document.querySelectorAll('.product-gallery-thumb').forEach(function (el) {
 });
 
 document.querySelectorAll('.product-gallery').forEach(function (el) {
-    if (el.dataset.swiperBound === '1') { return; }
-    el.dataset.swiperBound = '1';
+    if (saniarSliderIsLive(el)) { return; }
+    saniarMarkSliderBound(el);
 
     var thumbEl = document.querySelector('.product-gallery-thumb');
     var thumbsInstance = thumbEl && thumbEl.swiper ? thumbEl.swiper : null;
@@ -167,8 +251,8 @@ document.querySelectorAll('.product-gallery').forEach(function (el) {
 
 /* ========= اسلایدر افقی دسته‌بندی‌ها (free-mode) ========= */
 document.querySelectorAll('.free-mode').forEach(function (el) {
-    if (el.dataset.swiperBound === '1') { return; }
-    el.dataset.swiperBound = '1';
+    if (saniarSliderIsLive(el)) { return; }
+    saniarMarkSliderBound(el);
     saniarSwiper(el, {
         slidesPerView: "auto",
         spaceBetween: 10,

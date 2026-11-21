@@ -4,7 +4,7 @@
    محصول (گالری، فروشنده‌ها، تنوع‌ها، افزودن به سبد، شمارش معکوس، توگل‌ها)
    می‌مُرد. داخل IIFE هر اجرا اسکوپ تازه دارد و اجرای مجدد بی‌خطر است. */
 (function () {
-    'use strict';
+
 // وضعیت فروشندگان چندگانه از data-attribute صفحه خوانده می‌شود (به‌جای اسکریپت اینلاین در بلید)
 if (typeof window.multi_vendor_system_status === 'undefined') {
     var $jsProduct = $('.js-product[data-multi-vendor]');

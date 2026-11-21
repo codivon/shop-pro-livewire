@@ -1,6 +1,6 @@
 /* فاز ۱۹۳ — کل فایل در IIFE — let گلوبال (autoCompleteUrl/productsCount) در اجرای مجددِ ناوبری SPA خطای redeclaration می‌داد. */
 (function () {
-    'use strict';
+
 let autoCompleteUrl = $('#order-create-form').data('auto-complete-url');
 
 $('#order-create-form input[name="username"]')

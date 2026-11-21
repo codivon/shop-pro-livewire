@@ -102,7 +102,7 @@
                                                 <li class="nav-item @if(@$active=="profileEdit") active @endif"><a href="{{ route('front.user.profile.edit') }}" class="nav-link">
                                                         <i class="bi bi-person-gear"></i>اطلاعات شخصی</a>
                                                 </li>
-                                                <li class="nav-item"><a href="{{ route('logout') }}" class="nav-link"><i class="bi bi-arrow-right-square"></i>خروج از حساب کاربری</a></li>
+                                                <li class="nav-item"><a href="{{ route('logout') }}" data-no-navigate class="nav-link"><i class="bi bi-arrow-right-square"></i>خروج از حساب کاربری</a></li>
                                             </ul>
                                         </nav>
                                     </div>
@@ -201,7 +201,7 @@
                                                 <li class="nav-item @if(@$active=="profileEdit") active @endif"><a href="{{ route('front.user.profile.edit') }}" class="nav-link">
                                                         <i class="bi bi-person-gear"></i>اطلاعات شخصی</a>
                                                 </li>
-                                                <li class="nav-item"><a href="{{ route('logout') }}" class="nav-link"><i class="bi bi-arrow-right-square"></i>خروج از حساب کاربری</a></li>
+                                                <li class="nav-item"><a href="{{ route('logout') }}" data-no-navigate class="nav-link"><i class="bi bi-arrow-right-square"></i>خروج از حساب کاربری</a></li>
                                             </ul>
                                         </nav>
                                     </div>

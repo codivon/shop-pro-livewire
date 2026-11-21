@@ -13,7 +13,7 @@
         <li><a href="{{ route('front.tickets.index') }}" class="dropdown-item"><i class="bi bi-question-circle me-2"></i>درخواست پشتیبانی</a></li>
         <li><a href="{{ route('front.favorites.index') }}" class="dropdown-item"><i class="bi bi-heart me-2"></i>محصولات مورد علاقه</a></li>
         <li><a href="{{ route('front.user.user-history') }}" class="dropdown-item"><i class="bi bi-clock-history me-2"></i>بازدید های اخیر</a></li>
-        <li><a href="{{ route('logout') }}" class="dropdown-item mct-hover"><i class="bi bi-arrow-right-square me-2"></i>خروج از حساب کاربری</a></li>
+        <li><a href="{{ route('logout') }}" data-no-navigate class="dropdown-item mct-hover"><i class="bi bi-arrow-right-square me-2"></i>خروج از حساب کاربری</a></li>
     </ul>
 @else
     <ul class="dropdown-menu">

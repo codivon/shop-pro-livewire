@@ -26,6 +26,13 @@
  *  • فاز ۱۹۱: تشخیص سوایپ/درگ — کلیکی که در پایانِ کشیدنِ انگشت/ماوس روی
  *    اسلایدرها (Swiper/Owl) تولید می‌شود هرگز نباید ناوبری کند؛ وگرنه با هر
  *    سوایپ، کلیکِ روی تصویر/عنوان محصول به «تک‌صفحهٔ محصول» می‌رسید.
+ *  • فاز ۱۹۵ — دو رفع نهایی:
+ *    ۱) سوایپ‌های زیر آستانهٔ touch-slop مرورگر (touchmove dispatch نمی‌شود):
+ *       دلتای نهایی در finishDrag «قبل از» خاموش‌شدن tracking شمرده می‌شود +
+ *       فالبک pointermove برای ژست لمسی. (تأییدشده روی فروشگاه live)
+ *    ۲) «خروج خودکار از پنل مشتری»: لینک GET /logout هرگز x-navigate نمی‌گیرد؛
+ *       وگرنه فقط هاور روی آیتم «خروج» در منو prefetch را اجرا می‌کرد و کاربر
+ *       بدون هیچ کلیکی logout می‌شد.
  * =========================================================================
  */
 (function () {
@@ -44,12 +51,20 @@
        (رفع «صفحهٔ لاگین رفرش می‌شود»). صفحهٔ احراز هویت سند کامل خودش را دارد و
        mergeNewHead لایووایر دارایی‌های آن را مدیریت می‌کند؛ نسخه‌های اسکریپت‌های
        مشترک در همهٔ لایوت‌ها یکسان شده است تا اجرای مجدد/خطای redeclaration رخ ندهد.
-       مسیرهای حساس باقی‌مانده (verify/welcome/change-username/password/contact/admin/…) لود کامل. */
+       مسیرهای حساس باقی‌مانده (verify/welcome/change-username/password/contact/admin/…) لود کامل.
+       فاز ۱۹۵ — «logout» اضافه شد: روت GET /logout یک اکشن مخربِ نشست است؛ اگر
+       لینک خروجِ منو x-navigate.hover بگیرد، فقط ۶۰ms هاور روی آیتم «خروج» (بدون
+       هیچ کلیکی) prefetch را اجرا می‌کرد و کاربرِ پروفایل بی‌درنگ logout و به
+       صفحهٔ ورود پرت می‌شد — دقیقاً همان «میفتم بیرون وقتی بین منوها می‌گردم». */
     var SPA_EXCLUDE_SEGMENTS = [
-        'verify', 'welcome', 'change-username', 'password',
+        'verify', 'welcome', 'change-username', 'password', 'logout',
         'form', 'contact', 'newsletter',
         'admin', 'install', 'setup'
     ];
+
+    /* فاز ۱۹۵ — لینک‌هایی که هرگز نباید علامت x-navigate بگیرند حتی اگر
+       مسیرشان در لیست بالا نبود (دفاع دوم؛ مثلاً با تغییر مسیر خروج). */
+    var NEVER_NAVIGATE_HREF = /\/logout(\/|\?|#|$)/i;
 
     /* فاز ۱۸۸ — اتریبیوت واقعیِ دایرکتیو Alpine.
        در این هسته wire:navigate فقط «هنگام init المان» به x-navigate ترجمه
@@ -127,6 +142,9 @@
         if (!href) { return false; }
         if (href.charAt(0) === '#') { return false; }
         if (/^(javascript|mailto|tel|sms|data|blob):/i.test(href)) { return false; }
+
+        /* فاز ۱۹۵ — لینک خروج و هر اکشن مخربِ نشست: هرگز علامت نمی‌خورد */
+        if (NEVER_NAVIGATE_HREF.test(href)) { return false; }
 
         if (a.hasAttribute('download')) { return false; }
         /* هر targetی جز _self (blank/_top/iframe) → مداخله نکن */
@@ -258,9 +276,17 @@
 
     function finishDrag(x, y) {
         if (!dragState.tracking) { return; }
-        dragState.tracking = false;
 
+        /* فاز ۱۹۵ — دلتای نهایی «قبل از» خاموش‌کردن tracking شمرده شود:
+           ====================================================================
+           ترتیب قبلی (tracking=false سپس trackMove) باعث می‌شد trackMove به‌خاطر
+           گاردِ !tracking زود برگردد و جابه‌جایی بین آخرین touchmove و touchend
+           هرگز حساب نمی‌شد. در ژست‌های سریع (flick) یا کوتاه که touchmove کمی
+           دارند — و مهم‌تر: در حرکت‌های زیر آستانهٔ touch-slop مرورگر که touchmove
+           اصلاً dispatch نمی‌شود — travelX صفر می‌ماند و سوایپ مثل «تپ» پردازش
+           می‌شد ⇒ کلیکِ پایانی ناوبری به تک‌صفحهٔ محصول می‌کرد. */
         if (typeof x === 'number') { trackMove(x, y); }
+        dragState.tracking = false;
 
         dragState.lastGestureEnd = Date.now();
 
@@ -308,6 +334,19 @@
             var t = e.touches && e.touches[0];
             if (!t) { return; }
             trackMove(t.clientX, t.clientY);
+        }, { capture: true, passive: true });
+
+        /* فاز ۱۹۵ — فالبک pointermove برای ژست‌های لمسی:
+           ====================================================================
+           بعضی محیط‌ها در حرکت‌های زیر آستانهٔ touch-slop فقط pointermove
+           می‌دهند و touchmove اصلاً dispatch نمی‌شود (تأییدشده روی فروشگاه live)؛
+           بدون این فالبک، مسافتِ سوایپ‌های کوتاه صفر می‌ماند و کلیکِ پایانیِ
+           ژست ناوبری می‌کرد. برای pointerType='touch' انباشته می‌شود؛ ماوس از
+           mousemove موجود تغذیه می‌شود تا دوبار شمرده نشود. */
+        document.addEventListener('pointermove', function (e) {
+            if (dragState.tracking && e.pointerType === 'touch') {
+                trackMove(e.clientX, e.clientY);
+            }
         }, { capture: true, passive: true });
 
         /* فاز ۱۹۴ — preventDefault روی touchendِ سوایپ:

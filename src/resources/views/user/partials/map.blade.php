@@ -26,6 +26,6 @@
 @push('scripts')
     {{--<script type="text/javascript" src="https://cdn.map.ir/web-sdk/1.4.2/js/jquery-3.2.1.min.js"></script>--}}
     <script type="text/javascript" src="{{ theme_asset('js/plugins/map.ir/mapp.env.js') }}"></script>
-    <script type="text/javascript" src="{{ theme_asset('js/plugins/map.ir/mapp.min.js') }}"></script>
+    <script type="text/javascript" src="{{ theme_asset('js/plugins/map.ir/mapp.min.js') }}?v=2"></script>
     <script src="{{theme_asset('js/pages/addresses/map-select-scripts.js')}}"></script>
 @endpush

@@ -300,7 +300,7 @@
 
 @push('scripts-top-js')
     <script src="{{ theme_asset('js/plugins/map.ir/mapp.env.js') }}"></script>
-    <script src="{{ theme_asset('js/plugins/map.ir/mapp.min.js') }}"></script>
+    <script src="{{ theme_asset('js/plugins/map.ir/mapp.min.js') }}?v=2"></script>
 @endpush
 
 @push('scripts')
@@ -309,7 +309,7 @@
     <script src="{{ theme_asset('js/jquery.nice-select.min.js') }}"></script>
     <script src="{{ theme_asset('js/pages/addresses/map-select-scripts.js') }}?v=161"></script>
     <script src="{{ theme_asset('js/pages/carts/checkout.js') }}?v=174"></script>
-    <script src="{{ theme_asset('js/pages/checkout.js') }}?v=176"></script>
+    <script src="{{ theme_asset('js/pages/checkout.js') }}?v=177"></script>
     <script src="{{ theme_asset('js/pages/addresses/index.js') }}?v=162"></script>
     <script src="{{ theme_asset('js/pages/addresses/add-edit-address.js?v=2') }}"></script>
 @endpush

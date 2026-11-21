@@ -73,7 +73,10 @@ $('.comment-replay-to a').click(function(e) {
     e.preventDefault();
     $('#comments-form input[name="comment_id"]').val('');
     $('.comment-replay-to').hide();
-})
+});
+/* فاز ۱۹۳ — سمیکالن بالا الزامی است: بدون آن، «})» با «(function () {» خط بعد
+   به‌صورت زنجیرهٔ فراخوانی تجزیه می‌شود (ASI) و خطای
+   «$(...).click(...) is not a function» روی کل صفحات نظرات/محصول می‌دهد. */
 /* فاز ۱۸۵ (SPA) — اجرای فوری به‌جای ready؛ بایندها روی DOM تازهٔ هر ناوبری انجام می‌شوند */
 (function () {
     var initQuestions = function () {

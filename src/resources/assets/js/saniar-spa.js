@@ -389,10 +389,54 @@
         interceptClicks();
     }
 
+    /* فاز ۱۹۳ — نوسازی هندلرهای delegated جی‌کوئریِ document بعد از هر ناوبری
+       ====================================================================
+       علامت اصلی: بعد از یک ناوبری SPA، هندلرهای delegated که در لود اول روی
+       document بایند شده‌اند (.mask-handler «مشاهده بیشتر»، .add-to-cart و …)
+       در کشِ jQuery دیده می‌شوند ولی با کلیک واقعی دیگر اجرا نمی‌شوند — حتی
+       هندلر تازه‌ای که بعد از ناوبری بایند شود کار می‌کند.
+       راه‌حل: همهٔ هندلرهای document را با off+on (همان تابع، همان سلکتور،
+       همان namespace) یک دور برداشت/نصب دوباره می‌کنیم تا شنوندهٔ ریشهٔ
+       dispatch جی‌کوئری مطمئناً به document فعلی وصل باشد. همین الگوی
+       off+on که اسکریپت‌های صفحه (show.js و …) دارند، این‌جا به‌صورت سراسری
+       و idempotent اجرا می‌شود؛ هیچ handler جدیدی اضافه نمی‌شود و ترتیب
+       منطقی بایندها حفظ می‌ماند. */
+    function refreshJqueryDocumentHandlers() {
+        if (!window.jQuery || !window.jQuery._data) { return; }
+
+        var all;
+        try { all = window.jQuery._data(document, 'events'); } catch (e) { return; }
+        if (!all) { return; }
+
+        Object.keys(all).forEach(function (type) {
+            var list = all[type];
+            if (!list || !list.length) { return; }
+
+            list.slice().forEach(function (h) {
+                if (!h || typeof h.handler !== 'function') { return; }
+
+                var types = h.type || type;
+                if (h.namespace) { types += '.' + h.namespace; }
+                var selector = h.selector || null;
+
+                try {
+                    if (selector) {
+                        window.jQuery(document).off(types, selector, h.handler);
+                        window.jQuery(document).on(types, selector, h.data, h.handler);
+                    } else {
+                        window.jQuery(document).off(types, null, h.handler);
+                        window.jQuery(document).on(types, null, h.data, h.handler);
+                    }
+                } catch (e) { /* هیچ نوسازی نباید ناوبری را بشکند */ }
+            });
+        });
+    }
+
     function onNavigated() {
         markLinks(document);   /* لینک‌های تازهٔ صفحهٔ جدید */
         normalizeHead();       /* ضدتکرار متا/کنonical برای SEO */
         runReinits();          /* initهای تم روی DOM تازه */
+        refreshJqueryDocumentHandlers(); /* فاز ۱۹۳ — احیای هندلرهای document */
     }
 
     /* فاز ۱۸۸ — ناوبری نرم عمومی برای ریدایرکت‌های JS تم

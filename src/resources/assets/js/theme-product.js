@@ -369,7 +369,7 @@
        نمی‌کند و رفتار دوگانه رخ نمی‌دهد. پشتیبانی کیبورد
        (Enter/Space) هم اضافه شد (role=button در بلید).
        --------------------------------------------------------- */
-    var togglesBound = false;
+    var togglesBound = false; /* فاز ۱۹۳ — منسوخ؛ پرچم واقعی window.__snrProductTogglesBound است */
 
     function jqueryHasDelegate(selector) {
         try {
@@ -412,13 +412,14 @@
         handler.classList.toggle('open', anyActive);
     }
 
+    /* فاز ۱۹۳ — این اسکریپت بدون data-navigate-once با هر ناوبری SPA دوباره اجرا
+       می‌شود؛ پرچم closure-سطح در هر اجرا صفر می‌شد و با هر ناوبری یک لیسنر
+       click تازه روی document انباشته می‌گشت. پرچم روی window است تا فقط یک
+       بار بایند شود؛ چون داخلش وضعیت jQuery را در لحظهٔ کلیک می‌سنجد،
+       نتیجه بین ناوبری‌ها هم همیشه به‌روز است. */
     function initProductToggles() {
-        if (togglesBound) { return; }
-        togglesBound = true;
-
-        /* اگر jQuery هندلر خودش را روی document دارد → دست نزن */
-        var paramsOwned = jqueryHasDelegate('.product-params-more-handler');
-        var maskOwned = jqueryHasDelegate('.mask-handler');
+        if (window.__snrProductTogglesBound) { return; }
+        window.__snrProductTogglesBound = true;
 
         document.addEventListener('click', function (e) {
             var handler = e.target.closest('.product-params-more-handler, .mask-handler');
@@ -427,8 +428,12 @@
             /* فقط داخل صفحهٔ محصول — ماسک‌های چک‌اوت دست jQuery اصلی بمانند */
             if (!document.querySelector('.product-page')) { return; }
 
-            if (handler.classList.contains('product-params-more-handler') && paramsOwned) { return; }
-            if (handler.classList.contains('mask-handler') && maskOwned) { return; }
+            /* اگر jQuery هندلر خودش را روی document دارد → دست نزن.
+               فاز ۱۹۳ — بررسیِ مالکیت در لحظهٔ کلیک (نه زمان بایند)،
+               تا اگر هندلر jQuery بین دو ناوبری از دسترس خارج شد،
+               همین فالبک بلافاصله جایگزین کار کند. */
+            if (handler.classList.contains('product-params-more-handler') && jqueryHasDelegate('.product-params-more-handler')) { return; }
+            if (handler.classList.contains('mask-handler') && jqueryHasDelegate('.mask-handler')) { return; }
 
             e.preventDefault();
 

@@ -1,3 +1,6 @@
+/* فاز ۱۹۳ — کل فایل در IIFE — متغیرهای let گلوبال (isUpdatingPrice/isFirstLoad) در اجرای مجددِ ناوبری SPA خطای redeclaration می‌دادند. */
+(function () {
+    'use strict';
 // ==================== متغیرهای سراسری ====================
 let isUpdatingPrice = false;
 let isFirstLoad = true; // مشخص می‌کند اولین بار است یا نه
@@ -562,3 +565,5 @@ $(document).off('change.saniarReserve').on('change.saniarReserve', 'input[name="
         }
     });
 });
+
+})();

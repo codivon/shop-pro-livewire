@@ -49,8 +49,7 @@
                                         <a href="{{ route('front.brands.show', $brand->slug) }}"
                                            class="saniar-brand-card"
                                            @if ($pass === 1) aria-hidden="true" tabindex="-1" @endif>
-                                            <img src="{{ asset($brand->image) }}" alt="{{ $brand->name }}"
-                                                 loading="lazy" draggable="false">
+                                            @include('front::widgets.partials.brand-logo', ['brand' => $brand])
                                         </a>
                                     @endforeach
                                 @endfor
@@ -66,7 +65,7 @@
                                 @foreach ($brands as $brand)
                                     <div class="swiper-slide">
                                         <a href="{{ route('front.brands.show', $brand->slug) }}" class="saniar-brand-card">
-                                            <img src="{{ asset($brand->image) }}" alt="{{ $brand->name }}" loading="lazy">
+                                            @include('front::widgets.partials.brand-logo', ['brand' => $brand])
                                         </a>
                                     </div>
                                 @endforeach
@@ -157,6 +156,26 @@
             object-fit: contain;
             -webkit-user-drag: none;
         }
+
+        /* فاز ۱۹۳ — فالبک ظریف وقتی لوگوی برند وجود ندارد یا ۴۰۴ می‌دهد:
+           به‌جای آیکون تصویر شکسته، حرف اول نام برند با استایل برند نمایش داده می‌شود */
+        .saniar-brand-card__fallback {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 76px;
+            height: 40px;
+            padding: 2px 16px;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            color: var(--main-color-one, #275fe0);
+            background: linear-gradient(135deg, rgba(39, 95, 224, .07), rgba(39, 95, 224, .16));
+            border-radius: 8px;
+            user-select: none;
+        }
+
+        .saniar-brand-card__fallback[hidden] { display: none; }
 
         .saniar-brand-card:hover,
         .saniar-brand-card:focus-visible {

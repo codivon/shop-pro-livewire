@@ -23,8 +23,17 @@
             </div>
         @endif
 --}}
+        {{-- فاز ۱۹۳ — ستون‌هایی که مقداری در پنل ندارند رندر نمی‌شوند تا فاصله‌های خالی بزرگ ایجاد نکنند --}}
+        @php
+            $footerHasTel      = trim((string) option('info_tel', '')) !== '';
+            $footerHasEmail    = trim((string) option('info_email', '')) !== '';
+            $footerHasAddress  = trim((string) option('info_footer_text', '')) !== '';
+            $footerSocialKeys  = ['social_instagram', 'social_whatsapp', 'social_telegram', 'social_youtube', 'social_twitter'];
+            $footerHasSocials  = collect($footerSocialKeys)->contains(fn ($k) => trim((string) option($k, '')) !== '');
+        @endphp
         <div class="footer-socail">
             <div class="row gy-3">
+                @if ($footerHasTel)
                 <div class="col-lg-3">
                     <div class="contact-item">
                         <div class="title">
@@ -36,6 +45,8 @@
                         </div>
                     </div>
                 </div>
+                @endif
+                @if ($footerHasEmail)
                 <div class="col-lg-3">
                     <div class="contact-item">
                         <div class="title">
@@ -47,6 +58,8 @@
                         </div>
                     </div>
                 </div>
+                @endif
+                @if ($footerHasAddress)
                 <div class="col-lg-3">
                     <div class="contact-item">
                         <div class="title">
@@ -58,6 +71,8 @@
                         </div>
                     </div>
                 </div>
+                @endif
+                @if ($footerHasSocials)
                 <div class="col-lg-3">
                     <div class="contact-item">
                         <div class="title">
@@ -85,12 +100,20 @@
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
 
+        {{-- فاز ۱۹۳ — گروه‌های بدون هیچ لینک نمایش داده نمی‌شوند (فاصلهٔ خالی نمی‌سازند) --}}
+        @php
+            $footerFilledGroups = collect($footer_links)->filter(
+                fn ($group) => $links->where('link_group_id', $group['key'])->isNotEmpty()
+            );
+        @endphp
+        @if ($footerFilledGroups->isNotEmpty())
         <div class="footer-menu">
             <div class="row gy-3">
-                @foreach($footer_links as $group)
+                @foreach($footerFilledGroups as $group)
                     <div class="col-lg-3 col-6">
                         <div class="footer-menu-title">
                             <h4 class="font-16">{{ option('link_groups_' . $group['key'], $group['name']) }}</h4>
@@ -104,6 +127,7 @@
                 @endforeach
             </div>
         </div>
+        @endif
 
         <div class="footer-text">
             <div class="row gy-3">

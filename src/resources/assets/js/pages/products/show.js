@@ -1,3 +1,10 @@
+/* فاز ۱۹۳ — کل فایل در IIFE: این اسکریپت بدون data-navigate-once با هر ناوبری
+   SPA دوباره اجرا می‌شود؛ تعریف‌های let/const در سطح گلوبال (cachedStores و …)
+   در اجرای دوم «Identifier has already been declared» می‌دادند و کل JS صفحهٔ
+   محصول (گالری، فروشنده‌ها، تنوع‌ها، افزودن به سبد، شمارش معکوس، توگل‌ها)
+   می‌مُرد. داخل IIFE هر اجرا اسکوپ تازه دارد و اجرای مجدد بی‌خطر است. */
+(function () {
+    'use strict';
 // وضعیت فروشندگان چندگانه از data-attribute صفحه خوانده می‌شود (به‌جای اسکریپت اینلاین در بلید)
 if (typeof window.multi_vendor_system_status === 'undefined') {
     var $jsProduct = $('.js-product[data-multi-vendor]');
@@ -1110,3 +1117,5 @@ $(document).off('click.saniarParamsMore').on('click.saniarParamsMore', '.product
     $items.stop(true, true).slideToggle(200);
     $handler.toggleClass('open');
 });
+
+})();

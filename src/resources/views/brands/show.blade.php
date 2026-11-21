@@ -33,16 +33,40 @@
             <div id="category-products-div" data-action="">
                 <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
                     <div class="title d-flex align-items-center">
-                        {{-- فاز ۱۹۲ — لوگوی برند در سربرگ صفحهٔ برند (اگر تصویر داشته باشد) --}}
+                        {{-- فاز ۱۹۲ — لوگوی برند در سربرگ صفحهٔ برند --}}
+                        {{-- فاز ۱۹۳ — اگر لوگو نبود یا ۴۰۴ داد، نشان حرف اول برند با استایل تم --}}
                         @if ($brand->image)
                             <img src="{{ asset($brand->image) }}" alt="{{ $brandName }}"
                                  class="brand-page-logo img-fluid" loading="eager" decoding="async"
-                                 onerror="this.style.display='none'">
+                                 onerror="window.snrBrandImgFallback && window.snrBrandImgFallback(this)">
+                            <span class="brand-page-logo-fallback" hidden aria-hidden="true">{{ mb_substr(trim($brandName), 0, 1) }}</span>
                         @endif
                         <img src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
                         <h1 class="font-16 ms-3 mb-0">همه محصولات برند <span class="main-color-one-color d-inline-block">{{ $brandName }}</span></h1>
                     </div>
                 </div>
+
+                @if ($brand->image)
+                    <style>
+                        /* فاز ۱۹۳ — فالبک لوگوی برند در سربرگ صفحهٔ برند */
+                        .brand-page-logo-fallback {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-width: 56px;
+                            height: 44px;
+                            padding: 2px 16px;
+                            font-size: 22px;
+                            font-weight: 800;
+                            letter-spacing: .5px;
+                            color: var(--main-color-one, #275fe0);
+                            background: linear-gradient(135deg, rgba(39, 95, 224, .07), rgba(39, 95, 224, .16));
+                            border-radius: 10px;
+                            user-select: none;
+                        }
+                        .brand-page-logo-fallback[hidden] { display: none; }
+                    </style>
+                @endif
 
                 @if($products->count())
                     <div class="category-items">

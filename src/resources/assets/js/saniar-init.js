@@ -6,6 +6,20 @@
 (function () {
     'use strict';
 
+    /* فاز ۱۹۳ — فالبک تصویر برند: وقتی لوگوی برند ۴۰۴ می‌دهد (فایل روی سرور
+       موجود نیست)، به‌جای آیکون تصویر شکسته، نشان حرف اول نام برند نمایش
+       داده می‌شود (span.saniar-brand-card__fallback داخل همان کارت از قبل
+       با hidden کنار img گذاشته شده است). */
+    window.snrBrandImgFallback = function (img) {
+        try {
+            var card = img.closest('.saniar-brand-card') || img.parentElement;
+            if (!card) { return; }
+            img.hidden = true;
+            var fb = card.querySelector('.saniar-brand-card__fallback');
+            if (fb) { fb.hidden = false; }
+        } catch (e) { /* هرگز بقیهٔ صفحه را نشکند */ }
+    };
+
     /* فاز ۱۸۵ (SPA) — مقداردهی‌ها تابع قابل-فراخوانی شدند تا بعد از هر
        ناوبری wire:navigate هم روی گره‌های تازه اجرا شوند */
     window.saniarTemplateInit = function () {

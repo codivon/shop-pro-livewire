@@ -1691,3 +1691,118 @@ html[data-theme="dark"] .dashboard-panel .my-paginate .pagination .page-link {
         font-size: 16px;
     }
 }
+
+/* ============================================================
+   فاز ۲۰۱ — منوهای تزریقی پکیج‌ها (اقساط، باشگاه مشتریان و …)
+   پکیج‌ها آیتم‌ها را با ساختار
+   <li class="nav-item"><a class="profile-menu-url"><span class="fas …"></span>عنوان</a></li>
+   داخل ul.navbar-nav سایدبار تزریق می‌کنند؛ این قواعد همان ظاهر
+   a.nav-link های داخلی را به آن‌ها می‌دهد (دسکتاپ + موبایل آفکانوس).
+   ============================================================ */
+.usp-nav .nav-item > a.profile-menu-url {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--usp-muted);
+    border-radius: var(--usp-radius-sm);
+    transition: .2s all ease-in-out;
+    -webkit-transition: .2s all ease-in-out;
+    text-decoration: none;
+    line-height: 1.6;
+}
+
+/* جعبهٔ آیکون — پکیج‌ها آیکون را با <span class="fas …"> یا <i> می‌فرستند */
+.usp-nav .nav-item > a.profile-menu-url > i,
+.usp-nav .nav-item > a.profile-menu-url > span[class*="fa-"],
+.usp-nav .nav-item > a.profile-menu-url > span[class*="bi-"],
+.usp-nav .nav-item > a.profile-menu-url > span[class*="mdi-"] {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    margin-left: 10px;
+    border-radius: 10px;
+    background: #f4f5f9;
+    color: var(--usp-muted-2);
+    transition: .2s all ease-in-out;
+    -webkit-transition: .2s all ease-in-out;
+    flex-shrink: 0;
+}
+
+.usp-nav .nav-item > a.profile-menu-url:hover,
+.usp-nav .nav-item > a.profile-menu-url:focus {
+    color: var(--usp-accent);
+    background: #f7f8fb;
+}
+
+.usp-nav .nav-item > a.profile-menu-url:hover > i,
+.usp-nav .nav-item > a.profile-menu-url:hover > span[class*="fa-"],
+.usp-nav .nav-item > a.profile-menu-url:hover > span[class*="bi-"],
+.usp-nav .nav-item > a.profile-menu-url:hover > span[class*="mdi-"] {
+    background: var(--usp-accent-soft);
+    color: var(--usp-accent);
+}
+
+/* حالت فعال (اگر پکیج کلاس active/active-profile بگذارد) */
+.usp-nav .nav-item.active > a.profile-menu-url,
+.usp-nav .nav-item > a.profile-menu-url.active-profile {
+    color: var(--usp-accent);
+    font-weight: 700;
+    background: var(--usp-accent-soft);
+}
+
+.usp-nav .nav-item.active > a.profile-menu-url > i,
+.usp-nav .nav-item.active > a.profile-menu-url > span[class*="fa-"],
+.usp-nav .nav-item.active > a.profile-menu-url > span[class*="bi-"],
+.usp-nav .nav-item.active > a.profile-menu-url > span[class*="mdi-"],
+.usp-nav .nav-item > a.profile-menu-url.active-profile > i,
+.usp-nav .nav-item > a.profile-menu-url.active-profile > span[class*="fa-"] {
+    background: var(--usp-accent);
+    color: #fff !important;
+    box-shadow: 0 6px 14px -6px rgba(39, 95, 224, .7);
+}
+
+/* نشان تعداد (اگر پکیج badge بفرستد) */
+.usp-nav .nav-item > a.profile-menu-url .badge {
+    margin-right: auto;
+    font-size: 11px;
+    padding: 4px 9px;
+    border-radius: 999px;
+}
+
+/* ---------- تم تیره ---------- */
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url {
+    color: var(--dk-text-soft, #a7adbb);
+}
+
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url > i,
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url > span[class*="fa-"],
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url > span[class*="bi-"],
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url > span[class*="mdi-"] {
+    background: var(--dk-surface-2, #242936);
+    color: var(--dk-text-muted, #818898);
+}
+
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url:hover,
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url:focus {
+    background: var(--dk-surface-2, #242936);
+    color: var(--dk-text, #e6e8ee);
+}
+
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url:hover > i,
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url:hover > span[class*="fa-"],
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url:hover > span[class*="bi-"],
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url:hover > span[class*="mdi-"] {
+    background: var(--usp-accent-soft);
+    color: var(--usp-accent);
+}
+
+html[data-theme="dark"] .usp-nav .nav-item.active > a.profile-menu-url,
+html[data-theme="dark"] .usp-nav .nav-item > a.profile-menu-url.active-profile {
+    background: var(--usp-accent-soft);
+    color: var(--usp-accent);
+}

@@ -7300,3 +7300,213 @@ body > .bread-crumb,
 body > [id^="widget-"] {
     width: 100%;
 }
+
+/* ============================================================
+   فاز ۲۰۱ — شش اصلاح فرانت/پنل مشتری
+   ============================================================ */
+
+/* ---------- [۳] قلب علاقه‌مندی روی کارت محصول ----------
+   حالا کامپوننت لایووایر (button) است — همان شکل دایره‌ای
+   دکمه‌های هدر کارت (قبلاً فقط a استایل داشت). */
+.product-header-btn button {
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    border-radius: 50%;
+    background: #f4f4f4;
+    transition: 200ms;
+    -webkit-transition: 200ms;
+    color: var(--text-color, #333);
+    vertical-align: middle;
+}
+
+.product-header-btn button i {
+    font-size: 16px;
+    line-height: 35px;
+}
+
+.product-header-btn button:hover {
+    background-color: #ddd;
+}
+
+.product-header-btn button.btn-option-favorites,
+.product-header-btn button.btn-option-favorites i {
+    color: #e83674;
+}
+
+.product-header-btn button:not(:last-child) {
+    margin-left: 5px;
+}
+
+/* تولتیپ دکمهٔ علاقه‌مندی روی کارت — قبلاً data-bs-title روی <a> بود؛
+   حالا با aria-label دکمه (که با state علاقه‌مندی هم به‌روز می‌شود) */
+.product-header-btn button {
+    position: relative;
+}
+
+.product-header-btn button .tooltip-short {
+    display: none !important;
+}
+
+.product-header-btn button::after {
+    content: attr(aria-label);
+    position: absolute;
+    top: 50%;
+    right: calc(100% + 10px);
+    transform: translateY(-50%);
+    background-color: #1c1c25;
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: .2s all ease-in-out;
+    -webkit-transition: .2s all ease-in-out;
+    z-index: 5;
+}
+
+.product-header-btn button:hover::after,
+.product-header-btn button:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ---------- [۱] منوهای تزریقی پکیج‌ها در پنل مشتری ----------
+   ساختار قدیمی (اگر پکیج‌ها به ul.profile-menu-items تزریق کنند) */
+ul.profile-menu-items li.nav-item {
+    list-style: none;
+    display: block;
+    width: 100%;
+    float: none;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+
+ul.profile-menu-items li.nav-item > a.profile-menu-url,
+ul.profile-menu-items li.nav-item > a {
+    font-size: 14px;
+    text-decoration: none;
+    color: #0e0e0e;
+    display: block;
+    padding: 10px 5px;
+    font-weight: bold;
+    height: 45px;
+    line-height: 25px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+ul.profile-menu-items li.nav-item > a:hover,
+ul.profile-menu-items li.nav-item > a:focus {
+    color: #009ec9 !important;
+}
+
+ul.profile-menu-items li.nav-item > a span {
+    font-size: 20px;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+ul.profile-menu-items li.nav-item > a.active-profile,
+ul.profile-menu-items li.nav-item > a.active-profile:hover {
+    color: #009ec9 !important;
+}
+
+/* ---------- [۲] مودال افزودن/ویرایش آدرس — نوار اکشن ----------
+   «انصراف و بازگشت» دکمه‌مانند می‌شود و «ثبت آدرس» به سمت چپ می‌رود */
+#add-edit-address-modal .address-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 6px 0 15px;
+    clear: both;
+    overflow: hidden;
+}
+
+#add-edit-address-modal .address-form-actions .form-checkout-valid-row {
+    float: none;
+    margin: 0;
+}
+
+#add-edit-address-modal .address-form-actions .parent-btn button {
+    width: auto;
+    min-width: 220px;
+    margin-top: 0;
+}
+
+#add-edit-address-modal .address-form-actions a.cancel-edit-address {
+    float: none;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 47px;
+    padding: 0 22px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .25s ease, color .25s ease, background .25s ease;
+    -webkit-transition: border-color .25s ease, color .25s ease, background .25s ease;
+}
+
+#add-edit-address-modal .address-form-actions a.cancel-edit-address:hover,
+#add-edit-address-modal .address-form-actions a.cancel-edit-address:focus {
+    border-color: var(--main-color-one, #1ca2bd);
+    color: var(--main-color-one, #1ca2bd);
+    text-decoration: none;
+}
+
+/* حالت تیرهٔ نوار اکشن مودال آدرس */
+html[data-theme="dark"] #add-edit-address-modal .address-form-actions a.cancel-edit-address {
+    background: var(--dk-surface-2, #242936);
+    border-color: var(--dk-line, #2e3442);
+    color: var(--dk-text-muted, #818898);
+}
+
+html[data-theme="dark"] #add-edit-address-modal .address-form-actions a.cancel-edit-address:hover,
+html[data-theme="dark"] #add-edit-address-modal .address-form-actions a.cancel-edit-address:focus {
+    border-color: var(--usp-accent, var(--main-color-one, #5b8af5));
+    color: var(--usp-accent, var(--main-color-one, #5b8af5));
+}
+
+/* ---------- [۴] فوتر — دکمهٔ ارسال خبرنامه: عنوان سفید در همهٔ حالت‌ها ---------- */
+footer .footer-newsletter-form button,
+footer .footer-newsletter-form button:hover,
+footer .footer-newsletter-form button:focus,
+footer .footer-newsletter-form button:disabled,
+footer .footer-form form .btn-footer-post,
+footer .footer-form form .btn-footer-post:hover,
+footer .footer-form form .btn-footer-post:focus,
+footer .footer-form form .btn-footer-post:disabled {
+    color: #fff !important;
+}
+
+/* ---------- استایل‌های درخواستی کاربر — سرصفحهٔ صفحات پکیج‌ها ---------- */
+.usp-page-head .bi{
+    color:#fff
+}
+.ccr-hero-title{
+    color:#fff
+}
+.ccr-hero-sub{
+    color:#fff
+}
+.ccr-hero-ico{
+    color:#fff
+}

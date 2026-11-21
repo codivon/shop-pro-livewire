@@ -860,52 +860,64 @@ $(document).on('click', '.cart-canvas .js-mini-qty-btn', function (e) {
     });
 });
 
-$('#newsletter-form').on('submit', function(e) {
+/* فاز ۲۰۱ — خبرنامهٔ فوتر (فرم کلاسیکِ فال‌بک وقتی Livewire غیرفعال است):
+   • بایند delegate تا اگر فرم دیر رندر شد هم کار کند
+   • سلکتور دکمه با fallback (button[type=submit] یا هر button داخل فرم)
+   • unblock + بازگرداندن متن دکمه «همیشه» در complete اجرا می‌شود
+     (رفع گیرکردن «در حال ثبت…»)
+   • پیام‌ها با showCustomToast، خطای ۴۲۲ آرایه‌امن */
+$(document).on('submit', '#newsletter-form', function (e) {
     e.preventDefault();
-    block('#newsletter-form');
-    var form = $(this);
-    var submitBtn = form.find('button[type="submit"]');
-    var originalText = submitBtn.text();
 
-    submitBtn.text('در حال ثبت...').prop('disabled', true);
+    var form = $(this);
+    var submitBtn = form.find('button[type="submit"]').length
+        ? form.find('button[type="submit"]')
+        : form.find('button');
+    var originalText = submitBtn.html();
+
+    submitBtn.html('در حال ثبت...').prop('disabled', true);
+    block('#newsletter-form');
 
     $.ajax({
         url: form.attr('action'),
         method: 'POST',
         data: form.serialize(),
-        success: function(response) {
-            if (response.success){
-                showCustomToast(response.message,'success');
-                form[0].reset();
-            }else {
-                showCustomToast(response.message,'error');
+        success: function (response) {
+            var msg = (response && response.message) ? response.message : 'عضویت شما در خبرنامه با موفقیت ثبت شد';
+            var type = (response && response.success) ? 'success' : 'error';
 
+            if (typeof showCustomToast === 'function') {
+                showCustomToast(msg, type);
             }
-
-
-            unblock('#newsletter-form');
+            if (response && response.success) {
+                form[0].reset();
+            }
         },
         beforeSend: function (xhr) {
             xhr.setRequestHeader(
                 'X-CSRF-TOKEN',
                 $('meta[name="csrf-token"]').attr('content')
             );
-            block('#newsletter-form');
         },
-        error: function(xhr) {
+        error: function (xhr) {
             var errorMessage = 'خطایی رخ داده است';
 
-            if (xhr.status === 422) {
+            if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
                 var errors = xhr.responseJSON.errors;
-                errorMessage = errors.contact;
+                errorMessage = Array.isArray(errors.contact)
+                    ? errors.contact[0]
+                    : (errors.contact || errorMessage);
             } else if (xhr.responseJSON && xhr.responseJSON.error) {
                 errorMessage = xhr.responseJSON.error;
             }
-            showCustomToast(errorMessage,'error');
-            unblock('#newsletter-form');
+
+            if (typeof showCustomToast === 'function') {
+                showCustomToast(errorMessage, 'error');
+            }
         },
-        complete: function() {
-            submitBtn.text(originalText).prop('disabled', false);
+        complete: function () {
+            unblock('#newsletter-form');
+            submitBtn.html(originalText).prop('disabled', false);
         }
     });
 });

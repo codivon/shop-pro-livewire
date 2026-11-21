@@ -23,7 +23,19 @@
 
     @if($hoverBtns)
         <div class="product-header-btn">
-            <a href="{{ route('front.favorites.index') }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="افزودن به علاقه مندی ها"><i class="bi bi-heart"></i></a>
+            {{-- فاز ۲۰۱ — قلب علاقه‌مندی روی کارت‌ها دیگر «لینک به پنل» نیست؛
+                 کلیک = افزودن/حذف واقعی (کامپوننت لایووایر، هم‌قرارداد با تک‌صفحه).
+                 فال‌بک: بدون Livewire، دکمهٔ AJAX کلاسیک (#add-to-favorites در show.js). --}}
+            @if (class_exists(\Livewire\Livewire::class))
+                <livewire:saniar-favorites-button :product="$product" :key="'saniar-favorites-'.$product->id" />
+            @else
+                <button id="add-to-favorites" type="button" class="bg-transparent border-0 p-0"
+                        data-product="{{ $product->id }}" data-action="{{ route('front.favorites.store') }}"
+                        aria-label="افزودن به علاقه‌مندی">
+                    <i class="bi bi-heart"></i>
+                    <span class="tooltip-short">افزودن به علاقه‌مندی</span>
+                </button>
+            @endif
             <a href="{{ route('front.products.show', ['product' => $product]) }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="مشاهده"><i class="bi bi-eye"></i></a>
         </div>
     @endif

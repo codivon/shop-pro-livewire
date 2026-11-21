@@ -214,6 +214,8 @@ $(document).off('click.saniarSendStockNotify').on('click.saniarSendStockNotify',
 
 //-------------------------- Add to favorites
 /* فاز ۱۸۵ — علاقه‌مندی: مهمان → پیغام + هدایت به صفحه ورود (به‌جای خطای خام ۴۰۱ کنسول) */
+/* فاز ۲۰۱ — کلاسِ حالت فعال «btn-option-favorites» است (در blade هم با همین کلاس رندر می‌شود)؛
+   قبلاً «favorites» ست می‌شد که در CSS وجود ندارد و قلب رنگ نمی‌گرفت؛ پیام‌ها هم دقیق شدند. */
 $(document).off('click.saniarFavorites').on('click.saniarFavorites', '#add-to-favorites', function () {
     var btn = this;
 
@@ -224,13 +226,16 @@ $(document).off('click.saniarFavorites').on('click.saniarFavorites', '#add-to-fa
             product_id: $(btn).data('product')
         },
         success: function (data) {
-            showCustomToast('با موفقیت انجام شد','success')
-            if (data.action == 'create') {
-                $(btn).addClass('favorites');
+            if (data && data.action === 'create') {
+                $(btn).addClass('btn-option-favorites');
                 $(btn).parent().find('span').text('حذف از علاقمندی ها');
-            } else {
-                $(btn).removeClass('favorites');
+                if (typeof showCustomToast === 'function') showCustomToast('به علاقه‌مندی‌ها اضافه شد', 'success');
+            } else if (data && data.action === 'delete') {
+                $(btn).removeClass('btn-option-favorites');
                 $(btn).parent().find('span').text('افزودن به علاقمندی ها');
+                if (typeof showCustomToast === 'function') showCustomToast('از علاقه‌مندی‌ها حذف شد', 'info');
+            } else {
+                if (typeof showCustomToast === 'function') showCustomToast('خطایی رخ داده است؛ دوباره تلاش کنید', 'error');
             }
         },
         beforeSend: function (xhr) {

@@ -197,6 +197,8 @@ $('#sendStockNotifyBtn').click(sendStockNotify);
 // product prices js codes
 
 //-------------------------- Add to favorites
+/* فاز ۲۰۱ — کلاسِ حالت فعال «btn-option-favorites» است (هم‌گام با show.js) —
+   قبلاً «favorites» ست می‌شد که در CSS وجود ندارد؛ پیام‌ها هم دقیق شدند. */
 $(document).on('click', '#add-to-favorites', function () {
     var btn = this;
 
@@ -207,13 +209,16 @@ $(document).on('click', '#add-to-favorites', function () {
             product_id: $(btn).data('product')
         },
         success: function (data) {
-            showCustomToast('با موفقیت انجام شد','success')
-            if (data.action == 'create') {
-                $(btn).addClass('favorites');
+            if (data && data.action === 'create') {
+                $(btn).addClass('btn-option-favorites');
                 $(btn).parent().find('span').text('حذف از علاقمندی ها');
-            } else {
-                $(btn).removeClass('favorites');
+                if (typeof showCustomToast === 'function') showCustomToast('به علاقه‌مندی‌ها اضافه شد', 'success');
+            } else if (data && data.action === 'delete') {
+                $(btn).removeClass('btn-option-favorites');
                 $(btn).parent().find('span').text('افزودن به علاقمندی ها');
+                if (typeof showCustomToast === 'function') showCustomToast('از علاقه‌مندی‌ها حذف شد', 'info');
+            } else {
+                if (typeof showCustomToast === 'function') showCustomToast('خطایی رخ داده است؛ دوباره تلاش کنید', 'error');
             }
         },
         beforeSend: function (xhr) {

@@ -857,7 +857,7 @@
         {{-- /۱۸۰ — نسخهٔ کش ?v=2 --}}
         <script src="{{ theme_asset('js/pages/products/price-alert.js') }}?v=3"></script>
      @endif
-   <script src="{{ theme_asset('js/pages/products/show.js') }}?v=23"></script>
+   <script src="{{ theme_asset('js/pages/products/show.js') }}?v=24"></script>
    <script src="{{ theme_asset('js/pages/comments.js') }}?v=3"></script>
    {{-- منطق لحظه‌ای قیمت + تعویض تصویر گالری (بدون اسکریپت اینلاین) --}}
    <script src="{{ theme_asset('js/theme-product.js') }}?v=7"></script>

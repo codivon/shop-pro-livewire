@@ -274,16 +274,21 @@
 
 
 
-                                            <div class="form-checkout-valid-row">
-                                                <div class="parent-btn">
-                                                    <button class="btn border-0 main-color-one-bg waves-effect waves-light">
-                                                        ثبت آدرس
-                                                        <i class="bi bi-check-lg text-white"></i>
-                                                    </button>
+                                            {{-- نوار اکشن: انصراف سمت راست، «ثبت آدرس» سمت چپ (flex space-between — استایل در style.css فاز ۲۰۱) --}}
+                                            <div class="address-form-actions">
+                                                <a class="cancel-edit-address cursor-pointer" data-bs-dismiss="modal">
+                                                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                                                    انصراف و بازگشت
+                                                </a>
+                                                <div class="form-checkout-valid-row">
+                                                    <div class="parent-btn">
+                                                        <button class="btn border-0 main-color-one-bg waves-effect waves-light">
+                                                            ثبت آدرس
+                                                            <i class="bi bi-check-lg text-white"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-
-                                            <a class="cancel-edit-address cursor-pointer" data-bs-dismiss="modal">انصراف و بازگشت</a>
                                         </div>
                                     </div>
 

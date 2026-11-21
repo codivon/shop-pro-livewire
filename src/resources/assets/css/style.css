@@ -851,7 +851,10 @@ header{
     height: auto;
     min-width: 200px;
     min-height: 400px;
-    max-height: min(480px, calc(100vh - 180px));
+    /* فاز ۱۹۷ — به‌درخواست کاربر: سقف ارتفاع پنل با 245px حساب می‌شود تا
+       در ویوپورت‌های کوتاه، پایین پنل (و پنل فرعی ثابت که هم‌قد آن است)
+       هرگز از پایین صفحه بیرون نزند */
+    max-height: min(480px, calc(100vh - 245px));
     position: absolute;
     top: 50px;
     left: 20px;
@@ -875,6 +878,27 @@ header{
     display: flex;
     left: 0;
     right: 0;
+}
+
+/* فاز ۱۹۷ — پل ضد گپ: بین لبهٔ پایین دکمهٔ «دسته‌بندی کالاها» و لبهٔ بالای
+   پنل/پنل فرعی ~۴px فاصلهٔ مرده هست؛ عبور موربِ پوینتر از این نوار
+   mouseleave می‌دهد و کل مگا منو قبل از رسیدن به زیرمنو بسته می‌شد.
+   پل روی خودِ دکمه می‌نشیند (li نباید positioned شود چون زمینهٔ position
+   پنل، ‎.top-menu-parent‎ است و دو پنل هم overflow:auto دارند و ::after داخل
+   آن‌ها clip می‌شود): نوار نامرئی ۱۲px زیر دکمه — پوینتر روی ::after یعنی
+   روی خودِ دکمه؛ هیچ‌وقت از زیردرخت head بیرون نمی‌زند (همراه با تأخیر
+   ۳۰۰ms بستن در jquery-app.js). */
+.top-menu-menu li.main-menu-head > a.nav-link {
+    position: relative;
+}
+
+.top-menu-menu li.main-menu-head > a.nav-link::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: -70px;
+    right: -10px;
+    height: 12px;
 }
 
 /* اسکرول‌بار ستون دسته‌ها (راست) و ستون فرعی (چپ) — جدا از هم */
@@ -1238,6 +1262,36 @@ header{
 .top-menu-menu ul.main-menu > ul.snr-mega-flyout li.snr-mega-group {
     break-inside: avoid;
     page-break-inside: avoid;
+}
+
+/* فاز ۱۹۷ — ریشه‌یابی «زیرمنوهای لول ۳ نمایش داده نمی‌شوند»:
+   قانون قدیمیِ منوی دو سطحی، ‎.top-menu-menu ul > li > ul‎، به‌صورت
+   عمومی روی لیستِ فرزندانِ گروه‌ها (ul.snr-mega-group-list داخل پنل ثابت
+   snr-mega-flyout) هم می‌نشیند و آن‌ها را position:absolute + top:98% +
+   visibility:hidden + height:300px می‌کند؛ نتیجه: «اپل/سامسونگ/…» در DOM
+   هستند ولی هرگز دیده نمی‌شوند و کلیک روی‌شان ممکن نیست.
+   داخل پنل ثابت، لیست فرزندان باید inline زیر تیتر گروه باشد:
+   position:static + always-visible + height:auto؛ آیتم‌ها هم block با
+   عرض کامل (قانون قدیمی display:inline + margin‌ها را خنثی می‌کنیم). */
+.top-menu-menu ul.main-menu > ul.snr-mega-flyout li.snr-mega-group > ul.snr-mega-group-list {
+    position: static !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+    height: auto !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: auto !important;
+    transition: none !important;
+    list-style: none !important;
+}
+
+.top-menu-menu ul.main-menu > ul.snr-mega-flyout li.snr-mega-group > ul.snr-mega-group-list > li {
+    display: block !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* فاز ۱۷۷ — آیکون فلشِ تیتر گروه‌های تو در تو (مثل نمونهٔ دیجی‌کالا) */

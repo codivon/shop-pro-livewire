@@ -72,7 +72,7 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=176">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=177">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
@@ -514,7 +514,7 @@
 <script src="{{theme_asset('plugin/timer/timer.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('js/app.js')}}?v=167" data-navigate-once></script>
-<script src="{{theme_asset('js/jquery-app.js')}}?v=5" data-navigate-once></script>
+<script src="{{theme_asset('js/jquery-app.js')}}?v=6" data-navigate-once></script>
 
 {{-- سانیار — پلاگین‌های جانبی تمپلیت --}}
 {{-- پلاگین go-to-top حذف شد؛ دکمهٔ مستطیلی «برگشت به بالا» در theme-header.js --}}

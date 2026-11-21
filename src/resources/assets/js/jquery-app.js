@@ -1,7 +1,10 @@
 $(function () {
 
     ///نمایش زیر منو
-    $(".showSubMenu").click(function () {
+    /* فاز ۱۹۷ — بایند delegated به‌جای مستقیم: بایندِ مستقیم بعد از هر
+       ناوبری SPA (تعویض کامل body توسط livewire:navigate) می‌مُرد و
+       شِورون‌های زیرمنو در منوی ریسپانسیو بی‌پاسخ می‌شدند. */
+    $(document).on('click', '.showSubMenu', function () {
         $(this).nextAll("ul").toggleClass("show");
         $(this).toggleClass('open');
     })
@@ -73,11 +76,32 @@ $(function () {
     window.addEventListener('scroll', repositionOpenFlyouts, { passive: true });
     window.addEventListener('resize', repositionOpenFlyouts);
 
-    /* باز/بسته شدن کل پنل مگا منو با ورود و خروج موس از دکمهٔ «دسته‌بندی کالاها» */
+    /* باز/بسته شدن کل پنل مگا منو با ورود و خروج موس از دکمهٔ «دسته‌بندی کالاها»
+       =====================================================================
+       فاز ۱۹۷ — ریشه‌یابی «لینک‌های زیرمنو/فرزندان کار نمی‌کنند»:
+       ۱) گپ مردهٔ ~۴px بین لبهٔ پایین دکمه و لبهٔ بالای پنل/پنل فرعی؛ عبور
+          پوینتر از این نوار، mouseleave سراسری می‌داد و کل مگا منو «وسط راه»
+          بسته می‌شد — کاربر هرگز به زیرمنو نمی‌رسید (کلیک روی فرزندان غیرممکن).
+          ⇒ بستن با «تأخیر ۳۰۰ms» + پل CSS (‎::after‎ در style.css) هر دو اعمال شد.
+       ۲) هر ورود مجدد پوینتر به زیردرخت head، محتوای پنل فرعی را از نو
+          innerHTML می‌کرد؛ المان زیر پوینتر بین mousedown و mouseup از DOM
+          جدا می‌شد و کلیک ناوبری می‌مُرد (۶۱ بار detach پیاپی در تست).
+          ⇒ اگر پنل از قبل باز و پنل فرعی از قبل نمایش است، رندر تکرار نمی‌شود. */
+    var megaCloseTimer = null;
     $(document).on('mouseenter', '.top-menu-menu .main-menu-head', function () {
+        if (megaCloseTimer) { clearTimeout(megaCloseTimer); megaCloseTimer = null; }
+
+        var wasActive = $(this).children('ul.main-menu').hasClass('active');
         $(this).children().addClass('active');
 
         var panel = $(this).children('ul.main-menu').get(0);
+        if (wasActive && panel && panel.__snrFlyout &&
+            panel.__snrFlyout.classList.contains('main-menu-sub-active')) {
+            /* پنل باز و پنل فرعی پر است — بازنویسی innerHTML = detach المانِ
+               زیر پوینتر و مرگ کلیک؛ فقط ردیف فعال را دست نمی‌زنیم */
+            return;
+        }
+
         var firstRow = panel ? panel.querySelector(':scope > li') : null;
         if (firstRow) {
             /* فاز ۱۸۵ — ردیف اول هم «هایلایت» می‌شود تا با محتوای پنل فرعی
@@ -89,13 +113,18 @@ $(function () {
         }
     })
     $(document).on('mouseleave', '.top-menu-menu .main-menu-head', function () {
-        $(this).children().removeClass('active');
+        var self = this;
+        if (megaCloseTimer) { clearTimeout(megaCloseTimer); }
+        megaCloseTimer = setTimeout(function () {
+            megaCloseTimer = null;
+            $(self).children().removeClass('active');
 
-        var panel = $(this).children('ul.main-menu').get(0);
-        if (panel && panel.__snrFlyout) {
-            $(panel.__snrFlyout).removeClass('main-menu-sub-active');
-            $(panel).find('> li').removeClass('main-menu-sub-active-li');
-        }
+            var panel = $(self).children('ul.main-menu').get(0);
+            if (panel && panel.__snrFlyout) {
+                $(panel.__snrFlyout).removeClass('main-menu-sub-active');
+                $(panel).find('> li').removeClass('main-menu-sub-active-li');
+            }
+        }, 300);
     })
 
     /* هاور روی ردیف‌های مگا منو → فقط محتوای پنل ثابت فرعی عوض می‌شود.
@@ -116,12 +145,14 @@ $(function () {
         showMegaFlyoutRow(this, row);
     });
 
-    /* خروج موس از کل پنل مگا منو → پاک‌سازی کامل ردیف فعال و پنل فرعی */
+    /* خروج موس از ستون ردیف‌های پنل مگا منو
+       فاز ۱۹۷ — فقط هایلایتِ ردیف‌ها پاک می‌شود؛ پنهان‌سازی پنل فرعی و بستنِ
+       پنل را «mouseleave تأخیردارِ head» انجام می‌دهد. قبلاً همین‌جا پنل فرعی
+       فوراً مخفی می‌شد: عبور پوینتر از گپِ بین دکمه و پنل (مسیر مورب کاربر)
+       = خروج از پنل ⇒ پنل فرعی خاموش ⇒ ورود دوباره به ناحیهٔ خالی ⇒ رندر
+       مجدد و پرش — دقیقاً «زیرمنو باز نمی‌ماند و کلیک روی فرزندان نمی‌گیرد». */
     $(document).on('mouseleave', '.top-menu-menu ul.main-menu', function () {
         $(this).find('> li').removeClass('main-menu-sub-active-li');
-        if (this.__snrFlyout) {
-            $(this.__snrFlyout).removeClass('main-menu-sub-active');
-        }
     })
 
     ///شمارنده محصول برای اضافه کردن به سبد خرید

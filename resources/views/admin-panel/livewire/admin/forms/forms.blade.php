@@ -64,7 +64,7 @@
                             </td>
                             <td class="px-3 py-3 fa-digits font-bold">{{ number_format($form->id) }}</td>
                             <td class="max-w-56 px-3 py-3">
-                                <p class="truncate font-semibold">{{ $form->title }}</p>
+                                <p class="max-w-56 truncate font-semibold">{{ $form->title }}</p>
                                 @if (Route::has('front.form.show'))
                                     <a href="{{ route('front.form.show', $form->slug) }}" target="_blank" rel="noopener"
                                        class="mt-0.5 inline-flex items-center gap-1 text-[11px] text-brand-600 hover:underline dark:text-brand-400">
@@ -74,7 +74,7 @@
                                 @endif
                             </td>
                             <td class="max-w-40 px-3 py-3">
-                                <code class="truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $form->slug }}</code>
+                                <code class="block max-w-40 truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $form->slug }}</code>
                             </td>
                             <td class="px-3 py-3">
                                 @if ($form->published)

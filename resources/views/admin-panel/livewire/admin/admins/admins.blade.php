@@ -123,10 +123,10 @@
                                      class="size-10 rounded-xl border border-line object-cover dark:border-night-line">
                             </td>
                             <td class="max-w-40 px-3 py-3">
-                                <p class="truncate font-semibold">{{ $admin->fullname }}</p>
+                                <p class="max-w-40 truncate font-semibold">{{ $admin->fullname }}</p>
                             </td>
                             <td class="max-w-36 px-3 py-3">
-                                <code class="truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $admin->username }}</code>
+                                <code class="block max-w-36 truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $admin->username }}</code>
                             </td>
                             <td class="max-w-36 px-3 py-3">
                                 @if ($admin->mobile)
@@ -321,7 +321,7 @@
                             <label class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] transition-colors hover:bg-surface-2 dark:hover:bg-night-3">
                                 <input type="checkbox" wire:model="roles" value="{{ $role->id }}"
                                        class="size-4 rounded-md border-line text-brand-600 focus:ring-brand-500/30 dark:border-night-line">
-                                <span class="truncate font-medium">{{ $role->title }}</span>
+                                <span class="min-w-0 truncate font-medium">{{ $role->title }}</span>
                             </label>
                         @empty
                             <p class="text-xs text-ink-3 dark:text-night-ink-2">نقشی برای انتخاب وجود ندارد.</p>

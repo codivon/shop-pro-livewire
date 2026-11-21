@@ -78,18 +78,18 @@
                                        class="size-4 rounded-md border-line text-brand-600 focus:ring-brand-500/30 dark:border-night-line">
                             </td>
                             <td class="max-w-52 px-3 py-3">
-                                <p class="truncate font-semibold" title="{{ $page->title }}">{{ $page->title }}</p>
+                                <p class="max-w-52 truncate font-semibold" title="{{ $page->title }}">{{ $page->title }}</p>
                             </td>
                             <td class="max-w-64 px-3 py-3">
                                 @if (\Illuminate\Support\Facades\Route::has('front.pages.show'))
-                                    <code class="block truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr"
+                                    <code class="block max-w-64 truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr"
                                           title="{{ $page->link() }}">{{ $page->link() }}</code>
                                 @else
                                     <span class="text-ink-3 dark:text-night-ink-2">—</span>
                                 @endif
                             </td>
                             <td class="max-w-40 px-3 py-3">
-                                <code class="truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $page->slug ?? '—' }}</code>
+                                <code class="block max-w-40 truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $page->slug ?? '—' }}</code>
                             </td>
                             <td class="px-3 py-3 text-center">
                                 @if ($page->published)

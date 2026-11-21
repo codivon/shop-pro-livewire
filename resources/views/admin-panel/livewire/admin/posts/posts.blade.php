@@ -70,10 +70,10 @@
         @endcan
     </div>
 
-    {{-- جدول --}}
+    {{-- جدول — table-layout:fixed تا محتوای طولانی/غیرشکستنی، عرض ستون‌ها را منفجر نکند --}}
     <div class="ap-card overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-4xl text-start text-[13px]">
+            <table class="w-full min-w-4xl table-fixed text-start text-[13px]" style="table-layout:fixed">
                 <thead>
                     <tr class="border-b border-line bg-surface-2 text-ink-2 dark:border-night-line dark:bg-night-3">
                         <th class="w-10 px-3 py-3">
@@ -82,16 +82,16 @@
                                    aria-label="انتخاب همه">
                         </th>
                         <th class="w-16 px-3 py-3 text-start font-bold">تصویر</th>
-                        <th class="px-3 py-3 text-start font-bold">عنوان</th>
-                        <th class="px-3 py-3 text-start font-bold">اسلاگ</th>
-                        <th class="px-3 py-3 text-start font-bold">نوع</th>
-                        <th class="px-3 py-3 text-start font-bold">دسته‌بندی‌ها</th>
-                        <th class="px-3 py-3 text-start font-bold">وضعیت</th>
-                        <th class="w-14 px-3 py-3 text-center font-bold" title="انتخاب سردبیر">
+                        <th class="w-44 px-3 py-3 text-start font-bold">عنوان</th>
+                        <th class="w-36 px-3 py-3 text-start font-bold">اسلاگ</th>
+                        <th class="w-16 px-3 py-3 text-start font-bold">نوع</th>
+                        <th class="w-32 px-3 py-3 text-start font-bold">دسته‌بندی‌ها</th>
+                        <th class="w-28 px-3 py-3 text-start font-bold">وضعیت</th>
+                        <th class="w-12 px-3 py-3 text-center font-bold" title="انتخاب سردبیر">
                             <x-admin-panel::icon name="star" class="mx-auto size-4 text-amber-500" />
                         </th>
-                        <th class="px-3 py-3 text-start font-bold">تاریخ ایجاد</th>
-                        <th class="px-3 py-3 text-start font-bold">دیدگاه‌ها</th>
+                        <th class="w-24 px-3 py-3 text-start font-bold">تاریخ ایجاد</th>
+                        <th class="w-16 px-3 py-3 text-start font-bold">دیدگاه‌ها</th>
                         <th class="w-24 px-3 py-3 text-start font-bold">عملیات</th>
                     </tr>
                 </thead>
@@ -109,9 +109,10 @@
                                      alt="{{ $post->title }}" loading="lazy"
                                      class="size-10 rounded-xl border border-line object-cover dark:border-night-line">
                             </td>
-                            <td class="max-w-56 px-3 py-3">
+                            <td class="w-44 overflow-hidden px-3 py-3">
                                 <div class="flex items-center gap-1.5">
-                                    <p class="truncate font-semibold">{{ $post->title }}</p>
+                                    {{-- min-w-0 + flex-1 تا truncate داخل flex درست عمل کند --}}
+                                    <p class="min-w-0 flex-1 truncate font-semibold">{{ $post->title }}</p>
                                     @if (\Illuminate\Support\Facades\Route::has('front.articles.show'))
                                         <a href="{{ route('front.articles.show', $post) }}" target="_blank"
                                            class="shrink-0 text-ink-3 transition-colors hover:text-brand-600 dark:text-night-ink-2"
@@ -121,8 +122,9 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="max-w-40 px-3 py-3">
-                                <code class="truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $post->slug ?? '—' }}</code>
+                            <td class="w-36 overflow-hidden px-3 py-3">
+                                {{-- block بدون آن، overflow-hidden و truncate روی عنصر inline بی‌اثر است --}}
+                                <code class="block truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $post->slug ?? '—' }}</code>
                             </td>
                             <td class="px-3 py-3">
                                 @if ($post->post_type === 'video')
@@ -133,7 +135,7 @@
                                     <span class="ap-badge bg-sky-50 text-sky-700 dark:bg-sky-500/12 dark:text-sky-400">{{ \App\Livewire\Admin\Posts\PostIndex::typeLabel($post->post_type) }}</span>
                                 @endif
                             </td>
-                            <td class="max-w-48 px-3 py-3">
+                            <td class="overflow-hidden px-3 py-3">
                                 @forelse ($post->Categories->take(2) as $category)
                                     <span class="ap-badge mr-1 bg-surface-3 text-ink-2 dark:bg-night-3 dark:text-night-ink-2">{{ $category->title }}</span>
                                 @empty

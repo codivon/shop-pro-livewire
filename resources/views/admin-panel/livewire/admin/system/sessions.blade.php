@@ -252,12 +252,12 @@
                                         @if ($accountBan)
                                             <span class="text-[11px] font-semibold text-red-600 dark:text-red-400">کل حساب کاربری</span>
                                         @else
-                                            <code class="truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $block->session_id ?? $block->ip_address ?? '-' }}</code>
+                                            <code class="block max-w-40 truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $block->session_id ?? $block->ip_address ?? '-' }}</code>
                                         @endif
                                     </td>
                                     <td class="px-3 py-3">{{ $block->status_text }}</td>
                                     <td class="max-w-48 px-3 py-3">
-                                        <p class="truncate text-ink-2 dark:text-night-ink-2">{{ $block->reason ?? '-' }}</p>
+                                        <p class="max-w-48 truncate text-ink-2 dark:text-night-ink-2">{{ $block->reason ?? '-' }}</p>
                                     </td>
                                     <td class="px-3 py-3 fa-digits whitespace-nowrap">{{ $this->jdate($block->created_at, 'd F Y H:i') }}</td>
                                     <td class="px-3 py-3">

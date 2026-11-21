@@ -168,16 +168,16 @@
                                      class="size-10 rounded-xl border border-line object-cover dark:border-night-line">
                             </td>
                             <td class="max-w-40 px-3 py-3">
-                                <p class="truncate font-semibold">{{ $brand->name }}</p>
+                                <p class="max-w-40 truncate font-semibold">{{ $brand->name }}</p>
                             </td>
                             <td class="px-3 py-3">
                                 <span class="fa-digits inline-flex size-7 items-center justify-center rounded-lg bg-surface-2 text-xs font-bold text-ink-2 dark:bg-night-3 dark:text-night-ink-2">{{ $brand->ordering ?? 0 }}</span>
                             </td>
                             <td class="max-w-40 px-3 py-3">
-                                <code class="truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $brand->slug ?? '—' }}</code>
+                                <code class="block max-w-40 truncate text-[11px] text-ink-2 dark:text-night-ink-2" dir="ltr">{{ $brand->slug ?? '—' }}</code>
                             </td>
                             <td class="max-w-56 px-3 py-3">
-                                <p class="truncate text-ink-2 dark:text-night-ink-2">{{ \Illuminate\Support\Str::limit(strip_tags((string) $brand->description), 80) ?: '—' }}</p>
+                                <p class="max-w-56 truncate text-ink-2 dark:text-night-ink-2">{{ \Illuminate\Support\Str::limit(strip_tags((string) $brand->description), 80) ?: '—' }}</p>
                             </td>
                             <td class="px-3 py-3 fa-digits whitespace-nowrap">{{ $this->jdate($brand->created_at) }}</td>
                             <td class="px-3 py-3">

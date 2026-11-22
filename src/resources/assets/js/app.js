@@ -118,6 +118,10 @@ window.saniarInitSwipers = function () {
 document.querySelectorAll('.js-home-slider').forEach(function (el) {
     if (saniarSliderIsLive(el)) { return; }
     saniarMarkSliderBound(el);
+    /* فاز ۲۰۲ — ریشهٔ «اسلایدر در گوشی اسلاید نمی‌خورد»: افکت fade است؛
+       در fade هیچ حرکت افقی دیده نمی‌شود و ژست سوایپ لمسی عملاً بی‌اثر حس می‌شود.
+       در موبایل/تبلت افکت slide (حرکت واقعی) و در دسکتاپ fade طبق تمپلیت. */
+    var isTouchLayout = window.matchMedia && window.matchMedia('(max-width: 991.98px)').matches;
     saniarSwiper(el, {
         spaceBetween: 30,
         centeredSlides: true,
@@ -127,7 +131,8 @@ document.querySelectorAll('.js-home-slider').forEach(function (el) {
             delay: 3000,
             disableOnInteraction: false,
         },
-        effect: "fade",
+        effect: isTouchLayout ? "slide" : "fade",
+        grabCursor: true,
     });
 });
 

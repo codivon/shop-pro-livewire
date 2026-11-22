@@ -72,7 +72,7 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=179">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=180">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
@@ -103,7 +103,7 @@
     {!! option('info_header_codes', '') !!}
 
     @if(auth('adminPanel')->check())
-        <link rel="stylesheet" href="{{ theme_asset('css/admin-loggedin-navbar.css') }}">
+        <link rel="stylesheet" href="{{ theme_asset('css/admin-loggedin-navbar.css') }}?v=2">
     @endif
 
     {{-- آیکون‌های اعلان‌ها (mdi) — فقط برای کاربر وارد شده تا رندر هدر کند نشود --}}
@@ -513,7 +513,7 @@
 <script src="{{theme_asset('plugin/swiper/swiper-bundle.min.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('plugin/timer/timer.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js')}}" data-navigate-once></script>
-<script src="{{theme_asset('js/app.js')}}?v=167" data-navigate-once></script>
+<script src="{{theme_asset('js/app.js')}}?v=168" data-navigate-once></script>
 <script src="{{theme_asset('js/jquery-app.js')}}?v=7" data-navigate-once></script>
 
 {{-- سانیار — پلاگین‌های جانبی تمپلیت --}}
@@ -532,7 +532,7 @@
 <script src="{{theme_asset('js/owl.carousel.min.js')}}" data-navigate-once></script>
 <script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
 <script src="{{ theme_asset("js/scripts.js") }}?v=13" data-navigate-once></script>
-<script src="{{theme_asset('js/main.js')}}?v=22" data-navigate-once></script>
+<script src="{{theme_asset('js/main.js')}}?v=23" data-navigate-once></script>
 @stack('scripts')
 
 {!! option('info_scripts') !!}

@@ -404,6 +404,57 @@
 
     });
 
+    /* فاز ۲۰۲ — اسلایدر «مطالب مرتبط وبلاگ» پایین تک‌صفحه مقاله:
+       مقداردهی اسکوپ‌شده روی هر نمونه؛ با هر ناوبری SPA این فایل دوباره
+       اجرا می‌شود و گارد el.swiper از مقداردهی دوباره جلوگیری می‌کند. */
+    if (window.Swiper) {
+        document.querySelectorAll('.js-related-posts').forEach(function (el) {
+            if (el.swiper && el.swiper.el === el && el.isConnected) { return; }
+            var slides = el.querySelectorAll('.swiper-slide').length;
+            if (!slides) { return; }
+            new Swiper(el, {
+                slidesPerView: 1.12,
+                spaceBetween: 16,
+                loop: slides > 4,
+                loopAdditionalSlides: 4,
+                autoplay: { delay: 4200, disableOnInteraction: false },
+                grabCursor: true,
+                pagination: { el: el.querySelector('.swiper-pagination'), clickable: true },
+                navigation: {
+                    nextEl: el.querySelector('.swiper-button-next'),
+                    prevEl: el.querySelector('.swiper-button-prev')
+                },
+                breakpoints: {
+                    576: { slidesPerView: 2.12 },
+                    992: { slidesPerView: 4 }
+                }
+            });
+        });
+    }
+
+    /* فاز ۲۰۲ — دکمهٔ کپی لینک مقاله (کاشی اشتراک‌گذاری) */
+    $(document).off('click.snrShareCopy').on('click.snrShareCopy', '.snr-share-copy', function () {
+        var url = $(this).data('url') || window.location.href;
+        var done = function () {
+            if (typeof showCustomToast === 'function') { showCustomToast('لینک مقاله کپی شد', 'success'); }
+        };
+        function fallbackCopy(text, cb) {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); cb(); } catch (e) { /* بی‌اثر */ }
+            document.body.removeChild(ta);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(done).catch(function () { fallbackCopy(url, done); });
+        } else {
+            fallbackCopy(url, done);
+        }
+    });
+
     };
     if (document.readyState === 'loading') { $(document).ready(initArticleShow); } else { initArticleShow(); }
 })();

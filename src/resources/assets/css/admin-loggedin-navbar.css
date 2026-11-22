@@ -213,3 +213,61 @@
         padding: 9px 12px;
     }
 }
+
+/* ============================================================
+   فاز ۲۰۲ — موبایل/تاچ: پنل‌های کشویی به‌صورت «نوار تمام‌عرض»
+   زیر خود نوار باز می‌شوند (تپ روی «محصولات/مقالات/آواتار»).
+   position:fixed تا داخل کانتینر overflow-x:auto موبایل کلیپ نشود.
+   JS: main.js کلاس touch-open را روی li تپ‌شده ست می‌کند.
+   ============================================================ */
+@media (max-width: 991px) {
+    .admin-loggedin-navbar .list-item-has-children > .sub-menu {
+        position: fixed;
+        top: 48px;
+        right: 0;
+        left: 0;
+        min-width: 0;
+        width: auto;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+        gap: 4px;
+        margin: 0;
+        padding: 8px 10px;
+        border: 0;
+        border-radius: 0;
+        box-shadow: 0 14px 28px -18px rgba(0, 0, 0, .45);
+        transform: translateY(-6px);
+    }
+
+    /* پنل آواتار هم همان نوار تمام‌عرض (چپ‌چین نباشد) */
+    .admin-loggedin-navbar .dropdown-user-menu .list-item-has-children > .sub-menu {
+        right: 0;
+        left: 0;
+    }
+
+    .admin-loggedin-navbar .sub-menu .list-item {
+        display: block;
+        flex: 1 1 auto;
+    }
+
+    .admin-loggedin-navbar .sub-menu .nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 9px 14px;
+        border-radius: 9px;
+        background: #f7f7f9;
+        color: #333 !important;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .admin-loggedin-navbar .sub-menu .nav-link i {
+        margin-left: 7px;
+    }
+
+    .admin-loggedin-navbar .sub-menu::before {
+        display: none;
+    }
+}

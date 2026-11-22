@@ -125,6 +125,43 @@ class ArticleController extends Controller
             ->limit(8)
             ->get();
 
+        /* فاز ۲۰۲ — بازطراحی تک‌صفحه مقاله:
+           • مقالات مرتبطِ همان دسته‌بندی برای اسلایدر پایین صفحه؛ اگر کمتر از
+             ۴ عدد بود با جدیدترین‌ها (بدون تکرار) تا ۸ پر می‌شود تا اسلایدر
+             همیشه چیزی برای نمایش داشته باشد (شکایت کاربر: «آخرین مقالات را
+             نمایش نمی‌داد»).
+           • داغ‌ترین مطالب برای کارت «داغ‌ترین مطالب امروز» سایدبار. */
+        $relatedPosts = Post::where('id', '!=', $post->id)
+            ->when($post->categories->isNotEmpty(), function ($q) use ($post) {
+                $q->whereHas('categories', function ($c) use ($post) {
+                    $c->whereIn('categories.id', $post->categories->pluck('id'));
+                });
+            })
+            ->with(['admin', 'categories'])
+            ->published()
+            ->latest()
+            ->limit(8)
+            ->get();
+
+        if ($relatedPosts->count() < 4) {
+            $relatedIds = $relatedPosts->pluck('id')->push($post->id);
+
+            $filler = Post::whereNotIn('id', $relatedIds)
+                ->with(['admin', 'categories'])
+                ->published()
+                ->latest()
+                ->limit(8 - $relatedPosts->count())
+                ->get();
+
+            $relatedPosts = $relatedPosts->merge($filler);
+        }
+
+        $trendingPosts = Post::published()
+            ->with(['admin', 'categories'])
+            ->orderByDesc('view')
+            ->limit(4)
+            ->get();
+
         // هشتگ های داغ
         $hotTags = Tag::withCount('posts')
             ->orderBy('posts_count', 'desc')
@@ -176,7 +213,7 @@ class ArticleController extends Controller
             ->get()
             ->groupBy('comment_id');
 
-        return view('front::articles.show', compact('post', 'suggestions', 'latestPosts', 'hotTags', 'isLiked', 'userPendingComments', 'userPendingReplies'));
+        return view('front::articles.show', compact('post', 'suggestions', 'latestPosts', 'relatedPosts', 'trendingPosts', 'hotTags', 'isLiked', 'userPendingComments', 'userPendingReplies'));
     }
 
     /**

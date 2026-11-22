@@ -901,6 +901,62 @@ $(document).on('click', '.cart-canvas .js-mini-qty-btn', function (e) {
     });
 });
 
+/* فاز ۲۰۲ — نوار مدیریت بالای سایت (دسترسی سریع ادمین) در موبایل:
+   تریگرهای بدون مقصد («محصولات»، «مقالات»، آواتار) در تاچ رفتار تپ/باز-بسته
+   می‌گیرند (کلاس touch-open که CSS پنل‌هایش را می‌سازد) — روی دسکتاپ hover
+   سر جایش است و این هندلر کاری نمی‌کند. */
+$(document).off('click.snrAdminNav').on('click.snrAdminNav', '.admin-loggedin-navbar .list-item-has-children > a', function (e) {
+    var trigger = $(this);
+    var href = trigger.attr('href');
+
+    /* تریگرِ دارای مقصد واقعی = لینک عادی؛ فقط پدرهای بدون href منو باز می‌کنند */
+    if (href && href !== '#' && href.indexOf('javascript:') !== 0) { return; }
+
+    var $li = trigger.closest('.list-item-has-children');
+    var wasOpen = $li.hasClass('touch-open');
+
+    /* بستن بقیهٔ پنل‌ها */
+    $('.admin-loggedin-navbar .list-item-has-children.touch-open').removeClass('touch-open')
+        .children('a').attr('aria-expanded', 'false');
+
+    if (!wasOpen) {
+        $li.addClass('touch-open');
+        trigger.attr('aria-expanded', 'true');
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    /* اگر باز بوده و دوباره تپ شد، بسته می‌شود (کلاس برداشته شد) */
+});
+
+/* کلیک روی آیتم‌های پنل → بستن پنل‌ها */
+$(document).off('click.snrAdminNavItem').on('click.snrAdminNavItem', '.admin-loggedin-navbar .sub-menu a', function () {
+    $('.admin-loggedin-navbar .list-item-has-children.touch-open').removeClass('touch-open')
+        .children('a').attr('aria-expanded', 'false');
+});
+
+/* کلیک بیرون نوار یا Escape → بستن */
+$(document).off('click.snrAdminNavOut').on('click.snrAdminNavOut', function (e) {
+    if ($(e.target).closest('.admin-loggedin-navbar').length) { return; }
+    $('.admin-loggedin-navbar .list-item-has-children.touch-open').removeClass('touch-open')
+        .children('a').attr('aria-expanded', 'false');
+});
+$(document).off('keydown.snrAdminNavEsc').on('keydown.snrAdminNavEsc', function (e) {
+    if (e.key !== 'Escape' && e.keyCode !== 27) { return; }
+    $('.admin-loggedin-navbar .list-item-has-children.touch-open').removeClass('touch-open')
+        .children('a').attr('aria-expanded', 'false');
+});
+
+/* فاز ۲۰۲ — وقتی سایدبار سبد خرید باز است، آیکون‌های شناور (پشتیبانی/برگشت به بالا)
+   پنهان می‌شوند تا روی پنل سبد نیفتند. کلاس body.snr-cart-open با رویدادهای
+   Bootstrap ست/برداشته می‌شود + فالبک CSS با :has() */
+$(document).off('shown.bs.offcanvas.snrCartOpen hidden.bs.offcanvas.snrCartOpen hidden.bs.offcanvas.snrCartClose')
+    .on('shown.bs.offcanvas.snrCartOpen', '#offcanvasCart', function () {
+        $(document.body).addClass('snr-cart-open');
+    })
+    .on('hidden.bs.offcanvas.snrCartClose', '#offcanvasCart', function () {
+        $(document.body).removeClass('snr-cart-open');
+    });
+
 /* فاز ۲۰۱ — خبرنامهٔ فوتر (فرم کلاسیکِ فال‌بک وقتی Livewire غیرفعال است):
    • بایند delegate تا اگر فرم دیر رندر شد هم کار کند
    • سلکتور دکمه با fallback (button[type=submit] یا هر button داخل فرم)

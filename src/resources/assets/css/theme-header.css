@@ -965,3 +965,82 @@
         max-height: 60vh;
     }
 }
+
+/* =====================================================================
+   فاز ۲۰۲ پیوست — اسلایدر جستجو (ستون تبلیغاتی حالت خالیِ پنل جستجو)
+   قالب در هدر: #saniarSearchPromo (مخفی)؛ کلون در پنل با id سشن
+   ===================================================================== */
+.sr2-with-promo {
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+}
+
+.sr2-with-promo .sr2-main-col {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.sr2-promo {
+    flex: 0 0 189px;
+    width: 189px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #f6f7fa;
+    border: 1px solid #eef0f3;
+    direction: ltr;
+}
+
+.sr2-promo-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 240px;
+}
+
+.sr2-promo .snr-search-promo-item {
+    position: absolute;
+    inset: 0;
+    display: block;
+    opacity: 0;
+    transform: scale(1.02);
+    transition: opacity .45s ease, transform .45s ease;
+    pointer-events: none;
+}
+
+.sr2-promo .snr-search-promo-item.is-active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+.sr2-promo .snr-search-promo-item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* تم تیره */
+.dark-theme .sr2-promo,
+.saniar-theme-dark .sr2-promo {
+    background: #23262d;
+    border-color: #33373f;
+}
+
+.dark-theme .sr2-with-promo .sr2-main-col,
+.saniar-theme-dark .sr2-with-promo .sr2-main-col {
+    color: inherit;
+}
+
+/* موبایل: ستون تبلیغاتی پنهان — پنل در آفکانس جا ندارد */
+@media (max-width: 991px) {
+    .sr2-with-promo {
+        display: block;
+    }
+
+    .sr2-promo,
+    .sr2-promo-track {
+        display: none;
+    }
+}

@@ -1609,3 +1609,28 @@ function saniar_variants_payload($product): array
     }
 }
 }
+
+/* =====================================================================
+ |  فاز ۲۰۲ پیوست — اسلایدرِ جستجو (گروه search_sliders)
+ |  =====================================================================
+ |  ادمین در بخش «اسلایدرها» گروه «اسلایدر جستجو» را انتخاب می‌کند؛ این
+ |  تصویرها باید در پنل جستجوی لحظه‌ای هدر (حالت خالی: فوکوس بدون تایپ)
+ |  به‌صورت یک ستون تبلیغاتی چرخان نمایش داده شوند.
+ |  lenient روی lang: ردیف‌های قدیمی با lang=NULL هم نمایش داده می‌شوند.
+ |  ===================================================================== */
+if (!function_exists('get_search_sliders')) {
+    function get_search_sliders(int $take = 5)
+    {
+        try {
+            return \App\Models\Slider::query()
+                ->whereJsonContains('groups', 'search_sliders')
+                ->where('published', true)
+                ->where(fn ($q) => $q->where('lang', app()->getLocale())->orWhereNull('lang'))
+                ->orderBy('ordering')
+                ->take($take)
+                ->get();
+        } catch (\Throwable $e) {
+            return collect();
+        }
+    }
+}

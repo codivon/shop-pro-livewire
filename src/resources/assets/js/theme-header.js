@@ -62,6 +62,49 @@
                 '</a>';
         }
 
+        /* فاز ۲۰۲ پیوست — اسلایدر جستجو (گروه «اسلایدر جستجو»):
+           قالب #saniarSearchPromo در هدر رندر شده؛ اینجا محتوای آن داخل
+           حالت خالیِ پنل جستجو به‌صورت ستون تبلیغاتی چرخان کلون می‌شود. */
+        var promoTimer = null;
+        function promoSource() {
+            return document.getElementById('saniarSearchPromo');
+        }
+        function promoHtml() {
+            var src = promoSource();
+            if (!src || !src.children.length) { return ''; }
+            return '<div class="sr2-promo" id="saniarSearchPromoPanel">' +
+                '<div class="sr2-promo-track">' + src.innerHTML + '</div>' +
+                '</div>';
+        }
+        function startPromoRotation(panel) {
+            if (promoTimer) { window.clearInterval(promoTimer); promoTimer = null; }
+            var track = panel.querySelector('.sr2-promo-track');
+            if (!track || track.children.length < 2) { return; }
+            promoTimer = window.setInterval(function () {
+                var active = track.querySelector('.snr-search-promo-item.is-active');
+                if (!active) {
+                    active = track.children[0];
+                    if (active) { active.classList.add('is-active'); }
+                    return;
+                }
+                active.classList.remove('is-active');
+                var next = active.nextElementSibling || track.children[0];
+                if (next) { next.classList.add('is-active'); }
+            }, 3800);
+        }
+        function stopPromoRotation() {
+            if (promoTimer) { window.clearInterval(promoTimer); promoTimer = null; }
+        }
+        /* خروجی: اگر بنر جستجو موجود باشد، محتوای اصلی در ستون کنار ستون تبلیغاتی می‌نشیند */
+        function withPromoLayout(innerHtml) {
+            var promo = promoHtml();
+            if (!promo) { return innerHtml; }
+            return '<div class="sr2-with-promo">' +
+                '<div class="sr2-main-col">' + innerHtml + '</div>' +
+                promo +
+                '</div>';
+        }
+
         function renderEmptyState(panel, data) {
             var recent = getRecent();
             var popular = (data && data.popular) || [];
@@ -103,11 +146,17 @@
                 }
             }
 
-            panel.innerHTML = hasSection ? html : '<div class="sr2-empty">چیزی برای نمایش نیست</div>';
+            /* فاز ۲۰۲ پیوست — اسلایدر جستجو موجود باشد حتی بدون بخش‌ها هم
+               نمایش داده می‌شود (تنها محتوای پنلِ خالی همان ستون تبلیغاتی است) */
+            var promo = promoHtml();
+            var inner = hasSection ? html : '<div class="sr2-empty">چیزی برای نمایش نیست</div>';
+            panel.innerHTML = promo ? withPromoLayout(inner) : inner;
             panel.classList.add('open');
+            if (promo) { startPromoRotation(panel); } else { stopPromoRotation(); }
         }
 
         function renderResults(panel, data, q) {
+            stopPromoRotation(); /* فاز ۲۰۲ پیوست — در حالت نتایج، چرخش تبلیغ متوقف شود */
             var html = '';
 
             if (data.categories && data.categories.length) {
@@ -153,6 +202,7 @@
             form.appendChild(panel);
 
             var hidePanel = function () {
+                stopPromoRotation();
                 panel.classList.remove('open');
                 panel.innerHTML = '';
             };

@@ -110,6 +110,26 @@ function saniarSwiper(el, config) {
     return new Swiper(el, config);
 }
 
+/* فاز ۲۰۲ پیوست — پارامترهای loop/rewind بر اساس تعداد اسلاید:
+   ====================================================================
+   ریشهٔ «دکمهٔ بعدی و قبلی اسلایدر اصلی کار نمی‌کند»: Swiper 11 برای حلقه
+   (loop) به حداقل «slidesPerView + slidesPerGroup + loopAdditionalSlides»
+   اسلاید نیاز دارد؛ وقتی تعداد اسلایدها کمتر باشد، loop بی‌صدا غیرفعال
+   می‌شود (Swiper Loop Warning) و slideNext/slidePrev هیچ کاری نمی‌کنند.
+   با ۳ اسلاید و loopAdditionalSlides=۶ ⇒ نیاز ۸ ⇒ حلقه مرده بود.
+   راه‌حل: وقتی اسلایدها برای loop کافی نیستند، به‌جای loop از rewind
+   استفاده می‌شود (رسیدن به آخر ⇒ برگشت نرم به اول؛ دکمه‌ها و پخش خودکار
+   همیشه کار می‌کنند) و پجینیشن هم تعداد واقعی اسلایدها را نشان می‌دهد. */
+window.saniarLoopParams = function (count, perView, las) {
+    perView = Math.max(1, Math.ceil(parseFloat(perView) || 1));
+    las = parseInt(las, 10) || 0;
+    var needed = perView + 1 + las; /* slidesPerGroup پیش‌فرض = ۱ */
+    if (count >= needed) {
+        return { loop: true, loopAdditionalSlides: las, rewind: false };
+    }
+    return { loop: false, loopAdditionalSlides: 0, rewind: true };
+};
+
 window.saniarInitSwipers = function () {
     if (!window.Swiper) { return; }
 
@@ -122,11 +142,15 @@ document.querySelectorAll('.js-home-slider').forEach(function (el) {
        در fade هیچ حرکت افقی دیده نمی‌شود و ژست سوایپ لمسی عملاً بی‌اثر حس می‌شود.
        در موبایل/تبلت افکت slide (حرکت واقعی) و در دسکتاپ fade طبق تمپلیت. */
     var isTouchLayout = window.matchMedia && window.matchMedia('(max-width: 991.98px)').matches;
+    /* فاز ۲۰۲ پیوست — loop/rewind بر اساس تعداد اسلاید (دکمهٔ بعدی/قبلی)
+       چند نمونهٔ کم‌اسلاید دیگر هم روی صفحه ممکن است main-slider باشند */
+    var homeLoop = window.saniarLoopParams(el.querySelectorAll('.swiper-slide').length, 1, 6);
     saniarSwiper(el, {
         spaceBetween: 30,
         centeredSlides: true,
-        loop: el.querySelectorAll('.swiper-slide').length > 1,
-        loopAdditionalSlides: 6, /* فاز ۱۹۶ — به‌درخواست کاربر */
+        loop: homeLoop.loop,
+        loopAdditionalSlides: homeLoop.loopAdditionalSlides,
+        rewind: homeLoop.rewind,
         autoplay: {
             delay: 3000,
             disableOnInteraction: false,
@@ -141,11 +165,13 @@ document.querySelectorAll('.js-moment-slider').forEach(function (el) {
     if (saniarSliderIsLive(el)) { return; }
     saniarMarkSliderBound(el);
     var progressBar = el.querySelector('.swiper-progress-bar');
+    var momentLoop = window.saniarLoopParams(el.querySelectorAll('.swiper-slide').length, 1, 6);
     saniarSwiper(el, {
         slidesPerView: 1,
         spaceBetween: 30,
-        loop: el.querySelectorAll('.swiper-slide').length > 1,
-        loopAdditionalSlides: 6, /* فاز ۱۹۶ — به‌درخواست کاربر */
+        loop: momentLoop.loop,
+        loopAdditionalSlides: momentLoop.loopAdditionalSlides,
+        rewind: momentLoop.rewind,
         autoplay: {
             delay: 3000,
             disableOnInteraction: false,
@@ -190,8 +216,8 @@ document.querySelectorAll('.amazing-slider').forEach(function (root) {
     var mainConfig = {
         effect: "fade",
         speed: 1000,
-        loop: sliderEl.querySelectorAll('.swiper-slide').length > 1,
-        loopAdditionalSlides: 6, /* فاز ۱۹۶ — به‌درخواست کاربر */
+        /* فاز ۲۰۲ پیوست — loop/rewind بر اساس تعداد اسلاید */
+        loopAdditionalSlides: 6,
         autoplay: {
             delay: 5000,
             disableOnInteraction: false,
@@ -201,6 +227,11 @@ document.querySelectorAll('.amazing-slider').forEach(function (root) {
 
     /* اتصال thumbs — فقط از طریق کانفیگ (API درست Swiper) */
     if (thumbs) { mainConfig.thumbs = { swiper: thumbs }; }
+
+    var amazingLoop = window.saniarLoopParams(sliderEl.querySelectorAll('.swiper-slide').length, 1, mainConfig.loopAdditionalSlides);
+    mainConfig.loop = amazingLoop.loop;
+    mainConfig.loopAdditionalSlides = amazingLoop.loopAdditionalSlides;
+    mainConfig.rewind = amazingLoop.rewind;
 
     saniarSwiper(sliderEl, mainConfig);
 });
@@ -215,12 +246,16 @@ document.querySelectorAll('.product-slider-swiper').forEach(function (el) {
        و لرزش روی مرز) و با slidesPerView=۵ فقط وقتی اسلاید کافی باشد فعال
        می‌شود تا Swiper 11 برای چرخش به اسلاید خالی نیاز پیدا نکند. */
     var productSlides = el.querySelectorAll('.swiper-slide').length;
+    /* فاز ۲۰۲ پیوست — با slidesPerView=۵ و LAS=۶، حلقه به ۱۲ اسلاید نیاز دارد؛
+       کمتر ⇒ rewind تا دکمه‌های بعدی/قبلی و پخش خودکار همیشه کار کنند */
+    var productLoop = window.saniarLoopParams(productSlides, 5, 6);
 
     saniarSwiper(el, {
         slidesPerView: 5,
         spaceBetween: 10,
-        loop: productSlides > 5,
-        loopAdditionalSlides: 6, /* عدد ۶ طبق درخواست کاربر */
+        loop: productLoop.loop,
+        loopAdditionalSlides: productLoop.loopAdditionalSlides,
+        rewind: productLoop.rewind,
         breakpoints: {
             100:  { slidesPerView: 1, spaceBetween: 20 },
             576:  { slidesPerView: 2, spaceBetween: 20 },
@@ -242,12 +277,18 @@ document.querySelectorAll('.saniar-brands__swiper').forEach(function (el) {
     var autoplaySpeed = parseInt(el.dataset.autoplaySpeed || '3000', 10);
     if (!isFinite(autoplaySpeed) || autoplaySpeed < 800) { autoplaySpeed = 3000; }
 
+    var brandCount = el.querySelectorAll('.swiper-slide').length;
+    /* فاز ۲۰۲ پیوست — با slidesPerView=۶ و LAS=۶ حلقه به ۱۳ اسلاید نیاز دارد؛
+       کمتر ⇒ rewind */
+    var brandLoop = window.saniarLoopParams(brandCount, 6, 6);
+
     saniarSwiper(el, {
         rtl: true,
         slidesPerView: 6,
         spaceBetween: 12,
-        loop: el.querySelectorAll('.swiper-slide').length > 6,
-        loopAdditionalSlides: 6, /* فاز ۱۹۶ — به‌درخواست کاربر */
+        loop: brandLoop.loop,
+        loopAdditionalSlides: brandLoop.loopAdditionalSlides,
+        rewind: brandLoop.rewind,
         autoplay: autoplayEnabled
             ? { delay: autoplaySpeed, disableOnInteraction: false, pauseOnMouseEnter: true }
             : false,

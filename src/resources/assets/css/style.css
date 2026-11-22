@@ -2086,7 +2086,9 @@ a.image-data-src{
 
 .slider .swiper-button-next,.slider .swiper-button-prev {
     top: 90%;
-    opacity: 0;
+    /* فاز ۲۰۲ پیوست — دکمه‌ها همیشه نیمه‌پیدا باشند تا قابل کشف باشند
+       (قبلاً فقط با هاور ظاهر می‌شدند و کاربر فکر می‌کرد دکمه‌ای وجود ندارد) */
+    opacity: 0.45;
     transition: 0.3s;
 }
 
@@ -2095,6 +2097,11 @@ a.image-data-src{
 }
 
 .slider:hover .swiper-button-prev{
+    opacity: 1;
+}
+
+.slider .swiper-button-next:focus-visible,
+.slider .swiper-button-prev:focus-visible {
     opacity: 1;
 }
 
@@ -7540,4 +7547,14 @@ body:has(#offcanvasCart.show) #back-to-top {
     -webkit-user-drag: none;
     user-select: none;
     -webkit-user-select: none;
+}
+
+/* ================== فاز ۲۰۲ پیوست ================== */
+
+/* ---------- [۱] کلاس مردهٔ «hide» بوت‌استرپ ۳ ----------
+   در Bootstrap 5 کلاس hide وجود ندارد؛ هر عنصری (مثل alert خالی
+   تک‌صفحهٔ مقاله) که با hide مخفی شده بود، آشکارا نمایش داده می‌شد.
+   این قاعدهٔ ایمنی هر عنصر دارای hide را واقعاً مخفی می‌کند. */
+.hide {
+    display: none !important;
 }

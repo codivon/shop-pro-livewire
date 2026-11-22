@@ -323,14 +323,30 @@ class ArticleController extends Controller
 
         $request->validate([
             'content' => 'required|string|min:3|max:1000',
+            /* فاز ۲۰۲ پیوست — «نام شما» و «ایمیل» فرم دیدگاه تک‌صفحهٔ مقاله
+               برای کاربر واردشده اختیاری‌اند (پیش‌فرض از حساب پر می‌شود) و
+               برای مهمان اجباری */
+            'name'    => array_filter([
+                auth()->check() ? 'nullable' : 'required',
+                'string',
+                'min:2',
+                'max:60',
+            ]),
+            'email'   => 'nullable|email|max:120',
         ]);
 
-        $userName = auth()->check() ? (auth()->user()->full_name ?? auth()->user()->username) : 'کاربر مهمان';
+        $userName = auth()->check()
+            ? (auth()->user()->full_name ?? auth()->user()->username)
+            : ($request->input('name') ?: 'کاربر مهمان');
         $itemTitle = $item->title ?? $item->name ?? "#{$item->id}";
         $itemType = $type == 'post' ? 'مقاله' : 'محصول';
 
         $comment = Comment::create([
             'body' => $request->input('content'),
+            /* فاز ۲۰۲ پیوست — ذخیرهٔ نام/ایمیل فرم (برای عضو سایت هم ذخیره
+               می‌شود تا در صورت تایپ نام متفاوت همان نمایش داده شود) */
+            'name' => $request->input('name') ?: (auth()->check() ? $userName : null),
+            'email' => $request->input('email'),
             'commentable_id' => $item->id,
             'commentable_type' => $modelClass,
             'user_id' => auth()->id(),
@@ -377,10 +393,12 @@ class ArticleController extends Controller
                     'id' => $comment->id,
                     'body' => $comment->body,
                     'created_at' => jdate($comment->created_at)->format('d F Y'),
+                    /* فاز ۲۰۲ پیوست — نام نمایشی: عضو → نام فرم (مهمان) → «شما» */
                     'user' => auth()->check() ? [
                         'full_name' => auth()->user()->full_name,
                         'image_url' => auth()->user()->image_url
                     ] : null,
+                    'name' => auth()->check() ? (auth()->user()->full_name ?? null) : ($comment->name ?: 'شما'),
                     'is_pending' => true
                 ]
             ]);
@@ -394,7 +412,15 @@ class ArticleController extends Controller
     {
         $request->validate([
             'comment_id' => 'required|exists:comments,id',
-            'content' => 'required|string|min:3|max:1000'
+            'content' => 'required|string|min:3|max:1000',
+            /* فاز ۲۰۲ پیوست — نام/ایمیل مودال پاسخ برای مهمان اجباری است */
+            'name'    => array_filter([
+                auth()->check() ? 'nullable' : 'required',
+                'string',
+                'min:2',
+                'max:60',
+            ]),
+            'email'   => 'nullable|email|max:120',
         ]);
 
         $parentComment = Comment::findOrFail($request->comment_id);
@@ -413,6 +439,9 @@ class ArticleController extends Controller
 
         $comment = Comment::create([
             'body' => $request->input('content'),
+            /* فاز ۲۰۲ پیوست — نام/ایمیل مودال پاسخ */
+            'name' => $request->input('name') ?: (auth()->check() ? (auth()->user()->full_name ?? auth()->user()->username) : null),
+            'email' => $request->input('email'),
             'commentable_id' => $parentComment->commentable_id,
             'commentable_type' => $parentComment->commentable_type,
             'user_id' => auth()->id(),
@@ -460,6 +489,8 @@ class ArticleController extends Controller
                         'full_name' => auth()->user()->full_name,
                         'image_url' => auth()->user()->image_url
                     ] : null,
+                    /* فاز ۲۰۲ پیوست — نام نمایشی پاسخ مهمان */
+                    'name' => auth()->check() ? (auth()->user()->full_name ?? null) : ($comment->name ?: 'شما'),
                     'is_pending' => true
                 ]
             ]);

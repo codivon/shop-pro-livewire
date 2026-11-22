@@ -22,7 +22,9 @@
                     </div>
                 </div>
 
-                <div class="alert alert-success hide"></div>
+                {{-- فاز ۲۰۲ پیوست — alert خالی «alert-success hide» حذف شد؛
+                     در Bootstrap 5 کلاس hide وجود ندارد و باکس سبز خالی نمایش داده می‌شد.
+                     پیام‌ها با showCustomToast (توست سراسری) نمایش داده می‌شوند. --}}
 
                 {{--نظر های تایید نشده--}}
                 <div class="user-pending-comments">
@@ -58,7 +60,8 @@
                                                 @if($comment->user)
                                                     {{ $comment->user->full_name ?? 'ناشناس' }}
                                                 @else
-                                                    {{ $comment->admin->full_name ?? 'ناشناس' }}
+                                                    {{-- فاز ۲۰۲ پیوست — نام مهمان از فرم دیدگاه --}}
+                                                    {{ $comment->admin->full_name ?? $comment->name ?? 'ناشناس' }}
                                                 @endif
                                             </p>
                                             <p class="text-muted comment-date-speractor">–</p>
@@ -105,15 +108,17 @@
                             <div class="comment-item-title">
                                 <div class="comment-date">
                                     @php
+                                        /* فاز ۲۰۲ پیوست — زنجیرهٔ نام نمایشی: عضو → مدیر → نام مهمان */
                                         $full_name = $comment->user
                                             ? $comment->user->full_name
-                                            : ($comment->admin->full_name ?? 'ناشناس');
+                                            : ($comment->admin->full_name ?? $comment->name ?? 'ناشناس');
                                     @endphp
                                     <p class="text-muted comment-date-auther">
                                         @if($comment->user)
                                             {{ $comment->user->full_name ?? 'ناشناس' }}
                                         @else
-                                            {{ $comment->admin->full_name ?? 'ناشناس' }}
+                                            {{-- فاز ۲۰۲ پیوست — نام مهمان از فرم دیدگاه --}}
+                                            {{ $comment->admin->full_name ?? $comment->name ?? 'ناشناس' }}
                                         @endif
                                     </p>
                                     <p class="text-muted comment-date-speractor">–</p>
@@ -158,7 +163,8 @@
                                                         @if($reply->user)
                                                             {{ $reply->user->full_name ?? 'ناشناس' }}
                                                         @else
-                                                            {{ $reply->admin->full_name ?? 'ناشناس' }}
+                                                            {{-- فاز ۲۰۲ پیوست — نام مهمان از فرم پاسخ --}}
+                                                            {{ $reply->admin->full_name ?? $reply->name ?? 'ناشناس' }}
                                                         @endif
                                                     </p>
                                                     <p class="text-muted comment-date-speractor">–</p>
@@ -226,7 +232,8 @@
                                                                 @if($pendingReply->user)
                                                                     {{ $pendingReply->user->full_name ?? 'ناشناس' }}
                                                                 @else
-                                                                    {{ $pendingReply->admin->full_name ?? 'ناشناس' }}
+                                                                    {{-- فاز ۲۰۲ پیوست — نام مهمان از فرم پاسخ --}}
+                                                                    {{ $pendingReply->admin->full_name ?? $pendingReply->name ?? 'ناشناس' }}
                                                                 @endif
                                                             </p>
                                                             <p class="text-muted comment-date-speractor">–</p>
@@ -298,6 +305,24 @@
                             <x-captcha point="comments" />
                         </div>
                     @endif
+                    <div class="row g-3 mb-2">
+                        {{-- فاز ۲۰۲ پیوست — فیلدهای «نام شما» و «ایمیل» برای ثبت دیدگاه
+                           برای عضو سایت از حساب پیش‌فرض پر می‌شود و اختیاری است؛
+                           برای مهمان اجباری است (کنترل سمت سرور در ArticleController) --}}
+                        <div class="col-md-6">
+                            <label for="commentName" class="form-label">نام شما <span class="text-danger ms-1">*</span></label>
+                            <input type="text" class="form-control" name="name" id="commentName"
+                                   value="{{ auth('web')->check() ? (auth('web')->user()->fullname ?? auth('web')->user()->full_name ?? '') : '' }}"
+                                   placeholder="مثلاً: علی رضایی" maxlength="60" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="commentEmail" class="form-label">ایمیل</label>
+                            <input type="email" class="form-control" name="email" id="commentEmail" dir="ltr"
+                                   value="{{ auth('web')->check() ? (auth('web')->user()->email ?? '') : '' }}"
+                                   placeholder="you@example.com" maxlength="120">
+                            <small class="text-muted">برای اطلاع از پاسخ‌ها؛ نمایش داده نمی‌شود.</small>
+                        </div>
+                    </div>
                     <div class="form-group mb-2">
                         <label for="commentContent" class="form-label">دیدگاه <span class="text-danger ms-1">*</span></label>
                         <textarea class="form-control" name="content" id="commentContent" rows="5" placeholder="چه نظری دارید؟"></textarea>
@@ -329,6 +354,21 @@
             <div class="modal-body">
                 <form id="send-answer-form" class="reply-form" data-comment-id="" data-action="{{ route('front.articles.comments.reply') }}">
                     @csrf
+                    <div class="row g-3 mb-2">
+                        {{-- فاز ۲۰۲ پیوست — نام/ایمیل مودال پاسخ (مهمان اجباری) --}}
+                        <div class="col-md-6">
+                            <label class="form-label" for="replyName">نام شما <span class="text-danger ms-1">*</span></label>
+                            <input type="text" class="form-control" name="name" id="replyName"
+                                   value="{{ auth('web')->check() ? (auth('web')->user()->fullname ?? auth('web')->user()->full_name ?? '') : '' }}"
+                                   placeholder="مثلاً: علی رضایی" maxlength="60" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="replyEmail">ایمیل</label>
+                            <input type="email" class="form-control" name="email" id="replyEmail" dir="ltr"
+                                   value="{{ auth('web')->check() ? (auth('web')->user()->email ?? '') : '' }}"
+                                   placeholder="you@example.com" maxlength="120">
+                        </div>
+                    </div>
                     <div class="form-group mb-2">
                         <label class="form-label">پاسخ <span class="text-danger ms-1">*</span></label>
                         <textarea class="form-control" name="content" rows="3" placeholder="پاسختان را بنویسید ..."></textarea>

@@ -48,6 +48,21 @@
             return
         }
 
+        /* فاز ۲۰۲ پیوست — «نام شما» و «ایمیل» فرم دیدگاه */
+        let nameField = form.find('input[name="name"]');
+        let emailField = form.find('input[name="email"]');
+        if (nameField.length && nameField.val().trim().length < 2) {
+            showCustomToast('لطفاً نام خود را وارد کنید', 'error');
+            nameField.trigger('focus');
+            return;
+        }
+        if (emailField.length && emailField.val().trim() !== ''
+            && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailField.val().trim())) {
+            showCustomToast('ایمیل واردشده معتبر نیست', 'error');
+            emailField.trigger('focus');
+            return;
+        }
+
         block('#comment-form')
 
         $.ajax({
@@ -60,7 +75,8 @@
                     var comment = response.comment;
 
                     // تعیین نام و آواتار
-                    var userName = comment.user ? comment.user.full_name : 'شما';
+                    // فاز ۲۰۲ پیوست — برای مهمان نام واردشده در فرم نمایش داده می‌شود
+                    var userName = comment.user ? comment.user.full_name : (comment.name || 'شما');
                     var avatarUrl = comment.user ? comment.user.image_url : '/default-avatar.png';
 
                     // ساخت HTML
@@ -155,17 +171,11 @@
         };
         return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
-    function showAlert(message, type) {
-        var $alert = $('.alert.alert-' + type);
-        $alert.html('<i class="fas fa-' + (type === 'success' ? 'circle-check' : 'exclamation-circle') + '"></i> ' + message);
-        $alert.removeClass('hide').fadeIn();
 
-        setTimeout(function() {
-            $alert.fadeOut(function() {
-                $alert.addClass('hide');
-            });
-        }, 10000);
-    }
+    /* فاز ۲۰۲ پیوست — تابع showAlert مرده حذف شد (هیچ‌جا صدا زده نمی‌شد و
+       عنصر «alert alert-success hide» را هدف می‌گرفت؛ در Bootstrap 5 کلاس
+       hide وجود ندارد و باکس سبز خالی همیشه دیده می‌شد). پیام‌ها از این
+       پس فقط با showCustomToast نمایش داده می‌شوند. */
 
     // ارسال پاسخ
     $('#send-answer-form').on('submit', function(e) {
@@ -179,6 +189,21 @@
             return
         }
 
+        /* فاز ۲۰۲ پیوست — «نام شما» و «ایمیل» مودال پاسخ */
+        let nameField = form.find('input[name="name"]');
+        let emailField = form.find('input[name="email"]');
+        if (nameField.length && nameField.val().trim().length < 2) {
+            showCustomToast('لطفاً نام خود را وارد کنید', 'error');
+            nameField.trigger('focus');
+            return;
+        }
+        if (emailField.length && emailField.val().trim() !== ''
+            && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailField.val().trim())) {
+            showCustomToast('ایمیل واردشده معتبر نیست', 'error');
+            emailField.trigger('focus');
+            return;
+        }
+
         block('#send-answer-model')
 
         if (commentId){
@@ -188,13 +213,17 @@
                 data: {
                     comment_id: commentId,
                     content: content,
+                    /* فاز ۲۰۲ پیوست — ارسال نام/ایمیل با پاسخ */
+                    name: nameField.length ? nameField.val().trim() : '',
+                    email: emailField.length ? emailField.val().trim() : '',
                 },
                 success: function(response) {
                     if (response.success) {
                         var comment = response.comment;
 
                         // تعیین نام و آواتار
-                        var userName = comment.user ? comment.user.full_name : 'شما';
+                        // فاز ۲۰۲ پیوست — نام نمایشی پاسخ مهمان از فرم
+                        var userName = comment.user ? comment.user.full_name : (comment.name || 'شما');
                         var avatarUrl = comment.user ? comment.user.image_url : '';
 
                         // ساخت HTML
@@ -412,11 +441,17 @@
             if (el.swiper && el.swiper.el === el && el.isConnected) { return; }
             var slides = el.querySelectorAll('.swiper-slide').length;
             if (!slides) { return; }
+            /* فاز ۲۰۲ پیوست — با perView=۴ و LAS=۴ حلقه به ۹ اسلاید نیاز دارد؛
+               ۵ تا ۸ اسلاید ⇒ loop بی‌صدا می‌مُرد و دکمه‌ها کار نمی‌کردند ⇒ rewind */
+            var lp = window.saniarLoopParams
+                ? window.saniarLoopParams(slides, 4, 4)
+                : { loop: slides > 4, loopAdditionalSlides: 4, rewind: false };
             new Swiper(el, {
                 slidesPerView: 1.12,
                 spaceBetween: 16,
-                loop: slides > 4,
-                loopAdditionalSlides: 4,
+                loop: lp.loop,
+                loopAdditionalSlides: lp.loopAdditionalSlides,
+                rewind: lp.rewind,
                 autoplay: { delay: 4200, disableOnInteraction: false },
                 grabCursor: true,
                 pagination: { el: el.querySelector('.swiper-pagination'), clickable: true },

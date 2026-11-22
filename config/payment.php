@@ -189,11 +189,14 @@ return [
             'description' => 'payment using poolam',
         ],
         'sadad' => [
+            // آدرس‌های رسمی سداد مطابق نمونهٔ کد رسمی بانک ملی.
+            // قبلاً بدون /vpg بود و پاسخ بانک همیشه خطای عمومی می‌داد. با env قابل override است
+            // (تست با سرور شبیه‌ساز سداد / تغییر آیندهٔ endpoint بانک بدون دست‌زدن به کد).
             'apiPaymentByIdentityUrl' => 'https://sadad.shaparak.ir/api/v0/PaymentByIdentity/PaymentRequest',
-            'apiPaymentUrl' => 'https://sadad.shaparak.ir/api/v0/Request/PaymentRequest',
+            'apiPaymentUrl' => env('SADAD_API_PAYMENT_URL', 'https://sadad.shaparak.ir/vpg/api/v0/Request/PaymentRequest'),
             'apiPurchaseByIdentityUrl' => 'https://sadad.shaparak.ir/vpg/api/v0/Request/PaymentRequest',
-            'apiPurchaseUrl' => 'https://sadad.shaparak.ir/Purchase',
-            'apiVerificationUrl' => 'https://sadad.shaparak.ir/VPG/api/v0/Advice/Verify',
+            'apiPurchaseUrl' => env('SADAD_REDIRECT_URL', 'https://sadad.shaparak.ir/VPG/Purchase'),
+            'apiVerificationUrl' => env('SADAD_API_VERIFICATION_URL', 'https://sadad.shaparak.ir/vpg/api/v0/Advice/Verify'),
             'key' => '',
             'merchantId' => '',
             'terminalId' => '',
@@ -368,7 +371,8 @@ return [
         'payping' => \Shetabit\Multipay\Drivers\Payping\Payping::class,
         'paystar' => \Shetabit\Multipay\Drivers\Paystar\Paystar::class,
         'poolam' => \Shetabit\Multipay\Drivers\Poolam\Poolam::class,
-        'sadad' => \Shetabit\Multipay\Drivers\Sadad\Sadad::class,
+        // سداد رسمی (بانک ملی) — مطابق نمونهٔ رسمی بانک + لاگ کامل ResCode/Description + گارد جابجایی پذیرنده/ترمینال
+        'sadad' => \App\Services\Payments\SadadOfficial::class,
         'saman' => \Shetabit\Multipay\Drivers\Saman\Saman::class,
         'sep' => \Shetabit\Multipay\Drivers\SEP\SEP::class,
         'sepehr' => \Shetabit\Multipay\Drivers\Sepehr\Sepehr::class,

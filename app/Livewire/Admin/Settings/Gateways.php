@@ -102,9 +102,12 @@ class Gateways extends Component
                 ['name' => 'amountIsToman', 'label' => 'قیمت‌های فروشگاه تومانی است (درگاه سپ ریال می‌خواهد — مبلغ ×۱۰ ارسال می‌شود)', 'type' => 'toggle', 'default' => '1'],
             ],
             'sadad' => [
-                ['name' => 'terminalId', 'label' => 'شماره پذیرنده', 'type' => 'text'],
-                ['name' => 'merchantId', 'label' => 'کد پذیرنده', 'type' => 'text'],
-                ['name' => 'key', 'label' => 'کلید تراکنش', 'type' => 'text', 'secret' => true],
+                // برچسب‌های فرم قدیمی جابجا بود (terminalId را «شماره پذیرنده» می‌نوشت و merchantId را «کد پذیرنده»)
+                // → شماره پذیرنده در فیلد terminalId ذخیره می‌شد و بانک خطای عمومی -۱ می‌داد.
+                // حالا دقیقاً مطابق واژگان اطلاعیهٔ بانک ملی برچسب‌گذاری شده + hint برای هر فیلد.
+                ['name' => 'merchantId', 'label' => 'شماره پذیرنده', 'type' => 'text', 'hint' => '«شماره پذیرنده» در اطلاعیهٔ بانک ملی — عدد بلندتر (۱۵ رقم با صفرهای ابتدایی، مثل 000000140352535)'],
+                ['name' => 'terminalId', 'label' => 'شماره ترمینال', 'type' => 'text', 'hint' => '«شماره ترمینال» در اطلاعیهٔ بانک — عدد کوتاه‌تر (۸ رقم، مثل 24121342) — نه شماره پذیرنده!'],
+                ['name' => 'key', 'label' => 'کلید ترمینال', 'type' => 'text', 'secret' => true, 'hint' => '«کلید ترمینال» در اطلاعیهٔ بانک — رشتهٔ base64 (همان کلید تراکنش)'],
             ],
             'zibal' => [
                 ['name' => 'merchantId', 'label' => 'کد پذیرنده', 'type' => 'text', 'secret' => true],
@@ -197,6 +200,12 @@ class Gateways extends Component
 
         // سوییچ فعال/غیرفعال مستقل است — وضعیت فعلی DB حفظ می‌شود
         $request_gateway['is_active'] = (bool) $gateway->is_active;
+
+        // خوددرمانی سداد: اگر فرم قدیمی مقدار پذیرنده/ترمینال را برعکس ذخیره کرده باشد،
+        // همین‌جا قبل از نوشتن در دیتابیس اصلاح می‌شود (شماره پذیرندهٔ سداد همیشه بلندتر از ترمینال است)
+        if ($gateway->key === 'sadad' && isset($request_gateway['configs']) && is_array($request_gateway['configs'])) {
+            $request_gateway['configs'] = $this->normalizeSadadConfigs($request_gateway['configs']);
+        }
 
         $changes = $this->persistGateway($gateway, $request_gateway);
         $this->logGatewayChanges($gateway, $changes);
@@ -298,6 +307,29 @@ class Gateways extends Component
         }
 
         return $gatewayChanges;
+    }
+
+    /**
+     * خوددرمانی سداد: اصلاح خودکار مقدارهای جابجای پذیرنده/ترمینال (اثر برچسب‌های فرم قدیمی).
+     * شماره پذیرندهٔ سداد همیشه بلندتر از شماره ترمینال است؛ اگر برعکس ذخیره شده باشد
+     * اینجا جابجا می‌شود تا بانک دیگر خطای عمومی -۱ ندهد + toast هشدار به اپراتور.
+     */
+    private function normalizeSadadConfigs(array $configs): array
+    {
+        $merchantId = trim((string) ($configs['merchantId'] ?? ''));
+        $terminalId = trim((string) ($configs['terminalId'] ?? ''));
+
+        if ($merchantId === '' || $terminalId === ''
+            || ! ctype_digit($merchantId) || ! ctype_digit($terminalId)
+            || mb_strlen($terminalId) <= mb_strlen($merchantId)) {
+            return $configs;
+        }
+
+        [$configs['terminalId'], $configs['merchantId']] = [$merchantId, $terminalId];
+
+        $this->dispatch('toast', message: 'مقدارهای درگاه سداد جابجا ذخیره شده بودند (شماره پذیرنده جای شماره ترمینال) — هنگام ذخیره اصلاح شد.', type: 'info');
+
+        return $configs;
     }
 
     /** لاگ فعالیت تغییرات درگاه (پورت دقیق) */

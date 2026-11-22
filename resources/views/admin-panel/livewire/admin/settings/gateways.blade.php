@@ -229,6 +229,13 @@
                                                                wire:model="form.{{ $card['id'] }}.configs.{{ $field['name'] }}"
                                                                class="ap-input font-mono" autocomplete="off">
                                                     @endif
+                                                    @if (! empty($field['hint']))
+                                                        {{-- hint راهنما برای فیلدهای حساس (مثل سداد: پذیرنده/ترمینال/کلید) --}}
+                                                        <small class="mt-1.5 flex items-start gap-1.5 text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
+                                                            <x-admin-panel::icon name="info" class="mt-0.5 size-3.5 shrink-0" />
+                                                            {{ $field['hint'] }}
+                                                        </small>
+                                                    @endif
                                                 @endif
                                             </div>
                                         @endforeach

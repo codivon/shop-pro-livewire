@@ -1180,6 +1180,25 @@ function get_gateway_configs($gateway)
     return $configs;
 }
 
+/**
+ * پروکسی شاپرک: اگر سرور میزبان خارج از ایران باشد، شاپرک (sadad.shaparak.ir و
+ * بقیهٔ IPGWها) به درخواست‌ها پاسخ نمی‌دهد و درایورها با cURL 28 (timeout) می‌میرند.
+ * درایورهای بانکی (فعلاً سداد) قبل از اتصال این مقدار را به‌عنوان proxy گووزل می‌گذارند.
+ * مقدار از گزینهٔ payment_shaparak_proxy خوانده می‌شود (مثل http://user:pass@host:port)؛
+ * خالی/تنظیم‌نشده = بدون پروکسی. option() خودش گارد پیش‌ازنصب دارد.
+ */
+function shaparak_proxy(): ?string
+{
+    try {
+        $proxy = trim((string) option('payment_shaparak_proxy', ''));
+    } catch (Throwable $e) {
+        // DB در دسترس نیست (یا نصب ناتمام است) — بدون پروکسی ادامه بده تا جریان پرداخت نخوابد
+        return null;
+    }
+
+    return $proxy !== '' ? $proxy : null;
+}
+
 // function get_gateway_configs($gateway)
 // {
 //     $gateway = Gateway::where('key', $gateway)->first();

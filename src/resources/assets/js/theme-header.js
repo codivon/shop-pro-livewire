@@ -37,7 +37,8 @@
             if (!term) { return; }
             var list = getRecent().filter(function (t) { return t !== term; });
             list.unshift(term);
-            try { localStorage.setItem('saniarRecentSearches', JSON.stringify(list.slice(0, 6))); } catch (e) { /* */ }
+            /* فاز ۲۰۳ — حداکثر ۵ مورد در «جستجوهای اخیر» */
+            try { localStorage.setItem('saniarRecentSearches', JSON.stringify(list.slice(0, 5))); } catch (e) { /* */ }
         }
 
         /* ---------- رندر ---------- */
@@ -62,52 +63,99 @@
                 '</a>';
         }
 
-        /* فاز ۲۰۲ پیوست — اسلایدر جستجو (گروه «اسلایدر جستجو»):
-           قالب #saniarSearchPromo در هدر رندر شده؛ اینجا محتوای آن داخل
-           حالت خالیِ پنل جستجو به‌صورت ستون تبلیغاتی چرخان کلون می‌شود. */
+        /* فاز ۲۰۳ — اسلایدر جستجو (گروه «اسلایدر جستجو»):
+           قالب #saniarSearchPromo در هدر رندر شده؛ اینجا محتوای آن به‌صورت
+           یک اسلایدر تمام‌عرض «زیر» جستجوهای اخیر و پرطرفدار کلون می‌شود
+           (قبلاً ستون کناریِ باریک ۱۹۰px بود و تصویرها ناقص دیده می‌شدند).
+           اسلایدر کامل است: چرخش خودکار + دات‌های قابل کلیک + توقف با هاور. */
         var promoTimer = null;
+        var PROMO_INTERVAL = 4200;
         function promoSource() {
             return document.getElementById('saniarSearchPromo');
         }
         function promoHtml() {
             var src = promoSource();
             if (!src || !src.children.length) { return ''; }
+
+            var dots = '';
+            if (src.children.length > 1) {
+                dots = '<div class="sr2-promo-dots">';
+                for (var i = 0; i < src.children.length; i++) {
+                    dots += '<button type="button" class="sr2-promo-dot' + (i === 0 ? ' is-active' : '') + '" data-index="' + i + '" aria-label="اسلاید ' + (i + 1) + '"></button>';
+                }
+                dots += '</div>';
+            }
+
             return '<div class="sr2-promo" id="saniarSearchPromoPanel">' +
                 '<div class="sr2-promo-track">' + src.innerHTML + '</div>' +
+                dots +
                 '</div>';
         }
+        function promoGo(track, index) {
+            var items = track.querySelectorAll('.snr-search-promo-item');
+            if (!items.length) { return; }
+            if (index < 0) { index = items.length - 1; }
+            if (index >= items.length) { index = 0; }
+            items.forEach(function (el) { el.classList.remove('is-active'); });
+            items[index].classList.add('is-active');
+
+            var box = track.parentNode;
+            var dotsWrap = box.querySelector('.sr2-promo-dots');
+            if (dotsWrap) {
+                dotsWrap.querySelectorAll('.sr2-promo-dot').forEach(function (dot, i) {
+                    dot.classList.toggle('is-active', i === index);
+                });
+            }
+        }
+        function promoActiveIndex(track) {
+            var items = track.querySelectorAll('.snr-search-promo-item');
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].classList.contains('is-active')) { return i; }
+            }
+            return 0;
+        }
         function startPromoRotation(panel) {
-            if (promoTimer) { window.clearInterval(promoTimer); promoTimer = null; }
+            stopPromoRotation();
             var track = panel.querySelector('.sr2-promo-track');
             if (!track || track.children.length < 2) { return; }
-            promoTimer = window.setInterval(function () {
-                var active = track.querySelector('.snr-search-promo-item.is-active');
-                if (!active) {
-                    active = track.children[0];
-                    if (active) { active.classList.add('is-active'); }
-                    return;
-                }
-                active.classList.remove('is-active');
-                var next = active.nextElementSibling || track.children[0];
-                if (next) { next.classList.add('is-active'); }
-            }, 3800);
+
+            var play = function () {
+                stopPromoRotation();
+                promoTimer = window.setInterval(function () {
+                    promoGo(track, promoActiveIndex(track) + 1);
+                }, PROMO_INTERVAL);
+            };
+            play();
+
+            /* دات‌ها — ناوبری دستی؛ بعد از انتخاب، چرخش از سر گرفته می‌شود */
+            var dotsWrap = panel.querySelector('.sr2-promo-dots');
+            if (dotsWrap) {
+                dotsWrap.addEventListener('click', function (e) {
+                    var dot = e.target.closest('.sr2-promo-dot');
+                    if (!dot) { return; }
+                    e.preventDefault();
+                    e.stopPropagation();
+                    promoGo(track, parseInt(dot.getAttribute('data-index') || '0', 10));
+                    play();
+                });
+            }
+
+            /* هاور روی اسلایدر → توقف چرخش؛ خروج → ادامه */
+            var box = panel.querySelector('.sr2-promo');
+            if (box) {
+                box.addEventListener('mouseenter', stopPromoRotation);
+                box.addEventListener('mouseleave', play);
+            }
         }
         function stopPromoRotation() {
             if (promoTimer) { window.clearInterval(promoTimer); promoTimer = null; }
         }
-        /* خروجی: اگر بنر جستجو موجود باشد، محتوای اصلی در ستون کنار ستون تبلیغاتی می‌نشیند */
-        function withPromoLayout(innerHtml) {
-            var promo = promoHtml();
-            if (!promo) { return innerHtml; }
-            return '<div class="sr2-with-promo">' +
-                '<div class="sr2-main-col">' + innerHtml + '</div>' +
-                promo +
-                '</div>';
-        }
 
         function renderEmptyState(panel, data) {
-            var recent = getRecent();
-            var popular = (data && data.popular) || [];
+            /* فاز ۲۰۳ — جستجوهای اخیر و پرطرفدار: حداکثر ۵ مورد
+               (اسلایس سمت کلاینت، حافظهٔ قدیمی localStorage را هم پوشش می‌دهد) */
+            var recent = getRecent().slice(0, 5);
+            var popular = ((data && data.popular) || []).slice(0, 5);
             var banner = data && data.banner;
             var html = '';
             var hasSection = false;
@@ -146,11 +194,14 @@
                 }
             }
 
-            /* فاز ۲۰۲ پیوست — اسلایدر جستجو موجود باشد حتی بدون بخش‌ها هم
-               نمایش داده می‌شود (تنها محتوای پنلِ خالی همان ستون تبلیغاتی است) */
+            /* فاز ۲۰۳ — اسلایدر جستجو: زیر جستجوهای اخیر و پرطرفدار،
+               تمام‌عرض و کامل (چرخش خودکار + دات‌ها). حتی بدون بخش‌ها هم
+               نمایش داده می‌شود (تنها محتوای پنلِ خالی همان اسلایدر است). */
             var promo = promoHtml();
             var inner = hasSection ? html : '<div class="sr2-empty">چیزی برای نمایش نیست</div>';
-            panel.innerHTML = promo ? withPromoLayout(inner) : inner;
+            if (promo) { inner += promo; }
+
+            panel.innerHTML = inner;
             panel.classList.add('open');
             if (promo) { startPromoRotation(panel); } else { stopPromoRotation(); }
         }
@@ -158,7 +209,6 @@
         function renderResults(panel, data, q) {
             stopPromoRotation(); /* فاز ۲۰۲ پیوست — در حالت نتایج، چرخش تبلیغ متوقف شود */
             var html = '';
-
             if (data.categories && data.categories.length) {
                 html += '<div class="sr2-section"><div class="sr2-heading">دسته‌بندی‌ها</div>';
                 data.categories.forEach(function (item) { html += resultRow(item, 'bi-grid', false, 'در فروشی '); });
@@ -190,6 +240,11 @@
             panel.innerHTML = html || '<div class="sr2-empty">نتیجه‌ای برای «' + escapeHtml(q) + '» یافت نشد</div>';
             panel.classList.add('open');
         }
+
+        /* فاز ۲۰۳ — حافظهٔ آخرین نتایج هر فرم:
+           بعد از بسته‌شدن پنل، با کلیک دوباره روی فیلد، همان نتایجِ
+           همان عبارت فوراً (بدون درخواست شبکه) باز می‌شود. */
+        var lastResults = null; /* { q: 'عبارت', data: {...} } */
 
         /* ---------- اتصال به هر فرم جستجو (دسکتاپ + موبایل) ---------- */
         document.querySelectorAll('.search-form').forEach(function (form) {
@@ -229,9 +284,30 @@
                     });
             };
 
-            /* فوکوس / کلیک با ورودی خالی → پنل اخیر + پرطرفدار */
+            /* فوکوس / کلیک → پنل مناسب با مقدار فعلی فیلد:
+               - فیلد خالی یا کمتر از ۲ کاراکتر → اخیر + پرطرفدار + اسلایدر
+               - فیلد دارای عبارت جستجو → همان نتایج قبلی فوراً باز می‌شود
+                 (فاز ۲۰۳ — قبلاً با عبارت ≥۲ کاراکتر هیچ رخدادی نمی‌شد
+                 و پنل دیگر باز نمی‌شد؛ اکنون کشِ lastResults یا واکشی مجدد) */
             var showIdlePanel = function () {
-                if ((input.value || '').trim().length >= 2) { return; }
+                var q = (input.value || '').trim();
+
+                if (q.length >= 2) {
+                    if (lastResults && lastResults.q === q && lastResults.data) {
+                        /* همان نتایج قبلی — باز شدن فوری */
+                        renderResults(panel, lastResults.data, q);
+                    } else {
+                        panel.innerHTML = '<div class="sr2-empty"><i class="bi bi-arrow-repeat"></i> در حال جستجو…</div>';
+                        panel.classList.add('open');
+                        fetchSuggest(q, function (data) {
+                            if ((input.value || '').trim() !== q) { return; }
+                            lastResults = { q: q, data: data };
+                            renderResults(panel, data, q);
+                        });
+                    }
+                    return;
+                }
+
                 fetchSuggest('', function (data) {
                     if ((input.value || '').trim().length >= 2) { return; }
                     renderEmptyState(panel, data);
@@ -266,6 +342,8 @@
 
                     fetchSuggest(q, function (data) {
                         if ((input.value || '').trim() !== q) { return; }
+                        /* فاز ۲۰۳ — ذخیره برای باز شدن دوبارهٔ همان نتایج */
+                        lastResults = { q: q, data: data };
                         renderResults(panel, data, q);
                     });
                 }, SEARCH_DEBOUNCE);

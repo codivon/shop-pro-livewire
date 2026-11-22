@@ -80,7 +80,7 @@
     <link rel="stylesheet" href="{{ theme_asset('css/owl.carousel.min.css') }}">
 
     {{-- اصلاحات ظاهری ریز (هدر/محصول/صفحات) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-header.css') }}?v=163">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-header.css') }}?v=164">
     <link rel="stylesheet" href="{{ theme_asset('css/theme-product.css') }}?v=20">
     <link rel="stylesheet" href="{{ theme_asset('css/theme-pages.css') }}">
 
@@ -385,9 +385,10 @@
 
                     {{-- پنل جستجوی لحظه‌ای توسط theme-header.js ساخته می‌شود --}}
 
-                    {{-- فاز ۲۰۲ پیوست — اسلایدر جستجو (گروه «اسلایدر جستجو» بخش اسلایدرها):
-                         تصویرهای این گروه در حالت خالیِ پنل جستجو (فوکوس بدون تایپ)
-                         به‌صورت ستون تبلیغاتی چرخان نمایش داده می‌شوند.
+                    {{-- فاز ۲۰۳ — اسلایدر جستجو (گروه «اسلایدر جستجو» بخش اسلایدرها):
+                         تصویرهای این گروه در حالت خالیِ پنل جستجو به‌صورت یک اسلایدر
+                         تمام‌عرض و کامل «زیر» جستجوهای اخیر و پرطرفدار نمایش داده می‌شوند
+                         (چرخش خودکار + دات‌های قابل کلیک + توقف با هاور؛ دسکتاپ و موبایل).
                          قالب مخفی است؛ theme-header.js آن را داخل پنل کلون می‌کند.
                          مهم: دستور PHP در این layout باید همیشه بلوکی نوشته شود؛
                          ترکیب فرم درون‌خطی (با پرانتز) با بلوک‌های PHP باعث
@@ -546,7 +547,7 @@
 {{-- پلاگین go-to-top حذف شد؛ دکمهٔ مستطیلی «برگشت به بالا» در theme-header.js --}}
 <script src="{{theme_asset('plugin/rasta-contact/script.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('js/saniar-init.js')}}?v=167" data-navigate-once></script>
-<script src="{{theme_asset('js/theme-header.js')}}?v=28" data-navigate-once></script>
+<script src="{{theme_asset('js/theme-header.js')}}?v=29" data-navigate-once></script>
 
 {{-- اسکریپت‌های عملکردی فروشگاه --}}
 <script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}" data-navigate-once></script>

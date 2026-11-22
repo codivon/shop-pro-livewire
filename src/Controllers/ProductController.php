@@ -280,7 +280,9 @@ class ProductController extends Controller
 
         /* ---------- پنل خالی: جستجوهای پرطرفدار ---------- */
         if (mb_strlen($searchTerm) < 2) {
-            $popular = Cache::remember('front.search.popular', 1800, function () {
+            /* فاز ۲۰۳ — حداکثر ۵ مورد (کلید کش هم نسخه‌گذاری شد تا
+               تغییر محدودیت بدون انتظار برای انقضای کش ۳۰ دقیقه‌ای اعمال شود) */
+            $popular = Cache::remember('front.search.popular.v5', 1800, function () {
                 try {
                     return DB::table('searches')
                         ->select('keyword', DB::raw('COUNT(*) AS total'))
@@ -288,7 +290,7 @@ class ProductController extends Controller
                         ->where('keyword', '!=', '')
                         ->groupBy('keyword')
                         ->orderByDesc('total')
-                        ->limit(8)
+                        ->limit(5)
                         ->get()
                         ->pluck('keyword')
                         ->values();

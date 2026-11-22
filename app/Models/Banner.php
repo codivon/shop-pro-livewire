@@ -47,6 +47,15 @@ class Banner extends Model
                 'size'  => '300 × 820',
                 'icon'  => 'fa-grip-vertical',
             ],
+            /* فاز ۲۰۲ — گروه «بنر سه‌تایی» به گروه‌های نمایش فرم افزودن/ویرایش بنر
+               اضافه شد (همگام با فاز ۲۰۰ برنچ SaniarTheme): ویجت «بنر سه‌تایی» تم
+               گروه index_middle_3_banners را می‌خواند؛ این گروه در کاتالوگ مدل
+               نبود، ادمین نمی‌توانست بنری به آن متصل کند */
+            'index_middle_3_banners' => [
+                'label' => 'بنر سه‌تایی',
+                'size'  => '300 × 540',
+                'icon'  => 'fa-grip-lines-vertical',
+            ],
             'index_middle_4_banners' => [
                 'label' => 'بنر چهارتایی',
                 'size'  => '300 × 820',

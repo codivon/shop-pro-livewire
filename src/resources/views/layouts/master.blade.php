@@ -388,8 +388,14 @@
                     {{-- فاز ۲۰۲ پیوست — اسلایدر جستجو (گروه «اسلایدر جستجو» بخش اسلایدرها):
                          تصویرهای این گروه در حالت خالیِ پنل جستجو (فوکوس بدون تایپ)
                          به‌صورت ستون تبلیغاتی چرخان نمایش داده می‌شوند.
-                         قالب مخفی است؛ theme-header.js آن را داخل پنل کلون می‌کند. --}}
-                    @php($searchSliders = function_exists('get_search_sliders') ? get_search_sliders() : collect())
+                         قالب مخفی است؛ theme-header.js آن را داخل پنل کلون می‌کند.
+                         مهم: دستور PHP در این layout باید همیشه بلوکی نوشته شود؛
+                         ترکیب فرم درون‌خطی (با پرانتز) با بلوک‌های PHP باعث
+                         بلعیده‌شدن نیمهٔ فایل توسط storePhpBlocks لاراول و
+                         خطای «unexpected token» هنگام کامپایل می‌شود. --}}
+                    @php
+                        $searchSliders = function_exists('get_search_sliders') ? get_search_sliders() : collect();
+                    @endphp
                     @if($searchSliders->count())
                         <div id="saniarSearchPromo" hidden aria-hidden="true">
                             @foreach($searchSliders as $promoSlider)

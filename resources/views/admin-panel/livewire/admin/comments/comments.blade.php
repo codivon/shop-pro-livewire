@@ -97,7 +97,12 @@
                                         <x-admin-panel::icon name="store" class="size-4 text-amber-600 dark:text-amber-400" />
                                         {{ $comment->seller->business_name ?? '' }}
                                     @else
+                                        {{-- فاز ۲۰۲ پیوست — نام/ایمیل مهمان (فرم دیدگاه تک‌صفحهٔ مقاله) --}}
+                                        <x-admin-panel::icon name="user" class="size-4 text-ink-3 dark:text-night-ink-3" />
                                         {{ $comment->name ?? 'مهمان' }}
+                                        @if ($comment->email)
+                                            <span class="text-xs font-normal text-ink-3 dark:text-night-ink-3" dir="ltr">({{ $comment->email }})</span>
+                                        @endif
                                     @endif
                                 </span>
                             </td>
@@ -267,6 +272,10 @@
                                 </span>
                             @else
                                 {{ $comment->name ?? 'مهمان' }}
+                                @if ($comment->email)
+                                    {{-- فاز ۲۰۲ پیوست — ایمیل مهمان در جزئیات دیدگاه --}}
+                                    <span class="block text-xs font-normal text-ink-3 dark:text-night-ink-3" dir="ltr">{{ $comment->email }}</span>
+                                @endif
                             @endif
                         </span>
                     </div>

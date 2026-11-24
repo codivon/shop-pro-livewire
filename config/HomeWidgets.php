@@ -1155,7 +1155,7 @@ return [
         'image' => 'widgets/categories.png',
         'options' => [
               [
-                'title'      => 'عنوان قابل نمایش',
+                'title'      => 'دسته بندی محصولات',
                 'key'        => 'title',
                 'input-type' => 'input',
                 'default'    => 'پرفروشترین محصولات فروشگاه',

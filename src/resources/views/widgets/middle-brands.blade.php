@@ -11,7 +11,7 @@
 @endphp
 
 @if (count($brands))
-    <section class="saniar-brands pb-20" aria-label="{{ $title ?: 'برندهای فروشگاه' }}">
+    <section class="saniar-brands mb-3 pb-20" aria-label="{{ $title ?: 'برندهای فروشگاه' }}">
         <div class="container-fluid">
             <div class="saniar-brands__inner">
 

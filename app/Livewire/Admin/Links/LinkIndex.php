@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Links;
 
 use App\Models\Link;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -115,6 +116,9 @@ class LinkIndex extends Component
             'ordering'      => Link::max('ordering') + 1,
         ]);
 
+        // فاز ۲۰۴ — شکستن کش فوتر تم تا لینک جدید بلافاصله در فرانت دیده شود
+        Cache::forget('front.footer.links');
+
         $this->reset(['createTitle', 'createLink', 'createGroupId']);
 
         $this->dispatch('toast', message: 'لینک با موفقیت ایجاد شد.', type: 'success');
@@ -170,6 +174,9 @@ class LinkIndex extends Component
                 'link_group_id' => $this->editGroupId,
             ]);
 
+            // فاز ۲۰۴ — شکستن کش فوتر تم (ممکن است گروه/عنوان/مقصد عوض شده باشد)
+            Cache::forget('front.footer.links');
+
             $this->dispatch('toast', message: 'لینک با موفقیت ویرایش شد.', type: 'success');
         }
 
@@ -197,6 +204,9 @@ class LinkIndex extends Component
             }
 
             $link->delete();
+
+            // فاز ۲۰۴ — شکستن کش فوتر تم تا لینک حذف‌شده بلافاصله از فرانت برود
+            Cache::forget('front.footer.links');
         }
 
         $this->confirmingDelete = null;
@@ -257,6 +267,9 @@ class LinkIndex extends Component
 
         Link::whereKey($current->id)->update(['ordering' => $neighbor->ordering]);
         Link::whereKey($neighbor->id)->update(['ordering' => $current->ordering]);
+
+        // فاز ۲۰۴ — شکستن کش فوتر تم تا ترتیب جدید بلافاصله در فرانت دیده شود
+        Cache::forget('front.footer.links');
 
         $this->dispatch('toast', message: 'ترتیب لینک‌ها ذخیره شد.', type: 'success');
     }

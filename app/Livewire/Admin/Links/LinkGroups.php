@@ -121,6 +121,9 @@ class LinkGroups extends Component
             option_update('link_groups_' . $key, $value);
         }
 
+        // فاز ۲۰۴ — شکستن کش گروه‌های فوتر تم تا عنوان جدید بلافاصله دیده شود
+        Cache::forget('front.footer.groups.' . app()->getLocale());
+
         $this->dispatch('toast', message: 'گروه‌های لینک با موفقیت ذخیره شد.', type: 'success');
     }
 
@@ -147,6 +150,9 @@ class LinkGroups extends Component
         $newKey = self::nextGroupKey();
 
         option_update('link_groups_' . $newKey, $this->newGroupTitle);
+
+        // فاز ۲۰۴ — شکستن کش گروه‌های فوتر تم تا گروه جدید بلافاصله در فوتر بیاید
+        Cache::forget('front.footer.groups.' . app()->getLocale());
 
         $this->newGroupTitle = '';
         $this->fillGroupTitles();
@@ -215,6 +221,9 @@ class LinkGroups extends Component
             ->delete();
 
         Cache::forget('options.' . app()->getLocale() . '.link_groups_' . $key);
+
+        // فاز ۲۰۴ — شکستن کش گروه‌های فوتر تم تا گروه حذف‌شده بلافاصله از فوتر برود
+        Cache::forget('front.footer.groups.' . app()->getLocale());
 
         // هم‌گام‌سازی مموی درخواستی option با حذف مستقیم کش؛
         // در غیر این صورت fillGroupTitles() در همین درخواست گروه حذف‌شده را می‌بیند.

@@ -546,6 +546,7 @@ function get_widget_uncached($widget)
 
         case 'products-default-block':
         case 'products-moment-block':
+        case 'products-moment-block':
         case 'products-colorful-block': {
             $products = Product::query()
                 ->with('lowestPrice', 'category:id,title,slug,type')

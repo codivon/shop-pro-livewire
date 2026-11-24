@@ -18,7 +18,7 @@
 @endphp
 
 @if(count($faqs))
-    <div class="py-20">
+    <div class="pb-20">
         <div class="container-fluid">
             <div class="content-box">
                 <div class="container-fluid">

@@ -22,7 +22,7 @@
 @endphp
 
 @if(count($main_sliders) || $has_side)
-    <div class="main-slider py-20">
+    <div class="main-slider pb-20">
         <div class="container-fluid">
             <div class="row gy-3">
                 {{-- ستون کناری (شگفت‌انگیز یا بنرها) --}}

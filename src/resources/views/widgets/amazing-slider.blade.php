@@ -11,7 +11,7 @@
 @endphp
 
 @if(count($amazing_products))
-    <div class="amazing py-20">
+    <div class="amazing pb-20">
         <div class="container-fluid">
 
             @if($widget->option('title'))

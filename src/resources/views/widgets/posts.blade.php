@@ -10,7 +10,7 @@
 @endphp
 
 @if(count($posts))
-    <div class="blog-slider site-slider site-slider-sm py-20">
+    <div class="blog-slider site-slider site-slider-sm pb-20">
         @if($widget->option('title'))
             <div class="container-fluid">
                 <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">

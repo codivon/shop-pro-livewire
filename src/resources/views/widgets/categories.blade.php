@@ -7,7 +7,7 @@
 @endphp
 
 @if(count($categories))
-    <div class="category py-20">
+    <div class="category pb-20">
         <div class="container-fluid">
             @if($widget->option('title'))
                 <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">

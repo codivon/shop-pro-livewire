@@ -4,7 +4,7 @@
     $mobile_sliders = $variables['mobile_sliders'];
 @endphp
 
-<div class="full-width-slider-wrapper">
+<div class="full-width-slider-wrapper pb-20">
     <div id="mainCarousel" class="carousel slide full-width-carousel" data-bs-ride="carousel" data-bs-touch="true">
         @if(count($main_sliders) > 1)
             <ol class="carousel-indicators custom-indicators">

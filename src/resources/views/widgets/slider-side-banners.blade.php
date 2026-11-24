@@ -13,7 +13,7 @@
 @endphp
 
 @if(count($main_sliders) || count($index_slider_banners))
-    <div class="main-slider py-20">
+    <div class="main-slider pb-20">
         <div class="container-fluid">
             <div class="row gy-3">
                 {{-- بنرها زیر هم --}}

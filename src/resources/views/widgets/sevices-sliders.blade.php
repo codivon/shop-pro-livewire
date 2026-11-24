@@ -5,7 +5,7 @@
 @endphp
 
 @if(count($sevices_sliders))
-    <div class="feature">
+    <div class="feature pb-20">
         <div class="container-fluid">
             <div class="row justify-content-center g-2 row-cols-1 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-5">
                 @foreach($sevices_sliders as $sevices_slider)

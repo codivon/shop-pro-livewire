@@ -5,7 +5,7 @@
 @endphp
 
 @if(count($banners))
-    <div class="banner py-20">
+    <div class="banner pb-20">
         <div class="container-fluid">
             <div class="row g-3">
                 @foreach($banners as $banner)

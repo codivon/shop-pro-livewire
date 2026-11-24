@@ -69,12 +69,12 @@
                         @include('front::widgets.products-colorful-block')
                         @break
 
-                    @case('middle-banners')
-                        @include('front::widgets.middle-banners')
-                        @break
-
                     @case('middle-brands')
                         @include('front::widgets.middle-brands')
+                        @break
+
+                    @case('middle-banners')
+                        @include('front::widgets.middle-banners')
                         @break
 
                     @case('middle-banners-2')

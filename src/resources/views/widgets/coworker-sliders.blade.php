@@ -7,7 +7,7 @@
 @endphp
 
 @if(count($coworker_sliders))
-    <div class="service">
+    <div class="service pb-20">
         <div class="container-fluid">
             <div class="row gy-3 justify-content-between align-items-center">
                 <div class="col-lg-3">

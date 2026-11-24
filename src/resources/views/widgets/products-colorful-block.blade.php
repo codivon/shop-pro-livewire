@@ -5,7 +5,7 @@
 @endphp
 
 @if(count($products))
-    <div class="product-slider product-slider-colorful site-slider py-20">
+    <div class="product-slider product-slider-colorful site-slider pb-20">
         @if($widget->option('title'))
             <div class="container-fluid">
                 <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">

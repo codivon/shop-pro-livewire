@@ -13,7 +13,7 @@ return [
                 'input-type' => 'input',
                 'type' => 'number',
                 'default' => '5',
-                'class' => 'col-md-4 col-6',
+                'class' => 'col-md-4',
                 'attributes' => 'required'
             ],
             [
@@ -1154,11 +1154,12 @@ return [
         'title' => 'دسته بندی محصولات',
         'image' => 'widgets/categories.png',
         'options' => [
-            [
-                'title'      => 'انتخاب دسته بندی ها',
-                'key'        => 'categories',
-                'input-type' => 'product_categories',
-                'class'      => 'col-md-12',
+              [
+                'title'      => 'عنوان قابل نمایش',
+                'key'        => 'title',
+                'input-type' => 'input',
+                'default'    => 'پرفروشترین محصولات فروشگاه',
+                'class'      => 'col-md-6 col-6',
             ],
             [
                 'title'      => 'لینک دکمه مشاهده همه (اختیاری)',
@@ -1167,6 +1168,12 @@ return [
                 'type'       => 'text',
                 'class'      => 'col-md-6 col-6',
             ],
+            [
+                'title'      => 'انتخاب دسته بندی ها',
+                'key'        => 'categories',
+                'input-type' => 'product_categories',
+                'class'      => 'col-md-12',
+            ]
 
         ],
         'rules' => [

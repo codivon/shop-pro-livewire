@@ -3,6 +3,9 @@
 {{-- فاز ۱۹۱ — دفاع نهایی در لایهٔ ویو: حتی اگر دادهٔ خام/نرمال‌نشده به اینجا برسد
      (deployment ناقص، opcache قدیمی، config معیوب جدید)، هیچ آرایه‌ای echo نمی‌شود
      و خطای «Array to string conversion» در این ویو عملاً غیرممکن است. --}}
+{{-- فاز ۲۰۳ — کلاس گرید کانفیگ هر قالب (مثلاً 'col-md-4 col-6' در HomeWidgets/PostsWidgets)
+     با ap_widget_grid_class به ستون‌های واقعی گرید ۱۲ ستونهٔ فرم تبدیل می‌شود؛
+     fallback پیش‌فرض برای فیلدهای بدون class: نصف‌عرض از sm به بالا (رفتار قبلی). --}}
 @php
     $errors = $errors ?? (new \Illuminate\Support\ViewErrorBag())->put('default', new \Illuminate\Support\MessageBag());
 
@@ -13,6 +16,11 @@
         /* attributes یک نقطهٔ تزریق raw HTML است — فقط رشتهٔ واقعی مجاز است */
         return is_string($value) ? $value : '';
     };
+    $apFieldFallback = $apFieldFallback ?? 'ap-wcol-12 ap-wcol-sm-6';
+    $apFieldClass    = fn ($option) => ap_widget_grid_class(
+        is_string($option['class'] ?? null) ? $option['class'] : null,
+        $apFieldFallback
+    );
 @endphp
 @foreach ($options as $option)
     @php $optionKey = $option['key']; $errorKey = 'optionValues.' . $optionKey; @endphp
@@ -20,8 +28,8 @@
     @switch($option['input-type'])
 
         @case('input')
-            {{-- پورت back/widgets/partials/input.blade.php : عرض یکنواخت w-full --}}
-            <div class="{{ ap_clean_legacy_class($apOptScalar($option['class'] ?? null)) ?: 'w-full' }}">
+            {{-- پورت back/widgets/partials/input.blade.php — عرض از کلاس کانفیگ قالب (فاز ۲۰۳) --}}
+            <div class="{{ $apFieldClass($option) }}">
                 <label class="mb-1.5 block text-xs font-semibold" for="option-input-{{ $optionKey }}">
                     {{ $apOptString($option['title'] ?? $optionKey) }}
                 </label>
@@ -39,8 +47,8 @@
             @break
 
         @case('select')
-            {{-- پورت back/widgets/partials/select.blade.php : عرض یکنواخت w-full --}}
-            <div class="{{ ap_clean_legacy_class($apOptScalar($option['class'] ?? null)) ?: 'w-full' }}">
+            {{-- پورت back/widgets/partials/select.blade.php — عرض از کلاس کانفیگ قالب (فاز ۲۰۳) --}}
+            <div class="{{ $apFieldClass($option) }}">
                 <label class="mb-1.5 block text-xs font-semibold" for="option-select-{{ $optionKey }}">
                     {{ $apOptString($option['title'] ?? $optionKey) }}
                 </label>
@@ -63,8 +71,8 @@
             @break
 
         @case('file')
-            {{-- پورت back/widgets/partials/file.blade.php + آپلود WithFileUploads : عرض یکنواخت --}}
-            <div class="{{ ap_clean_legacy_class($option['class'] ?? null) ?: 'w-full' }}">
+            {{-- پورت back/widgets/partials/file.blade.php + آپلود WithFileUploads — عرض از کلاس کانفیگ قالب (فاز ۲۰۳) --}}
+            <div class="{{ $apFieldClass($option) }}">
                 <label class="mb-1.5 block text-xs font-semibold" for="option-file-{{ $optionKey }}">
                     {{ $option['title'] }}
                 </label>

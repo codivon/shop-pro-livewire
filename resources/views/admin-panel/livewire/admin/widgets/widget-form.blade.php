@@ -107,9 +107,11 @@
                         </div>
                     @endif
 
-                    {{-- رندر داینامیک options بر اساس template config (پورت template.blade.php) --}}
+                    {{-- رندر داینامیک options بر اساس template config (پورت template.blade.php)
+                        فاز ۲۰۳ — گرید ۱۲ ستونه: عرض هر فیلد از کلاس کانفیگ قالب (col-md-4 col-6 و…)
+                        با ap_widget_grid_class نگاشت می‌شود؛ فیلد بدون class → نصف‌عرض از sm به بالا --}}
                     @if ($this->template && ! empty($this->template['options']))
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="grid grid-cols-12 gap-4">
                             @include('admin-panel::livewire.admin.widgets.partials.template-options', [
                                 'options' => $this->template['options'],
                                 'widget'  => $this->widget,

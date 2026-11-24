@@ -1272,3 +1272,98 @@ jdp-container .jdp-btn-today {
     width: 1.75rem;
     height: 1.75rem;
 }
+
+/* ==========================================================================
+   فاز ۲۰۳ — ستون‌های فرم ابزارک‌ها (ap-wcol-*)
+   نگاشت کلاس‌های گرید بوت‌استرپ کانفیگ هر قالب (HomeWidgets/PostsWidgets):
+   'col-md-4 col-6' → ap-wcol-6 ap-wcol-md-4 توسط ap_widget_grid_class().
+   والد این فیلدها همیشه grid grid-cols-12 است (فرم ابزارک / بیلدر).
+   نقاط شکست = بوت‌استرپ: sm 576 | md 768 | lg 992 | xl 1200 | xxl 1400
+   ========================================================================== */
+.ap-wcol-1  { grid-column: span 1; }
+.ap-wcol-2  { grid-column: span 2; }
+.ap-wcol-3  { grid-column: span 3; }
+.ap-wcol-4  { grid-column: span 4; }
+.ap-wcol-5  { grid-column: span 5; }
+.ap-wcol-6  { grid-column: span 6; }
+.ap-wcol-7  { grid-column: span 7; }
+.ap-wcol-8  { grid-column: span 8; }
+.ap-wcol-9  { grid-column: span 9; }
+.ap-wcol-10 { grid-column: span 10; }
+.ap-wcol-11 { grid-column: span 11; }
+.ap-wcol-12 { grid-column: span 12; }
+
+@media (min-width: 576px) {
+  .ap-wcol-sm-1  { grid-column: span 1; }
+  .ap-wcol-sm-2  { grid-column: span 2; }
+  .ap-wcol-sm-3  { grid-column: span 3; }
+  .ap-wcol-sm-4  { grid-column: span 4; }
+  .ap-wcol-sm-5  { grid-column: span 5; }
+  .ap-wcol-sm-6  { grid-column: span 6; }
+  .ap-wcol-sm-7  { grid-column: span 7; }
+  .ap-wcol-sm-8  { grid-column: span 8; }
+  .ap-wcol-sm-9  { grid-column: span 9; }
+  .ap-wcol-sm-10 { grid-column: span 10; }
+  .ap-wcol-sm-11 { grid-column: span 11; }
+  .ap-wcol-sm-12 { grid-column: span 12; }
+}
+
+@media (min-width: 768px) {
+  .ap-wcol-md-1  { grid-column: span 1; }
+  .ap-wcol-md-2  { grid-column: span 2; }
+  .ap-wcol-md-3  { grid-column: span 3; }
+  .ap-wcol-md-4  { grid-column: span 4; }
+  .ap-wcol-md-5  { grid-column: span 5; }
+  .ap-wcol-md-6  { grid-column: span 6; }
+  .ap-wcol-md-7  { grid-column: span 7; }
+  .ap-wcol-md-8  { grid-column: span 8; }
+  .ap-wcol-md-9  { grid-column: span 9; }
+  .ap-wcol-md-10 { grid-column: span 10; }
+  .ap-wcol-md-11 { grid-column: span 11; }
+  .ap-wcol-md-12 { grid-column: span 12; }
+}
+
+@media (min-width: 992px) {
+  .ap-wcol-lg-1  { grid-column: span 1; }
+  .ap-wcol-lg-2  { grid-column: span 2; }
+  .ap-wcol-lg-3  { grid-column: span 3; }
+  .ap-wcol-lg-4  { grid-column: span 4; }
+  .ap-wcol-lg-5  { grid-column: span 5; }
+  .ap-wcol-lg-6  { grid-column: span 6; }
+  .ap-wcol-lg-7  { grid-column: span 7; }
+  .ap-wcol-lg-8  { grid-column: span 8; }
+  .ap-wcol-lg-9  { grid-column: span 9; }
+  .ap-wcol-lg-10 { grid-column: span 10; }
+  .ap-wcol-lg-11 { grid-column: span 11; }
+  .ap-wcol-lg-12 { grid-column: span 12; }
+}
+
+@media (min-width: 1200px) {
+  .ap-wcol-xl-1  { grid-column: span 1; }
+  .ap-wcol-xl-2  { grid-column: span 2; }
+  .ap-wcol-xl-3  { grid-column: span 3; }
+  .ap-wcol-xl-4  { grid-column: span 4; }
+  .ap-wcol-xl-5  { grid-column: span 5; }
+  .ap-wcol-xl-6  { grid-column: span 6; }
+  .ap-wcol-xl-7  { grid-column: span 7; }
+  .ap-wcol-xl-8  { grid-column: span 8; }
+  .ap-wcol-xl-9  { grid-column: span 9; }
+  .ap-wcol-xl-10 { grid-column: span 10; }
+  .ap-wcol-xl-11 { grid-column: span 11; }
+  .ap-wcol-xl-12 { grid-column: span 12; }
+}
+
+@media (min-width: 1400px) {
+  .ap-wcol-xxl-1  { grid-column: span 1; }
+  .ap-wcol-xxl-2  { grid-column: span 2; }
+  .ap-wcol-xxl-3  { grid-column: span 3; }
+  .ap-wcol-xxl-4  { grid-column: span 4; }
+  .ap-wcol-xxl-5  { grid-column: span 5; }
+  .ap-wcol-xxl-6  { grid-column: span 6; }
+  .ap-wcol-xxl-7  { grid-column: span 7; }
+  .ap-wcol-xxl-8  { grid-column: span 8; }
+  .ap-wcol-xxl-9  { grid-column: span 9; }
+  .ap-wcol-xxl-10 { grid-column: span 10; }
+  .ap-wcol-xxl-11 { grid-column: span 11; }
+  .ap-wcol-xxl-12 { grid-column: span 12; }
+}

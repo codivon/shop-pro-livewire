@@ -484,7 +484,7 @@
                             <x-admin-panel::icon name="settings-2" class="size-3.5 text-brand-600 dark:text-brand-400" />
                             تنظیمات تخصصی این ابزارک
                         </p>
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="grid grid-cols-12 gap-4">
                             @include('admin-panel::livewire.admin.widgets.partials.template-options', [
                                 'options' => $modalTemplate['options'],
                                 'widget'  => $this->modalWidget,

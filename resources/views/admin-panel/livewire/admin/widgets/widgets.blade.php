@@ -372,11 +372,13 @@
                             <x-admin-panel::icon name="settings-2" class="size-3.5 text-brand-600 dark:text-brand-400" />
                             تنظیمات تخصصی این ابزارک
                         </p>
-                        {{-- : تک‌ستونه — هر فیلد یک ردیف کامل و منظم --}}
-                        <div class="grid grid-cols-1 gap-4">
+                        {{-- : تک‌ستونه — هر فیلد یک ردیف کامل و منظم
+                            فاز ۲۰۳ — گرید ۱۲ ستونه؛ fallback تمام‌عرض تا تک‌ستونه بماند --}}
+                        <div class="grid grid-cols-12 gap-4">
                             @include('admin-panel::livewire.admin.widgets.partials.template-options', [
                                 'options' => $typeTemplate['options'],
                                 'widget'  => $this->modalWidget,
+                                'apFieldFallback' => 'ap-wcol-12',
                             ])
                         </div>
                     </div>

@@ -2998,6 +2998,77 @@ if (! function_exists('module_is_ready')) {
     }
 }
 
+if (! function_exists('ap_widget_grid_class')) {
+    /**
+     * فاز ۲۰۳ — تبدیل کلاس‌های گرید بوت‌استرپِ کانفیگ ابزارک‌ها
+     * (مثلاً 'col-md-4 col-6' در HomeWidgets/PostsWidgets هر قالب)
+     * به کلاس‌های ستونِ اختصاصی پنل (ap-wcol-*) که در گرید ۱۲ ستونهٔ
+     * فرم ابزارک معنایش دقیق بوت‌استرپی را می‌دهند:
+     *
+     *   col-N        → ap-wcol-N          (همهٔ عرض‌ها)
+     *   col-{bp}-N   → ap-wcol-{bp}-N     (از breakpoint به بالا)
+     *   col / col-{bp} (خودکار) → تمام‌عرض در همان نقطهٔ شکست
+     *
+     * چرا مستقیم col-6 نمی‌گذاریم؟ تیلویند ۴ برای هر عدد یک ابزارک
+     * داینامیک می‌سازد (.col-6 { grid-column: 6 }) و چیدمان گرید
+     * فرم را خراب می‌کند؛ پس رشتهٔ خام بوت‌استرپ هرگز به DOM نمی‌رسد.
+     * کلاس‌های غیرستونی (مثل mt-3 یا کلاس سفارشی قالب) دست‌نخورده می‌مانند.
+     * اگر هیچ ستونی در کلاس نبود → fallback (پیش‌فرض: نصف‌عرض از sm به بالا
+     * تا رفتار قبلیِ گرید دوستونه برای فیلدهای بدون class حفظ شود).
+     */
+    function ap_widget_grid_class(?string $class, string $fallback = 'ap-wcol-12 ap-wcol-sm-6'): string
+    {
+        $tokens = preg_split('/\s+/', trim((string) $class)) ?: [];
+        $out = [];
+        $hasBaseColumn = false;
+
+        foreach ($tokens as $token) {
+            if ($token === '') {
+                continue;
+            }
+
+            $lower = strtolower($token);
+
+            /* col-N — ستون در همهٔ عرض‌ها */
+            if (preg_match('/^col-(1[0-2]|[1-9])$/', $lower, $m)) {
+                $out[] = 'ap-wcol-' . $m[1];
+                $hasBaseColumn = true;
+                continue;
+            }
+
+            /* col — ستون خودکار = تمام‌عرض */
+            if ($lower === 'col') {
+                $out[] = 'ap-wcol-12';
+                $hasBaseColumn = true;
+                continue;
+            }
+
+            /* col-{bp} — ستون خودکار از breakpoint به بالا = تمام‌عرض */
+            if (preg_match('/^col-(sm|md|lg|xl|xxl)$/', $lower, $m)) {
+                $out[] = 'ap-wcol-' . $m[1] . '-12';
+                continue;
+            }
+
+            /* col-{bp}-N — ستون از breakpoint به بالا */
+            if (preg_match('/^col-(sm|md|lg|xl|xxl)-(1[0-2]|[1-9])$/', $lower, $m)) {
+                $out[] = 'ap-wcol-' . $m[1] . '-' . $m[2];
+                continue;
+            }
+
+            /* کلاس‌های متفرقه بدون تغییر */
+            $out[] = $token;
+        }
+
+        /* معناشناسی بوت‌استرپ: col-md-N زیر md تمام‌عرض است؛
+           پس اگر هیچ ستون پایه‌ای (col/col-N) نیامده، fallback اضافه می‌شود */
+        if (! $hasBaseColumn) {
+            array_unshift($out, $fallback);
+        }
+
+        return trim(implode(' ', array_unique($out)));
+    }
+}
+
 if (! function_exists('ap_clean_legacy_class')) {
     /**
      * حذف کلاس‌های ستونِ بوت‌استرپ (col، col-6، col-md-3، col-xl-4 و…)

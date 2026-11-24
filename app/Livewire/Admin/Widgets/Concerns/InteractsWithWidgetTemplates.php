@@ -257,7 +257,13 @@ trait InteractsWithWidgetTemplates
                 }
             }
 
-            return implode('، ', $value);
+            /* فاز ۲۰۳ — اعضای تودرتو (مثل اسلایدها) به JSON خوانا تبدیل می‌شوند
+               تا implode روی آرایهٔ درون آرایه، خطای «Array to string» ندهد */
+            return implode('، ', array_map(function ($item) {
+                return is_array($item)
+                    ? json_encode($item, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                    : (string) $item;
+            }, $value));
         }
 
         if (is_bool($value)) {
@@ -368,11 +374,14 @@ trait InteractsWithWidgetTemplates
         $adminName = auth('adminPanel')->user()?->full_name ?? auth('adminPanel')->user()?->name ?? 'مدیر';
         $changeDetails = [];
 
-        foreach ($allChanges as $change) {
-            if (is_array($change) && isset($change['title'])) {
-                $changeDetails[] = "{$change['title']} از «{$change['old']}» به «{$change['new']}»";
-            }
-        }
+        /* فاز ۲۰۳ — ریشهٔ خطای «Array to string conversion» در اولین ذخیره:
+           $allChanges علاوه بر تغییرات تخت (title/is_active/ordering)،
+           کلید «options» را هم دارد که خودش لایه‌ای تودرتو است
+           (کلیدها = نام گزینه‌ها؛ هر عضو = آرایهٔ title/old/new).
+           اگر یکی از گزینه‌ها دقیقاً «title» نام داشت، آرایهٔ آن در
+           رشتهٔ درون‌یابی می‌شد و خطا می‌داد. پیمایش بازگشتی ساختار را
+           درست باز می‌کند و مقادیر آرایه‌ای هم به رشتهٔ امن تبدیل می‌شوند. */
+        $this->collectWidgetChangeLines($allChanges, $changeDetails);
 
         $logMessage = "مدیر {$adminName} ابزارک {$pageLabel} «{$widget->title}» را ویرایش کرد: " . implode('، ', $changeDetails);
 
@@ -388,5 +397,64 @@ trait InteractsWithWidgetTemplates
                 'ip'           => request()->ip(),
             ])
             ->log($logMessage);
+    }
+
+    /**
+     * تبدیل امن مقدار تغییر به رشته (برای درون‌یابی در متن لاگ).
+     * آرایه‌های تخت با «،» به هم می‌چسبند؛ اعضای تودرتو به JSON خوانا می‌روند.
+     */
+    protected function widgetChangeValueToString($value): string
+    {
+        if (is_null($value)) {
+            return 'خالی';
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'بله' : 'خیر';
+        }
+
+        if (is_array($value)) {
+            if (empty($value)) {
+                return 'هیچ موردی';
+            }
+
+            $parts = array_map(function ($item) {
+                if (is_array($item)) {
+                    return json_encode($item, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                }
+
+                return (string) $item;
+            }, $value);
+
+            return implode('، ', $parts);
+        }
+
+        return (string) $value;
+    }
+
+    /**
+     * پیمایش بازگشتی ساختار تغییرات؛ هم ساختار تخت (title/old/new)
+     * و هم لایهٔ تودرتو (options => [key => [title/old/new]]) را پوشش می‌دهد.
+     */
+    protected function collectWidgetChangeLines(array $changes, array &$out): void
+    {
+        foreach ($changes as $change) {
+            if (! is_array($change)) {
+                continue;
+            }
+
+            $isFlatChange = isset($change['title'])
+                && ! is_array($change['title'])
+                && array_key_exists('old', $change)
+                && array_key_exists('new', $change);
+
+            if ($isFlatChange) {
+                $out[] = "{$change['title']} از «{$this->widgetChangeValueToString($change['old'])}» به «{$this->widgetChangeValueToString($change['new'])}»";
+
+                continue;
+            }
+
+            $this->collectWidgetChangeLines($change, $out);
+        }
     }
 }

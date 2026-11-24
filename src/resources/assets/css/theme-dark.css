@@ -2836,3 +2836,114 @@ html[data-theme="dark"] .category-description.category-background table th {
 html[data-theme="dark"] .category-description.category-background table td {
     border-color: var(--dk-border) !important;
 }
+
+/* ============================================================
+   فاز ۲۰۳ — فوتر بازطراحی‌شده (snr-footer-*) در حالت شب
+   ============================================================ */
+html[data-theme="dark"] .footer {
+    background-color: #0d0f13;
+}
+
+html[data-theme="dark"] .snr-footer-contact {
+    border-bottom-color: #1c2027;
+}
+
+html[data-theme="dark"] .snr-contact-title,
+html[data-theme="dark"] .snr-links-title,
+html[data-theme="dark"] .snr-nl-title,
+html[data-theme="dark"] .snr-footer-copy strong {
+    color: var(--dk-text, #e6e8ec);
+}
+
+html[data-theme="dark"] .snr-contact-icon {
+    background: rgba(255, 255, 255, .06);
+    color: var(--main-color-one);
+}
+
+html[data-theme="dark"] .snr-contact-cell:hover .snr-contact-icon {
+    background: var(--main-color-one);
+    color: #fff;
+}
+
+html[data-theme="dark"] .snr-contact-value,
+html[data-theme="dark"] .snr-nl-sub,
+html[data-theme="dark"] .snr-about-text,
+html[data-theme="dark"] .snr-footer-copy {
+    color: var(--dk-text-muted, #818898);
+}
+
+html[data-theme="dark"] .snr-contact-value a {
+    color: var(--dk-text-muted, #818898);
+}
+
+html[data-theme="dark"] .snr-contact-value a:hover {
+    color: #5bd0c8;
+}
+
+html[data-theme="dark"] .snr-links-col {
+    border-right-color: rgba(255, 255, 255, .07);
+}
+
+html[data-theme="dark"] .snr-links-col:hover {
+    border-right-color: #5bd0c8;
+}
+
+html[data-theme="dark"] .snr-links-col ul a {
+    color: var(--dk-text-muted, #818898);
+}
+
+html[data-theme="dark"] .snr-links-col ul a i {
+    color: #3a4048;
+}
+
+html[data-theme="dark"] .snr-links-col ul a:hover {
+    color: #5bd0c8;
+}
+
+html[data-theme="dark"] .snr-links-col ul a:hover i {
+    color: #5bd0c8;
+}
+
+html[data-theme="dark"] .snr-footer-socials a {
+    background: rgba(255, 255, 255, .06);
+    color: var(--dk-text-soft, #b7bcc6);
+}
+
+html[data-theme="dark"] .snr-footer-socials a:hover {
+    background: #5bd0c8;
+    color: #0d0f13;
+}
+
+html[data-theme="dark"] .snr-footer-newsletter {
+    background: linear-gradient(105deg, rgba(255, 255, 255, .04) 0%, rgba(255, 255, 255, 0) 90%);
+    border-color: #1c2027;
+}
+
+html[data-theme="dark"] .snr-nl-icon {
+    background: var(--main-color-one);
+    color: #fff;
+}
+
+html[data-theme="dark"] .snr-footer-newsletter .footer-newsletter-form .form-control {
+    background: #16181d;
+    border: 1px solid #262a31;
+    color: var(--dk-text, #e6e8ec);
+    box-shadow: none;
+}
+
+html[data-theme="dark"] .snr-footer-newsletter .footer-newsletter-form .form-control::placeholder {
+    color: var(--dk-text-muted, #818898);
+}
+
+html[data-theme="dark"] .snr-footer-badges img {
+    background: #16181d;
+    border-color: #262a31;
+}
+
+html[data-theme="dark"] .snr-footer-badges img:hover {
+    border-color: #5bd0c8;
+}
+
+html[data-theme="dark"] .snr-footer-copy {
+    border-top-color: #1c2027;
+}

@@ -7560,3 +7560,388 @@ body:has(#offcanvasCart.show) #back-to-top {
 .hide {
     display: none !important;
 }
+
+/* ============================================================
+   فاز ۲۰۳ — بازطراحی کامل فوتر (مطابق نمونهٔ کاربر؛ مدرن و مرتب)
+   ساختار: نوار تماس → ستون‌های لینک → نوار خبرنامه → درباره + نشان‌ها
+   → کپی‌رایت. کلاس‌های snr-footer-* تا با استایل‌های قدیمی تداخل نکنند.
+   ============================================================ */
+
+.footer {
+    padding: 0 0 0;
+    margin-top: 20px;
+}
+
+/* ---------- ۱) نوار تماس ---------- */
+.snr-footer-contact {
+    padding: 28px 0 24px;
+    border-bottom: 1px solid #eef0f3;
+}
+
+.snr-footer-contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 18px 22px;
+}
+
+.snr-contact-cell {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.snr-contact-icon {
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: var(--main-color-one-shadow, #f2f6ff);
+    color: var(--main-color-one);
+    font-size: 20px;
+    transition: .2s all ease-in-out;
+    -webkit-transition: .2s all ease-in-out;
+}
+
+.snr-contact-cell:hover .snr-contact-icon {
+    background: var(--main-color-one);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.snr-contact-body {
+    min-width: 0;
+    padding-top: 2px;
+}
+
+.snr-contact-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+.snr-contact-value {
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--text-muted, #6b7280);
+    word-break: break-word;
+}
+
+.snr-contact-value a {
+    color: var(--text-muted, #6b7280);
+    transition: .15s color ease-in-out;
+    -webkit-transition: .15s color ease-in-out;
+}
+
+.snr-contact-value a:hover {
+    color: var(--main-color-one);
+}
+
+.snr-footer-socials {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.snr-footer-socials a {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #f4f5f7;
+    color: #4b5563;
+    font-size: 16px;
+    transition: .2s all ease-in-out;
+    -webkit-transition: .2s all ease-in-out;
+}
+
+.snr-footer-socials a:hover {
+    background: var(--main-color-one);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* ---------- ۲) ستون‌های لینک ---------- */
+.snr-footer-links {
+    padding: 26px 0 6px;
+}
+
+.snr-links-col {
+    padding: 0 6px;
+    border-right: 2px solid var(--main-color-one-shadow, #f2f6ff);
+    transition: .2s border-color ease-in-out;
+    -webkit-transition: .2s border-color ease-in-out;
+}
+
+.snr-links-col:hover {
+    border-right-color: var(--main-color-one);
+}
+
+.snr-links-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 14px;
+}
+
+.snr-links-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.snr-links-col li + li {
+    margin-top: 10px;
+}
+
+.snr-links-col ul a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted, #6b7280);
+    transition: .15s all ease-in-out;
+    -webkit-transition: .15s all ease-in-out;
+}
+
+.snr-links-col ul a i {
+    font-size: 11px;
+    color: #c3c8d2;
+    transition: .15s all ease-in-out;
+    -webkit-transition: .15s all ease-in-out;
+}
+
+.snr-links-col ul a:hover {
+    color: var(--main-color-one);
+    font-weight: 600;
+}
+
+.snr-links-col ul a:hover i {
+    color: var(--main-color-one);
+    transform: translateX(-3px);
+}
+
+/* ---------- ۳) نوار خبرنامه ---------- */
+.snr-footer-newsletter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    margin-top: 26px;
+    padding: 20px 24px;
+    border-radius: 20px;
+    background: linear-gradient(105deg, var(--main-color-one-shadow, #f2f6ff) 0%, rgba(255, 255, 255, 0) 90%);
+    border: 1px solid #eef0f3;
+}
+
+.snr-nl-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.snr-nl-icon {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: var(--main-color-one);
+    color: #fff;
+    font-size: 21px;
+}
+
+.snr-nl-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 3px;
+}
+
+.snr-nl-sub {
+    font-size: 12.5px;
+    color: var(--text-muted, #6b7280);
+    margin-bottom: 0;
+}
+
+.snr-footer-newsletter .footer-newsletter-form {
+    margin-top: 0;
+    /* فاز ۲۰۳ — flex-basis عددی ممنوع: در موبایل که کارت به flex-direction:column
+       می‌رود، basis در محور عمودی اعمال می‌شد و فرم ۳۲۰px بلند می‌شد */
+    flex: 1 1 auto;
+    max-width: 560px;
+    min-width: 0;
+}
+
+.snr-footer-newsletter .footer-newsletter-form .form-control {
+    background: #fff;
+    height: 46px;
+    font-size: 13px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+}
+
+.snr-footer-newsletter .footer-newsletter-form .btn {
+    height: 46px;
+    padding: 0 26px;
+    flex-shrink: 0;
+}
+
+.snr-footer-newsletter .saniar-newsletter-error {
+    flex-basis: 100%;
+}
+
+/* ---------- ۴) دربارهٔ ما + نشان‌های اعتماد ---------- */
+.snr-footer-about {
+    padding: 26px 0 20px;
+}
+
+.snr-about-logo {
+    max-width: 180px;
+    max-height: 72px;
+    width: auto;
+    margin-bottom: 14px;
+    object-fit: contain;
+}
+
+.snr-about-text {
+    font-size: 13px;
+    line-height: 2.1;
+    color: var(--text-muted, #6b7280);
+    text-align: justify;
+    margin-bottom: 12px;
+    /* متن‌های بلند مدیر، فوتر را به‌هم نمی‌ریزند: حداکثر ۴ خط */
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.snr-about-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--main-color-one);
+    transition: .15s all ease-in-out;
+    -webkit-transition: .15s all ease-in-out;
+}
+
+.snr-about-more i {
+    font-size: 14px;
+    transition: .15s transform ease-in-out;
+    -webkit-transition: .15s transform ease-in-out;
+}
+
+.snr-about-more:hover {
+    color: var(--main-color-one);
+    opacity: .85;
+}
+
+.snr-about-more:hover i {
+    transform: translateX(-3px);
+}
+
+.snr-footer-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+.snr-footer-badges img {
+    width: 118px;
+    height: 118px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid #eef0f3;
+    border-radius: 16px;
+    padding: 8px;
+    transition: .2s all ease-in-out;
+    -webkit-transition: .2s all ease-in-out;
+}
+
+.snr-footer-badges img:hover {
+    border-color: var(--main-color-one-shadow, #f2f6ff);
+    transform: translateY(-2px);
+}
+
+.snr-footer-badges a {
+    display: inline-block;
+    line-height: 0;
+}
+
+/* ---------- ۵) کپی‌رایت ---------- */
+.snr-footer-copy {
+    margin-top: 6px;
+    padding: 16px 0;
+    border-top: 1px solid #eef0f3;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--text-muted, #8a8f9c);
+}
+
+.snr-footer-copy strong {
+    color: #1f2937;
+    font-weight: 700;
+}
+
+/* ---------- موبایل ---------- */
+@media (max-width: 992px) {
+    .snr-footer-contact-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .snr-footer-newsletter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .snr-footer-newsletter .footer-newsletter-form {
+        max-width: none;
+    }
+
+    .snr-footer-badges {
+        justify-content: center;
+    }
+
+    .snr-about-body {
+        text-align: center;
+    }
+
+    .snr-about-body .snr-about-text {
+        text-align: right;
+    }
+}
+
+@media (max-width: 575px) {
+    .snr-footer-contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .snr-about-logo {
+        margin-right: auto;
+        margin-left: auto;
+        display: block;
+    }
+}
+
+/* بازنویسی قانون فوتر چسبان body برای طراحی جدید (کنترل دقیق فاصله‌ها) */
+body > footer.footer {
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: auto;
+}

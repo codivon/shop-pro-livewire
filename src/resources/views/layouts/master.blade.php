@@ -72,8 +72,8 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=181">
-    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=182">
+    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=174">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
          بدون این CSS آفست افقی تمام‌صفحه ایجاد می‌شد --}}
@@ -85,7 +85,7 @@
     <link rel="stylesheet" href="{{ theme_asset('css/theme-pages.css') }}">
 
     {{-- /۱۵۸ — حالت شب (دارک مود) — بعد از همهٔ استایل‌ها تا بتواند بازنویسی کند --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=27">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=28">
 
     {{-- CSS عملکردی مشترک (توست‌ها + آیکون‌های منوهای داینامیک) --}}
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
@@ -103,7 +103,7 @@
     {!! option('info_header_codes', '') !!}
 
     @if(auth('adminPanel')->check())
-        <link rel="stylesheet" href="{{ theme_asset('css/admin-loggedin-navbar.css') }}?v=2">
+        <link rel="stylesheet" href="{{ theme_asset('css/admin-loggedin-navbar.css') }}?v=3">
     @endif
 
     {{-- آیکون‌های اعلان‌ها (mdi) — فقط برای کاربر وارد شده تا رندر هدر کند نشود --}}

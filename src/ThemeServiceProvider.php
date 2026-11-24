@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Models\Category;
 use App\Models\Link;
 use App\Models\Menu;
+use App\Models\Option;
 use App\Models\Post;
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
@@ -118,9 +119,44 @@ class ThemeServiceProvider extends ServiceProvider
 
         view()->composer(['front::partials.footer'], function ($view) {
 
-            $footer_links = config('front.linkGroups', []);
+            /* فاز ۲۰۴ — ریشه‌یابی «لینک‌های واردشده در فوتر نمایش داده نمی‌شوند»:
+               پنل مدیریت (LinkGroups::allGroups) فهرست گروه‌ها را از دو منو می‌سازد:
+               ۱) گروه‌های ثابت کانفیگ قالب (front.linkGroups — کلیدهای ۱/۲/۳)
+               ۲) گروه‌های افزوده‌شدهٔ مدیر که فقط یک ردیف options با کلید
+                  link_groups_{n} هستند (بدون دست‌زدن به کانفیگ قالب).
+               کامپوزر قبلی فقط کانفیگ را می‌دید؛ پس هر لینکی که مدیر در گروه‌های
+               تازه‌ساختهٔ خودش (کلید ۴ به بعد) ذخیره می‌کرد هرگز رندر نمی‌شد.
+               اکنون همان قرارداد پنل تکرار شده (کانفیگ + options) و چون پنل با
+               Cache::forget('front.footer.groups.{locale}') کش را می‌شکند، تغییرات
+               گروه‌ها بلافاصله در فوتر دیده می‌شوند. */
+            $footer_links = Cache::remember('front.footer.groups.' . app()->getLocale(), 300, function () {
+                $configGroups = collect(config('front.linkGroups', []))
+                    ->filter(fn ($group) => isset($group['key']))
+                    ->values();
+
+                $configKeys = $configGroups->pluck('key')->all();
+
+                $extraGroups = Option::query()
+                    ->where('option_name', 'like', 'link_groups_%')
+                    ->where('lang', app()->getLocale())
+                    ->get()
+                    ->map(function (Option $option) {
+                        return [
+                            'key'  => (int) str_replace('link_groups_', '', $option->option_name),
+                            'name' => (string) $option->option_value,
+                        ];
+                    })
+                    ->filter(fn ($group) => ! in_array($group['key'], $configKeys, true))
+                    ->values();
+
+                return $configGroups->merge($extraGroups)
+                    ->unique('key')
+                    ->values()
+                    ->all();
+            });
 
             // FIX مقیاس: لینک‌های فوتر در هر بازدید کوئری نمی‌زنند
+            // (پنل مدیریت در store/update/delete/move با Cache::forget می‌شکند)
             $links = Cache::remember('front.footer.links', 300, function () {
                 return Link::orderBy('ordering')->get();
             });

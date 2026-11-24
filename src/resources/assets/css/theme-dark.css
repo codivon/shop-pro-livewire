@@ -2855,14 +2855,8 @@ html[data-theme="dark"] .snr-footer-copy strong {
     color: var(--dk-text, #e6e8ec);
 }
 
-html[data-theme="dark"] .snr-contact-icon {
-    background: rgba(255, 255, 255, .06);
+html[data-theme="dark"] .snr-contact-title i {
     color: var(--main-color-one);
-}
-
-html[data-theme="dark"] .snr-contact-cell:hover .snr-contact-icon {
-    background: var(--main-color-one);
-    color: #fff;
 }
 
 html[data-theme="dark"] .snr-contact-value,
@@ -2880,19 +2874,11 @@ html[data-theme="dark"] .snr-contact-value a:hover {
     color: #5bd0c8;
 }
 
-html[data-theme="dark"] .snr-links-col {
-    border-right-color: rgba(255, 255, 255, .07);
-}
-
-html[data-theme="dark"] .snr-links-col:hover {
-    border-right-color: #5bd0c8;
-}
-
 html[data-theme="dark"] .snr-links-col ul a {
     color: var(--dk-text-muted, #818898);
 }
 
-html[data-theme="dark"] .snr-links-col ul a i {
+html[data-theme="dark"] .snr-links-col ul a::before {
     color: #3a4048;
 }
 
@@ -2900,7 +2886,7 @@ html[data-theme="dark"] .snr-links-col ul a:hover {
     color: #5bd0c8;
 }
 
-html[data-theme="dark"] .snr-links-col ul a:hover i {
+html[data-theme="dark"] .snr-links-col ul a:hover::before {
     color: #5bd0c8;
 }
 

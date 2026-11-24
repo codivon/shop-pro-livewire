@@ -7562,8 +7562,10 @@ body:has(#offcanvasCart.show) #back-to-top {
 }
 
 /* ============================================================
-   فاز ۲۰۳ — بازطراحی کامل فوتر (مطابق نمونهٔ کاربر؛ مدرن و مرتب)
-   ساختار: نوار تماس → ستون‌های لینک → نوار خبرنامه → درباره + نشان‌ها
+   فاز ۲۰۴ — بازطراحی دقیق فوتر مطابق نمونهٔ کاربر
+   ساختار: نوار تماس (آیکون + عنوان در یک سطر، مقدار زیرش)
+   → ستون‌های لینک با خط‌تیرهٔ ابتدای آیتم → نوار خبرنامه (مانند قبل)
+   → دربارهٔ ما (لوگو راست + نشان‌های اعتماد چپ، متن زیر، لینک پایین-چپ)
    → کپی‌رایت. کلاس‌های snr-footer-* تا با استایل‌های قدیمی تداخل نکنند.
    ============================================================ */
 
@@ -7574,55 +7576,42 @@ body:has(#offcanvasCart.show) #back-to-top {
 
 /* ---------- ۱) نوار تماس ---------- */
 .snr-footer-contact {
-    padding: 28px 0 24px;
+    padding: 30px 0 26px;
     border-bottom: 1px solid #eef0f3;
 }
 
 .snr-footer-contact-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 18px 22px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px 26px;
 }
 
 .snr-contact-cell {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
     min-width: 0;
 }
 
-.snr-contact-icon {
-    flex: 0 0 46px;
-    width: 46px;
-    height: 46px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 14px;
-    background: var(--main-color-one-shadow, #f2f6ff);
-    color: var(--main-color-one);
-    font-size: 20px;
-    transition: .2s all ease-in-out;
-    -webkit-transition: .2s all ease-in-out;
-}
-
-.snr-contact-cell:hover .snr-contact-icon {
-    background: var(--main-color-one);
-    color: #fff;
-    transform: translateY(-2px);
-}
-
-.snr-contact-body {
-    min-width: 0;
-    padding-top: 2px;
-}
-
+/* آیکون و عنوان در یک سطر — آیکون برهنهٔ رنگی مثل نمونه (بدون کادر) */
 .snr-contact-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
     font-size: 14.5px;
     font-weight: 700;
     color: #1f2937;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     line-height: 1.4;
+}
+
+.snr-contact-title i {
+    font-size: 20px;
+    color: var(--main-color-one);
+    line-height: 1;
+    transition: .2s transform ease-in-out;
+    -webkit-transition: .2s transform ease-in-out;
+}
+
+.snr-contact-cell:hover .snr-contact-title i {
+    transform: scale(1.12);
 }
 
 .snr-contact-value {
@@ -7642,20 +7631,26 @@ body:has(#offcanvasCart.show) #back-to-top {
     color: var(--main-color-one);
 }
 
+/* جداکنندهٔ « - » بین دو شماره مثل نمونه */
+.snr-contact-sep {
+    margin: 0 4px;
+    color: #c3c8d2;
+}
+
 .snr-footer-socials {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
 }
 
 .snr-footer-socials a {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: 50%;
     background: #f4f5f7;
     color: #4b5563;
     font-size: 16px;
@@ -7669,27 +7664,16 @@ body:has(#offcanvasCart.show) #back-to-top {
     transform: translateY(-2px);
 }
 
-/* ---------- ۲) ستون‌های لینک ---------- */
+/* ---------- ۲) ستون‌های لینک — با خط‌تیرهٔ ابتدای آیتم مثل نمونه ---------- */
 .snr-footer-links {
-    padding: 26px 0 6px;
-}
-
-.snr-links-col {
-    padding: 0 6px;
-    border-right: 2px solid var(--main-color-one-shadow, #f2f6ff);
-    transition: .2s border-color ease-in-out;
-    -webkit-transition: .2s border-color ease-in-out;
-}
-
-.snr-links-col:hover {
-    border-right-color: var(--main-color-one);
+    padding: 30px 0 8px;
 }
 
 .snr-links-title {
     font-size: 15px;
     font-weight: 700;
     color: #1f2937;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 }
 
 .snr-links-col ul {
@@ -7699,37 +7683,38 @@ body:has(#offcanvasCart.show) #back-to-top {
 }
 
 .snr-links-col li + li {
-    margin-top: 10px;
+    margin-top: 11px;
 }
 
 .snr-links-col ul a {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 13px;
     color: var(--text-muted, #6b7280);
     transition: .15s all ease-in-out;
     -webkit-transition: .15s all ease-in-out;
 }
 
-.snr-links-col ul a i {
-    font-size: 11px;
+/* خط‌تیرهٔ ابتدای آیتم (در RTL سمت راست متن می‌نشیند) */
+.snr-links-col ul a::before {
+    content: '-';
+    flex-shrink: 0;
     color: #c3c8d2;
-    transition: .15s all ease-in-out;
-    -webkit-transition: .15s all ease-in-out;
+    font-weight: 700;
+    transition: .15s color ease-in-out;
+    -webkit-transition: .15s color ease-in-out;
 }
 
 .snr-links-col ul a:hover {
     color: var(--main-color-one);
-    font-weight: 600;
 }
 
-.snr-links-col ul a:hover i {
+.snr-links-col ul a:hover::before {
     color: var(--main-color-one);
-    transform: translateX(-3px);
 }
 
-/* ---------- ۳) نوار خبرنامه ---------- */
+/* ---------- ۳) نوار خبرنامه (خبرنامهٔ تأییدشدهٔ کاربر — بدون تغییر) ---------- */
 .snr-footer-newsletter {
     display: flex;
     align-items: center;
@@ -7802,30 +7787,73 @@ body:has(#offcanvasCart.show) #back-to-top {
     flex-basis: 100%;
 }
 
-/* ---------- ۴) دربارهٔ ما + نشان‌های اعتماد ---------- */
+/* ---------- ۴) دربارهٔ ما — لوگو راست، نشان‌ها چپ، متن زیر (مطابق نمونه) ---------- */
 .snr-footer-about {
     padding: 26px 0 20px;
 }
 
+.snr-about-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px 24px;
+    margin-bottom: 16px;
+}
+
 .snr-about-logo {
-    max-width: 180px;
-    max-height: 72px;
+    max-width: 200px;
+    max-height: 76px;
     width: auto;
-    margin-bottom: 14px;
     object-fit: contain;
+}
+
+.snr-footer-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.snr-footer-badges img {
+    width: 118px;
+    height: 118px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid #eef0f3;
+    border-radius: 16px;
+    padding: 8px;
+    transition: .2s all ease-in-out;
+    -webkit-transition: .2s all ease-in-out;
+}
+
+.snr-footer-badges img:hover {
+    border-color: var(--main-color-one-shadow, #f2f6ff);
+    transform: translateY(-2px);
+}
+
+.snr-footer-badges a {
+    display: inline-block;
+    line-height: 0;
 }
 
 .snr-about-text {
     font-size: 13px;
-    line-height: 2.1;
+    line-height: 2.15;
     color: var(--text-muted, #6b7280);
     text-align: justify;
     margin-bottom: 12px;
-    /* متن‌های بلند مدیر، فوتر را به‌هم نمی‌ریزند: حداکثر ۴ خط */
+    /* متن‌های خیلی بلند مدیر فوتر را بی‌نهایت نمی‌کنند؛ تا ۸ خط مثل نمونه */
     display: -webkit-box;
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 8;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+/* «اطلاعات بیشتر» پایین-چپ مثل نمونه (flex-end در RTL = لبهٔ چپ) */
+.snr-about-more-row {
+    display: flex;
+    justify-content: flex-end;
 }
 
 .snr-about-more {
@@ -7852,36 +7880,6 @@ body:has(#offcanvasCart.show) #back-to-top {
 
 .snr-about-more:hover i {
     transform: translateX(-3px);
-}
-
-.snr-footer-badges {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 12px;
-}
-
-.snr-footer-badges img {
-    width: 118px;
-    height: 118px;
-    object-fit: contain;
-    background: #fff;
-    border: 1px solid #eef0f3;
-    border-radius: 16px;
-    padding: 8px;
-    transition: .2s all ease-in-out;
-    -webkit-transition: .2s all ease-in-out;
-}
-
-.snr-footer-badges img:hover {
-    border-color: var(--main-color-one-shadow, #f2f6ff);
-    transform: translateY(-2px);
-}
-
-.snr-footer-badges a {
-    display: inline-block;
-    line-height: 0;
 }
 
 /* ---------- ۵) کپی‌رایت ---------- */
@@ -7918,12 +7916,12 @@ body:has(#offcanvasCart.show) #back-to-top {
         justify-content: center;
     }
 
-    .snr-about-body {
-        text-align: center;
+    .snr-about-top {
+        justify-content: center;
     }
 
-    .snr-about-body .snr-about-text {
-        text-align: right;
+    .snr-about-text {
+        text-align: justify;
     }
 }
 

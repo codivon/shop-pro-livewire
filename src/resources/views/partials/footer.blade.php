@@ -1,80 +1,103 @@
-{{-- فوتر سانیار — بازطراحی فاز ۲۰۳ (مطابق نمونهٔ کاربر: مدرن و مرتب) --}}
+{{-- فوتر سانیار — فاز ۲۰۴ (بازطراحی دقیق مطابق نمونهٔ کاربر) --}}
 {{-- ساختار: نوار تماس (تلفن/ایمیل/آدرس/شبکه‌های اجتماعی) → ستون‌های لینک
-     → نوار خبرنامه → دربارهٔ ما + نشان‌های اعتماد → نوار کپی‌رایت --}}
+     → نوار خبرنامه → دربارهٔ ما (لوگو + نشان‌های اعتماد + متن) → نوار کپی‌رایت --}}
 <footer class="footer snr-footer">
     <div class="container-fluid">
 
-        {{-- فاز ۱۹۳ — ستون‌هایی که مقداری در پنل ندارند رندر نمی‌شوند تا فاصله‌های خالی بزرگ ایجاد نکنند --}}
+        {{-- فاز ۱۹۳/۲۰۴ — فیلدهای بدون مقدار رندر نمی‌شوند تا فاصلهٔ خالی نسازند --}}
         @php
             $footerHasTel      = trim((string) option('info_tel', '')) !== '';
+            $footerSupportTel  = trim((string) option('info_support_phone', '')) !== '';
             $footerHasEmail    = trim((string) option('info_email', '')) !== '';
-            $footerHasAddress  = trim((string) option('info_footer_text', '')) !== '';
-            $footerSocialKeys  = ['social_instagram', 'social_whatsapp', 'social_telegram', 'social_youtube', 'social_twitter'];
-            $footerSocials     = collect([
-                'social_instagram' => ['bi-instagram', 'اینستاگرام'],
-                'social_whatsapp'  => ['bi-whatsapp', 'واتس‌اپ'],
-                'social_telegram'  => ['bi-telegram', 'تلگرام'],
-                'social_youtube'   => ['bi-youtube', 'یوتیوب'],
-                'social_twitter'   => ['bi-twitter', 'توییتر'],
-            ])->filter(fn ($v, $k) => trim((string) option($k, '')) !== '');
+            /* فاز ۲۰۴ — ریشه‌یابی «متن زیر عنوان آدرس، آدرس نیست»:
+               قبلاً info_footer_text (متن بلند سئوی فوتر) زیر عنوانِ «آدرس شرکت»
+               رندر می‌شد؛ آدرس واقعی فروشگاه در option('info_address') است
+               (همان فیلدی که صفحهٔ تماس هم استفاده می‌کند). */
+            $footerAddress     = trim((string) option('info_address', ''));
+            $footerSocialKeys  = [
+                'social_telegram'  => ['bi-telegram',      'تلگرام'],
+                'social_instagram' => ['bi-instagram',     'اینستاگرام'],
+                'social_whatsapp'  => ['bi-whatsapp',      'واتس‌اپ'],
+                'social_aparat'    => ['bi-play-btn-fill', 'آپارات'],
+                'social_eitaa'     => ['bi-send-fill',     'ایتا'],
+                'social_rubika'    => ['bi-gem',           'روبیکا'],
+                'social_bale'      => ['bi-chat-square',   'بله'],
+                'social_x'         => ['bi-twitter-x',     'توییتر (ایکس)'],
+                'social_facebook'  => ['bi-facebook',      'فیسبوک'],
+                'social_youtube'   => ['bi-youtube',       'یوتیوب'],
+                'social_linkedin'  => ['bi-linkedin',      'لینکدین'],
+            ];
+            /* فاز ۲۰۴ — قبلاً کلید ناموجودِ social_twitter چک می‌شد و بقیهٔ
+               شبکه‌های پنل (آپارات/ایتا/روبیکا/بله/ایکس/فیسبوک/لینکدین) اصلاً
+               دیده نمی‌شدند؛ اکنون همهٔ کلیدهای صفحهٔ تنظیمات شبکه‌های اجتماعی
+               پشتیبانی می‌شوند. */
+            $footerSocials     = collect($footerSocialKeys)
+                ->filter(fn ($v, $k) => trim((string) option($k, '')) !== '');
             $footerHasSocials  = $footerSocials->isNotEmpty();
             $footerFilledGroups = collect($footer_links)->filter(
                 fn ($group) => $links->where('link_group_id', $group['key'])->isNotEmpty()
             );
-            $footerAboutText = trim((string) option('info_about_us', option('info_short_description', '')));
+            /* متن بلند «دربارهٔ ما» مثل نمونه: اول متن فوتر، بعد درباره‌ما، بعد توضیح کوتاه */
+            $footerAboutText = trim((string) option('info_footer_text', ''))
+                ?: trim((string) option('info_about_us', ''))
+                ?: trim((string) option('info_short_description', ''));
         @endphp
 
-        {{-- ۱) نوار تماس --}}
-        @if ($footerHasTel || $footerHasEmail || $footerHasAddress || $footerHasSocials)
+        {{-- ۱) نوار تماس — آیکون + عنوان در یک سطر، مقدار زیرش (مطابق نمونه) --}}
+        @if ($footerHasTel || $footerHasEmail || trim((string) $footerAddress) !== '' || $footerHasSocials)
         <div class="snr-footer-contact">
             <div class="snr-footer-contact-grid">
                 @if ($footerHasTel)
                 <div class="snr-contact-cell">
-                    <span class="snr-contact-icon" aria-hidden="true"><i class="bi bi-headset"></i></span>
-                    <div class="snr-contact-body">
-                        <h4 class="snr-contact-title">شماره‌های ارتباطی</h4>
-                        <div class="snr-contact-value" dir="rtl">
-                            <a href="tel:{{ preg_replace('/\s+/', '', option('info_tel', '')) }}" dir="ltr">{{ option('info_tel', '') }}</a>
-                        </div>
+                    <h4 class="snr-contact-title">
+                        <i class="bi bi-telephone" aria-hidden="true"></i>
+                        <span>شماره‌های ارتباطی</span>
+                    </h4>
+                    <div class="snr-contact-value" dir="rtl">
+                        <a href="tel:{{ preg_replace('/\s+/', '', option('info_tel', '')) }}" dir="ltr">{{ option('info_tel', '') }}</a>
+                        @if ($footerSupportTel)
+                            <span class="snr-contact-sep">-</span>
+                            <a href="tel:{{ preg_replace('/\s+/', '', option('info_support_phone', '')) }}" dir="ltr">{{ option('info_support_phone', '') }}</a>
+                        @endif
                     </div>
                 </div>
                 @endif
                 @if ($footerHasEmail)
                 <div class="snr-contact-cell">
-                    <span class="snr-contact-icon" aria-hidden="true"><i class="bi bi-envelope"></i></span>
-                    <div class="snr-contact-body">
-                        <h4 class="snr-contact-title">ایمیل‌های ارتباطی</h4>
-                        <div class="snr-contact-value">
-                            <a href="mailto:{{ option('info_email', '') }}" dir="ltr">{{ option('info_email', '') }}</a>
-                        </div>
+                    <h4 class="snr-contact-title">
+                        <i class="bi bi-envelope" aria-hidden="true"></i>
+                        <span>ایمیل‌های ارتباطی</span>
+                    </h4>
+                    <div class="snr-contact-value">
+                        <a href="mailto:{{ option('info_email', '') }}" dir="ltr">{{ option('info_email', '') }}</a>
                     </div>
                 </div>
                 @endif
-                @if ($footerHasAddress)
+                @if (trim((string) $footerAddress) !== '')
                 <div class="snr-contact-cell">
-                    <span class="snr-contact-icon" aria-hidden="true"><i class="bi bi-geo-alt"></i></span>
-                    <div class="snr-contact-body">
-                        <h4 class="snr-contact-title">آدرس شرکت</h4>
-                        <div class="snr-contact-value">
-                            <span>{{ option('info_footer_text', '') }}</span>
-                        </div>
+                    <h4 class="snr-contact-title">
+                        <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                        <span>آدرس شرکت</span>
+                    </h4>
+                    <div class="snr-contact-value">
+                        <span>{{ $footerAddress }}</span>
                     </div>
                 </div>
                 @endif
                 @if ($footerHasSocials)
                 <div class="snr-contact-cell">
-                    <span class="snr-contact-icon" aria-hidden="true"><i class="bi bi-share"></i></span>
-                    <div class="snr-contact-body">
-                        <h4 class="snr-contact-title">فروشگاه در رسانه‌ها</h4>
-                        <div class="snr-contact-value">
-                            <div class="snr-footer-socials">
-                                @foreach($footerSocials as $key => [$icon, $label])
-                                    <a href="{{ option($key) }}" target="_blank" rel="noopener nofollow"
-                                       aria-label="{{ $label }}" title="{{ $label }}">
-                                        <i class="bi {{ $icon }}"></i>
-                                    </a>
-                                @endforeach
-                            </div>
+                    <h4 class="snr-contact-title">
+                        <i class="bi bi-share" aria-hidden="true"></i>
+                        <span>فروشگاه در رسانه‌ها</span>
+                    </h4>
+                    <div class="snr-contact-value">
+                        <div class="snr-footer-socials">
+                            @foreach($footerSocials as $key => [$icon, $label])
+                                <a href="{{ option($key) }}" target="_blank" rel="noopener nofollow"
+                                   aria-label="{{ $label }}" title="{{ $label }}">
+                                    <i class="bi {{ $icon }}"></i>
+                                </a>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -86,16 +109,15 @@
         {{-- ۲) ستون‌های لینک — گروه‌های بدون هیچ لینک نمایش داده نمی‌شوند --}}
         @if ($footerFilledGroups->isNotEmpty())
         <div class="snr-footer-links">
-            <div class="row gy-4">
+            <div class="row row-cols-2 row-cols-lg-4 gy-4">
                 @foreach($footerFilledGroups as $group)
-                    <div class="col-6 col-lg-3">
+                    <div class="col">
                         <div class="snr-links-col">
                             <h4 class="snr-links-title">{{ option('link_groups_' . $group['key'], $group['name']) }}</h4>
                             <ul>
                                 @foreach($links->where('link_group_id', $group['key']) as $link)
                                     <li>
                                         <a href="{{ $link->link }}">
-                                            <i class="bi bi-chevron-left" aria-hidden="true"></i>
                                             <span>{{ $link->title }}</span>
                                         </a>
                                     </li>
@@ -108,7 +130,7 @@
         </div>
         @endif
 
-        {{-- ۳) نوار خبرنامه --}}
+        {{-- ۳) نوار خبرنامه (خبرنامهٔ فعلی که درست است، دست‌نخورده ماند) --}}
         <div class="snr-footer-newsletter">
             <div class="snr-nl-head">
                 <span class="snr-nl-icon" aria-hidden="true"><i class="bi bi-megaphone"></i></span>
@@ -132,32 +154,14 @@
             @endif
         </div>
 
-        {{-- ۴) دربارهٔ ما + نشان‌های اعتماد --}}
+        {{-- ۴) دربارهٔ ما — لوگو راست، نشان‌های اعتماد چپ، متن زیر، «اطلاعات بیشتر» پایین-چپ (مطابق نمونه) --}}
         @if ($footerAboutText !== '' || option('info_enamad') || option('info_samandehi'))
         <div class="snr-footer-about">
-            <div class="row gy-4 align-items-start">
-                <div class="col-lg-9">
-                    <div class="snr-about-body">
-                        @if ($footerAboutText !== '')
-                            <img loading="lazy" decoding="async"
-                                 src="{{ option('info_logo', theme_asset('image/logo.png')) }}"
-                                 class="snr-about-logo" alt="{{ option('info_site_title', 'او پی شاپ') }}">
-                            <p class="snr-about-text">
-                                {{ $footerAboutText }}
-                            </p>
-                            <a href="{{ route('front.contact.index') }}" class="snr-about-more">
-                                اطلاعات بیشتر
-                                <i class="bi bi-arrow-left" aria-hidden="true"></i>
-                            </a>
-                        @else
-                            <img loading="lazy" decoding="async"
-                                 src="{{ option('info_logo', theme_asset('image/logo.png')) }}"
-                                 class="snr-about-logo" alt="{{ option('info_site_title', 'او پی شاپ') }}">
-                        @endif
-                    </div>
-                </div>
+            <div class="snr-about-top">
+                <img loading="lazy" decoding="async"
+                     src="{{ option('info_logo', theme_asset('image/logo.png')) }}"
+                     class="snr-about-logo" alt="{{ option('info_site_title', 'او پی شاپ') }}">
                 @if(option('info_enamad') || option('info_samandehi'))
-                <div class="col-lg-3">
                     <div class="snr-footer-badges">
                         @if(option('info_enamad'))
                             {!! option('info_enamad') !!}
@@ -166,9 +170,19 @@
                             {!! option('info_samandehi') !!}
                         @endif
                     </div>
-                </div>
                 @endif
             </div>
+            @if ($footerAboutText !== '')
+                <p class="snr-about-text">
+                    {{ $footerAboutText }}
+                </p>
+                <div class="snr-about-more-row">
+                    <a href="{{ route('front.contact.index') }}" class="snr-about-more">
+                        اطلاعات بیشتر
+                        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    </a>
+                </div>
+            @endif
         </div>
         @endif
 

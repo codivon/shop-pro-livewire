@@ -60,7 +60,7 @@
                     </div>
                     <div class="swiper-button-next d-lg-flex d-none"></div>
                     <div class="swiper-button-prev d-lg-flex d-none"></div>
-                    <div class="swiper-pagination"></div>
+                    <!-- <div class="swiper-pagination"></div> -->
                 </div>
             </div>
         </div>

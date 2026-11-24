@@ -17,7 +17,7 @@
             @if($widget->option('title'))
                 <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
                     <div class="title d-flex align-items-center">
-                        <img loading="lazy" decoding="async" src="{{ theme_asset('image/square.svg') }}" alt="" class="img-fluid">
+                        <img loading="lazy" decoding="async" src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
                         <h5 class="font-16 ms-3">اسلایدر<span class="main-color-one-color d-inline-block ms-1">{{ $widget->option('title') }}</span></h5>
                     </div>
                     <div class="link">

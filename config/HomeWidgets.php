@@ -466,13 +466,13 @@ return [
 
     'products-colorful-block' => [
         'title' => 'کادر محصولات با پس زمینه',
-        'image' => 'widgets/special.jpg',
+        'image' => 'widgets/products-default.jpg',
         'options' => [
             [
                 'title'      => 'عنوان قابل نمایش',
                 'key'        => 'title',
                 'input-type' => 'input',
-                'default'    => 'اسلایدر شگفت انگیز',
+                'default'    => 'پرفروشترین محصولات فروشگاه',
                 'class'      => 'col-md-4',
             ],
             [

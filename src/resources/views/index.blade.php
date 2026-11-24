@@ -61,6 +61,11 @@
                         @include('front::widgets.products-moment-block')
                         @break
 
+                    @case('products-multi-block')
+                        @include('front::widgets.products-multi-block')
+                        @break
+    
+
                     @case('products-default-block')
                         @include('front::widgets.products-default-block')
                         @break

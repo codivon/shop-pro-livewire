@@ -62,8 +62,11 @@
 @endphp
 
 <aside
+    id="ap-sidebar"
     class="fixed inset-y-0 right-0 z-50 flex w-[17rem] flex-col border-l border-line bg-surface transition-transform duration-300 lg:translate-x-0
            dark:border-night-line dark:bg-night-2"
+    {{-- فاز ۲۱۰ — id ثابت برای تزریق «رنگ سایدبار» در تنظیمات ظاهری:
+         layout.blade.php متغیرهای سطح را فقط داخل همین aside بازتعریف می‌کند --}}
     {{-- رفع «در موبایل سایدبار باز نمی‌شود»: این aside قبلاً x-data="apSidebar"
          خودش را داشت؛ یعنی دو اسکوپ جدا وجود داشت (wrapper در layout + اینجا). همبرگر
          موبایل، openِ wrapper را true می‌کرد اما openِ همین aside همچنان false می‌ماند و

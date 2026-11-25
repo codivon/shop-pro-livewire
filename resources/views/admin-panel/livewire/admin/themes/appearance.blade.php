@@ -1,16 +1,19 @@
 {{-- ============================================================
-     پنل مدیریت — تنظیمات ظاهری (فاز ۲۰۸)
+     پنل مدیریت — تنظیمات ظاهری (فاز ۲۰۸ — فاز ۲۱۰)
      همان طراحیِ بخش «ظاهر و رنگ‌بندی» قالب سانیار، این‌بار برای خودِ پنل:
        • ۱۲ پالت آماده (گرید ۴ ستونه) + شخصی‌سازی
        • اسلایدر گرمی/سردی + ردیف «حالت پیش‌فرض پالت»
        • طیف تولیدشدهٔ ۵۰..۹۵۰ (کلیک = کپی کد رنگ)
        • پیش‌نمایش زنده (دکمهٔ اصلی/خطی، برچسب، سبد خرید)
+       • فاز ۲۱۰ — رنگ فونت (جدا برای روشن و تم شب)
+       • فاز ۲۱۰ — رنگ سایدبار و رنگ صفحه (جدا برای روشن و تم شب،
+         هماهنگ با تم شب + کنتراست خودکار متن سایدبار)
        • حالت پیش‌فرض پنل (روشن/تیره)
        • بازگشت به پیش‌فرض + ذخیرهٔ پوسته
 
-     اعمال: پس از ذخیره، layout پنل متغیرهای --color-brand-* را
-     بازنویسی می‌کند و همین صفحه هم بلافاصله متغیرها را inline
-     روی <html> ست می‌کند تا بدون رفرش، کل پنل رنگ بگیرد.
+     اعمال: پس از ذخیره، layout پنل متغیرهای --color-brand-* (و متغیرهای
+     فونت/سایدبار/صفحه) را بازنویسی می‌کند و همین صفحه هم بلافاصله
+     متغیرها را inline روی <html> ست می‌کند تا بدون رفرش، کل پنل رنگ بگیرد.
      ============================================================ --}}
 @php
     /** @var array $preview */
@@ -20,6 +23,16 @@
     $gradientCss = 'linear-gradient('.$preview['gradient_angle'].'deg, '.implode(', ', $preview['gradient']).')';
     $rawBase = ($palette === 'custom') ? $custom : (collect($palettes)->firstWhere('key', $palette)['base'] ?? $base);
     $steps = [950, 900, 800, 700, 600, 500, 400, 300, 200, 100, 50];
+
+    /* فاز ۲۱۰ — رنگ فونت/سایدبار/صفحه: مقدار ذخیره‌شده یا پیش‌فرض پنل */
+    $saFontColor      = $fontColor !== '' ? $fontColor : \App\Support\PaletteEngine::DEFAULT_FONT_COLOR;
+    $saFontColorDark  = $fontColorDark !== '' ? $fontColorDark : \App\Support\PaletteEngine::DEFAULT_FONT_COLOR_DARK;
+    $saSideColor      = $sidebarColor !== '' ? $sidebarColor : \App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR;
+    $saSideColorDark  = $sidebarColorDark !== '' ? $sidebarColorDark : \App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR_DARK;
+    $saPageColor      = $pageColor !== '' ? $pageColor : \App\Support\PaletteEngine::DEFAULT_PAGE_COLOR;
+    $saPageColorDark  = $pageColorDark !== '' ? $pageColorDark : \App\Support\PaletteEngine::DEFAULT_PAGE_COLOR_DARK;
+    $saSideInk        = \App\Support\PaletteEngine::contrastInk($saSideColor);
+    $saSideInkDark    = \App\Support\PaletteEngine::contrastInk($saSideColorDark);
 @endphp
 <div class="mx-auto max-w-6xl space-y-5">
 
@@ -179,6 +192,232 @@
                 </div>
             </div>
 
+            {{-- ===== فاز ۲۱۰ — رنگ فونت ===== --}}
+            <div id="sa-font-box" class="rounded-2xl border-2 border-dashed p-4 sm:p-5"
+                 style="border-color: {{ $base }}55;">
+                <h4 class="text-[13px] font-bold">رنگ فونت</h4>
+                <p class="mt-1 text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
+                    رنگ متنِ همهٔ صفحات پنل را جدا برای حالت روشن و تم شب تنظیم کنید؛
+                    با دکمهٔ «پیش‌فرض» هر رنگ به مقدار اصلی پنل برمی‌گردد.
+                </p>
+
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    {{-- حالت روشن --}}
+                    <div class="rounded-2xl border p-4" style="border-color: {{ $base }}33;">
+                        <p class="mb-3 flex items-center gap-1.5 text-[12px] font-bold">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
+                                <circle cx="12" cy="12" r="4"/>
+                                <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                            حالت روشن
+                        </p>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <label class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                                   style="background: {{ $saFontColor }}" title="باز کردن انتخابگر رنگ">
+                                <input type="color" id="sa-font-color" value="{{ $saFontColor }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ فونت حالت روشن">
+                            </label>
+                            <input type="text" id="sa-font-hex" dir="ltr" maxlength="7" value="{{ $fontColor }}"
+                                   class="ap-input w-32 text-center text-[12px] font-bold" placeholder="#1A2333"
+                                   onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                                   aria-label="کد HEX رنگ فونت حالت روشن">
+                            <button type="button" id="sa-font-reset"
+                                    class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                    style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                    title="بازگشت رنگ فونت روشن به پیش‌فرض پنل">
+                                پیش‌فرض
+                            </button>
+                        </div>
+                        <div class="mt-3 rounded-xl bg-surface px-3 py-2.5 border border-line">
+                            <p id="sa-font-sample" class="m-0 text-[12.5px] leading-6 font-semibold"
+                               style="color: {{ $saFontColor }};">
+                                نمونهٔ متن — لیست سفارش‌ها، محصولات و تنظیمات پنل.
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- تم شب --}}
+                    <div class="rounded-2xl border p-4" style="border-color: {{ $base }}33;">
+                        <p class="mb-3 flex items-center gap-1.5 text-[12px] font-bold">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
+                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                            </svg>
+                            تم شب
+                        </p>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <label class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                                   style="background: {{ $saFontColorDark }}" title="باز کردن انتخابگر رنگ">
+                                <input type="color" id="sa-font-color-dark" value="{{ $saFontColorDark }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ فونت تم شب">
+                            </label>
+                            <input type="text" id="sa-font-hex-dark" dir="ltr" maxlength="7" value="{{ $fontColorDark }}"
+                                   class="ap-input w-32 text-center text-[12px] font-bold" placeholder="#E5EAF2"
+                                   onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                                   aria-label="کد HEX رنگ فونت تم شب">
+                            <button type="button" id="sa-font-reset-dark"
+                                    class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                    style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                    title="بازگشت رنگ فونت تم شب به پیش‌فرض پنل">
+                                پیش‌فرض
+                            </button>
+                        </div>
+                        <div class="mt-3 rounded-xl px-3 py-2.5 border border-night-line" style="background: #0d1219;">
+                            <p id="sa-font-sample-dark" class="m-0 text-[12.5px] leading-6 font-semibold"
+                               style="color: {{ $saFontColorDark }};">
+                                نمونهٔ متن در تم شب — سفارش‌ها، محصولات و تنظیمات پنل.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ===== فاز ۲۱۰ — رنگ سایدبار و صفحه ===== --}}
+            <div id="sa-shell-box" class="rounded-2xl border-2 border-dashed p-4 sm:p-5"
+                 style="border-color: {{ $base }}55;">
+                <h4 class="text-[13px] font-bold">رنگ سایدبار و صفحه</h4>
+                <p class="mt-1 text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
+                    پس‌زمینهٔ منوی کنار (سایدبار) و پس‌زمینهٔ صفحات پنل را جدا برای حالت
+                    روشن و تم شب انتخاب کنید؛ متن و هاورِ سایدبار خودکار با رنگ انتخابی
+                    هماهنگ می‌شود و خوانایی در تم شب حفظ می‌ماند.
+                </p>
+
+                <div class="mt-4 space-y-4">
+                    {{-- سایدبار --}}
+                    <div class="rounded-2xl border p-4" style="border-color: {{ $base }}33;">
+                        <p class="mb-3 flex items-center gap-1.5 text-[12px] font-bold">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
+                                <rect width="18" height="18" x="3" y="3" rx="2"/>
+                                <path d="M3 9h18"/><path d="M9 21V9"/>
+                            </svg>
+                            رنگ سایدبار
+                        </p>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="text-[11px] font-bold text-ink-3 dark:text-night-ink-2 w-12 shrink-0">روشن</span>
+                                <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                                       style="background: {{ $saSideColor }}" title="باز کردن انتخابگر رنگ">
+                                    <input type="color" id="sa-side-color" value="{{ $saSideColor }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ سایدبار حالت روشن">
+                                </label>
+                                <input type="text" id="sa-side-hex" dir="ltr" maxlength="7" value="{{ $sidebarColor }}"
+                                       class="ap-input w-28 text-center text-[12px] font-bold" placeholder="#FFFFFF"
+                                       onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                                       aria-label="کد HEX رنگ سایدبار روشن">
+                                <button type="button" id="sa-side-reset"
+                                        class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                        style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                        title="بازگشت رنگ سایدبار روشن به پیش‌فرض پنل">
+                                    پیش‌فرض
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="text-[11px] font-bold text-ink-3 dark:text-night-ink-2 w-12 shrink-0">تم شب</span>
+                                <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                                       style="background: {{ $saSideColorDark }}" title="باز کردن انتخابگر رنگ">
+                                    <input type="color" id="sa-side-color-dark" value="{{ $saSideColorDark }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ سایدبار تم شب">
+                                </label>
+                                <input type="text" id="sa-side-hex-dark" dir="ltr" maxlength="7" value="{{ $sidebarColorDark }}"
+                                       class="ap-input w-28 text-center text-[12px] font-bold" placeholder="#111827"
+                                       onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                                       aria-label="کد HEX رنگ سایدبار تم شب">
+                                <button type="button" id="sa-side-reset-dark"
+                                        class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                        style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                        title="بازگشت رنگ سایدبار تم شب به پیش‌فرض پنل">
+                                    پیش‌فرض
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- صفحه --}}
+                    <div class="rounded-2xl border p-4" style="border-color: {{ $base }}33;">
+                        <p class="mb-3 flex items-center gap-1.5 text-[12px] font-bold">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
+                                <rect width="20" height="14" x="2" y="5" rx="2"/>
+                                <path d="M2 10h20"/>
+                            </svg>
+                            رنگ صفحه
+                        </p>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="text-[11px] font-bold text-ink-3 dark:text-night-ink-2 w-12 shrink-0">روشن</span>
+                                <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                                       style="background: {{ $saPageColor }}" title="باز کردن انتخابگر رنگ">
+                                    <input type="color" id="sa-page-color" value="{{ $saPageColor }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ صفحه حالت روشن">
+                                </label>
+                                <input type="text" id="sa-page-hex" dir="ltr" maxlength="7" value="{{ $pageColor }}"
+                                       class="ap-input w-28 text-center text-[12px] font-bold" placeholder="#F6F7F8"
+                                       onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                                       aria-label="کد HEX رنگ صفحه روشن">
+                                <button type="button" id="sa-page-reset"
+                                        class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                        style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                        title="بازگشت رنگ صفحه روشن به پیش‌فرض پنل">
+                                    پیش‌فرض
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="text-[11px] font-bold text-ink-3 dark:text-night-ink-2 w-12 shrink-0">تم شب</span>
+                                <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                                       style="background: {{ $saPageColorDark }}" title="باز کردن انتخابگر رنگ">
+                                    <input type="color" id="sa-page-color-dark" value="{{ $saPageColorDark }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ صفحه تم شب">
+                                </label>
+                                <input type="text" id="sa-page-hex-dark" dir="ltr" maxlength="7" value="{{ $pageColorDark }}"
+                                       class="ap-input w-28 text-center text-[12px] font-bold" placeholder="#0D1219"
+                                       onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                                       aria-label="کد HEX رنگ صفحه تم شب">
+                                <button type="button" id="sa-page-reset-dark"
+                                        class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                        style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                        title="بازگشت رنگ صفحه تم شب به پیش‌فرض پنل">
+                                    پیش‌فرض
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- پیش‌نمایش زندهٔ سایدبار/صفحه --}}
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div>
+                            <p class="mb-1.5 text-[10px] font-bold text-ink-3 dark:text-night-ink-2">پیش‌نمایش حالت روشن:</p>
+                            <div class="flex h-24 overflow-hidden rounded-xl border" style="border-color: {{ $base }}33;">
+                                <div id="sa-shell-preview-side" class="w-1/3 shrink-0 p-2"
+                                     style="background: {{ $saSideColor }};">
+                                    <div class="mb-2 flex items-center gap-1.5">
+                                        <span class="flex size-4 items-center justify-center rounded-md text-[8px] text-white" style="background: {{ $base }}">P</span>
+                                        <span id="sa-shell-preview-side-title" class="text-[8px] font-bold" style="color: {{ $saSideInk }};">پنل</span>
+                                    </div>
+                                    <div id="sa-shell-preview-link1" class="mb-1 rounded-md px-1.5 py-1 text-[8px] font-semibold" style="background: color-mix(in srgb, {{ $base }} 14%, {{ $saSideColor }}); color: {{ $saSideInk }};">منو فعال</div>
+                                    <div id="sa-shell-preview-link2" class="rounded-md px-1.5 py-1 text-[8px]" style="color: color-mix(in srgb, {{ $saSideInk }} 72%, {{ $saSideColor }});">منو دیگر</div>
+                                </div>
+                                <div id="sa-shell-preview-page" class="flex-1 p-2"
+                                     style="background: {{ $saPageColor }};">
+                                    <div class="h-full rounded-lg border bg-white" style="border-color: rgba(0,0,0,.06);"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="mb-1.5 text-[10px] font-bold text-ink-3 dark:text-night-ink-2">پیش‌نمایش تم شب:</p>
+                            <div class="flex h-24 overflow-hidden rounded-xl border" style="border-color: {{ $base }}33;">
+                                <div id="sa-shell-preview-side-dark" class="w-1/3 shrink-0 p-2"
+                                     style="background: {{ $saSideColorDark }};">
+                                    <div class="mb-2 flex items-center gap-1.5">
+                                        <span class="flex size-4 items-center justify-center rounded-md text-[8px] text-white" style="background: {{ $base }}">P</span>
+                                        <span id="sa-shell-preview-side-title-dark" class="text-[8px] font-bold" style="color: {{ $saSideInkDark }};">پنل</span>
+                                    </div>
+                                    <div id="sa-shell-preview-link1-dark" class="mb-1 rounded-md px-1.5 py-1 text-[8px] font-semibold" style="background: color-mix(in srgb, {{ $base }} 22%, {{ $saSideColorDark }}); color: {{ $saSideInkDark }};">منو فعال</div>
+                                    <div id="sa-shell-preview-link2-dark" class="rounded-md px-1.5 py-1 text-[8px]" style="color: color-mix(in srgb, {{ $saSideInkDark }} 72%, {{ $saSideColorDark }});">منو دیگر</div>
+                                </div>
+                                <div id="sa-shell-preview-page-dark" class="flex-1 p-2"
+                                     style="background: {{ $saPageColorDark }};">
+                                    <div class="h-full rounded-lg border" style="background: #111827; border-color: rgba(255,255,255,.06);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- طیف تولیدشده --}}
             <div class="rounded-2xl bg-surface-2/60 p-4 sm:p-5 dark:bg-night-3/50">
                 <p class="mb-3 text-[12px] font-bold">
@@ -307,7 +546,32 @@
         warmth: {{ $warmth }},
         custom: @json($custom),
         mode: @json($mode),
+        fontColor: @json($fontColor),
+        fontColorDark: @json($fontColorDark),
+        sidebarColor: @json($sidebarColor),
+        sidebarColorDark: @json($sidebarColorDark),
+        pageColor: @json($pageColor),
+        pageColorDark: @json($pageColorDark),
     };
+
+    /* فاز ۲۱۰ — پیش‌فرض‌های پنل برای دکمه‌های «پیش‌فرض» */
+    const saShellDefaults = {
+        font: @json(\App\Support\PaletteEngine::DEFAULT_FONT_COLOR),
+        fontDark: @json(\App\Support\PaletteEngine::DEFAULT_FONT_COLOR_DARK),
+        side: @json(\App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR),
+        sideDark: @json(\App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR_DARK),
+        page: @json(\App\Support\PaletteEngine::DEFAULT_PAGE_COLOR),
+        pageDark: @json(\App\Support\PaletteEngine::DEFAULT_PAGE_COLOR_DARK),
+    };
+
+    /* کنتراست YIQ روی رنگ پس‌زمینه — قرینهٔ PaletteEngine::contrastInk (PHP) */
+    function saContrastInk(hex) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+        return yiq >= 150 ? saShellDefaults.font : '#F2F5FA';
+    }
 
     /* ---------- ریاضی رنگ (قرینهٔ PHP — طیف با پلهٔ ۶۰۰ = رنگ اصلی) ---------- */
     const saClamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -423,6 +687,46 @@
         Object.keys(scale).forEach((step) => s.setProperty('--color-brand-' + step, scale[step]));
     }
 
+    /* فاز ۲۱۰ — اعمال فوری فونت/سایدبار/صفحه پس از ذخیره یا بازگشت (بدون رفرش).
+       مهم: متغیرهای سطحِ سایدبار باید روی خودِ #ap-sidebar ست شوند نه روی <html>؛
+       وگرنه کارت‌ها و سطوح سفیدِ کل پنل هم رنگ می‌گرفتند. حالت «پیش‌فرض» هم با
+       ست‌کردن مقدار پیش‌فرض پنل اعمال می‌شود تا بلوک استایل قبلیِ ذخیره‌شده بی‌اثر شود. */
+    function saApplyShellVars() {
+        const s = document.documentElement.style;
+        const sideColor = saState.sidebarColor || saShellDefaults.side;
+        const sideColorDark = saState.sidebarColorDark || saShellDefaults.sideDark;
+
+        /* رنگ فونت — متغیرهای سراسری؛ خالی = پیش‌فرض پنل */
+        s.setProperty('--color-ink', saState.fontColor || saShellDefaults.font);
+        s.setProperty('--color-night-ink', saState.fontColorDark || saShellDefaults.fontDark);
+
+        /* پس‌زمینهٔ سایدبار/صفحه — فقط متغیرها (قواعد تزریقی layout از همین‌ها می‌خوانند) */
+        s.setProperty('--ap-side-bg', sideColor);
+        s.setProperty('--ap-side-bg-dark', sideColorDark);
+        s.setProperty('--ap-page-bg', saState.pageColor || saShellDefaults.page);
+        s.setProperty('--ap-page-bg-dark', saState.pageColorDark || saShellDefaults.pageDark);
+
+        /* متغیرهای مشتق سطح سایدبار — فقط داخل #ap-sidebar */
+        const side = document.getElementById('ap-sidebar');
+        if (side) {
+            const ink = saContrastInk(sideColor);
+            const inkD = saContrastInk(sideColorDark);
+            const st = side.style;
+            st.setProperty('--color-surface', sideColor);
+            st.setProperty('--color-surface-2', 'color-mix(in srgb, ' + sideColor + ' 93%, ' + ink + ')');
+            st.setProperty('--color-surface-3', 'color-mix(in srgb, ' + sideColor + ' 87%, ' + ink + ')');
+            st.setProperty('--color-line', 'color-mix(in srgb, ' + sideColor + ' 82%, ' + ink + ')');
+            st.setProperty('--color-ink', ink);
+            st.setProperty('--color-ink-2', 'color-mix(in srgb, ' + ink + ' 76%, ' + sideColor + ')');
+            st.setProperty('--color-ink-3', 'color-mix(in srgb, ' + ink + ' 56%, ' + sideColor + ')');
+            st.setProperty('--color-night-2', sideColorDark);
+            st.setProperty('--color-night-3', 'color-mix(in srgb, ' + sideColorDark + ' 86%, ' + inkD + ')');
+            st.setProperty('--color-night-line', 'color-mix(in srgb, ' + sideColorDark + ' 80%, ' + inkD + ')');
+            st.setProperty('--color-night-ink', inkD);
+            st.setProperty('--color-night-ink-2', 'color-mix(in srgb, ' + inkD + ' 72%, ' + sideColorDark + ')');
+        }
+    }
+
     function saApplyUI() {
         const pv = saComputePreview();
         saLast = pv;
@@ -456,12 +760,69 @@
         if (defBtn) { defBtn.style.borderColor = base + '4D'; defBtn.style.color = base; }
 
         // جعبه‌های خط‌چین
-        ['sa-warmth-box', 'sa-custom-box'].forEach((id) => {
+        ['sa-warmth-box', 'sa-custom-box', 'sa-font-box', 'sa-shell-box'].forEach((id) => {
             const box = document.getElementById(id);
             if (box) box.style.borderColor = base + '55';
         });
         const customBox = document.getElementById('sa-custom-box');
         if (customBox) customBox.classList.toggle('hidden', saState.palette !== 'custom');
+
+        /* فاز ۲۱۰ — رنگ فونت: نمونه‌های زنده + نشانگر انتخابگر + دکمهٔ پیش‌فرض */
+        const fontSample = document.getElementById('sa-font-sample');
+        const fontSampleDark = document.getElementById('sa-font-sample-dark');
+        const fontInput = document.getElementById('sa-font-color');
+        const fontInputDark = document.getElementById('sa-font-color-dark');
+        const fontReset = document.getElementById('sa-font-reset');
+        const fontResetDark = document.getElementById('sa-font-reset-dark');
+        if (fontSample) fontSample.style.color = saState.fontColor || saShellDefaults.font;
+        if (fontSampleDark) fontSampleDark.style.color = saState.fontColorDark || saShellDefaults.fontDark;
+        if (fontInput) fontInput.value = saState.fontColor || saShellDefaults.font;
+        if (fontInputDark) fontInputDark.value = saState.fontColorDark || saShellDefaults.fontDark;
+        if (fontReset) { fontReset.style.borderColor = base + '4D'; fontReset.style.color = base; }
+        if (fontResetDark) { fontResetDark.style.borderColor = base + '4D'; fontResetDark.style.color = base; }
+
+        /* فاز ۲۱۰ — رنگ سایدبار/صفحه: پیش‌نمایش زنده + نشانگرها + دکمه‌های پیش‌فرض */
+        const sideColor = saState.sidebarColor || saShellDefaults.side;
+        const sideColorDark = saState.sidebarColorDark || saShellDefaults.sideDark;
+        const pageColor = saState.pageColor || saShellDefaults.page;
+        const pageColorDark = saState.pageColorDark || saShellDefaults.pageDark;
+        const sideInk = saContrastInk(sideColor);
+        const sideInkDark = saContrastInk(sideColorDark);
+
+        const pvSide = document.getElementById('sa-shell-preview-side');
+        const pvSideDark = document.getElementById('sa-shell-preview-side-dark');
+        const pvPage = document.getElementById('sa-shell-preview-page');
+        const pvPageDark = document.getElementById('sa-shell-preview-page-dark');
+        if (pvSide) pvSide.style.background = sideColor;
+        if (pvSideDark) pvSideDark.style.background = sideColorDark;
+        if (pvPage) pvPage.style.background = pageColor;
+        if (pvPageDark) pvPageDark.style.background = pageColorDark;
+
+        const pvSideTitle = document.getElementById('sa-shell-preview-side-title');
+        const pvSideTitleDark = document.getElementById('sa-shell-preview-side-title-dark');
+        const pvLink1 = document.getElementById('sa-shell-preview-link1');
+        const pvLink1Dark = document.getElementById('sa-shell-preview-link1-dark');
+        const pvLink2 = document.getElementById('sa-shell-preview-link2');
+        const pvLink2Dark = document.getElementById('sa-shell-preview-link2-dark');
+        if (pvSideTitle) pvSideTitle.style.color = sideInk;
+        if (pvSideTitleDark) pvSideTitleDark.style.color = sideInkDark;
+        if (pvLink1) { pvLink1.style.background = 'color-mix(in srgb, ' + base + ' 14%, ' + sideColor + ')'; pvLink1.style.color = sideInk; }
+        if (pvLink1Dark) { pvLink1Dark.style.background = 'color-mix(in srgb, ' + base + ' 22%, ' + sideColorDark + ')'; pvLink1Dark.style.color = sideInkDark; }
+        if (pvLink2) pvLink2.style.color = 'color-mix(in srgb, ' + sideInk + ' 72%, ' + sideColor + ')';
+        if (pvLink2Dark) pvLink2Dark.style.color = 'color-mix(in srgb, ' + sideInkDark + ' 72%, ' + sideColorDark + ')';
+
+        const sideInput = document.getElementById('sa-side-color');
+        const sideInputDark = document.getElementById('sa-side-color-dark');
+        const pageInput = document.getElementById('sa-page-color');
+        const pageInputDark = document.getElementById('sa-page-color-dark');
+        if (sideInput) sideInput.value = sideColor;
+        if (sideInputDark) sideInputDark.value = sideColorDark;
+        if (pageInput) pageInput.value = pageColor;
+        if (pageInputDark) pageInputDark.value = pageColorDark;
+        ['sa-side-reset', 'sa-side-reset-dark', 'sa-page-reset', 'sa-page-reset-dark'].forEach((id) => {
+            const btn = document.getElementById(id);
+            if (btn) { btn.style.borderColor = base + '4D'; btn.style.color = base; }
+        });
 
         // طیف تولیدشده
         saRoot.querySelectorAll('.sa-swatch').forEach((sw) => {
@@ -557,6 +918,43 @@
         });
     });
 
+    /* ---------- فاز ۲۱۰ — رویدادهای رنگ فونت/سایدبار/صفحه ---------- */
+    const saBindPair = (inputId, hexId, stateKey, applyKey) => {
+        const input = document.getElementById(inputId);
+        const hexInput = document.getElementById(hexId);
+        if (input) {
+            input.addEventListener('input', () => {
+                saState[stateKey] = input.value.toUpperCase();
+                if (hexInput) hexInput.value = saState[stateKey];
+                saApplyUI();
+            });
+        }
+        if (hexInput) {
+            hexInput.addEventListener('input', () => {
+                const v = hexInput.value.trim();
+                if (/^#?[0-9a-fA-F]{6}$/.test(v)) {
+                    saState[stateKey] = ('#' + v.replace('#', '')).toUpperCase();
+                    if (input) input.value = saState[stateKey];
+                    saApplyUI();
+                }
+            });
+        }
+        const resetBtn = document.getElementById(applyKey);
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                saState[stateKey] = '';
+                saApplyUI();
+            });
+        }
+    };
+
+    saBindPair('sa-font-color', 'sa-font-hex', 'fontColor', 'sa-font-reset');
+    saBindPair('sa-font-color-dark', 'sa-font-hex-dark', 'fontColorDark', 'sa-font-reset-dark');
+    saBindPair('sa-side-color', 'sa-side-hex', 'sidebarColor', 'sa-side-reset');
+    saBindPair('sa-side-color-dark', 'sa-side-hex-dark', 'sidebarColorDark', 'sa-side-reset-dark');
+    saBindPair('sa-page-color', 'sa-page-hex', 'pageColor', 'sa-page-reset');
+    saBindPair('sa-page-color-dark', 'sa-page-hex-dark', 'pageColorDark', 'sa-page-reset-dark');
+
     // کلیک روی پله‌های طیف = کپی کد رنگ
     saRoot.querySelectorAll('.sa-swatch').forEach((sw) => {
         sw.addEventListener('click', () => {
@@ -583,9 +981,15 @@
             saSaveBtn.disabled = true;
             saSaveBtn.style.opacity = '0.7';
             try {
-                await $wire.syncState(saState.palette, saState.warmth, saState.custom, saState.mode);
+                await $wire.syncState(
+                    saState.palette, saState.warmth, saState.custom, saState.mode,
+                    saState.fontColor, saState.fontColorDark,
+                    saState.sidebarColor, saState.sidebarColorDark,
+                    saState.pageColor, saState.pageColorDark
+                );
                 await $wire.call('saveSkin');
                 saApplyAdminVars(saComputePreview().scale);
+                saApplyShellVars();
             } finally {
                 saSaveBtn.disabled = false;
                 saSaveBtn.style.opacity = '1';
@@ -613,10 +1017,17 @@
         if (data.warmth !== undefined && data.warmth !== null) saState.warmth = parseInt(data.warmth, 10) || 0;
         if (data.custom) saState.custom = data.custom;
         if (data.mode) saState.mode = data.mode;
+        if (data.fontColor !== undefined && data.fontColor !== null) saState.fontColor = data.fontColor;
+        if (data.fontColorDark !== undefined && data.fontColorDark !== null) saState.fontColorDark = data.fontColorDark;
+        if (data.sidebarColor !== undefined && data.sidebarColor !== null) saState.sidebarColor = data.sidebarColor;
+        if (data.sidebarColorDark !== undefined && data.sidebarColorDark !== null) saState.sidebarColorDark = data.sidebarColorDark;
+        if (data.pageColor !== undefined && data.pageColor !== null) saState.pageColor = data.pageColor;
+        if (data.pageColorDark !== undefined && data.pageColorDark !== null) saState.pageColorDark = data.pageColorDark;
         if (saHexInput) saHexInput.value = saState.custom;
         if (saColorInput) saColorInput.value = saState.custom;
         saApplyUI();
         saApplyAdminVars(saComputePreview().scale);
+        saApplyShellVars();
     });
 </script>
 @endscript

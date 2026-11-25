@@ -35,6 +35,26 @@ class AppearanceSettings extends Component
     /** حالت پیش‌فرض پنل: light | dark */
     public string $mode = 'light';
 
+    /* فاز ۲۱۰ — رنگ فونت/سایدبار/صفحه؛ خالی = پیش‌فرض پنل (بدون بازنویسی) */
+
+    /** رنگ فونت پنل در حالت روشن */
+    public string $fontColor = '';
+
+    /** رنگ فونت پنل در تم شب */
+    public string $fontColorDark = '';
+
+    /** رنگ سایدبار در حالت روشن */
+    public string $sidebarColor = '';
+
+    /** رنگ سایدبار در تم شب */
+    public string $sidebarColorDark = '';
+
+    /** رنگ صفحه در حالت روشن */
+    public string $pageColor = '';
+
+    /** رنگ صفحه در تم شب */
+    public string $pageColorDark = '';
+
     /** برچسب وضعیت ذخیره‌شده (نشان «ذخیره‌سازی: …») */
     public string $savedLabel = '';
 
@@ -51,6 +71,12 @@ class AppearanceSettings extends Component
         $this->warmth = (int) $state['warmth'];
         $this->custom = $state['custom'];
         $this->mode = $state['mode'];
+        $this->fontColor = (string) ($state['font_color'] ?? '');
+        $this->fontColorDark = (string) ($state['font_color_dark'] ?? '');
+        $this->sidebarColor = (string) ($state['sidebar_color'] ?? '');
+        $this->sidebarColorDark = (string) ($state['sidebar_color_dark'] ?? '');
+        $this->pageColor = (string) ($state['page_color'] ?? '');
+        $this->pageColorDark = (string) ($state['page_color_dark'] ?? '');
         $this->savedLabel = $state['label'];
         $this->saved = $state['saved'];
     }
@@ -58,7 +84,7 @@ class AppearanceSettings extends Component
     /**
      * همگام‌سازی وضعیت از JS (قبل از ذخیره) — یک رفت‌وبرگشت برای هر ۴ مقدار.
      */
-    public function syncState($palette = null, $warmth = null, $custom = null, $mode = null): void
+    public function syncState($palette = null, $warmth = null, $custom = null, $mode = null, $fontColor = null, $fontColorDark = null, $sidebarColor = null, $sidebarColorDark = null, $pageColor = null, $pageColorDark = null): void
     {
         if (is_string($palette) && $palette !== '') {
             $this->palette = $palette;
@@ -72,6 +98,26 @@ class AppearanceSettings extends Component
         if (is_string($mode) && in_array($mode, ['light', 'dark'], true)) {
             $this->mode = $mode;
         }
+
+        /* فاز ۲۱۰ — رنگ‌های تکمیلی: خالی = پیش‌فرض پنل */
+        if (is_string($fontColor)) {
+            $this->fontColor = PaletteEngine::normalizeHexOrNull($fontColor) ?? '';
+        }
+        if (is_string($fontColorDark)) {
+            $this->fontColorDark = PaletteEngine::normalizeHexOrNull($fontColorDark) ?? '';
+        }
+        if (is_string($sidebarColor)) {
+            $this->sidebarColor = PaletteEngine::normalizeHexOrNull($sidebarColor) ?? '';
+        }
+        if (is_string($sidebarColorDark)) {
+            $this->sidebarColorDark = PaletteEngine::normalizeHexOrNull($sidebarColorDark) ?? '';
+        }
+        if (is_string($pageColor)) {
+            $this->pageColor = PaletteEngine::normalizeHexOrNull($pageColor) ?? '';
+        }
+        if (is_string($pageColorDark)) {
+            $this->pageColorDark = PaletteEngine::normalizeHexOrNull($pageColorDark) ?? '';
+        }
     }
 
     /** ذخیرهٔ پوستهٔ پنل — همان لحظه روی کل پنل اعمال می‌شود */
@@ -80,7 +126,14 @@ class AppearanceSettings extends Component
         auth('adminPanel')->user()?->can('themes.settings') ?: abort(403);
 
         $previous = PaletteEngine::stateFromOption();
-        $payload = PaletteEngine::resolve($this->palette, $this->warmth, $this->custom, $this->mode);
+        $payload = PaletteEngine::resolve($this->palette, $this->warmth, $this->custom, $this->mode, [
+            'font_color'         => $this->fontColor,
+            'font_color_dark'    => $this->fontColorDark,
+            'sidebar_color'      => $this->sidebarColor,
+            'sidebar_color_dark' => $this->sidebarColorDark,
+            'page_color'         => $this->pageColor,
+            'page_color_dark'    => $this->pageColorDark,
+        ]);
 
         if (PaletteEngine::isDefaultState($payload)) {
             $payload['label'] = 'زمرّد (پیش‌فرض)';
@@ -103,6 +156,12 @@ class AppearanceSettings extends Component
                         'رنگ اصلی' => $payload['base'],
                         'گرمی/سردی' => $payload['warmth'],
                         'حالت پیش‌فرض' => $payload['mode'] === 'dark' ? 'تیره' : 'روشن',
+                        'رنگ فونت (روشن)' => $payload['font_color'] ?? 'پیش‌فرض',
+                        'رنگ فونت (تم شب)' => $payload['font_color_dark'] ?? 'پیش‌فرض',
+                        'رنگ سایدبار (روشن)' => $payload['sidebar_color'] ?? 'پیش‌فرض',
+                        'رنگ سایدبار (تم شب)' => $payload['sidebar_color_dark'] ?? 'پیش‌فرض',
+                        'رنگ صفحه (روشن)' => $payload['page_color'] ?? 'پیش‌فرض',
+                        'رنگ صفحه (تم شب)' => $payload['page_color_dark'] ?? 'پیش‌فرض',
                     ],
                 ],
                 'ip' => request()->ip(),
@@ -145,11 +204,17 @@ class AppearanceSettings extends Component
         $this->warmth = 0;
         $this->custom = PaletteEngine::DEFAULT_CUSTOM;
         $this->mode = 'light';
+        $this->fontColor = '';
+        $this->fontColorDark = '';
+        $this->sidebarColor = '';
+        $this->sidebarColorDark = '';
+        $this->pageColor = '';
+        $this->pageColorDark = '';
         $this->savedLabel = $default['label'];
         $this->saved = false;
 
         // وضعیت تازه برای JS (UI انتخاب‌ها و طیف باید ریست شود)
-        $this->dispatch('appearance-reset', palette: $this->palette, warmth: $this->warmth, custom: $this->custom, mode: $this->mode, label: $this->savedLabel);
+        $this->dispatch('appearance-reset', palette: $this->palette, warmth: $this->warmth, custom: $this->custom, mode: $this->mode, fontColor: '', fontColorDark: '', sidebarColor: '', sidebarColorDark: '', pageColor: '', pageColorDark: '', label: $this->savedLabel);
 
         $this->dispatch('toast', message: 'پوستهٔ پنل به حالت پیش‌فرض (زمردی) بازگشت.', type: 'info');
     }
@@ -157,7 +222,14 @@ class AppearanceSettings extends Component
     public function render()
     {
         // طیف و رنگ‌های زندهٔ سمت سرور برای رندر اولیه؛ پس از آن JS لحظه‌ای به‌روزرسانی می‌کند
-        $preview = PaletteEngine::resolve($this->palette, $this->warmth, $this->custom, $this->mode);
+        $preview = PaletteEngine::resolve($this->palette, $this->warmth, $this->custom, $this->mode, [
+            'font_color'         => $this->fontColor,
+            'font_color_dark'    => $this->fontColorDark,
+            'sidebar_color'      => $this->sidebarColor,
+            'sidebar_color_dark' => $this->sidebarColorDark,
+            'page_color'         => $this->pageColor,
+            'page_color_dark'    => $this->pageColorDark,
+        ]);
 
         return view('admin-panel::livewire.admin.themes.appearance', [
             'palettes' => PaletteEngine::palettes(),

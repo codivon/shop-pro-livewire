@@ -17,6 +17,10 @@
             : (($ap_appearance_payload['mode'] ?? 'light') === 'dark' ? 'dark' : ''));
     $ap_scale = $ap_appearance_payload['scale'];
     $ap_base = $ap_appearance_payload['base'] ?? ($ap_scale[600] ?? '#059669');
+
+    /* فاز ۲۱۰ — رنگ فونت پنل از پوستهٔ فعال (بدون سایدبار در این صفحه) */
+    $ap_font      = $ap_appearance_payload['font_color'] ?? null;
+    $ap_font_dark = $ap_appearance_payload['font_color_dark'] ?? null;
 @endphp
 <!DOCTYPE html>
 <html lang="fa" dir="rtl"
@@ -45,6 +49,14 @@
             --ck-color-base-active: var(--color-brand-600);
             --ck-color-base-action-muted: var(--color-brand-100);
             --ck-focus-border-color: var(--color-brand-600);
+@if ($ap_font)
+            /* فاز ۲۱۰ — رنگ فونت پنل (روشن) */
+            --color-ink: {{ $ap_font }};
+@endif
+@if ($ap_font_dark)
+            /* فاز ۲۱۰ — رنگ فونت پنل (تم شب) */
+            --color-night-ink: {{ $ap_font_dark }};
+@endif
         }
 
         .ap-btn-primary {

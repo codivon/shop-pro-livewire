@@ -3,11 +3,19 @@
 namespace App\Support;
 
 /* ============================================================
-   PaletteEngine (فاز ۲۰۸) — موتور پوستهٔ رنگی «پنل مدیریت»
+   PaletteEngine (فاز ۲۰۸ — فاز ۲۱۰) — موتور پوستهٔ رنگی «پنل مدیریت»
    ------------------------------------------------------------
    همان زبانِ طراحیِ بخش «ظاهر و رنگ‌بندی» قالب سانیار، این‌بار
    برای خودِ پنل: ۱۲ پالت آماده + شخصی‌سازی + اسلایدر گرمی/سردی
    + طیف ۵۰..۹۵۰ + حالت پیش‌فرض روشن/تیره.
+
+   فاز ۲۱۰ — علاوه بر پالت:
+   • رنگ فونت (متن) پنل — جدا برای حالت روشن و تم شب
+     (بازنویسی --color-ink و --color-night-ink).
+   • رنگ سایدبار و رنگ صفحه — جدا برای حالت روشن و تم شب؛
+     رنگ متن/هاور/خط سایدبار خودکار از همان رنگِ انتخابی مشتق
+     می‌شود (color-mix + کنتراست YIQ) تا همیشه خوانا بماند و
+     با تم شب هماهنگ باشد.
 
    تفاوت با نسخهٔ قالب (Themes\SaniarTheme\src\Support):
    • کلید option: «admin_appearance» (مستقل از زبان — در
@@ -32,6 +40,27 @@ class PaletteEngine
 
     /** رنگ اصلی پیش‌فرض حالت شخصی‌سازی */
     public const DEFAULT_CUSTOM = '#D62976';
+
+    /* فاز ۲۱۰ — پیش‌فرض‌های رنگ فونت/سایدبار/صفحه (= مقادیر فعلی پنل؛
+       خالی بودن هرکدام در payload یعنی «بدون بازنویسی، همان پیش‌فرض پنل») */
+
+    /** رنگ فونت پنل در حالت روشن (‎--color-ink در admin.css) */
+    public const DEFAULT_FONT_COLOR = '#1A2333';
+
+    /** رنگ فونت پنل در تم شب (‎--color-night-ink در admin.css) */
+    public const DEFAULT_FONT_COLOR_DARK = '#E5EAF2';
+
+    /** رنگ سایدبار در حالت روشن (bg-surface) */
+    public const DEFAULT_SIDEBAR_COLOR = '#FFFFFF';
+
+    /** رنگ سایدبار در تم شب (dark:bg-night-2) */
+    public const DEFAULT_SIDEBAR_COLOR_DARK = '#111827';
+
+    /** رنگ صفحه در حالت روشن (bg-surface-2 بدنه) */
+    public const DEFAULT_PAGE_COLOR = '#F6F7F8';
+
+    /** رنگ صفحه در تم شب (dark:bg-night بدنه) */
+    public const DEFAULT_PAGE_COLOR_DARK = '#0D1219';
 
     /**
      * پالت‌های آماده — ترتیب آرایه = چیدمان گرید RTL (اولین = راست‌ترین کارت)
@@ -177,7 +206,41 @@ class PaletteEngine
         return strtoupper($fallback);
     }
 
-    /** HEX → [h(۰..۳۶۰), s(۰..۱۰۰), l(۰..۱۰۰)] */
+    /**
+     * فاز ۲۱۰ — نرمال‌سازی HEX با اجازهٔ خالی بودن.
+     * خالی/نامعتبر = null یعنی «پیش‌فرض پنل» (بدون بازنویسی متغیر).
+     */
+    public static function normalizeHexOrNull(?string $value): ?string
+    {
+        $value = strtoupper(trim((string) $value));
+        if (preg_match('/^#?([0-9A-F]{6})$/', $value, $m)) {
+            return '#'.$m[1];
+        }
+
+        return null;
+    }
+
+    /**
+     * فاز ۲۱۰ — رنگ متنِ خوانا روی پس‌زمینهٔ داده‌شده (معیار YIQ).
+     * برای سایدبارِ رنگی: متن تیره روی رنگ روشن و متن روشن روی رنگ تیره.
+     */
+    public static function contrastInk(string $hex): string
+    {
+        [$r, $g, $b] = self::hexToRgb($hex);
+        $yiq = (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+        return $yiq >= 150 ? self::DEFAULT_FONT_COLOR : '#F2F5FA';
+    }
+
+    /** HEX -> "R, G, B" (for rgba() shadows in the injected style) */
+    public static function hexToRgbString(string $hex): string
+    {
+        [$r, $g, $b] = self::hexToRgb($hex);
+
+        return $r . ', ' . $g . ', ' . $b;
+    }
+
+    /** HEX -> HSL: h(0-360), s(0-100), l(0-100) */
     public static function hexToHsl(string $hex): array
     {
         [$r, $g, $b] = self::hexToRgb($hex);
@@ -384,7 +447,7 @@ class PaletteEngine
      * محاسبهٔ کامل وضعیت پوسته از ورودی‌های خام.
      * خروجی = همان JSON ذخیره‌شونده در option (layout پنل فقط مصرف‌کننده است).
      */
-    public static function resolve(string $paletteKey, int $warmth, ?string $customHex = null, ?string $mode = 'light'): array
+    public static function resolve(string $paletteKey, int $warmth, ?string $customHex = null, ?string $mode = 'light', ?array $extras = null): array
     {
         $palettes = self::indexed();
         $paletteKey = isset($palettes[$paletteKey]) ? $paletteKey : self::DEFAULT_PALETTE;
@@ -418,7 +481,7 @@ class PaletteEngine
         }
 
         return [
-            'v'              => 1,
+            'v'              => 2,
             'palette'        => $paletteKey,
             'warmth'         => $warmth,
             'custom'         => $custom,
@@ -431,6 +494,15 @@ class PaletteEngine
             'scale'          => $scale,
             'gradient'       => array_values($stops),
             'gradient_angle' => (int) ($palette['gradient_angle'] ?? 135),
+
+            /* فاز ۲۱۰ — رنگ فونت/سایدبار/صفحه (جدا برای روشن و تم شب)؛
+               null یعنی «پیش‌فرض پنل» و در تزریق CSS رد می‌شود. */
+            'font_color'         => self::normalizeHexOrNull($extras['font_color'] ?? null),
+            'font_color_dark'    => self::normalizeHexOrNull($extras['font_color_dark'] ?? null),
+            'sidebar_color'      => self::normalizeHexOrNull($extras['sidebar_color'] ?? null),
+            'sidebar_color_dark' => self::normalizeHexOrNull($extras['sidebar_color_dark'] ?? null),
+            'page_color'         => self::normalizeHexOrNull($extras['page_color'] ?? null),
+            'page_color_dark'    => self::normalizeHexOrNull($extras['page_color_dark'] ?? null),
         ];
     }
 
@@ -445,7 +517,14 @@ class PaletteEngine
     /** پوشهٔ پیش‌فرض پنل (زمردیِ فعلی — وقتی چیزی ذخیره نشده یا مقدار خراب است) */
     public static function defaultPayload(): array
     {
-        $payload = self::resolve(self::DEFAULT_PALETTE, 0, self::DEFAULT_CUSTOM, 'light');
+        $payload = self::resolve(self::DEFAULT_PALETTE, 0, self::DEFAULT_CUSTOM, 'light', [
+            'font_color'         => self::DEFAULT_FONT_COLOR,
+            'font_color_dark'    => self::DEFAULT_FONT_COLOR_DARK,
+            'sidebar_color'      => self::DEFAULT_SIDEBAR_COLOR,
+            'sidebar_color_dark' => self::DEFAULT_SIDEBAR_COLOR_DARK,
+            'page_color'         => self::DEFAULT_PAGE_COLOR,
+            'page_color_dark'    => self::DEFAULT_PAGE_COLOR_DARK,
+        ]);
         $payload['label'] = 'زمرّد (پیش‌فرض)';
 
         return $payload;
@@ -471,13 +550,19 @@ class PaletteEngine
             || ! is_string($data['palette'])
         ) {
             return [
-                'palette' => self::DEFAULT_PALETTE,
-                'warmth'  => 0,
-                'custom'  => self::DEFAULT_CUSTOM,
-                'mode'    => 'light',
-                'label'   => 'زمرّد (پیش‌فرض)',
-                'saved'   => false,
-                'payload' => self::defaultPayload(),
+                'palette'            => self::DEFAULT_PALETTE,
+                'warmth'             => 0,
+                'custom'             => self::DEFAULT_CUSTOM,
+                'mode'               => 'light',
+                'font_color'         => '',
+                'font_color_dark'    => '',
+                'sidebar_color'      => '',
+                'sidebar_color_dark' => '',
+                'page_color'         => '',
+                'page_color_dark'    => '',
+                'label'              => 'زمرّد (پیش‌فرض)',
+                'saved'              => false,
+                'payload'            => self::defaultPayload(),
             ];
         }
 
@@ -485,7 +570,15 @@ class PaletteEngine
             (string) $data['palette'],
             (int) ($data['warmth'] ?? 0),
             isset($data['custom']) ? (string) $data['custom'] : self::DEFAULT_CUSTOM,
-            ($data['mode'] ?? 'light') === 'dark' ? 'dark' : 'light'
+            ($data['mode'] ?? 'light') === 'dark' ? 'dark' : 'light',
+            [
+                'font_color'         => isset($data['font_color']) ? (string) $data['font_color'] : '',
+                'font_color_dark'    => isset($data['font_color_dark']) ? (string) $data['font_color_dark'] : '',
+                'sidebar_color'      => isset($data['sidebar_color']) ? (string) $data['sidebar_color'] : '',
+                'sidebar_color_dark' => isset($data['sidebar_color_dark']) ? (string) $data['sidebar_color_dark'] : '',
+                'page_color'         => isset($data['page_color']) ? (string) $data['page_color'] : '',
+                'page_color_dark'    => isset($data['page_color_dark']) ? (string) $data['page_color_dark'] : '',
+            ]
         );
 
         if (self::isDefaultState($payload)) {
@@ -493,13 +586,19 @@ class PaletteEngine
         }
 
         return [
-            'palette' => $payload['palette'],
-            'warmth'  => $payload['warmth'],
-            'custom'  => $payload['custom'],
-            'mode'    => $payload['mode'],
-            'label'   => $payload['label'],
-            'saved'   => true,
-            'payload' => $payload,
+            'palette'            => $payload['palette'],
+            'warmth'             => $payload['warmth'],
+            'custom'             => $payload['custom'],
+            'mode'               => $payload['mode'],
+            'font_color'         => $payload['font_color'] ?? '',
+            'font_color_dark'    => $payload['font_color_dark'] ?? '',
+            'sidebar_color'      => $payload['sidebar_color'] ?? '',
+            'sidebar_color_dark' => $payload['sidebar_color_dark'] ?? '',
+            'page_color'         => $payload['page_color'] ?? '',
+            'page_color_dark'    => $payload['page_color_dark'] ?? '',
+            'label'              => $payload['label'],
+            'saved'              => true,
+            'payload'            => $payload,
         ];
     }
 

@@ -66,6 +66,21 @@
            می‌شوند (سایهٔ دکمهٔ اصلی، خط drop ردیف‌ها، نقطهٔ پالس و CKEditor). */
         $ap_scale = $ap_appearance_payload['scale'];
         $ap_base = $ap_appearance_payload['base'] ?? ($ap_scale[600] ?? '#059669');
+
+        /* فاز ۲۱۰ — رنگ فونت/سایدبار/صفحه از پوستهٔ فعال.
+           null = «پیش‌فرض پنل» (بدون بازنویسی متغیر). رنگ متنِ سایدبار
+           با کنتراست YIQ از خودِ رنگِ سایدبار مشتق می‌شود تا هر رنگی
+           که مدیر انتخاب کند، متن همیشه خوانا می‌ماند. */
+        $ap_font      = $ap_appearance_payload['font_color'] ?? null;
+        $ap_font_dark = $ap_appearance_payload['font_color_dark'] ?? null;
+
+        $ap_side      = $ap_appearance_payload['sidebar_color'] ?? null;
+        $ap_side_dark = $ap_appearance_payload['sidebar_color_dark'] ?? null;
+        $ap_side_ink      = $ap_side ? \App\Support\PaletteEngine::contrastInk($ap_side) : null;
+        $ap_side_ink_dark = $ap_side_dark ? \App\Support\PaletteEngine::contrastInk($ap_side_dark) : null;
+
+        $ap_page      = $ap_appearance_payload['page_color'] ?? null;
+        $ap_page_dark = $ap_appearance_payload['page_color_dark'] ?? null;
     @endphp
     <style id="admin-appearance-vars">
         :root {
@@ -73,6 +88,14 @@
 @foreach ($ap_scale as $ap_step => $ap_hex)
             --color-brand-{{ $ap_step }}: {{ $ap_hex }};
 @endforeach
+@endif
+@if ($ap_font)
+            /* فاز ۲۱۰ — رنگ فونت پنل (حالت روشن) */
+            --color-ink: {{ $ap_font }};
+@endif
+@if ($ap_font_dark)
+            /* فاز ۲۱۰ — رنگ فونت پنل (تم شب) — فقط ابزارهای dark این var را می‌خوانند */
+            --color-night-ink: {{ $ap_font_dark }};
 @endif
             /* CKEditor — رنگ تأکیدی ویرایشگر هم‌رنگ برند پنل */
             --ck-color-base-action: var(--color-brand-600);
@@ -102,6 +125,53 @@
             0%, 100% { box-shadow: 0 0 0 0 {{ $ap_base }}80; }
             50% { box-shadow: 0 0 0 5px {{ $ap_base }}00; }
         }
+    </style>
+
+    {{-- فاز ۲۱۰ — رنگ سایدبار و رنگ صفحه.
+         سایدبار: به‌جای دست‌زدن به کلاس‌ها، همان متغیرهای سطح (surface/line/ink)
+         فقط داخل #ap-sidebar بازتعریف می‌شوند؛ همهٔ رنگ‌های فرعی (هاور، کارت
+         پروفایل، خطوط، متن کم‌رنگ) با color-mix از خودِ رنگ انتخابی مشتق
+         می‌شوند تا در حالت روشن و تم شب همیشه خوانا و هماهنگ بمانند.
+         صفحه: پس‌زمینهٔ بدنه با !important بازنویسی می‌شود؛ کارت‌ها و
+         سطوح سفید دست‌نخورده می‌مانند. --}}
+    <style id="admin-appearance-shell">
+        /* پس‌زمینهٔ سایدبار/صفحه همیشه از متغیر خوانده می‌شود تا در نبودِ رنگ
+           سفارشی، دقیقاً مقدار پیش‌فرض پنل و در تم شب مقدار تیره اعمال شود؛
+           و در JS پس از ذخیره هم فقط همین متغیرها ست شوند (بدون دست‌زدن به کلاس‌ها). */
+        #ap-sidebar { background-color: var(--ap-side-bg, var(--color-surface)); }
+        html.dark #ap-sidebar { background-color: var(--ap-side-bg-dark, var(--color-night-2)); }
+        body { background-color: var(--ap-page-bg, var(--color-surface-2)); }
+        html.dark body { background-color: var(--ap-page-bg-dark, var(--color-night)); }
+@if ($ap_side)
+        #ap-sidebar {
+            --ap-side-bg: {{ $ap_side }};
+            --color-surface: {{ $ap_side }};
+            --ap-side-ink: {{ $ap_side_ink }};
+            --color-surface-2: color-mix(in srgb, {{ $ap_side }} 93%, var(--ap-side-ink));
+            --color-surface-3: color-mix(in srgb, {{ $ap_side }} 87%, var(--ap-side-ink));
+            --color-line: color-mix(in srgb, {{ $ap_side }} 82%, var(--ap-side-ink));
+            --color-ink: var(--ap-side-ink);
+            --color-ink-2: color-mix(in srgb, var(--ap-side-ink) 76%, {{ $ap_side }});
+            --color-ink-3: color-mix(in srgb, var(--ap-side-ink) 56%, {{ $ap_side }});
+        }
+@endif
+@if ($ap_side_dark)
+        html.dark #ap-sidebar {
+            --ap-side-bg-dark: {{ $ap_side_dark }};
+            --color-night-2: {{ $ap_side_dark }};
+            --ap-side-ink-d: {{ $ap_side_ink_dark }};
+            --color-night-3: color-mix(in srgb, {{ $ap_side_dark }} 86%, var(--ap-side-ink-d));
+            --color-night-line: color-mix(in srgb, {{ $ap_side_dark }} 80%, var(--ap-side-ink-d));
+            --color-night-ink: var(--ap-side-ink-d);
+            --color-night-ink-2: color-mix(in srgb, var(--ap-side-ink-d) 72%, {{ $ap_side_dark }});
+        }
+@endif
+@if ($ap_page)
+        html { --ap-page-bg: {{ $ap_page }}; }
+@endif
+@if ($ap_page_dark)
+        html.dark { --ap-page-bg-dark: {{ $ap_page_dark }}; }
+@endif
     </style>
 
     {{-- پاک‌سازی استایل‌های پل بعد از SPA-navigate (عیناً مثل module-new — dedupe در

@@ -926,6 +926,13 @@ return [
                             'permission' => 'settings.floating-widget',
                             'icon' => 'panel-bottom',
                         ],
+                        // فاز ۲۰۸ — پوستهٔ رنگی پنل مدیریت (همان طراحی بخش ظاهری قالب)
+                        [
+                            'label' => 'تنظیمات ظاهری',
+                            'route' => 'np.appearance.index',
+                            'permission' => 'themes.settings',
+                            'icon' => 'palette',
+                        ],
                     ],
                 ],
                 [

@@ -568,7 +568,7 @@ class Dashboard extends Component
     {
         return [
             'textStyle' => ['fontFamily' => 'Vazirmatn, Tahoma, sans-serif'],
-            'color' => ['#10b981', '#0ea5e9'],
+            'color' => [ap_brand_color('500'), '#0ea5e9'],
             'animationDuration' => 700,
             'tooltip' => [
                 'trigger' => 'axis',
@@ -629,7 +629,7 @@ class Dashboard extends Component
 
     protected function statusChartOptions(): array
     {
-        $palette = ['#10b981', '#f59e0b', '#f43f5e', '#0ea5e9', '#8b5cf6', '#64748b'];
+        $palette = [ap_brand_color('500'), '#f59e0b', '#f43f5e', '#0ea5e9', '#8b5cf6', '#64748b'];
 
         return [
             'textStyle' => ['fontFamily' => 'Vazirmatn, Tahoma, sans-serif'],

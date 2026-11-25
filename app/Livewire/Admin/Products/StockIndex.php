@@ -367,9 +367,9 @@ class StockIndex extends Component
         $data = $this->chartData;
 
         return match ($key) {
-            'stock-owner-chart' => $this->donutOptions($data['owner'], ['#059669', '#0ea5e9']),
-            'stock-status-chart' => $this->donutOptions($data['stock'], ['#059669', '#f59e0b', '#f43f5e']),
-            'stock-top-products-chart' => $this->hBarOptions($data['topProducts'], '#059669', 'موجودی'),
+            'stock-owner-chart' => $this->donutOptions($data['owner'], [ap_brand_color('600'), '#0ea5e9']),
+            'stock-status-chart' => $this->donutOptions($data['stock'], [ap_brand_color('600'), '#f59e0b', '#f43f5e']),
+            'stock-top-products-chart' => $this->hBarOptions($data['topProducts'], ap_brand_color('600'), 'موجودی'),
             'stock-top-sellers-chart' => $this->hBarOptions($data['topSellers'], '#0ea5e9', 'تنوع'),
             default => [],
         };

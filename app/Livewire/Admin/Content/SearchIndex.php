@@ -337,7 +337,7 @@ class SearchIndex extends Component
 
         return [
             'textStyle' => ['fontFamily' => 'Vazirmatn, Tahoma, sans-serif'],
-            'color' => ['#10b981'],
+            'color' => [ap_brand_color('500')],
             'animationDuration' => 700,
             'tooltip' => [
                 'trigger' => 'axis',
@@ -380,7 +380,7 @@ class SearchIndex extends Component
 
         return [
             'textStyle' => ['fontFamily' => 'Vazirmatn, Tahoma, sans-serif'],
-            'color' => ['#10b981', '#0ea5e9'],
+            'color' => [ap_brand_color('500'), '#0ea5e9'],
             'animationDuration' => 700,
             'tooltip' => [
                 'trigger' => 'item',

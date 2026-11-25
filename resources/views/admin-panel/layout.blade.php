@@ -1,11 +1,43 @@
+@php
+    /* فاز ۲۰۸ — پوستهٔ رنگی پنل (تنظیمات ظاهری سایدبار):
+       option «admin_appearance» (JSON ساخت App\Support\PaletteEngine) خوانده و
+       به‌صورت بازنویسی متغیرهای --color-brand-* بعد از CSS کامپایل‌شده تزریق
+       می‌شود — کل پنل (سایدبار/دکمه‌ها/فرم‌ها/دارک‌مود) یک‌جا رنگ می‌گیرد.
+       وقتی چیزی ذخیره نشده، پوشهٔ پیش‌فرض = زمردیِ فعلی (بدون هیچ تغییر ظاهری). */
+    try {
+        $ap_appearance_state = \App\Support\PaletteEngine::stateFromOption();
+    } catch (\Throwable $ap_appearance_error) {
+        $ap_appearance_state = null;
+    }
+
+    $ap_appearance_payload = $ap_appearance_state['payload'] ?? null;
+
+    if (! is_array($ap_appearance_payload) || empty($ap_appearance_payload['scale'])) {
+        $ap_appearance_payload = \App\Support\PaletteEngine::defaultPayload();
+    }
+
+    /* حالت پیش‌فرض پنل: کوکیِ انتخابِ کاربر مقدم است؛ بدون کوکی، انتخابِ
+       مدیر در صفحهٔ «تنظیمات ظاهری» (روشن/تیره) ملاک می‌شود. */
+    $ap_admin_theme_cookie = request()->cookie('admin-theme');
+
+    if ($ap_admin_theme_cookie === 'dark') {
+        $ap_admin_theme_class = 'dark';
+    } elseif ($ap_admin_theme_cookie === 'light') {
+        $ap_admin_theme_class = '';
+    } else {
+        $ap_admin_theme_class = ($ap_appearance_payload['mode'] ?? 'light') === 'dark' ? 'dark' : '';
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="fa" dir="rtl"
-      class="h-full lw-booting {{ request()->cookie('admin-theme') === 'dark' ? 'dark' : '' }}">
+      class="h-full lw-booting {{ $ap_admin_theme_class }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="admin-prefix" content="{{ admin_route_prefix() }}">
+    {{-- فاز ۲۰۸ — مرجع حالت پیش‌فرض پنل برای ApTheme.get (وقتی کوکی‌ای نیست) --}}
+    <meta name="admin-appearance-mode" content="{{ $ap_appearance_payload['mode'] ?? 'light' }}">
 
     <title>@yield('title', $title ?? 'داشبورد') | پنل مدیریت {{ option('info_site_title', config('app.name')) }}</title>
 
@@ -25,6 +57,52 @@
     {{-- Font Awesome برای آیکون‌های منوی پکیج‌ها (همان منبعی که پنل قدیمی/پل استفاده می‌کند) --}}
     {{-- خودمیزبانی FA: cdnjs روی IPهای ایران کند/مسدود است و رندر همهٔ صفحات پنل را بلاک می‌کرد --}}
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}" referrerpolicy="no-referrer" />
+
+    @php
+        /* فاز ۲۰۸ — بازنویسی توکن‌های برند پنل از پوستهٔ انتخابی.
+           بعد از @vite می‌آید تا برنده شود؛ پنل با Tailwind 4 همهٔ رنگ‌های
+           برند را از var(--color-brand-*) می‌خواند ⇒ همین چند متغیر کل
+           پنل را رنگ می‌گیرد. رنگ‌های هاردکدِ باقی‌مانده هم اینجا بازنویسی
+           می‌شوند (سایهٔ دکمهٔ اصلی، خط drop ردیف‌ها، نقطهٔ پالس و CKEditor). */
+        $ap_scale = $ap_appearance_payload['scale'];
+        $ap_base = $ap_appearance_payload['base'] ?? ($ap_scale[600] ?? '#059669');
+    @endphp
+    <style id="admin-appearance-vars">
+        :root {
+@if (! empty($ap_scale) && is_array($ap_scale))
+@foreach ($ap_scale as $ap_step => $ap_hex)
+            --color-brand-{{ $ap_step }}: {{ $ap_hex }};
+@endforeach
+@endif
+            /* CKEditor — رنگ تأکیدی ویرایشگر هم‌رنگ برند پنل */
+            --ck-color-base-action: var(--color-brand-600);
+            --ck-color-base-action-hover: var(--color-brand-700);
+            --ck-color-base-focus: var(--color-brand-600);
+            --ck-color-base-active: var(--color-brand-600);
+            --ck-color-base-action-muted: var(--color-brand-100);
+            --ck-focus-border-color: var(--color-brand-600);
+        }
+
+        /* سایهٔ هاردکد دکمهٔ اصلی (rgb زمردی در admin.css) */
+        .ap-btn-primary {
+            box-shadow: 0 6px 16px -6px {{ $ap_base }}73;
+        }
+
+        /* خط راهنمای drop ردیف‌ها (طبقه‌بندی‌ها) */
+        .cat-row.ap-drop-before {
+            box-shadow: inset 0 3px 0 0 var(--color-brand-500), 0 6px 16px -8px {{ $ap_base }}59;
+        }
+
+        .cat-row.ap-drop-after {
+            box-shadow: inset 0 -3px 0 0 var(--color-brand-500), 0 6px 16px -8px {{ $ap_base }}59;
+        }
+
+        /* نقطهٔ پالس (وضعیت‌ها) */
+        @keyframes pulse-dot {
+            0%, 100% { box-shadow: 0 0 0 0 {{ $ap_base }}80; }
+            50% { box-shadow: 0 0 0 5px {{ $ap_base }}00; }
+        }
+    </style>
 
     {{-- پاک‌سازی استایل‌های پل بعد از SPA-navigate (عیناً مثل module-new — dedupe در
         mergeNewHead). اگر از صفحه‌ی پکیج (پل) به اینجا ناوبری SPA شده باشد، بلوک‌های

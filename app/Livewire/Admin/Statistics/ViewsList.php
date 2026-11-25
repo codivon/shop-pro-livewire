@@ -153,7 +153,7 @@ class ViewsList extends Component
     {
         return [
             'textStyle' => ['fontFamily' => 'Vazirmatn, Tahoma, sans-serif'],
-            'color'     => ['#10b981'],
+            'color'     => [ap_brand_color('500')],
             'animationDuration' => 700,
             'tooltip' => [
                 'trigger'        => 'axis',

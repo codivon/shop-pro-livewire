@@ -1456,6 +1456,27 @@ function theme_path($path)
     return base_path(config('front.theme_path').$path);
 }
 
+/**
+ * فاز ۲۰۸ — رنگ برندِ فعلیِ پنل (از «تنظیمات ظاهری») برای نمودارهای ECharts.
+ * نمودارها رنگ را به‌صورت literal می‌خواهند؛ به‌جای هاردکد زمردی، از طیف
+ * پوستهٔ فعال خوانده می‌شود تا با تغییر پوسته، نمودارها هم هماهنگ بمانند.
+ * گام‌های معتبر: 50..950 — پیش‌فرض 500.
+ */
+function ap_brand_color(string $step = '500'): string
+{
+    static $ap_scale = null;
+
+    if (! is_array($ap_scale)) {
+        try {
+            $ap_scale = \App\Support\PaletteEngine::stateFromOption()['payload']['scale'] ?? [];
+        } catch (\Throwable $e) {
+            $ap_scale = [];
+        }
+    }
+
+    return $ap_scale[$step] ?? ($ap_scale['600'] ?? '#059669');
+}
+
 function prepareNumber($num)
 {
     if (gettype($num) == 'integer' || gettype($num) == 'double') {

@@ -150,6 +150,7 @@ use App\Livewire\Admin\Taxonomy\SpecTypeIndex;
 use App\Livewire\Admin\Taxonomy\TagIndex;
 use App\Livewire\Admin\Themes\ThemeIndex;
 use App\Livewire\Admin\Themes\ThemeSettings;
+use App\Livewire\Admin\Themes\AppearanceSettings;
 use App\Livewire\Admin\Tickets\TicketCreate;
 use App\Livewire\Admin\Tickets\TicketIndex;
 use App\Livewire\Admin\Tickets\TicketShow;
@@ -607,6 +608,8 @@ Route::prefix('admin/'.admin_route_prefix())->name('np.')->group(function () {
         // تک‌صفحه packages/{slug} حذف شد؛ جزئیات پکیج در مودال لیست باز می‌شود (مثل پنل قدیمی)
         Route::get('packages', PackageIndex::class)->name('packages.index');
         Route::get('themes/settings', ThemeSettings::class)->name('themes.settings');
+        // فاز ۲۰۸ — تنظیمات ظاهری پنل مدیریت (پوستهٔ رنگی کل پنل)
+        Route::get('appearance', AppearanceSettings::class)->name('appearance.index');
         Route::get('themes', ThemeIndex::class)->name('themes.index');
         Route::get('imports/posts', PostsImport::class)->name('imports.posts');
         Route::get('imports/products', ProductsImport::class)->name('imports.products');

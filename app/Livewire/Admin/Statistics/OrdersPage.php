@@ -165,7 +165,7 @@ class OrdersPage extends Component
 
         return [
             'textStyle' => ['fontFamily' => 'Vazirmatn, Tahoma, sans-serif'],
-            'color'     => ['#10b981', '#f43f5e'],
+            'color'     => [ap_brand_color('500'), '#f43f5e'],
             'animationDuration' => 700,
             'tooltip' => [
                 'trigger'        => 'axis',

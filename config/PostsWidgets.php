@@ -8,17 +8,29 @@ return [
        هر بخش از صفحهٔ مقالات یک ویجت مستقل با تنظیمات مخصوص خودش است و
        طبق درخواست، در بالای فهرست ویجت‌ها قرار گرفته‌اند.
 
+       فاز ۲۰۴ — اسکرین‌شات اختصاصی هر بخش (image):
+       چهار ویجت blog-* اکنون تصویر پیش‌نمایش واقعی همان بخش از
+       blog.html را دارند (فایل‌های widgets/blog-*.png در assets تم)
+       تا در «مدیریت ابزارک‌های صفحهٔ مقالات» هر ابزار با ظاهر واقعی‌اش
+       شناخته شود؛ عنوان هر ابزار هم دقیقاً نام همان بخش در تمپلیت است.
+
        پالایش ویجت‌های قدیمی تم قبلی:
        ویجت‌های محصول (products-moment-block / products-default-block /
        products-colorful-block) که میراث تم پیشین برای صفحهٔ مقالات بودند
        از این فایل حذف شدند. صفحهٔ مقالات فقط ویجت‌های مقاله‌محور دارد؛
        همین ویجت‌ها در HomeWidgets.php برای صفحهٔ اصلی سر جایشان هستند.
+
+       نکتهٔ سازگاری: بقیهٔ ابزارهای این فایل (main-slider / posts-* /
+       middle-banners / coworker / sevices / faqs و ...) که از صفحهٔ
+       اصلی هم می‌آیند، همین‌جا برای صفحهٔ مقالات پشتیبانی می‌شوند —
+       case فرانت در blogs/index.blade.php + ویو در blogs/widgets/ +
+       واکشی داده در get_widget_uncached (helpers.php) برای همه موجود است.
        ================================================================== */
 
     /* ۱) هدر وبلاگ: جستجوی مقالات + دسته‌بندی‌ها (سایدبار) + بنر + خبرهای داغ */
     'blog-header' => [
-        'title' => 'هدر وبلاگ (جستجو و بنر و خبرهای داغ)',
-        'image' => 'widgets/banner.png',
+        'title' => 'هدر وبلاگ (جستجو، دسته‌بندی‌ها، بنر و خبرهای داغ)',
+        'image' => 'widgets/blog-header.png',
         'options' => [
             [
                 'title'      => 'جستجوی مقالات',
@@ -127,8 +139,8 @@ return [
 
     /* ۲) اسلایدر پربازدیدترین مطالب وبلاگ (کارت blog-item روی نوار رنگی) */
     'blog-mostviewed-slider' => [
-        'title' => 'اسلایدر مطالب وبلاگ',
-        'image' => 'widgets/products-moment.png',
+        'title' => 'اسلایدر پربازدیدترین مطالب وبلاگ',
+        'image' => 'widgets/blog-mostviewed-slider.png',
         'options' => [
             [
                 'title'      => 'عنوان',
@@ -205,8 +217,8 @@ return [
 
     /* ۳) آخرین ویدیوهای وبلاگ: گرید tv-blog-item + پلی‌لیست سایدبار */
     'blog-videos' => [
-        'title' => 'ویدیوهای وبلاگ',
-        'image' => 'widgets/banner.png',
+        'title' => 'ویدیوهای وبلاگ (گرید ویدیوها + پلی‌لیست کناری)',
+        'image' => 'widgets/blog-videos.png',
         'options' => [
             [
                 'title'      => 'عنوان',
@@ -303,7 +315,7 @@ return [
     /* ۴) آخرین مطالب وبلاگ: گرید blog-item (col-lg-3) */
     'blog-latest-grid' => [
         'title' => 'گرید آخرین مطالب وبلاگ',
-        'image' => 'widgets/products-default.jpg',
+        'image' => 'widgets/blog-latest-grid.png',
         'options' => [
             [
                 'title'      => 'عنوان',
@@ -816,7 +828,7 @@ return [
 
     'posts-tags' => [
         'title' => 'کلمات کلیدی',
-        'image' => '',
+        'image' => 'widgets/posts.png',
         'options' => [
             [
                 'title'      => 'عنوان',

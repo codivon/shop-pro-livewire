@@ -5,6 +5,8 @@ namespace App\Livewire\Admin\Settings;
 use App\Models\Province;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 /**
  * تنظیمات کلی سایت — پورت ۱:۱ Back\SettingController::showInformation/updateInformation
@@ -22,6 +24,7 @@ use Livewire\Component;
 #[Title('تنظیمات کلی')]
 class Information extends Component
 {
+    use WithFileUploads;
 
     /* ---------------- اطلاعات پایه ---------------- */
 
@@ -95,6 +98,17 @@ class Information extends Component
 
     public string $info_samandehi = '';
 
+    /* ---------------- مجوزها (فاز ۲۰۷ — تب «مجوزها») ---------------- */
+
+    /**
+     * لیست مجوزها/نشان‌های اعتماد (جایگزین مدرن دو فیلد قدیمی enamad/samandehi).
+     * هر ردیف: {type: image|html|link, title, image, code, link, active}
+     * (image_file فقط در زمان اجرا برای آپلود است — ذخیره نمی‌شود)
+     *
+     * @var array<int, array{type: string, title: string, image: string, code: string, link: string, active: bool}>
+     */
+    public array $info_licenses = [];
+
     /* ---------------- اسکریپت‌ها ---------------- */
 
     public string $info_gtm_id = '';
@@ -153,6 +167,9 @@ class Information extends Component
         $this->info_enamad = (string) option('info_enamad');
         $this->info_samandehi = (string) option('info_samandehi');
 
+        // فاز ۲۰۷ — بارگذاری مجوزها؛ فالبک: مهاجرت خودکار از دو فیلد قدیمی (اینماد/ساماندهی)
+        $this->info_licenses = $this->loadLicensesFromOption();
+
         $this->info_gtm_id = (string) option('info_gtm_id');
         $this->info_meta_pixel = (string) option('info_meta_pixel');
         $this->info_header_codes = (string) option('info_header_codes');
@@ -188,6 +205,167 @@ class Information extends Component
         $this->info_city_id = '';
     }
 
+    /* ---------------- مجوزها (فاز ۲۰۷) ---------------- */
+
+    public const LICENSE_TYPES = [
+        'image' => 'تصویر (لایو یا آدرس)',
+        'html'  => 'کد HTML',
+        'link'  => 'لینک',
+    ];
+
+    /** ساخت یک ردیف مجوز با مقادیر پیش‌فرض */
+    private function defaultLicense(string $type = 'html'): array
+    {
+        return [
+            'type'   => array_key_exists($type, self::LICENSE_TYPES) ? $type : 'html',
+            'title'  => '',
+            'image'  => '',
+            'code'   => '',
+            'link'   => '',
+            'active' => true,
+        ];
+    }
+
+    /**
+     * خواندن مجوزها از option؛ اگر هنوز ثبت نشده بود، از دو فیلد قدیمی
+     * info_enamad/info_samandehi مهاجرت می‌کند (اینماد همیشه به‌طور پیش‌فرض هست).
+     */
+    private function loadLicensesFromOption(): array
+    {
+        $raw = trim((string) option('info_licenses'));
+
+        if ($raw !== '') {
+            $decoded = json_decode($raw, true);
+
+            if (is_array($decoded)) {
+                return array_values(array_map(function ($row) {
+                    $license = $this->defaultLicense((string) ($row['type'] ?? 'html'));
+                    $license['title']  = (string) ($row['title'] ?? '');
+                    $license['image']  = (string) ($row['image'] ?? '');
+                    $license['code']   = (string) ($row['code'] ?? '');
+                    $license['link']   = (string) ($row['link'] ?? '');
+                    $license['active'] = array_key_exists('active', $row) ? (bool) $row['active'] : true;
+
+                    return $license;
+                }, $decoded));
+            }
+        }
+
+        // فالبک/مهاجرت: اینماد به‌طور پیش‌فرض + ساماندهی اگر کد قدیمی داشته باشد
+        $licenses = [];
+
+        $licenses[] = array_merge($this->defaultLicense('html'), [
+            'title' => 'اینماد',
+            'code'  => (string) option('info_enamad'),
+        ]);
+
+        $samandehi = trim((string) option('info_samandehi'));
+
+        if ($samandehi !== '') {
+            $licenses[] = array_merge($this->defaultLicense('html'), [
+                'title' => 'ساماندهی',
+                'code'  => $samandehi,
+            ]);
+        }
+
+        return $licenses;
+    }
+
+    public function addLicense(): void
+    {
+        $this->info_licenses[] = $this->defaultLicense('html');
+    }
+
+    public function removeLicense(int $index): void
+    {
+        if (! isset($this->info_licenses[$index])) {
+            return;
+        }
+
+        unset($this->info_licenses[$index]);
+        $this->info_licenses = array_values($this->info_licenses);
+    }
+
+    public function moveLicense(int $index, string $direction): void
+    {
+        $count = count($this->info_licenses);
+        $target = $direction === 'up' ? $index - 1 : $index + 1;
+
+        if ($index < 0 || $index >= $count || $target < 0 || $target >= $count) {
+            return;
+        }
+
+        [$this->info_licenses[$index], $this->info_licenses[$target]]
+            = [$this->info_licenses[$target], $this->info_licenses[$index]];
+
+        $this->info_licenses = array_values($this->info_licenses);
+    }
+
+    /**
+     * ذخیرهٔ نهایی مجوزها (شامل آپلود فایل تصویر) و پاک‌سازی فایل‌های بی‌استفادهٔ قدیمی.
+     * خروجی: [json قدیمی، json جدید] برای ثبت در لاگ اکتیویتی.
+     */
+    private function persistLicenses(): array
+    {
+        $oldJson = trim((string) option('info_licenses'));
+        $oldRows = [];
+
+        if ($oldJson !== '') {
+            $decoded = json_decode($oldJson, true);
+
+            if (is_array($decoded)) {
+                $oldRows = $decoded;
+            }
+        }
+
+        $licenses = [];
+
+        foreach ($this->info_licenses as $row) {
+            $license = $this->defaultLicense((string) ($row['type'] ?? 'html'));
+            $license['title']  = trim((string) ($row['title'] ?? ''));
+            $license['image']  = trim((string) ($row['image'] ?? ''));
+            $license['code']   = (string) ($row['code'] ?? '');
+            $license['link']   = trim((string) ($row['link'] ?? ''));
+            $license['active'] = (bool) ($row['active'] ?? true);
+
+            // فایل تازه انتخاب‌شده (آپلود فایل تصویر) → ذخیره در uploads/licenses
+            $file = $row['image_file'] ?? null;
+
+            if ($file instanceof TemporaryUploadedFile) {
+                $stored = $file->store('licenses', 'local');
+                $license['image'] = '/uploads/' . ltrim((string) $stored, '/');
+            }
+
+            $licenses[] = $license;
+        }
+
+        // پاک‌سازی فایل‌های قدیمی داخل uploads/licenses که از لیست حذف/جایگزین شده‌اند
+        $newFiles = collect($licenses)->pluck('image')->filter()->all();
+        $obsolete = [];
+
+        foreach ($oldRows as $oldRow) {
+            $oldImage = (string) ($oldRow['image'] ?? '');
+
+            if ($oldImage !== '' && str_starts_with($oldImage, '/uploads/licenses/')
+                && file_exists(public_path($oldImage)) && ! in_array($oldImage, $newFiles, true)) {
+                $obsolete[] = $oldImage;
+            }
+        }
+
+        foreach ($obsolete as $oldFile) {
+            @unlink(public_path($oldFile));
+        }
+
+        $json = json_encode($licenses, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        option_update('info_licenses', $json);
+
+        // پس از ذخیره، لیست از option تازه خوانده می‌شود (ورودی فایل موقت هم پاک می‌شود)
+        $this->info_licenses = $this->loadLicensesFromOption();
+
+        return [$oldJson, $json];
+    }
+
     /* ---------------- ذخیره (پورت updateInformation) ---------------- */
 
     public function save(): void
@@ -203,6 +381,16 @@ class Information extends Component
             'info_og_image' => 'nullable|string|max:2048',
             'info_city_id' => 'nullable|exists:cities,id',
             'info_province_id' => 'nullable|exists:provinces,id',
+
+            // فاز ۲۰۷ — مجوزها
+            'info_licenses' => 'array',
+            'info_licenses.*.type' => 'required|in:image,html,link',
+            'info_licenses.*.title' => 'nullable|string|max:255',
+            'info_licenses.*.image' => 'nullable|string|max:2048',
+            'info_licenses.*.code' => 'nullable|string',
+            'info_licenses.*.link' => 'nullable|string|max:2048',
+            'info_licenses.*.image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:3072',
+            'info_licenses.*.active' => 'nullable|boolean',
         ], [
             'info_site_title.required' => 'عنوان وبسایت الزامی است.',
             'info_icon.max' => 'آدرس تصویر آیکون سایت معتبر نیست.',
@@ -212,6 +400,14 @@ class Information extends Component
             'info_og_image.max' => 'آدرس تصویر OG معتبر نیست.',
             'info_city_id.exists' => 'شهر انتخاب‌شده معتبر نیست.',
             'info_province_id.exists' => 'استان انتخاب‌شده معتبر نیست.',
+
+            'info_licenses.*.type.required' => 'نوع مجوز برای هر ردیف الزامی است.',
+            'info_licenses.*.type.in' => 'نوع مجوز انتخابی نامعتبر است.',
+            'info_licenses.*.title.max' => 'عنوان مجوز حداکثر ۲۵۵ کاراکتر است.',
+            'info_licenses.*.image.max' => 'آدرس تصویر مجوز معتبر نیست.',
+            'info_licenses.*.image_file.image' => 'فایل مجوز باید تصویر باشد.',
+            'info_licenses.*.image_file.mimes' => 'فرمت مجاز تصویر: JPG، PNG، WEBP یا GIF.',
+            'info_licenses.*.image_file.max' => 'حداکثر حجم تصویر مجوز ۳ مگابایت است.',
         ], [
             'info_site_title' => 'عنوان وبسایت',
         ]);
@@ -310,6 +506,17 @@ class Information extends Component
 
         if (! empty($optionChanges)) {
             $allChanges['option_settings'] = $optionChanges;
+        }
+
+        // ========== 3.5 مجوزها (فاز ۲۰۷) — شامل آپلود فایل تصویر هر مجوز ==========
+        [$oldLicensesJson, $newLicensesJson] = $this->persistLicenses();
+
+        if ($oldLicensesJson !== $newLicensesJson) {
+            $allChanges['option_settings']['info_licenses'] = [
+                'old'   => $oldLicensesJson ?: 'خالی',
+                'new'   => $newLicensesJson ?: 'خالی',
+                'title' => 'مجوزها (نشان‌های اعتماد)',
+            ];
         }
 
         // ========== 4. لاگ نهایی (پورت دقیق) ==========

@@ -822,6 +822,15 @@ document.addEventListener('alpine:init', () => {
             return this.rows().some((r) => r.type === item.type && Number(r.id) === Number(item.id));
         },
 
+        /* فاز ۲۰۷ — toggle کامل: کلیک روی مورد انتخاب‌شده (سبز) آن را از فیلتر حذف می‌کند */
+        async toggle(item) {
+            if (this.added(item)) {
+                await this.$wire.removeFilterableRow(item.type, item.id);
+            } else {
+                await this.$wire.addFilterableRow(item.type, item.id);
+            }
+        },
+
         async add(item) {
             if (this.added(item)) return;
             await this.$wire.addFilterableRow(item.type, item.id);

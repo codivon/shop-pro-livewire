@@ -229,7 +229,7 @@
                                     <button type="button"
                                             wire:key="fm-item-{{ $type }}-{{ $item->id }}"
                                             x-show="match(@js($label), mq)"
-                                            x-on:click="add({{ \Illuminate\Support\Js::from(['type' => $type, 'id' => $item->id, 'label' => $label])->toHtml() }})"
+                                            x-on:click="toggle({{ \Illuminate\Support\Js::from(['type' => $type, 'id' => $item->id])->toHtml() }})"
                                             class="flex items-center justify-between gap-2 rounded-xl border p-3 text-start transition-all hover:border-brand-400 hover:bg-brand-50/40 dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5"
                                             x-bind:class="added({{ \Illuminate\Support\Js::from(['type' => $type, 'id' => $item->id])->toHtml() }})
                                                 ? 'border-emerald-300 bg-emerald-50/60 dark:border-emerald-500/30 dark:bg-emerald-500/10'
@@ -257,7 +257,7 @@
 
             {{-- فوتر --}}
             <div class="flex items-center justify-between gap-3 border-t border-line px-5 py-3.5 dark:border-night-line">
-                <p class="text-[11px] text-ink-3 dark:text-night-ink-2">موردها به‌ترتیب افزودن، به انتهای فیلتر اضافه می‌شوند.</p>
+                <p class="text-[11px] text-ink-3 dark:text-night-ink-2">موردها به‌ترتیب افزودن، به انتهای فیلتر اضافه می‌شوند؛ برای حذف، روی موردِ سبزِ تیک‌خورده کلیک کنید.</p>
                 <button type="button" x-on:click="modalOpen = false" class="ap-btn-primary !py-2">اتمام و بستن</button>
             </div>
         </div>

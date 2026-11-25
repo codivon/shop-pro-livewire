@@ -176,6 +176,26 @@ class FilterForm extends Component
         $this->dispatch('toast', message: '«' . $label . '» به فیلتر اضافه شد.', type: 'success');
     }
 
+    /**
+     * فاز ۲۰۷ — حذف مستقیم یک مورد فیلترپذیر از مودال «افزودن مشخصات»
+     * (رفع باگ «بعد از انتخاب، دیگر از حالت انتخاب درنمی‌آید»: در مودال، کلیک روی
+     * موردِ سبزِ تیک‌خورده = حذف از فیلتر؛ toggle کامل)
+     */
+    public function removeFilterableRow(string $type, int $id): void
+    {
+        $this->authorizeAccess();
+
+        foreach ($this->rows as $index => $row) {
+            if ($row['type'] === $type && (int) $row['id'] === $id) {
+                $label = (string) ($row['label'] ?: 'مورد');
+                $this->removeRow($index);
+                $this->dispatch('toast', message: '«' . $label . '» از فیلتر حذف شد.', type: 'info');
+
+                return;
+            }
+        }
+    }
+
     public function removeRow(int $index): void
     {
         unset($this->rows[$index]);

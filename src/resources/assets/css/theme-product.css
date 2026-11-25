@@ -216,7 +216,7 @@
 }
 
 .product-page .p-tabs .comments-list .article .header .buyer-badge {
-    background: rgba(39, 95, 224, .08);
+    background: rgba(var(--main-color-one-rgb, 39, 95, 224), .08);
     color: var(--main-color-one, #275fe0);
     padding: 3px 10px;
 }
@@ -393,7 +393,7 @@
     width: 38px;
     height: 38px;
     border-radius: 12px;
-    background: rgba(39, 95, 224, .08);
+    background: rgba(var(--main-color-one-rgb, 39, 95, 224), .08);
     color: var(--main-color-one, #275fe0);
     display: flex;
     align-items: center;
@@ -601,7 +601,7 @@
 .modal.review-modal .review-suggest-item label.active {
     border-color: var(--main-color-one, #275fe0);
     color: var(--main-color-one, #275fe0);
-    background: rgba(39, 95, 224, .05);
+    background: rgba(var(--main-color-one-rgb, 39, 95, 224), .05);
     font-weight: 600;
 }
 
@@ -1810,7 +1810,7 @@
 .product-seller-aside .rating-card:hover {
     border-color: var(--main-color-one, #275fe0);
     background: #fff;
-    box-shadow: 0 4px 14px rgba(39, 95, 224, .08);
+    box-shadow: 0 4px 14px rgba(var(--main-color-one-rgb, 39, 95, 224), .08);
     transform: translateY(-1px);
 }
 

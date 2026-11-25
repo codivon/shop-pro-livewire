@@ -6039,7 +6039,7 @@ html {
 .loginTermsDesc {
     font-size: 14px;
     text-align: center;
-    color: #333;
+    color: var(--color-site);
     direction: rtl;
     width: 90%;
     display: block;

@@ -438,73 +438,90 @@
          عوض می‌شود ⇒ وضعیت باز بودن حفظ می‌شود و هیچ پاک‌سازی دستی
          لازم نیست.
        ========================================================= */
-    window.SaniarThemeCartSync = function (cartHtml) {
-        if (!cartHtml) { return; }
+    window.SaniarThemeCartSync = function (cartHtml, explicitCount) {
+        /* فاز ۲۱۰ — مقاوم‌سازی همگام‌سازی سبد:
+           • شمارندهٔ صریحِ cart_count از پاسخ سرور مقدم است (قبلاً از regex/شمارش
+             گره‌ها حدس زده می‌شد و گاهی عدد آیکن هدر به‌روز نمی‌شد).
+           • کل تابع در try/catch است تا خرابیِ هر مرحله‌ای، توست و ادامهٔ
+             صفحه را نبندد — و شمارنده در بدترین حالت هم با حدسِ قبلی ست شود. */
+        if (!cartHtml && typeof explicitCount !== 'number') { return; }
 
-        var count = 0;
-        var parsedCanvas = null;
+        try {
+            var count = 0;
+            var parsedCanvas = null;
 
-        if (typeof cartHtml === 'string') {
-            var match = cartHtml.match(/data-cart-count="(\d+)"/);
-            if (match) { count = parseInt(match[1], 10) || 0; }
+            /* ۱) شمارندهٔ صریح پاسخ سرور (فاز ۲۱۰) */
+            if (typeof explicitCount === 'number' && !isNaN(explicitCount) && explicitCount >= 0) {
+                count = explicitCount;
+            } else if (typeof cartHtml === 'string') {
+                var match = cartHtml.match(/data-cart-count="(\d+)"/);
+                if (match) { count = parseInt(match[1], 10) || 0; }
 
-            var tpl = document.createElement('template');
-            tpl.innerHTML = cartHtml;
-            parsedCanvas = tpl.content.querySelector('.cart-canvas') || tpl.content.firstElementChild;
-        } else if (cartHtml.getAttribute) {
-            count = parseInt(cartHtml.getAttribute('data-cart-count') || '0', 10) || 0;
-            parsedCanvas = cartHtml;
-        }
-
-        /* جایگزین: شمارش آیتم‌های محصول در DOM تازه (آیتم‌های دارای تصویر —
-           ردیف فاکتور و باکس «سبد خالی» تصویر ندارند) */
-        var fresh = parsedCanvas && parsedCanvas.querySelector ? parsedCanvas.querySelector('.cart-canvases') : null;
-        if (!count && fresh) {
-            count = fresh.querySelectorAll(':scope > .item .image').length;
-        }
-        if (count < 0) { count = 0; }
-
-        document.querySelectorAll('.header-cart-counter').forEach(function (el) {
-            el.textContent = String(count);
-        });
-
-        var live = document.getElementById('offcanvasCart');
-
-        if (live && parsedCanvas) {
-            /* مسیر اصلی — بروزرسانی درجا: گرهٔ زنده عوض نمی‌شود،
-               instance بوت‌استرپ و وضعیت باز بودن دست‌نخورده می‌ماند */
-            live.setAttribute('data-cart-count', String(count));
-            if (parsedCanvas.innerHTML !== undefined) {
-                live.innerHTML = parsedCanvas.innerHTML;
+                var tpl = document.createElement('template');
+                tpl.innerHTML = cartHtml;
+                parsedCanvas = tpl.content.querySelector('.cart-canvas') || tpl.content.firstElementChild;
+            } else if (cartHtml.getAttribute) {
+                count = parseInt(cartHtml.getAttribute('data-cart-count') || '0', 10) || 0;
+                parsedCanvas = cartHtml;
             }
-        } else if (parsedCanvas) {
-            /* مسیر جایگزین — گرهٔ زنده از بین رفته بود (نباید معمولاً رخ دهد):
-               نسل قدیمیِ بازسازی + بازگشایی */
-            var old = document.querySelector('.cart-canvas');
-            if (old) {
-                var inst = window.bootstrap && window.bootstrap.Offcanvas && window.bootstrap.Offcanvas.getInstance(old);
-                if (inst) { inst.dispose(); }
-                old.replaceWith(parsedCanvas);
-            } else {
-                document.body.appendChild(parsedCanvas);
+
+            /* ۲) جایگزین: شمارش آیتم‌های محصول در DOM تازه (آیتم‌های دارای تصویر —
+               ردیف فاکتور و باکس «سبد خالی» تصویر ندارند) — فقط وقتی شمارندهٔ
+               صریح و regex هر دو در دسترس نبودند */
+            if (typeof explicitCount !== 'number' && !count) {
+                var fresh = parsedCanvas && parsedCanvas.querySelector ? parsedCanvas.querySelector('.cart-canvases') : null;
+                if (fresh) {
+                    count = fresh.querySelectorAll(':scope > .item .image').length;
+                }
             }
-            if (window.bootstrap && window.bootstrap.Offcanvas) {
-                window.bootstrap.Offcanvas.getOrCreateInstance(parsedCanvas).show();
+            if (count < 0) { count = 0; }
+
+            document.querySelectorAll('.header-cart-counter').forEach(function (el) {
+                el.textContent = String(count);
+            });
+
+            var live = document.getElementById('offcanvasCart');
+
+            if (live && parsedCanvas) {
+                /* مسیر اصلی — بروزرسانی درجا: گرهٔ زنده عوض نمی‌شود،
+                   instance بوت‌استرپ و وضعیت باز بودن دست‌نخورده می‌ماند */
+                live.setAttribute('data-cart-count', String(count));
+                if (parsedCanvas.innerHTML !== undefined) {
+                    live.innerHTML = parsedCanvas.innerHTML;
+                }
+            } else if (parsedCanvas) {
+                /* مسیر جایگزین — گرهٔ زنده از بین رفته بود (نباید معمولاً رخ دهد):
+                   نسل قدیمیِ بازسازی + بازگشایی */
+                var old = document.querySelector('.cart-canvas');
+                if (old) {
+                    var inst = window.bootstrap && window.bootstrap.Offcanvas && window.bootstrap.Offcanvas.getInstance(old);
+                    if (inst) { inst.dispose(); }
+                    old.replaceWith(parsedCanvas);
+                } else {
+                    document.body.appendChild(parsedCanvas);
+                }
+                if (window.bootstrap && window.bootstrap.Offcanvas) {
+                    window.bootstrap.Offcanvas.getOrCreateInstance(parsedCanvas).show();
+                }
             }
+        } catch (syncError) {
+            if (window.console && console.warn) { console.warn('[SaniarTheme] cart sync failed:', syncError); }
         }
 
         /* گارد دفاعی اسکرول — اگر هیچ offcanvas/مودالی باز نیست ولی بدنه
            قفل مانده (overflow:hidden)، قفل برداشته شود */
-        var anyOpen = document.querySelector('.offcanvas.show, .modal.show');
-        if (!anyOpen && !document.body.classList.contains('modal-open')) {
-            document.querySelectorAll('.offcanvas-backdrop').forEach(function (node) {
-                node.remove();
-            });
-            if (document.body.style.overflow === 'hidden') {
-                document.body.style.overflow = '';
-                document.body.style.paddingRight = '';
+        try {
+            var anyOpen = document.querySelector('.offcanvas.show, .modal.show');
+            if (!anyOpen && !document.body.classList.contains('modal-open')) {
+                document.querySelectorAll('.offcanvas-backdrop').forEach(function (node) {
+                    node.remove();
+                });
+                if (document.body.style.overflow === 'hidden') {
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }
             }
-        }
+        } catch (guardError) { /* هیچ — گارد اختیاری است */ }
     };
 
     /* =========================================================

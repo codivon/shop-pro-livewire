@@ -12,9 +12,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#f7858d">
-    <meta name="msapplication-navbutton-color" content="#f7858d">
-    <meta name="apple-mobile-web-app-status-bar-style" content="#f7858d">
+    @php
+        /* فاز ۲۱۰ — رنگ نوار مرورگر (theme-color) هم‌رنگ پوستهٔ فعال قالب؛
+           قبلاً رنگ قدیمی قالب هاردکد شده بود و با تغییر پوسته عوض نمی‌شد */
+        try {
+            $sa_auth_meta_color = \Themes\SaniarTheme\src\Support\PaletteEngine::stateFromOption()['payload']['base'] ?? '#D62976';
+        } catch (\Throwable $sa_auth_meta_error) {
+            $sa_auth_meta_color = '#D62976';
+        }
+    @endphp
+    <meta name="theme-color" content="{{ $sa_auth_meta_color }}">
+    <meta name="msapplication-navbutton-color" content="{{ $sa_auth_meta_color }}">
+    <meta name="apple-mobile-web-app-status-bar-style" content="{{ $sa_auth_meta_color }}">
     {{-- Favicon --}}
     <link rel="icon" type="image/png" sizes="16x16" href="{{ option('info_icon', theme_asset('image/logo.png')) }}">
     <link rel="apple-touch-icon" sizes="144x144" href="{{ option('info_icon', theme_asset('image/logo.png')) }}">
@@ -45,6 +54,13 @@
 
     {{-- دارک مود در صفحات ورود/ثبت‌نام --}}
     <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=27">
+
+    {{-- فاز ۲۱۰ — پوستهٔ رنگی قالب در صفحات ورود/ثبت‌نام:
+         این لایوت تا فاز ۲۰۹ تزریق متغیرهای پوسته را نداشت و
+         صفحهٔ لاگین همیشه با رنگ پیش‌فرض قالب (آبی) رندر می‌شد؛
+         اکنون همان بلوک master.blade.php اینجا هم تزریق می‌شود
+         (بعد از theme-dark.css تا نسخهٔ تیره هم بازنویسی شود) --}}
+    @include('front::partials.appearance-vars')
 
     @yield('style')
     @stack('styles')

@@ -6,13 +6,15 @@ use Livewire\Component;
 use Themes\SaniarTheme\src\Support\PaletteEngine;
 
 /**
- * SaniarTheme — تنظیمات ظاهری قالب (فاز ۲۰۸)
+ * SaniarTheme — تنظیمات ظاهری قالب (فاز ۲۰۸ — فاز ۲۱۰)
  * ---------------------------------------------------------------------------
  * کارتِ کاملاً اختصاصیِ قالب در صفحهٔ «تنظیمات قالب» پنل مدیریت:
  *   • ۱۲ پالت آماده + شخصی‌سازی (کد HEX دلخواه)
  *   • اسلایدر گرمی/سردی رنگ (چرخش Hue به سمت گرم/سرد + کم‌رنگ/پررنگ)
  *   • تولید طیف ۵۰..۹۵۰ با پیش‌نمایش زنده
  *   • حالت پیش‌فرض روشن/تیرهٔ سایت
+ *   • فاز ۲۱۰ — رنگ فونت (متن) سایت؛ جدا برای حالت روشن و تم شب؛
+ *     خالی بودن هرکدام = پیش‌فرض قالب (بدون بازنویسی متغیر --color-site).
  *   • ذخیرهٔ پوسته در option «saniar_appearance» (مستقل از زبان) —
  *     فرانت همان لحظه با تزریق متغیرهای CSS در master.blade.php
  *     کل تم را با رنگ‌های جدید می‌بیند.
@@ -38,6 +40,12 @@ class AppearanceSettings extends Component
     /** حالت پیش‌فرض سایت: light | dark */
     public string $mode = 'light';
 
+    /** فاز ۲۱۰ — رنگ فونت (متن) سایت در حالت روشن؛ خالی = پیش‌فرض قالب */
+    public string $fontColor = '';
+
+    /** فاز ۲۱۰ — رنگ فونت (متن) سایت در تم شب؛ خالی = پیش‌فرض قالب */
+    public string $fontColorDark = '';
+
     /** برچسب وضعیت ذخیره‌شده (نشان «ذخیره‌سازی: …») */
     public string $savedLabel = '';
 
@@ -54,14 +62,16 @@ class AppearanceSettings extends Component
         $this->warmth = (int) $state['warmth'];
         $this->custom = $state['custom'];
         $this->mode = $state['mode'];
+        $this->fontColor = (string) ($state['font_color'] ?? '');
+        $this->fontColorDark = (string) ($state['font_color_dark'] ?? '');
         $this->savedLabel = $state['label'];
         $this->saved = $state['saved'];
     }
 
     /**
-     * همگام‌سازی وضعیت از JS (قبل از ذخیره) — یک رفت‌وبرگشت برای هر ۴ مقدار.
+     * همگام‌سازی وضعیت از JS (قبل از ذخیره) — یک رفت‌وبرگشت برای همهٔ مقادیر.
      */
-    public function syncState($palette = null, $warmth = null, $custom = null, $mode = null): void
+    public function syncState($palette = null, $warmth = null, $custom = null, $mode = null, $fontColor = null, $fontColorDark = null): void
     {
         if (is_string($palette) && $palette !== '') {
             $this->palette = $palette;
@@ -75,6 +85,12 @@ class AppearanceSettings extends Component
         if (is_string($mode) && in_array($mode, ['light', 'dark'], true)) {
             $this->mode = $mode;
         }
+        if (is_string($fontColor)) {
+            $this->fontColor = PaletteEngine::normalizeHexOrNull($fontColor) ?? '';
+        }
+        if (is_string($fontColorDark)) {
+            $this->fontColorDark = PaletteEngine::normalizeHexOrNull($fontColorDark) ?? '';
+        }
     }
 
     /** ذخیرهٔ پوسته — همان لحظه روی فرانت اعمال می‌شود */
@@ -83,7 +99,10 @@ class AppearanceSettings extends Component
         auth('adminPanel')->user()?->can('themes.settings') ?: abort(403);
 
         $previous = PaletteEngine::stateFromOption();
-        $payload = PaletteEngine::resolve($this->palette, $this->warmth, $this->custom, $this->mode);
+        $payload = PaletteEngine::resolve($this->palette, $this->warmth, $this->custom, $this->mode, [
+            'font_color'      => $this->fontColor,
+            'font_color_dark' => $this->fontColorDark,
+        ]);
 
         if (PaletteEngine::isDefaultState($payload)) {
             $payload['label'] = 'گرادیان اینستاگرامی (پیش‌فرض)';
@@ -106,6 +125,8 @@ class AppearanceSettings extends Component
                         'رنگ اصلی' => $payload['base'],
                         'گرمی/سردی' => $payload['warmth'],
                         'حالت پیش‌فرض' => $payload['mode'] === 'dark' ? 'تیره' : 'روشن',
+                        'رنگ فونت (روشن)' => $payload['font_color'] ?? 'پیش‌فرض',
+                        'رنگ فونت (تم شب)' => $payload['font_color_dark'] ?? 'پیش‌فرض',
                     ],
                 ],
                 'ip' => request()->ip(),
@@ -148,11 +169,13 @@ class AppearanceSettings extends Component
         $this->warmth = 0;
         $this->custom = PaletteEngine::DEFAULT_CUSTOM;
         $this->mode = 'light';
+        $this->fontColor = '';
+        $this->fontColorDark = '';
         $this->savedLabel = $default['label'];
         $this->saved = false;
 
         // وضعیت تازه برای JS (UI انتخاب‌ها و طیف باید ریست شود)
-        $this->dispatch('appearance-reset', palette: $this->palette, warmth: $this->warmth, custom: $this->custom, mode: $this->mode, label: $this->savedLabel);
+        $this->dispatch('appearance-reset', palette: $this->palette, warmth: $this->warmth, custom: $this->custom, mode: $this->mode, fontColor: '', fontColorDark: '', label: $this->savedLabel);
 
         $this->dispatch('toast', message: 'پوستهٔ قالب به حالت پیش‌فرض بازگشت.', type: 'info');
     }
@@ -160,7 +183,10 @@ class AppearanceSettings extends Component
     public function render()
     {
         // طیف و رنگ‌های زندهٔ سمت سرور برای رندر اولیه؛ پس از آن JS لحظه‌ای به‌روزرسانی می‌کند
-        $preview = PaletteEngine::resolve($this->palette, $this->warmth, $this->custom, $this->mode);
+        $preview = PaletteEngine::resolve($this->palette, $this->warmth, $this->custom, $this->mode, [
+            'font_color'      => $this->fontColor,
+            'font_color_dark' => $this->fontColorDark,
+        ]);
 
         return view('front::livewire.admin.appearance', [
             'palettes' => PaletteEngine::palettes(),

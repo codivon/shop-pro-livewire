@@ -118,7 +118,16 @@ class CartController extends Controller
                 ]);
         }
 
-        return response(['status' => 'success', 'cart' => view('front::partials.cart')->with('render_cart', $cart)->render()]);
+        /* فاز ۲۱۰ — شمارندهٔ دقیق سبد هم در پاسخ:
+           قبلاً فقط HTML سبد کشویی برمی‌گشت و JS مجبور بود شمارندهٔ هدر را
+           از داخل HTML حدس بزند (regex/شمارش گره‌ها)؛ در برخی حالت‌ها
+           (کوکی/تمپلیت/ترتیب گره‌ها) این حدس غلط می‌شد و عدد روی آیکن
+           سبد و آیتم‌های سایدبار به‌روز نمی‌شد. حالا cart_count صریح است. */
+        return response([
+            'status' => 'success',
+            'cart_count' => $cart->products()->count(),
+            'cart' => view('front::partials.cart')->with('render_cart', $cart)->render(),
+        ]);
     }
 
     public function update(Request $request)

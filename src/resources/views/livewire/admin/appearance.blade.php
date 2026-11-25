@@ -1,11 +1,12 @@
 {{-- ============================================================
-     SaniarTheme — تنظیمات ظاهری قالب (فاز ۲۰۸)
+     SaniarTheme — تنظیمات ظاهری قالب (فاز ۲۰۸ — فاز ۲۱۰)
      کارت اختصاصی قالب در صفحهٔ «تنظیمات قالب» پنل مدیریت —
      دقیقاً مطابق نمونهٔ طراحی:
        • پالت‌های آماده (گرید ۴ ستونه) + شخصی‌سازی
        • اسلایدر گرمی/سردی + ردیف «حالت پیش‌فرض پالت»
        • طیف تولیدشدهٔ ۵۰..۹۵۰ (کلیک = کپی کد رنگ)
        • پیش‌نمایش زنده (دکمهٔ اصلی/خطی، برچسب، سبد خرید)
+       • فاز ۲۱۰ — رنگ فونت (متن) سایت — جدا برای روشن و تم شب
        • حالت پیش‌فرض سایت (روشن/تیره)
        • بازگشت به پیش‌فرض + ذخیرهٔ پوسته (ذخیرهٔ مستقل از فرم والد)
 
@@ -20,6 +21,10 @@
     $gradientCss = 'linear-gradient('.$preview['gradient_angle'].'deg, '.implode(', ', $preview['gradient']).')';
     $rawBase = ($palette === 'custom') ? $custom : (collect($palettes)->firstWhere('key', $palette)['base'] ?? $base);
     $steps = [950, 900, 800, 700, 600, 500, 400, 300, 200, 100, 50];
+
+    /* فاز ۲۱۰ — رنگ فونت: مقدار ذخیره‌شده یا پیش‌فرض قالب (برای نشانگر انتخابگر) */
+    $saFontColor = $fontColor !== '' ? $fontColor : \Themes\SaniarTheme\src\Support\PaletteEngine::DEFAULT_FONT_COLOR;
+    $saFontColorDark = $fontColorDark !== '' ? $fontColorDark : \Themes\SaniarTheme\src\Support\PaletteEngine::DEFAULT_FONT_COLOR_DARK;
 @endphp
 <div id="saniar-appearance" class="ap-card overflow-hidden p-0">
 
@@ -143,6 +148,87 @@
                        class="ap-input w-40 text-center text-[12px] font-bold" placeholder="#D62976"
                        onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
                        aria-label="کد HEX رنگ اصلی">
+            </div>
+        </div>
+
+        {{-- ===== فاز ۲۱۰ — رنگ فونت (متن) سایت ===== --}}
+        <div id="sa-font-box" class="rounded-2xl border-2 border-dashed p-4 sm:p-5"
+             style="border-color: {{ $base }}55;">
+            <h4 class="text-[13px] font-bold">رنگ فونت (متن سایت)</h4>
+            <p class="mt-1 text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
+                رنگ متنِ صفحات سایت را جدا برای حالت روشن و تم شب تنظیم کنید؛
+                با دکمهٔ «پیش‌فرض» هم هر رنگ به مقدار اصلی قالب برمی‌گردد.
+            </p>
+
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                {{-- حالت روشن --}}
+                <div class="rounded-2xl border p-4" style="border-color: {{ $base }}33;">
+                    <p class="mb-3 flex items-center gap-1.5 text-[12px] font-bold">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
+                            <circle cx="12" cy="12" r="4"/>
+                            <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                        حالت روشن
+                    </p>
+                    <div class="flex items-center gap-3">
+                        <label class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                               style="background: {{ $saFontColor }}" title="باز کردن انتخابگر رنگ">
+                            <input type="color" id="sa-font-color" value="{{ $saFontColor }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ فونت حالت روشن">
+                        </label>
+                        <input type="text" id="sa-font-hex" dir="ltr" maxlength="7" value="{{ $fontColor }}"
+                               class="ap-input w-36 text-center text-[12px] font-bold" placeholder="#333333"
+                               onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                               aria-label="کد HEX رنگ فونت حالت روشن">
+                        <button type="button" id="sa-font-reset"
+                                class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                title="بازگشت رنگ فونت روشن به پیش‌فرض قالب">
+                            پیش‌فرض
+                        </button>
+                    </div>
+                    {{-- نمونهٔ متن --}}
+                    <div class="mt-3 rounded-xl bg-white px-3 py-2.5" style="border: 1px solid {{ $base }}22;">
+                        <p id="sa-font-sample" class="m-0 text-[12.5px] leading-6 font-semibold"
+                           style="color: {{ $saFontColor }}">
+                            نمونهٔ متن — از هر رنگی که انتخاب کنید، متن سایت همین‌طور دیده می‌شود.
+                        </p>
+                    </div>
+                </div>
+
+                {{-- تم شب --}}
+                <div class="rounded-2xl border p-4" style="border-color: {{ $base }}33;">
+                    <p class="mb-3 flex items-center gap-1.5 text-[12px] font-bold">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
+                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                        </svg>
+                        تم شب
+                    </p>
+                    <div class="flex items-center gap-3">
+                        <label class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                               style="background: {{ $saFontColorDark }}" title="باز کردن انتخابگر رنگ">
+                            <input type="color" id="sa-font-color-dark" value="{{ $saFontColorDark }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ فونت تم شب">
+                        </label>
+                        <input type="text" id="sa-font-hex-dark" dir="ltr" maxlength="7" value="{{ $fontColorDark }}"
+                               class="ap-input w-36 text-center text-[12px] font-bold" placeholder="#E6E8EE"
+                               onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                               aria-label="کد HEX رنگ فونت تم شب">
+                        <button type="button" id="sa-font-reset-dark"
+                                class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                title="بازگشت رنگ فونت تم شب به پیش‌فرض قالب">
+                            پیش‌فرض
+                        </button>
+                    </div>
+                    {{-- نمونهٔ متن --}}
+                    <div class="mt-3 rounded-xl px-3 py-2.5" style="background: #111827; border: 1px solid {{ $base }}22;">
+                        <p id="sa-font-sample-dark" class="m-0 text-[12.5px] leading-6 font-semibold"
+                           style="color: {{ $saFontColorDark }}">
+                            نمونهٔ متن در تم شب — سبد خرید، پرداخت و همهٔ صفحه‌ها.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -272,6 +358,14 @@
         warmth: {{ $warmth }},
         custom: @json($custom),
         mode: @json($mode),
+        fontColor: @json($fontColor),
+        fontColorDark: @json($fontColorDark),
+    };
+
+    /* فاز ۲۱۰ — پیش‌فرض‌های قالب برای دکمهٔ «پیش‌فرض» رنگ فونت */
+    const saFontDefaults = {
+        light: @json(\Themes\SaniarTheme\src\Support\PaletteEngine::DEFAULT_FONT_COLOR),
+        dark: @json(\Themes\SaniarTheme\src\Support\PaletteEngine::DEFAULT_FONT_COLOR_DARK),
     };
 
     /* ---------- ریاضی رنگ (قرینهٔ PHP) ---------- */
@@ -415,12 +509,26 @@
         if (defBtn) { defBtn.style.borderColor = base + '4D'; defBtn.style.color = base; }
 
         // جعبه‌های خط‌چین
-        ['sa-warmth-box', 'sa-custom-box'].forEach((id) => {
+        ['sa-warmth-box', 'sa-custom-box', 'sa-font-box'].forEach((id) => {
             const box = document.getElementById(id);
             if (box) box.style.borderColor = base + '55';
         });
         const customBox = document.getElementById('sa-custom-box');
         if (customBox) customBox.classList.toggle('hidden', saState.palette !== 'custom');
+
+        // فاز ۲۱۰ — رنگ فونت: نمونه‌های زنده + دکمه‌های پیش‌فرض
+        const fontSample = document.getElementById('sa-font-sample');
+        const fontSampleDark = document.getElementById('sa-font-sample-dark');
+        const fontColorInput = document.getElementById('sa-font-color');
+        const fontColorInputDark = document.getElementById('sa-font-color-dark');
+        const fontResetBtn = document.getElementById('sa-font-reset');
+        const fontResetBtnDark = document.getElementById('sa-font-reset-dark');
+        if (fontSample) fontSample.style.color = saState.fontColor || saFontDefaults.light;
+        if (fontSampleDark) fontSampleDark.style.color = saState.fontColorDark || saFontDefaults.dark;
+        if (fontColorInput) fontColorInput.value = saState.fontColor || saFontDefaults.light;
+        if (fontColorInputDark) fontColorInputDark.value = saState.fontColorDark || saFontDefaults.dark;
+        if (fontResetBtn) { fontResetBtn.style.borderColor = base + '4D'; fontResetBtn.style.color = base; }
+        if (fontResetBtnDark) { fontResetBtnDark.style.borderColor = base + '4D'; fontResetBtnDark.style.color = base; }
 
         // طیف تولیدشده
         saRoot.querySelectorAll('.sa-swatch').forEach((sw) => {
@@ -516,6 +624,61 @@
         });
     });
 
+    /* ---------- فاز ۲۱۰ — رویدادهای رنگ فونت ---------- */
+    const saFontHexInput = document.getElementById('sa-font-hex');
+    const saFontHexInputDark = document.getElementById('sa-font-hex-dark');
+
+    const saFontColorInput = document.getElementById('sa-font-color');
+    if (saFontColorInput) {
+        saFontColorInput.addEventListener('input', () => {
+            saState.fontColor = saFontColorInput.value.toUpperCase();
+            if (saFontHexInput) saFontHexInput.value = saState.fontColor;
+            saApplyUI();
+        });
+    }
+    if (saFontHexInput) {
+        saFontHexInput.addEventListener('input', () => {
+            const v = saFontHexInput.value.trim();
+            if (/^#?[0-9a-fA-F]{6}$/.test(v)) {
+                saState.fontColor = ('#' + v.replace('#', '')).toUpperCase();
+                if (saFontColorInput) saFontColorInput.value = saState.fontColor;
+                saApplyUI();
+            }
+        });
+    }
+    const saFontResetBtn = document.getElementById('sa-font-reset');
+    const saFontResetBtnDark = document.getElementById('sa-font-reset-dark');
+    const saFontColorInputDark = document.getElementById('sa-font-color-dark');
+    if (saFontColorInputDark) {
+        saFontColorInputDark.addEventListener('input', () => {
+            saState.fontColorDark = saFontColorInputDark.value.toUpperCase();
+            if (saFontHexInputDark) saFontHexInputDark.value = saState.fontColorDark;
+            saApplyUI();
+        });
+    }
+    if (saFontHexInputDark) {
+        saFontHexInputDark.addEventListener('input', () => {
+            const v = saFontHexInputDark.value.trim();
+            if (/^#?[0-9a-fA-F]{6}$/.test(v)) {
+                saState.fontColorDark = ('#' + v.replace('#', '')).toUpperCase();
+                if (saFontColorInputDark) saFontColorInputDark.value = saState.fontColorDark;
+                saApplyUI();
+            }
+        });
+    }
+    if (saFontResetBtn) {
+        saFontResetBtn.addEventListener('click', () => {
+            saState.fontColor = '';
+            saApplyUI();
+        });
+    }
+    if (saFontResetBtnDark) {
+        saFontResetBtnDark.addEventListener('click', () => {
+            saState.fontColorDark = '';
+            saApplyUI();
+        });
+    }
+
     // کلیک روی پله‌های طیف = کپی کد رنگ
     saRoot.querySelectorAll('.sa-swatch').forEach((sw) => {
         sw.addEventListener('click', () => {
@@ -542,7 +705,7 @@
             saSaveBtn.disabled = true;
             saSaveBtn.style.opacity = '0.7';
             try {
-                await $wire.syncState(saState.palette, saState.warmth, saState.custom, saState.mode);
+                await $wire.syncState(saState.palette, saState.warmth, saState.custom, saState.mode, saState.fontColor, saState.fontColorDark);
                 await $wire.call('saveSkin');
             } finally {
                 saSaveBtn.disabled = false;
@@ -571,8 +734,12 @@
         if (data.warmth !== undefined && data.warmth !== null) saState.warmth = parseInt(data.warmth, 10) || 0;
         if (data.custom) saState.custom = data.custom;
         if (data.mode) saState.mode = data.mode;
+        if (data.fontColor !== undefined && data.fontColor !== null) saState.fontColor = data.fontColor;
+        if (data.fontColorDark !== undefined && data.fontColorDark !== null) saState.fontColorDark = data.fontColorDark;
         if (saHexInput) saHexInput.value = saState.custom;
         if (saColorInput) saColorInput.value = saState.custom;
+        if (saFontHexInput) saFontHexInput.value = saState.fontColor;
+        if (saFontHexInputDark) saFontHexInputDark.value = saState.fontColorDark;
         saApplyUI();
     });
 </script>

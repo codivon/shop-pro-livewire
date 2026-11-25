@@ -26,6 +26,8 @@
             'gradient'       => ['#F58529', '#DD2A7B', '#8134AF', '#515BD4'],
             'gradient_angle' => 45,
             'mode'           => 'light',
+            'font_color'      => null,
+            'font_color_dark' => null,
         ];
     }
 
@@ -144,21 +146,44 @@
            بعد از theme-dark.css می‌آید تا هم :root و هم نسخهٔ تیره بازنویسی شود؛
            و قبل از info_header_codes تا CSS سفارشی مدیر همچنان آخرین حرف را بزند.
            کل تم (۸۳+ مصرف var(--main-color-one) و هدر/محصول/حالت شب) با همین
-           چند متغیر یک‌جا رنگ می‌گیرد — بدون دست‌زدن به کلاس‌ها. */
+           چند متغیر یک‌جا رنگ می‌گیرد — بدون دست‌زدن به کلاس‌ها.
+
+           فاز ۲۱۰ —
+             • ‎--main-color-one-rgb: برای همهٔ سایه/پس‌زمینه‌های rgba(39,95,224,…)
+               که در CSSهای قالب هاردکد بودند (محصول/پنل کاربر/برندها/نتیجهٔ
+               پرداخت) — با تغییر پوسته همه هم‌رنگ می‌شوند.
+             • ‎--color-site: رنگ فونت (متن) سایت از تنظیمات ظاهری؛ جدا برای
+               حالت روشن و تم شب. خالی بودن = پیش‌فرض قالب (بدون بازنویسی). */
         $sa_payload = $saniar_appearance_payload;
         $sa_gradient = 'linear-gradient(' . (int) ($sa_payload['gradient_angle'] ?? 135) . 'deg, '
             . implode(', ', $sa_payload['gradient'] ?? ['#D62976']) . ')';
+
+        try {
+            $sa_engine = \Themes\SaniarTheme\src\Support\PaletteEngine::class;
+            $sa_rgb = $sa_engine::hexToRgbString($sa_payload['base'] ?? '#D62976');
+            $sa_rgb_dark = $sa_engine::hexToRgbString($sa_payload['dark_base'] ?? ($sa_payload['base'] ?? '#D62976'));
+        } catch (\Throwable $sa_rgb_error) {
+            $sa_rgb = '214, 41, 118';
+            $sa_rgb_dark = $sa_rgb;
+        }
+
+        $sa_font_color = $sa_payload['font_color'] ?? null;
+        $sa_font_color_dark = $sa_payload['font_color_dark'] ?? null;
     @endphp
     <style id="saniar-appearance-vars">
         :root {
             --main-color-one: {{ $sa_payload['base'] }};
             --main-color-one-hover: {{ $sa_payload['hover'] }};
             --main-color-one-shadow: {{ $sa_payload['base'] }}31;
+            --main-color-one-rgb: {{ $sa_rgb }};
             --st-gradient: {{ $sa_gradient }};
 @if (! empty($sa_payload['scale']) && is_array($sa_payload['scale']))
 @foreach ($sa_payload['scale'] as $sa_step => $sa_hex)
             --st-primary-{{ $sa_step }}: {{ $sa_hex }};
 @endforeach
+@endif
+@if ($sa_font_color)
+            --color-site: {{ $sa_font_color }};
 @endif
         }
 
@@ -166,6 +191,10 @@
             --main-color-one: {{ $sa_payload['dark_base'] ?? $sa_payload['base'] }};
             --main-color-one-hover: {{ $sa_payload['dark_hover'] ?? $sa_payload['hover'] }};
             --main-color-one-shadow: {{ $sa_payload['dark_base'] ?? $sa_payload['base'] }}31;
+            --main-color-one-rgb: {{ $sa_rgb_dark }};
+@if ($sa_font_color_dark)
+            --color-site: {{ $sa_font_color_dark }};
+@endif
         }
 
         {{-- ابزارهای گرادیان پالت برای بخش‌های ویژهٔ قالب --}}

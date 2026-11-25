@@ -114,11 +114,14 @@
             }
         }
 
-        /* سبد کشویی هدر + شمارنده */
+        /* سبد کشویی هدر + شمارنده — فاز ۲۱۰: شمارندهٔ صریح سرور پاس داده می‌شود */
         if (res.cart) {
             /* بروزرسانی درجای سایدبار (بدون بازسازی گره — رفع بسته/بازشدن و قفل اسکرول) */
             if (window.SaniarThemeCartSync) {
-                window.SaniarThemeCartSync(res.cart);
+                window.SaniarThemeCartSync(
+                    res.cart,
+                    typeof res.cart_count !== 'undefined' && res.cart_count !== null ? parseInt(res.cart_count, 10) : null
+                );
             }
         }
 

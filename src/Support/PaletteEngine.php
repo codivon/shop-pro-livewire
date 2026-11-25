@@ -3,12 +3,14 @@
 namespace Themes\SaniarTheme\src\Support;
 
 /* ============================================================
-   SaniarTheme — PaletteEngine (فاز ۲۰۸)
+   SaniarTheme — PaletteEngine (فاز ۲۰۸ — فاز ۲۱۰)
    موتور پالت‌های رنگی «تنظیمات ظاهری قالب»:
    • پالت‌های آماده + شخصی‌سازی (رنگ دلخواه مدیر)
    • اسلایدر گرمی/سردی: چرخش Hue به سمت گرم (نارنجی/سرخ) یا سرد (آبی)
      + کمی اشباع بیشتر در سمت گرم («کم‌رنگ و پررنگ»)
    • تولید طیف ۵۰ تا ۹۵۰ حول رنگ اصلی (مطابق قرارداد Tailwind)
+   • فاز ۲۱۰ — رنگ فونت (متن) سایت، جدا برای حالت روشن و تم شب؛
+     خالی بودن هرکدام = پیش‌فرض قالب (#۳۳۳ در روشن / روشن در تم شب).
    • خروجیِ نهایی (payload) همان چیزی است که در option
      «saniar_appearance» ذخیره و در master.blade.php به‌صورت
      متغیرهای CSS تزریق می‌شود — فرانت هیچ محاسبه‌ای ندارد.
@@ -28,6 +30,12 @@ class PaletteEngine
 
     /** رنگ اصلی پیش‌فرض حالت شخصی‌سازی */
     public const DEFAULT_CUSTOM = '#D62976';
+
+    /** رنگ فونت پیش‌فرض قالب (متغیر --color-site در style.css) — حالت روشن */
+    public const DEFAULT_FONT_COLOR = '#333333';
+
+    /** رنگ فونت پیش‌فرض قالب در تم شب (متغیر --color-site در theme-dark.css) */
+    public const DEFAULT_FONT_COLOR_DARK = '#E6E8EE';
 
     /**
      * پالت‌های آماده.
@@ -158,6 +166,28 @@ class PaletteEngine
         }
 
         return strtoupper($fallback);
+    }
+
+    /**
+     * فاز ۲۱۰ — نرمال‌سازی HEX با اجازهٔ خالی بودن.
+     * خالی/نامعتبر = null یعنی «پیش‌فرض قالب» (بدون بازنویسی متغیر).
+     */
+    public static function normalizeHexOrNull(?string $value): ?string
+    {
+        $value = strtoupper(trim((string) $value));
+        if (preg_match('/^#?([0-9A-F]{6})$/', $value, $m)) {
+            return '#'.$m[1];
+        }
+
+        return null;
+    }
+
+    /** HEX → "R, G, B" — برای متغیرهای rgba(var(--st-rgb), alpha) در CSS قالب */
+    public static function hexToRgbString(string $hex): string
+    {
+        [$r, $g, $b] = self::hexToRgb($hex);
+
+        return $r.', '.$g.', '.$b;
     }
 
     /** HEX → [h(۰..۳۶۰), s(۰..۱۰۰), l(۰..۱۰۰)] */
@@ -374,8 +404,12 @@ class PaletteEngine
     /**
      * محاسبهٔ کامل وضعیت پوسته از روی ورودی‌های خام.
      * خروجی = همان JSON ذخیره‌شونده در option (فرانت فقط مصرف‌کننده است).
+     *
+     * فاز ۲۱۰ — $extras:
+     *   font_color       رنگ فونت سایت در حالت روشن (null/خالی = پیش‌فرض)
+     *   font_color_dark  رنگ فونت سایت در تم شب (null/خالی = پیش‌فرض)
      */
-    public static function resolve(string $paletteKey, int $warmth, ?string $customHex = null, ?string $mode = 'light'): array
+    public static function resolve(string $paletteKey, int $warmth, ?string $customHex = null, ?string $mode = 'light', ?array $extras = null): array
     {
         $palettes = self::indexed();
         $paletteKey = isset($palettes[$paletteKey]) ? $paletteKey : self::DEFAULT_PALETTE;
@@ -401,8 +435,13 @@ class PaletteEngine
             $label .= $warmth < 0 ? ' — گرم‌تر' : ' — سردتر';
         }
 
+        /* فاز ۲۱۰ — رنگ فونت (متن) سایت: جدا برای روشن و تم شب؛
+           null یعنی «پیش‌فرض قالب» و در تزریق CSS رد می‌شود. */
+        $fontColor = self::normalizeHexOrNull($extras['font_color'] ?? null);
+        $fontColorDark = self::normalizeHexOrNull($extras['font_color_dark'] ?? null);
+
         return [
-            'v'              => 1,
+            'v'              => 2,
             'palette'        => $paletteKey,
             'warmth'         => $warmth,
             'custom'         => $custom,
@@ -415,6 +454,8 @@ class PaletteEngine
             'scale'          => $scale,
             'gradient'       => array_values($stops),
             'gradient_angle' => (int) ($palette['gradient_angle'] ?? 135),
+            'font_color'       => $fontColor,
+            'font_color_dark'  => $fontColorDark,
         ];
     }
 
@@ -429,7 +470,10 @@ class PaletteEngine
     /** پوشهٔ پیش‌فرض (وقتی هنوز چیزی ذخیره نشده یا مقدار خراب است) */
     public static function defaultPayload(): array
     {
-        $payload = self::resolve(self::DEFAULT_PALETTE, 0, self::DEFAULT_CUSTOM, 'light');
+        $payload = self::resolve(self::DEFAULT_PALETTE, 0, self::DEFAULT_CUSTOM, 'light', [
+            'font_color'      => self::DEFAULT_FONT_COLOR,
+            'font_color_dark' => self::DEFAULT_FONT_COLOR_DARK,
+        ]);
         $payload['label'] = 'گرادیان اینستاگرامی (پیش‌فرض)';
 
         return $payload;
@@ -456,13 +500,15 @@ class PaletteEngine
             || ! is_string($data['palette'])
         ) {
             return [
-                'palette' => self::DEFAULT_PALETTE,
-                'warmth'  => 0,
-                'custom'  => self::DEFAULT_CUSTOM,
-                'mode'    => 'light',
-                'label'   => 'گرادیان اینستاگرامی (پیش‌فرض)',
-                'saved'   => false,
-                'payload' => self::defaultPayload(),
+                'palette'     => self::DEFAULT_PALETTE,
+                'warmth'      => 0,
+                'custom'      => self::DEFAULT_CUSTOM,
+                'mode'        => 'light',
+                'font_color'  => '',
+                'font_color_dark' => '',
+                'label'       => 'گرادیان اینستاگرامی (پیش‌فرض)',
+                'saved'       => false,
+                'payload'     => self::defaultPayload(),
             ];
         }
 
@@ -470,7 +516,11 @@ class PaletteEngine
             (string) $data['palette'],
             (int) ($data['warmth'] ?? 0),
             isset($data['custom']) ? (string) $data['custom'] : self::DEFAULT_CUSTOM,
-            ($data['mode'] ?? 'light') === 'dark' ? 'dark' : 'light'
+            ($data['mode'] ?? 'light') === 'dark' ? 'dark' : 'light',
+            [
+                'font_color'      => isset($data['font_color']) ? (string) $data['font_color'] : '',
+                'font_color_dark' => isset($data['font_color_dark']) ? (string) $data['font_color_dark'] : '',
+            ]
         );
 
         if (self::isDefaultState($payload)) {
@@ -478,13 +528,15 @@ class PaletteEngine
         }
 
         return [
-            'palette' => $payload['palette'],
-            'warmth'  => $payload['warmth'],
-            'custom'  => $payload['custom'],
-            'mode'    => $payload['mode'],
-            'label'   => $payload['label'],
-            'saved'   => true,
-            'payload' => $payload,
+            'palette'         => $payload['palette'],
+            'warmth'          => $payload['warmth'],
+            'custom'          => $payload['custom'],
+            'mode'            => $payload['mode'],
+            'font_color'      => $payload['font_color'] ?? '',
+            'font_color_dark' => $payload['font_color_dark'] ?? '',
+            'label'           => $payload['label'],
+            'saved'           => true,
+            'payload'         => $payload,
         ];
     }
 

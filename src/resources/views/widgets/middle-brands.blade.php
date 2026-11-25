@@ -159,7 +159,7 @@
             font-weight: 800;
             letter-spacing: .5px;
             color: var(--main-color-one, #275fe0);
-            background: linear-gradient(135deg, rgba(39, 95, 224, .07), rgba(39, 95, 224, .16));
+            background: linear-gradient(135deg, rgba(var(--main-color-one-rgb, 39, 95, 224), .07), rgba(var(--main-color-one-rgb, 39, 95, 224), .16));
             border-radius: 8px;
             user-select: none;
         }

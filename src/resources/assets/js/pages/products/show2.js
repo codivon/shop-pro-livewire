@@ -121,9 +121,14 @@ $(document).on('click', '.add-to-cart', function () {
                     confirmButtonText: 'باشه',
                     footer: '<h5><a href="/cart">مشاهده سبد خرید</a></h5>'
                 });*/
-                showCustomToast('با موفقیت به سبد اضافه شد','success');
-                /* بروزرسانی درجای سایدبار (بدون بازسازی گره) */
-                window.SaniarThemeCartSync && window.SaniarThemeCartSync(data.cart);
+                /* فاز ۲۱۰ — اول همگام‌سازی سبد (با شمارندهٔ صریح سرور)، بعد توست؛
+                   تا هیچ‌وقت خطای توست مانع به‌روزرسانی آیکن/سایدبار نشود */
+                try {
+                    window.SaniarThemeCartSync && window.SaniarThemeCartSync(data.cart, parseInt(data.cart_count, 10));
+                } catch (e) { console && console.warn && console.warn('cart sync:', e); }
+                if (typeof showCustomToast === 'function') {
+                    showCustomToast('با موفقیت به سبد اضافه شد','success');
+                }
             } else {
                 Swal.fire({
                     type: 'error',
@@ -139,10 +144,10 @@ $(document).on('click', '.add-to-cart', function () {
                 'X-CSRF-TOKEN',
                 $('meta[name="csrf-token"]').attr('content')
             );
-            block(btn);
+            try { block(btn); } catch (e) { /* پلاگین blockUI در دسترس نیست */ }
         },
         complete: function () {
-            unblock(btn);
+            try { unblock(btn); } catch (e) { /* هیچ */ }
         }
     });
 });
@@ -184,10 +189,10 @@ function sendStockNotify() {
                 'X-CSRF-TOKEN',
                 $('meta[name="csrf-token"]').attr('content')
             );
-            block(btn);
+            try { block(btn); } catch (e) { /* پلاگین blockUI در دسترس نیست */ }
         },
         complete: function () {
-            unblock(btn);
+            try { unblock(btn); } catch (e) { /* هیچ */ }
         }
     });
 }

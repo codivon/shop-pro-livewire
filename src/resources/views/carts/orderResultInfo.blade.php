@@ -507,7 +507,7 @@
             width: 38px;
             height: 38px;
             border-radius: 12px;
-            background: var(--main-color-one-shadow, rgba(39, 95, 224, .12));
+            background: var(--main-color-one-shadow, rgba(var(--main-color-one-rgb, 39, 95, 224), .12));
             color: var(--main-color-one);
             display: flex;
             align-items: center;
@@ -574,7 +574,7 @@
         .opr-badge.b-green { background: rgba(24, 157, 14, .12); color: #0b8502; }
         .opr-badge.b-red   { background: rgba(208, 35, 4, .11);  color: #d02304; }
         .opr-badge.b-amber { background: rgba(255, 164, 27, .16); color: #9c6a08; }
-        .opr-badge.b-blue  { background: rgba(39, 95, 224, .11); color: var(--main-color-one); }
+        .opr-badge.b-blue  { background: rgba(var(--main-color-one-rgb, 39, 95, 224), .11); color: var(--main-color-one); }
         .opr-badge.b-gray  { background: rgba(108, 117, 125, .13); color: #5a6268; }
 
         /* ---------- اقلام سفارش ---------- */
@@ -697,12 +697,12 @@
         .opr-btn-primary {
             background: linear-gradient(135deg, var(--main-color-one), var(--main-color-one-hover));
             color: #fff !important;
-            box-shadow: 0 8px 18px rgba(39, 95, 224, .30);
+            box-shadow: 0 8px 18px rgba(var(--main-color-one-rgb, 39, 95, 224), .30);
         }
 
         .opr-btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(39, 95, 224, .38);
+            box-shadow: 0 12px 24px rgba(var(--main-color-one-rgb, 39, 95, 224), .38);
             color: #fff !important;
         }
 
@@ -715,7 +715,7 @@
         .opr-btn-ghost:hover {
             border-color: var(--main-color-one);
             color: var(--main-color-one) !important;
-            background: rgba(39, 95, 224, .04);
+            background: rgba(var(--main-color-one-rgb, 39, 95, 224), .04);
         }
 
         .opr-footnote {

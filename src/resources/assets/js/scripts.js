@@ -78,6 +78,22 @@ $.ajaxSetup({
         } else if (data.status == 500) {
             showCustomToast('خطایی در سرور رخ داده است','error');
             return;
+        } else if (data.status == 419) {
+            /* فاز ۲۱۰ — انقضای نشست/توکن CSRF (عامل اصلی «گاهی افزودن به سبد
+               هیچ اثری ندارد»): قبلاً این خطا بی‌صدا نادیده می‌شد. حالا توست +
+               یک بازآوری محافظت‌شده (بدون حلقهٔ بی‌پایان). */
+            showCustomToast('نشست شما منقضی شده است؛ صفحه برای ادامه بازآوری می‌شود…','error');
+            try {
+                var stamp419 = 'saniar-419-reload';
+                var last419 = parseInt(sessionStorage.getItem(stamp419) || '0', 10);
+                if (Date.now() - last419 > 30000) {
+                    sessionStorage.setItem(stamp419, String(Date.now()));
+                    setTimeout(function () { location.reload(); }, 1800);
+                }
+            } catch (e) {
+                setTimeout(function () { location.reload(); }, 1800);
+            }
+            return;
         } else if (!data.responseJSON.errors) {
             showCustomToast('خطایی رخ داده است','error');
             return;

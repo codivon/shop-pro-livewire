@@ -49,6 +49,13 @@
     {{-- تم تیرهٔ چک‌اوت (قوانین اختصاصی چک‌اوت انتهای همین فایل است) --}}
     <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=27">
 
+    {{-- فاز ۲۱۰ — پوستهٔ رنگی قالب در چک‌اوت و نتیجهٔ پرداخت:
+         این لایوت تا فاز ۲۰۹ تزریق متغیرهای پوسته را نداشت و
+         صفحات سبد/پرداخت با رنگ پیش‌فرض قالب (آبی) رندر می‌شدند؛
+         اکنون همان بلوک master.blade.php اینجا هم تزریق می‌شود
+         (بعد از theme-dark.css تا نسخهٔ تیره هم بازنویسی شود) --}}
+    @include('front::partials.appearance-vars')
+
     {{-- توست‌ها --}}
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
 

@@ -67,5 +67,5 @@
 
 @push('scripts')
     <script src="{{ theme_asset('js/pages/carts/cart.js') }}?v=162"></script>
-    <script src="{{ theme_asset('js/pages/cart.js') }}?v=10"></script>
+    <script src="{{ theme_asset('js/pages/cart.js') }}?v=11"></script>
 @endpush

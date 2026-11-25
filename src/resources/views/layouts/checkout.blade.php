@@ -43,7 +43,7 @@
     <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css') }}">
 
     {{-- استایل‌های مشترک تم (متغیرهای رنگ، content-box، bank-item، pay-table و ...) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=174">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=175">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
 
     {{-- تم تیرهٔ چک‌اوت (قوانین اختصاصی چک‌اوت انتهای همین فایل است) --}}
@@ -127,8 +127,8 @@
 <script src="{{ theme_asset("js/plugins/toastr/toastr.min.js") }}" data-navigate-once></script>
 <script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
 {{-- block()/unblock() در scripts.js تعریف شده‌اند --}}
-<script src="{{ theme_asset("js/scripts.js") }}?v=13" data-navigate-once></script>
-<script src="{{theme_asset('js/main.js')}}?v=21" data-navigate-once></script>
+<script src="{{ theme_asset("js/scripts.js") }}?v=14" data-navigate-once></script>
+<script src="{{theme_asset('js/main.js')}}?v=24" data-navigate-once></script>
 
 {{-- فاز ۱۸۸ — اسکریپت‌های لایووایر و موتور SPA تم، تا ناوبری از چک‌اوت هم بدون رفرش باشد --}}
 @if (class_exists(\Livewire\Livewire::class))

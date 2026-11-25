@@ -80,8 +80,8 @@
 {{-- فاز ۱۹۴ — نسخه‌ها با لایوت اصلی یکسان شد (scripts.js قبلاً v=11 بود؛ تفاوت نسخه
      باعث re-execute و خطای redeclaration در ناوبری SPA می‌شد) --}}
 <script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
-<script src="{{ theme_asset("js/scripts.js") }}?v=13" data-navigate-once></script>
-<script src="{{theme_asset('js/main.js')}}?v=21" data-navigate-once></script>
+<script src="{{ theme_asset("js/scripts.js") }}?v=14" data-navigate-once></script>
+<script src="{{theme_asset('js/main.js')}}?v=24" data-navigate-once></script>
 <script src="{{theme_asset('js/theia-sticky-sidebar.min.js')}}" data-navigate-once></script>
 
 

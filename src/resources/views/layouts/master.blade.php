@@ -113,7 +113,7 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=185">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=186">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=174">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
@@ -122,7 +122,7 @@
 
     {{-- اصلاحات ظاهری ریز (هدر/محصول/صفحات) --}}
     <link rel="stylesheet" href="{{ theme_asset('css/theme-header.css') }}?v=164">
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-product.css') }}?v=20">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-product.css') }}?v=21">
     <link rel="stylesheet" href="{{ theme_asset('css/theme-pages.css') }}">
 
     {{-- /۱۵۸ — حالت شب (دارک مود) — بعد از همهٔ استایل‌ها تا بتواند بازنویسی کند --}}
@@ -657,7 +657,7 @@
 {{-- پلاگین go-to-top حذف شد؛ دکمهٔ مستطیلی «برگشت به بالا» در theme-header.js --}}
 <script src="{{theme_asset('plugin/rasta-contact/script.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('js/saniar-init.js')}}?v=167" data-navigate-once></script>
-<script src="{{theme_asset('js/theme-header.js')}}?v=29" data-navigate-once></script>
+<script src="{{theme_asset('js/theme-header.js')}}?v=30" data-navigate-once></script>
 
 {{-- اسکریپت‌های عملکردی فروشگاه --}}
 <script src="{{ theme_asset("js/plugins/sweetalert2.all.min.js") }}" data-navigate-once></script>
@@ -668,8 +668,8 @@
 <script src="{{theme_asset('js/jquery.countdown.min.js')}}" data-navigate-once></script>
 <script src="{{theme_asset('js/owl.carousel.min.js')}}" data-navigate-once></script>
 <script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
-<script src="{{ theme_asset("js/scripts.js") }}?v=13" data-navigate-once></script>
-<script src="{{theme_asset('js/main.js')}}?v=23" data-navigate-once></script>
+<script src="{{ theme_asset("js/scripts.js") }}?v=14" data-navigate-once></script>
+<script src="{{theme_asset('js/main.js')}}?v=24" data-navigate-once></script>
 @stack('scripts')
 
 {!! option('info_scripts') !!}

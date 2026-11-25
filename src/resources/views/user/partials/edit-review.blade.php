@@ -164,6 +164,6 @@
 </div>
 @push('scripts')
     <script src="{{theme_asset('js/bootstrap-slider.min.js')}}"></script>
-    <script src="{{ theme_asset('js/pages/products/show.js') }}?v=14"></script>
+    <script src="{{ theme_asset('js/pages/products/show.js') }}?v=25"></script>
     <script src="{{ theme_asset('js/pages/user/edit-review-modal.js') }}"></script>
 @endpush

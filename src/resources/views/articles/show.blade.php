@@ -16,7 +16,7 @@
 @push('styles')
     <link rel="stylesheet" href="{{theme_asset('js/plugins/plyr/plyr.css')}}" />
     {{-- فاز ۲۰۲ — استایل بازطراحی تک‌صفحه مقاله --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/pages/articles/show.css') }}?v=1">
+    <link rel="stylesheet" href="{{ theme_asset('css/pages/articles/show.css') }}?v=2">
 @endpush
 
 @section('content')

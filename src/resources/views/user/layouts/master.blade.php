@@ -2,7 +2,7 @@
 
 @push('styles')
     {{-- فاز ۲۰۰ — استایل بازطراحی‌شدهٔ پنل مشتری (فقط صفحات پنل) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/user-panel.css') }}?v=201">
+    <link rel="stylesheet" href="{{ theme_asset('css/user-panel.css') }}?v=202">
 @endpush
 
 @section('content')

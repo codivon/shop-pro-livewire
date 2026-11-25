@@ -86,6 +86,11 @@ class ThemeServiceProvider extends ServiceProvider
         if (class_exists(\Livewire\Livewire::class)) {
             \Livewire\Livewire::component('saniar-favorites-button', \Themes\SaniarTheme\src\Livewire\FavoritesButton::class);
             \Livewire\Livewire::component('saniar-newsletter-box', \Themes\SaniarTheme\src\Livewire\NewsletterBox::class);
+
+            /* فاز ۲۰۸ — کارت اختصاصی «تنظیمات ظاهری قالب» در پنل مدیریت
+               (صفحهٔ تنظیمات قالب ← بخش custom قالب فعال) — ذخیرهٔ مستقل
+               پوستهٔ رنگی در option سانیار_appearance + تزریق CSS در فرانت. */
+            \Livewire\Livewire::component('saniar-appearance-settings', \Themes\SaniarTheme\src\Livewire\Admin\AppearanceSettings::class);
         }
 
         // share with views

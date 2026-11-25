@@ -1,11 +1,50 @@
 @php
     $cart = get_cart();
+
+    /* فاز ۲۰۸ — پوستهٔ رنگی قالب (تنظیمات ظاهری پنل مدیریت):
+       option «saniar_appearance» (JSON ساخت PaletteEngine) خوانده می‌شود و
+       در <head> به‌صورت متغیرهای CSS تزریق می‌گردد تا کل تم فرانت با رنگ‌های
+       پوستهٔ انتخابی رنگ بگیرد. اگر چیزی ذخیره نشده یا مقدار خراب باشد،
+       payload پیش‌فرض (گرادیان اینستاگرامی) استفاده می‌شود. */
+    $saniar_theme_cookie = $_COOKIE['saniar-theme'] ?? '';
+
+    try {
+        $saniar_appearance_state = \Themes\SaniarTheme\src\Support\PaletteEngine::stateFromOption();
+    } catch (\Throwable $saniar_appearance_error) {
+        $saniar_appearance_state = null;
+    }
+
+    $saniar_appearance_payload = $saniar_appearance_state['payload'] ?? null;
+
+    if (! is_array($saniar_appearance_payload) || empty($saniar_appearance_payload['base'])) {
+        $saniar_appearance_payload = [
+            'base'           => '#D62976',
+            'hover'          => '#B4215F',
+            'dark_base'      => '#E8468A',
+            'dark_hover'     => '#F06AA5',
+            'scale'          => [],
+            'gradient'       => ['#F58529', '#DD2A7B', '#8134AF', '#515BD4'],
+            'gradient_angle' => 45,
+            'mode'           => 'light',
+        ];
+    }
+
     /* فاز ۱۹۲ — حالت روز/شب از کوکی (همراه localStorage) در سمت سرور:
        Livewire.navigate اتریبیوت‌های <html> را از HTML صفحهٔ جدید می‌گیرد؛
        اگر data-theme سمت سرور رندر نشود، بعد از هر ناوبری تم روشن می‌شد
        تا کاربر رفرش کند. اکنون کوکی saniar-theme مقدار اولیهٔ صحیح را
-       هم در لود کامل و هم در ناوبری SPA تضمین می‌کند. */
-    $saniar_theme_attr = ($_COOKIE['saniar-theme'] ?? '') === 'dark' ? 'dark' : 'light';
+       هم در لود کامل و هم در ناوبری SPA تضمین می‌کند.
+
+       فاز ۲۰۸ — حالت پیش‌فرض سایت از تنظیمات ظاهری پنل: کوکی/انتخابِ
+       قبلیِ کاربر مقدم است؛ فقط وقتی کوکی‌ای نیست، انتخاب مدیر
+       (روشن/تیره در کارت «ظاهر و رنگ‌بندی») ملاک می‌شود. */
+    if ($saniar_theme_cookie === 'dark') {
+        $saniar_theme_attr = 'dark';
+    } elseif ($saniar_theme_cookie === 'light') {
+        $saniar_theme_attr = 'light';
+    } else {
+        $saniar_theme_attr = ($saniar_appearance_payload['mode'] ?? 'light') === 'dark' ? 'dark' : 'light';
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="rtl" data-theme="{{ $saniar_theme_attr }}">
@@ -99,6 +138,48 @@
          تگ یکسان را dedupe می‌کند و هرگز unload نمی‌شود. --}}
     <link rel="stylesheet" href="{{ theme_asset('css/floating-widget.css') }}?v=176">
     <link rel="stylesheet" href="{{ theme_asset('css/notifications-popup.css') }}?v=2">
+
+    @php
+        /* فاز ۲۰۸ — ساخت CSS پوستهٔ رنگی.
+           بعد از theme-dark.css می‌آید تا هم :root و هم نسخهٔ تیره بازنویسی شود؛
+           و قبل از info_header_codes تا CSS سفارشی مدیر همچنان آخرین حرف را بزند.
+           کل تم (۸۳+ مصرف var(--main-color-one) و هدر/محصول/حالت شب) با همین
+           چند متغیر یک‌جا رنگ می‌گیرد — بدون دست‌زدن به کلاس‌ها. */
+        $sa_payload = $saniar_appearance_payload;
+        $sa_gradient = 'linear-gradient(' . (int) ($sa_payload['gradient_angle'] ?? 135) . 'deg, '
+            . implode(', ', $sa_payload['gradient'] ?? ['#D62976']) . ')';
+    @endphp
+    <style id="saniar-appearance-vars">
+        :root {
+            --main-color-one: {{ $sa_payload['base'] }};
+            --main-color-one-hover: {{ $sa_payload['hover'] }};
+            --main-color-one-shadow: {{ $sa_payload['base'] }}31;
+            --st-gradient: {{ $sa_gradient }};
+@if (! empty($sa_payload['scale']) && is_array($sa_payload['scale']))
+@foreach ($sa_payload['scale'] as $sa_step => $sa_hex)
+            --st-primary-{{ $sa_step }}: {{ $sa_hex }};
+@endforeach
+@endif
+        }
+
+        html[data-theme="dark"] {
+            --main-color-one: {{ $sa_payload['dark_base'] ?? $sa_payload['base'] }};
+            --main-color-one-hover: {{ $sa_payload['dark_hover'] ?? $sa_payload['hover'] }};
+            --main-color-one-shadow: {{ $sa_payload['dark_base'] ?? $sa_payload['base'] }}31;
+        }
+
+        {{-- ابزارهای گرادیان پالت برای بخش‌های ویژهٔ قالب --}}
+        .st-gradient {
+            background-image: var(--st-gradient) !important;
+        }
+
+        .st-gradient-text {
+            background-image: var(--st-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent !important;
+        }
+    </style>
 
     {!! option('info_header_codes', '') !!}
 

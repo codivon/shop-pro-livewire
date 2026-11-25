@@ -380,6 +380,26 @@ return [
 
     'settings' => [
         'fields' => [
+            /* فاز ۲۰۸ — بخش اختصاصی قالب: تنظیمات ظاهری (پالت‌های رنگی).
+               input-type=custom ⇒ در پنل بدون قاب عمومی و با سربرگ و طراحی
+               خودش رندر می‌شود (پشتیبانی generic در ویو settings پنل اضافه شد)
+               و ذخیره هم مستقل داخل کامپوننت خودش انجام می‌شود
+               (option «saniar_appearance» — مستقل از زبان). */
+            [
+                'input-type' => 'linebreak',
+                'title'      => 'ظاهر و رنگ‌بندی',
+            ],
+            [
+                'title'      => 'ظاهر و رنگ‌بندی',
+                'key'        => 'saniar_appearance_ui',
+                'input-type' => 'custom',
+                'view'       => 'front::admin.appearance',
+            ],
+            /* پایان بخش اختصاصی — با linebreak بعدی، فیلدهای عمومی بخش خودشان را می‌گیرند */
+            [
+                'input-type' => 'linebreak',
+                'title'      => 'تنظیمات عمومی',
+            ],
             /*[
                 'title'      => 'رنگ بندی قالب',
                 'key'        => 'dt_theme_color',

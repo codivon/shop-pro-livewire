@@ -85,6 +85,13 @@
 
             {{-- ===== کارت‌های بخش‌بندی‌شده ===== --}}
             @foreach ($final as $si => $section)
+                @if (count($section['fields'] ?? []) === 1 && ($section['fields'][0]['input-type'] ?? '') === 'custom')
+                    {{-- فاز ۲۰۸ — بخش تک‌فیلدی از نوع «custom»: ویو کاملاً اختصاصیِ قالبِ فعال
+                         (سربرگ، طراحی و منطق ذخیرهٔ مستقل داخل خودِ ویو است) — بدون قاب عمومی.
+                         هر قالبی می‌تواند با تعریف فیلدی با input-type=custom + view اختصاصی،
+                         کارت تنظیمات مخصوص خودش را در همین صفحه داشته باشد. --}}
+                    @include($section['fields'][0]['view'])
+                @else
                 <section class="ap-card overflow-hidden p-0">
                     {{-- سربرگ بخش --}}
                     <div class="flex items-center gap-2.5 border-b border-line bg-surface-2/50 px-4 py-3 dark:border-night-line dark:bg-night-3/40">
@@ -171,6 +178,7 @@
                         @endforeach
                     </div>
                 </section>
+                @endif
             @endforeach
 
             {{-- نوار ذخیره چسبان پایین --}}

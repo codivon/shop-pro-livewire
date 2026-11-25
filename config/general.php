@@ -582,5 +582,9 @@ return [
         'backup_auto_last_slot',
         'backup_auto_last_run',
         'backup_auto_last_result',
+
+        // فاز ۲۰۸ — پوستهٔ رنگی قالب (تنظیمات ظاهری پنل ← کارت اختصاصی قالب فعال)
+        // JSON پالت/گرمی‌وسردی/حالت پیش‌فرض سایت — مستقل از زبان باید خوانده شود
+        'saniar_appearance',
     ],
 ];

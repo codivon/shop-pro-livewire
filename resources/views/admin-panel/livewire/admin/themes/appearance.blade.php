@@ -1,38 +1,66 @@
 {{-- ============================================================
-     پنل مدیریت — تنظیمات ظاهری (فاز ۲۰۸ — فاز ۲۱۰)
-     همان طراحیِ بخش «ظاهر و رنگ‌بندی» قالب سانیار، این‌بار برای خودِ پنل:
-       • ۱۲ پالت آماده (گرید ۴ ستونه) + شخصی‌سازی
-       • اسلایدر گرمی/سردی + ردیف «حالت پیش‌فرض پالت»
-       • طیف تولیدشدهٔ ۵۰..۹۵۰ (کلیک = کپی کد رنگ)
-       • پیش‌نمایش زنده (دکمهٔ اصلی/خطی، برچسب، سبد خرید)
-       • فاز ۲۱۰ — رنگ فونت (جدا برای روشن و تم شب)
-       • فاز ۲۱۰ — رنگ سایدبار و رنگ صفحه (جدا برای روشن و تم شب،
-         هماهنگ با تم شب + کنتراست خودکار متن سایدبار)
-       • حالت پیش‌فرض پنل (روشن/تیره)
-       • بازگشت به پیش‌فرض + ذخیرهٔ پوسته
-
-     اعمال: پس از ذخیره، layout پنل متغیرهای --color-brand-* (و متغیرهای
-     فونت/سایدبار/صفحه) را بازنویسی می‌کند و همین صفحه هم بلافاصله
-     متغیرها را inline روی <html> ست می‌کند تا بدون رفرش، کل پنل رنگ بگیرد.
+     پنل مدیریت — تنظیمات ظاهری (فاز ۲۱۱ — طراحی تازه)
+     هر پالتِ آماده یک «بستهٔ رنگیِ هماهنگِ چندنقشی» است:
+       • رنگ اصلی → دکمه‌ها، لینک‌ها، آیکن‌ها و حالت‌های فعال
+       • رنگ سایدبار و رنگ صفحه → هرکدام تِینِ لطیفِ هم‌خانواده،
+         جدا برای حالت روشن و تم شب (نه همه‌چیز یک‌رنگ!)
+       • متن‌ها پیش‌فرضِ خوانای پنل می‌مانند ⇒ در تیره و روشن
+         هیچ متن یا دکمه‌ای نامعلوم نمی‌شود.
+     بخش‌های صفحه:
+       • پیش‌نمایش زندهٔ دوحالته (روشن | تم شب) — با متغیرهای CSS
+       • پالت‌های آماده — هر کارت یک مینیاتورِ دوحالته از پنل
+       • شخصی‌سازی — رنگ دکمه‌ها/متن/سایدبار/صفحه؛ نسخهٔ تم‌شبِ
+         هر رنگ خودکار و هماهنگ ساخته می‌شود
+       • میزان گرمی و سردیِ پالت — کل بسته با هم می‌چرخد
+     حالت پیش‌فرضِ روشن/تیرهٔ پنل از جای دیگر تنظیم می‌شود
+     (کوکی کاربر / دکمهٔ ماه) و اینجا فقط پیش‌نمایشِ سازگاری است.
+     اعمال: پس از ذخیره، layout پنل متغیرهای --color-brand-* و
+     متغیرهای سایدبار/صفحه/متن را بازنویسی می‌کند و همین صفحه هم
+     بلافاصله متغیرها را inline روی <html> ست می‌کند.
      ============================================================ --}}
 @php
     /** @var array $preview */
     /** @var array $palettes */
+
     $base = $preview['base'];
     $scale = $preview['scale'];
     $gradientCss = 'linear-gradient('.$preview['gradient_angle'].'deg, '.implode(', ', $preview['gradient']).')';
     $rawBase = ($palette === 'custom') ? $custom : (collect($palettes)->firstWhere('key', $palette)['base'] ?? $base);
-    $steps = [950, 900, 800, 700, 600, 500, 400, 300, 200, 100, 50];
 
-    /* فاز ۲۱۰ — رنگ فونت/سایدبار/صفحه: مقدار ذخیره‌شده یا پیش‌فرض پنل */
-    $saFontColor      = $fontColor !== '' ? $fontColor : \App\Support\PaletteEngine::DEFAULT_FONT_COLOR;
-    $saFontColorDark  = $fontColorDark !== '' ? $fontColorDark : \App\Support\PaletteEngine::DEFAULT_FONT_COLOR_DARK;
-    $saSideColor      = $sidebarColor !== '' ? $sidebarColor : \App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR;
-    $saSideColorDark  = $sidebarColorDark !== '' ? $sidebarColorDark : \App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR_DARK;
-    $saPageColor      = $pageColor !== '' ? $pageColor : \App\Support\PaletteEngine::DEFAULT_PAGE_COLOR;
-    $saPageColorDark  = $pageColorDark !== '' ? $pageColorDark : \App\Support\PaletteEngine::DEFAULT_PAGE_COLOR_DARK;
-    $saSideInk        = \App\Support\PaletteEngine::contrastInk($saSideColor);
-    $saSideInkDark    = \App\Support\PaletteEngine::contrastInk($saSideColorDark);
+    /* رنگ اصلیِ پیش‌نمایش تم‌شب هم همان پلهٔ ۶۰۰ است — پنل واقعی در دکمه‌ها/آیکن‌های
+       اصلی در تم شب هم از brand-600 استفاده می‌کند (بدون تعویض پله). */
+
+    /* نقش‌های فعالِ فعلی — مقادیر اولیهٔ پیش‌نمایش زندهٔ دوحالته */
+    $pvFont      = $preview['font_color'] ?: \App\Support\PaletteEngine::DEFAULT_FONT_COLOR;
+    $pvFontDark  = $preview['font_color_dark'] ?: \App\Support\PaletteEngine::DEFAULT_FONT_COLOR_DARK;
+    $pvSide      = $preview['sidebar_color'] ?: \App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR;
+    $pvSideDark  = $preview['sidebar_color_dark'] ?: \App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR_DARK;
+    $pvPage      = $preview['page_color'] ?: \App\Support\PaletteEngine::DEFAULT_PAGE_COLOR;
+    $pvPageDark  = $preview['page_color_dark'] ?: \App\Support\PaletteEngine::DEFAULT_PAGE_COLOR_DARK;
+    $pvSideInk   = \App\Support\PaletteEngine::contrastInk($pvSide);
+    $pvSideInkDark = \App\Support\PaletteEngine::contrastInk($pvSideDark);
+
+    /* کارت‌های پالت — رنگ‌های مینیاتورِ دوحالته (بدون گرمی/سردی) */
+    $cards = [];
+    foreach ($palettes as $p) {
+        $r = \App\Support\PaletteEngine::resolve($p['key'], 0, \App\Support\PaletteEngine::DEFAULT_CUSTOM, 'light');
+        $sideC = $r['sidebar_color'] ?: \App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR;
+        $sideDarkC = $r['sidebar_color_dark'] ?: \App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR_DARK;
+        $cards[$p['key']] = [
+            'primary'      => $r['base'],
+            'primaryDark'  => $r['base'],
+            'side'         => $sideC,
+            'sideDark'     => $sideDarkC,
+            'page'         => $r['page_color'] ?: \App\Support\PaletteEngine::DEFAULT_PAGE_COLOR,
+            'pageDark'     => $r['page_color_dark'] ?: \App\Support\PaletteEngine::DEFAULT_PAGE_COLOR_DARK,
+            'sideInk'      => \App\Support\PaletteEngine::contrastInk($sideC),
+            'sideInkDark'  => \App\Support\PaletteEngine::contrastInk($sideDarkC),
+            'ink'          => \App\Support\PaletteEngine::DEFAULT_FONT_COLOR,
+            'inkDark'      => \App\Support\PaletteEngine::DEFAULT_FONT_COLOR_DARK,
+            'card'         => '#FFFFFF',
+            'cardDark'     => '#161D2B',
+        ];
+    }
 @endphp
 <div class="mx-auto max-w-6xl space-y-5">
 
@@ -55,18 +83,17 @@
                 <div>
                     <h1 class="text-lg font-bold sm:text-xl">تنظیمات ظاهری</h1>
                     <p class="mt-1 flex flex-wrap items-center gap-2 text-xs text-white/85">
-                        <span>رنگ‌بندی پنل مدیریت:</span>
+                        <span>پوستهٔ رنگی پنل مدیریت:</span>
                         <span class="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold">{{ $savedLabel }}</span>
                     </p>
                 </div>
             </div>
-            <p class="hidden text-[11px] leading-6 text-white/80 sm:block sm:max-w-72">
-                پوستهٔ انتخابی بلافاصله روی سایدبار، دکمه‌ها، فرم‌ها و همهٔ صفحات پنل اعمال می‌شود.
+            <p class="hidden text-[11px] leading-6 text-white/80 sm:block sm:max-w-80">
+                هر پالت، دکمه‌ها، سایدبار و صفحه را با رنگ‌های هماهنگِ خودش — در روشن و تم شب — یک‌جا تغییر می‌دهد.
             </p>
         </div>
     </div>
 
-    {{-- ===== کارت اصلی (همان طراحی بخش ظاهری قالب) ===== --}}
     <div id="saniar-appearance" class="ap-card overflow-hidden p-0">
 
         {{-- سربرگ کارت --}}
@@ -82,8 +109,8 @@
                     </svg>
                 </span>
                 <div>
-                    <h2 class="text-[15px] font-bold">ظاهر و رنگ‌بندی</h2>
-                    <p class="mt-0.5 text-[11px] text-ink-3 dark:text-night-ink-2">مخصوص پنل مدیریت — اعمال روی تمام صفحات پنل</p>
+                    <h2 class="text-[15px] font-bold">ظاهر و رنگ‌بندی پنل</h2>
+                    <p class="mt-0.5 text-[11px] text-ink-3 dark:text-night-ink-2">اعمال روی تمام صفحات پنل — روشن و تم شب</p>
                 </div>
             </div>
 
@@ -100,22 +127,221 @@
 
         <div class="space-y-5 px-4 pb-5 pt-1 sm:px-6">
 
-            <p class="text-[11.5px] leading-6 text-ink-3 dark:text-night-ink-2">
-                یک پالت آماده انتخاب کنید یا با شخصی‌سازی، رنگ دلخواه خودتان را بسازید؛
-                همه‌چیز — از دکمه‌ها تا جزئیات — در همهٔ صفحات پنل هماهنگ تغییر می‌کند.
-            </p>
+            {{-- ===== پیش‌نمایش زندهٔ دوحالته ===== --}}
+            <div id="sa-preview-box" class="rounded-2xl border-2 border-dashed p-4 sm:p-5" style="border-color: {{ $base }}55;">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h3 class="text-[13px] font-bold">پیش‌نمایش زنده</h3>
+                    <p class="text-[10px] text-ink-3 dark:text-night-ink-2">سازگاری با روشن و تم شب — به‌صورت خودکار تضمین می‌شود</p>
+                </div>
 
-            {{-- پالت‌های آماده --}}
+                <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                    {{-- حالت روشن --}}
+                    <div>
+                        <p class="mb-1.5 flex items-center gap-1.5 text-[10.5px] font-bold text-ink-3 dark:text-night-ink-2">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true">
+                                <circle cx="12" cy="12" r="4"/>
+                                <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                            حالت روشن
+                        </p>
+                        <div id="sa-pv-light" class="h-48 overflow-hidden rounded-2xl border"
+                             style="--pv-side: {{ $pvSide }}; --pv-side-ink: {{ $pvSideInk }}; --pv-page: {{ $pvPage }}; --pv-card: #FFFFFF; --pv-ink: {{ $pvFont }}; --pv-primary: {{ $base }};">
+                            <div class="flex h-full">
+                                {{-- سایدبار (RTL — سمت راست) --}}
+                                <div class="flex w-[31%] shrink-0 flex-col gap-1.5 p-2.5" style="background: var(--pv-side)">
+                                    <div class="mb-0.5 flex items-center gap-1.5">
+                                        <span class="flex size-5 shrink-0 items-center justify-center rounded-lg text-[8px] font-black text-white" style="background: var(--pv-primary)">P</span>
+                                        <span class="truncate text-[9.5px] font-bold" style="color: var(--pv-side-ink)">پنل مدیریت</span>
+                                    </div>
+                                    <span class="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[9px] font-bold" style="background: color-mix(in srgb, var(--pv-primary) 16%, var(--pv-side)); color: var(--pv-side-ink)">
+                                        <span class="size-1.5 shrink-0 rounded-full" style="background: var(--pv-primary)"></span>
+                                        داشبورد
+                                    </span>
+                                    <span class="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[9px]" style="color: color-mix(in srgb, var(--pv-side-ink) 68%, var(--pv-side))">
+                                        <span class="size-1.5 shrink-0 rounded-full" style="background: color-mix(in srgb, var(--pv-side-ink) 40%, var(--pv-side))"></span>
+                                        سفارش‌ها
+                                    </span>
+                                    <span class="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[9px]" style="color: color-mix(in srgb, var(--pv-side-ink) 68%, var(--pv-side))">
+                                        <span class="size-1.5 shrink-0 rounded-full" style="background: color-mix(in srgb, var(--pv-side-ink) 40%, var(--pv-side))"></span>
+                                        محصولات
+                                    </span>
+                                    <span class="mt-auto flex items-center gap-1.5 border-t px-1 pt-2 text-[9px]" style="border-color: color-mix(in srgb, var(--pv-side-ink) 14%, transparent); color: var(--pv-side-ink)">
+                                        <span class="size-4 shrink-0 rounded-full" style="background: color-mix(in srgb, var(--pv-primary) 45%, var(--pv-side))"></span>
+                                        حساب مدیر
+                                    </span>
+                                </div>
+                                {{-- بدنه --}}
+                                <div class="flex min-w-0 flex-1 flex-col" style="background: var(--pv-page)">
+                                    <div class="flex items-center justify-between border-b px-3 py-2" style="border-color: color-mix(in srgb, var(--pv-ink) 8%, transparent)">
+                                        <span class="text-[9.5px] font-bold" style="color: var(--pv-ink)">داشبورد</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="flex size-5 items-center justify-center rounded-full text-white" style="background: var(--pv-primary)">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-2.5" aria-hidden="true">
+                                                    <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                                                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                                                </svg>
+                                            </span>
+                                            <span class="size-5 rounded-full" style="background: color-mix(in srgb, var(--pv-primary) 35%, var(--pv-page))"></span>
+                                        </div>
+                                    </div>
+                                    <div class="grid flex-1 grid-cols-2 gap-2 p-2.5">
+                                        <div class="flex flex-col rounded-xl border p-2" style="background: var(--pv-card); border-color: color-mix(in srgb, var(--pv-ink) 8%, transparent)">
+                                            <span class="text-[8px]" style="color: color-mix(in srgb, var(--pv-ink) 62%, transparent)">فروش امروز</span>
+                                            <span class="mt-auto text-[11px] font-black" style="color: var(--pv-ink)">۲٬۴۵۰٬۰۰۰</span>
+                                            <span class="mt-1 inline-flex w-fit items-center gap-1 rounded-full px-1.5 py-0.5 text-[7.5px] font-bold" style="background: color-mix(in srgb, var(--pv-primary) 14%, var(--pv-card)); color: var(--pv-primary)">
+                                                <span class="size-1 rounded-full" style="background: var(--pv-primary)"></span>
+                                                ۱۲٪ رشد
+                                            </span>
+                                        </div>
+                                        <div class="flex flex-col rounded-xl border p-2" style="background: var(--pv-card); border-color: color-mix(in srgb, var(--pv-ink) 8%, transparent)">
+                                            <span class="text-[8px]" style="color: color-mix(in srgb, var(--pv-ink) 62%, transparent)">وضعیت سفارش</span>
+                                            <span class="mt-1.5 w-fit rounded-full px-1.5 py-0.5 text-[7.5px] font-bold text-white" style="background: var(--pv-primary)">فعال</span>
+                                            <div class="mt-auto flex gap-1.5">
+                                                <span class="rounded-lg px-2 py-1 text-[8px] font-bold text-white" style="background: var(--pv-primary)">ذخیره</span>
+                                                <span class="rounded-lg border px-2 py-1 text-[8px] font-bold" style="border-color: color-mix(in srgb, var(--pv-primary) 45%, transparent); color: var(--pv-primary)">انصراف</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- تم شب --}}
+                    <div>
+                        <p class="mb-1.5 flex items-center gap-1.5 text-[10.5px] font-bold text-ink-3 dark:text-night-ink-2">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true">
+                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                            </svg>
+                            تم شب
+                        </p>
+                        <div id="sa-pv-dark" class="h-48 overflow-hidden rounded-2xl border"
+                             style="--pv-side: {{ $pvSideDark }}; --pv-side-ink: {{ $pvSideInkDark }}; --pv-page: {{ $pvPageDark }}; --pv-card: #161D2B; --pv-ink: {{ $pvFontDark }}; --pv-primary: {{ $base }};">
+                            <div class="flex h-full">
+                                {{-- سایدبار (RTL — سمت راست) --}}
+                                <div class="flex w-[31%] shrink-0 flex-col gap-1.5 p-2.5" style="background: var(--pv-side)">
+                                    <div class="mb-0.5 flex items-center gap-1.5">
+                                        <span class="flex size-5 shrink-0 items-center justify-center rounded-lg text-[8px] font-black text-white" style="background: var(--pv-primary)">P</span>
+                                        <span class="truncate text-[9.5px] font-bold" style="color: var(--pv-side-ink)">پنل مدیریت</span>
+                                    </div>
+                                    <span class="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[9px] font-bold" style="background: color-mix(in srgb, var(--pv-primary) 22%, var(--pv-side)); color: var(--pv-side-ink)">
+                                        <span class="size-1.5 shrink-0 rounded-full" style="background: var(--pv-primary)"></span>
+                                        داشبورد
+                                    </span>
+                                    <span class="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[9px]" style="color: color-mix(in srgb, var(--pv-side-ink) 68%, var(--pv-side))">
+                                        <span class="size-1.5 shrink-0 rounded-full" style="background: color-mix(in srgb, var(--pv-side-ink) 40%, var(--pv-side))"></span>
+                                        سفارش‌ها
+                                    </span>
+                                    <span class="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[9px]" style="color: color-mix(in srgb, var(--pv-side-ink) 68%, var(--pv-side))">
+                                        <span class="size-1.5 shrink-0 rounded-full" style="background: color-mix(in srgb, var(--pv-side-ink) 40%, var(--pv-side))"></span>
+                                        محصولات
+                                    </span>
+                                    <span class="mt-auto flex items-center gap-1.5 border-t px-1 pt-2 text-[9px]" style="border-color: color-mix(in srgb, var(--pv-side-ink) 14%, transparent); color: var(--pv-side-ink)">
+                                        <span class="size-4 shrink-0 rounded-full" style="background: color-mix(in srgb, var(--pv-primary) 45%, var(--pv-side))"></span>
+                                        حساب مدیر
+                                    </span>
+                                </div>
+                                {{-- بدنه --}}
+                                <div class="flex min-w-0 flex-1 flex-col" style="background: var(--pv-page)">
+                                    <div class="flex items-center justify-between border-b px-3 py-2" style="border-color: color-mix(in srgb, var(--pv-ink) 8%, transparent)">
+                                        <span class="text-[9.5px] font-bold" style="color: var(--pv-ink)">داشبورد</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="flex size-5 items-center justify-center rounded-full text-white" style="background: var(--pv-primary)">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-2.5" aria-hidden="true">
+                                                    <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                                                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                                                </svg>
+                                            </span>
+                                            <span class="size-5 rounded-full" style="background: color-mix(in srgb, var(--pv-primary) 35%, var(--pv-page))"></span>
+                                        </div>
+                                    </div>
+                                    <div class="grid flex-1 grid-cols-2 gap-2 p-2.5">
+                                        <div class="flex flex-col rounded-xl border p-2" style="background: var(--pv-card); border-color: color-mix(in srgb, var(--pv-ink) 8%, transparent)">
+                                            <span class="text-[8px]" style="color: color-mix(in srgb, var(--pv-ink) 62%, transparent)">فروش امروز</span>
+                                            <span class="mt-auto text-[11px] font-black" style="color: var(--pv-ink)">۲٬۴۵۰٬۰۰۰</span>
+                                            <span class="mt-1 inline-flex w-fit items-center gap-1 rounded-full px-1.5 py-0.5 text-[7.5px] font-bold" style="background: color-mix(in srgb, var(--pv-primary) 20%, var(--pv-card)); color: var(--pv-primary)">
+                                                <span class="size-1 rounded-full" style="background: var(--pv-primary)"></span>
+                                                ۱۲٪ رشد
+                                            </span>
+                                        </div>
+                                        <div class="flex flex-col rounded-xl border p-2" style="background: var(--pv-card); border-color: color-mix(in srgb, var(--pv-ink) 8%, transparent)">
+                                            <span class="text-[8px]" style="color: color-mix(in srgb, var(--pv-ink) 62%, transparent)">وضعیت سفارش</span>
+                                            <span class="mt-1.5 w-fit rounded-full px-1.5 py-0.5 text-[7.5px] font-bold text-white" style="background: var(--pv-primary)">فعال</span>
+                                            <div class="mt-auto flex gap-1.5">
+                                                <span class="rounded-lg px-2 py-1 text-[8px] font-bold text-white" style="background: var(--pv-primary)">ذخیره</span>
+                                                <span class="rounded-lg border px-2 py-1 text-[8px] font-bold" style="border-color: color-mix(in srgb, var(--pv-primary) 55%, transparent); color: var(--pv-primary)">انصراف</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ===== پالت‌های آماده ===== --}}
             <div>
-                <h3 class="mb-3 text-[13px] font-bold">پالت‌های آماده</h3>
+                <h3 class="mb-1 text-[13px] font-bold">پالت‌های آماده</h3>
+                <p class="mb-3 text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
+                    هر پالت یک بستهٔ رنگیِ هماهنگ است: رنگ اصلی برای دکمه‌ها و آیکن‌ها، تِینِ لطیف برای سایدبار و
+                    عمیق‌تر برای صفحه — در روشن و تم شب، هرکدام با نسخهٔ مخصوص خودشان.
+                </p>
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                     @foreach ($palettes as $p)
-                        @php $isSel = ($palette === $p['key']); @endphp
+                        @php
+                            $isSel = ($palette === $p['key']);
+                            $c = $cards[$p['key']];
+                        @endphp
                         <button type="button" data-palette-card="{{ $p['key'] }}" wire:key="sa-card-{{ $p['key'] }}"
                                 class="relative rounded-2xl border-2 bg-surface p-3 text-center transition-all duration-150 hover:-translate-y-0.5 dark:bg-night-2 {{ $isSel ? '' : 'border-line hover:border-ink-3/40 dark:border-night-line' }}"
                                 style="{{ $isSel ? 'border-color: '.$base.'; box-shadow: 0 0 0 3px '.$base.'26;' : '' }}"
                                 :aria-pressed="{{ $isSel ? 'true' : 'false' }}">
-                            <span class="mb-2.5 block h-16 w-full rounded-xl" style="background: linear-gradient(135deg, {{ implode(', ', $p['swatch']) }})" aria-hidden="true"></span>
+
+                            {{-- مینیاتور دوحالته: روشن (بالا) + تم شب (پایین) --}}
+                            <span class="mb-2.5 block overflow-hidden rounded-xl border border-black/[.06] dark:border-white/10" aria-hidden="true">
+                                {{-- روشن --}}
+                                <span class="flex h-9" style="background: {{ $c['page'] }}">
+                                    <span class="w-[30%] shrink-0 p-1" style="background: {{ $c['side'] }}">
+                                        <span class="flex items-center gap-1">
+                                            <span class="size-2 rounded-[3px]" style="background: {{ $c['primary'] }}"></span>
+                                            <span class="h-[3px] w-3 rounded-full" style="background: color-mix(in srgb, {{ $c['sideInk'] }} 72%, transparent)"></span>
+                                        </span>
+                                        <span class="mt-1 block h-[5px] w-full rounded-[3px]" style="background: color-mix(in srgb, {{ $c['primary'] }} 20%, {{ $c['side'] }})"></span>
+                                        <span class="mt-1 block h-[3px] w-3/4 rounded-full" style="background: color-mix(in srgb, {{ $c['sideInk'] }} 26%, transparent)"></span>
+                                    </span>
+                                    <span class="flex min-w-0 flex-1 flex-col gap-1 p-1">
+                                        <span class="flex items-center justify-between">
+                                            <span class="h-[3px] w-7 rounded-full" style="background: color-mix(in srgb, {{ $c['ink'] }} 78%, transparent)"></span>
+                                            <span class="size-2 rounded-full" style="background: {{ $c['primary'] }}"></span>
+                                        </span>
+                                        <span class="block flex-1 rounded-[4px] border" style="background: {{ $c['card'] }}; border-color: color-mix(in srgb, {{ $c['ink'] }} 8%, transparent)"></span>
+                                        <span class="block h-[6px] w-9 rounded-[3px]" style="background: {{ $c['primary'] }}"></span>
+                                    </span>
+                                </span>
+                                {{-- تم شب --}}
+                                <span class="flex h-9 border-t" style="background: {{ $c['pageDark'] }}; border-color: rgba(0,0,0,.35)">
+                                    <span class="w-[30%] shrink-0 p-1" style="background: {{ $c['sideDark'] }}">
+                                        <span class="flex items-center gap-1">
+                                            <span class="size-2 rounded-[3px]" style="background: {{ $c['primaryDark'] }}"></span>
+                                            <span class="h-[3px] w-3 rounded-full" style="background: color-mix(in srgb, {{ $c['sideInkDark'] }} 72%, transparent)"></span>
+                                        </span>
+                                        <span class="mt-1 block h-[5px] w-full rounded-[3px]" style="background: color-mix(in srgb, {{ $c['primaryDark'] }} 26%, {{ $c['sideDark'] }})"></span>
+                                        <span class="mt-1 block h-[3px] w-3/4 rounded-full" style="background: color-mix(in srgb, {{ $c['sideInkDark'] }} 26%, transparent)"></span>
+                                    </span>
+                                    <span class="flex min-w-0 flex-1 flex-col gap-1 p-1">
+                                        <span class="flex items-center justify-between">
+                                            <span class="h-[3px] w-7 rounded-full" style="background: color-mix(in srgb, {{ $c['inkDark'] }} 78%, transparent)"></span>
+                                            <span class="size-2 rounded-full" style="background: {{ $c['primaryDark'] }}"></span>
+                                        </span>
+                                        <span class="block flex-1 rounded-[4px] border" style="background: {{ $c['cardDark'] }}; border-color: color-mix(in srgb, {{ $c['inkDark'] }} 8%, transparent)"></span>
+                                        <span class="block h-[6px] w-9 rounded-[3px]" style="background: {{ $c['primaryDark'] }}"></span>
+                                    </span>
+                                </span>
+                            </span>
+
                             <span class="block text-[12.5px] font-bold leading-5">{{ $p['title'] }}</span>
                             <span class="mt-0.5 block text-[10px] leading-4 text-ink-3 dark:text-night-ink-2">{{ $p['desc'] }}</span>
 
@@ -131,13 +357,152 @@
                 </div>
             </div>
 
-            {{-- میزان گرمی و سردیِ پالت --}}
+            {{-- ===== شخصی‌سازی (فقط وقتی پالت «شخصی‌سازی» انتخاب شده) ===== --}}
+            <div id="sa-custom-box" class="rounded-2xl border-2 border-dashed p-4 sm:p-5 @if($palette !== 'custom') hidden @endif"
+                 style="border-color: {{ $base }}55;">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h4 class="text-[13px] font-bold">شخصی‌سازی رنگ‌ها</h4>
+                    <p class="text-[10px] font-semibold text-ink-3 dark:text-night-ink-2">نسخهٔ هماهنگِ هر رنگ در تم شب، خودکار ساخته می‌شود</p>
+                </div>
+
+                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                    {{-- دکمه‌ها و تأکیدها --}}
+                    <div class="rounded-2xl border p-3.5" style="border-color: {{ $base }}33;">
+                        <p class="flex items-center gap-1.5 text-[12px] font-bold">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
+                                <rect width="14" height="8" x="5" y="2" rx="3"/>
+                                <path d="m15 10 4 5H5l4-5"/>
+                                <path d="M12 15v7"/>
+                            </svg>
+                            دکمه‌ها و تأکیدها
+                        </p>
+                        <div class="mt-3 flex flex-wrap items-center gap-2.5">
+                            <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                                   style="background: {{ $custom }}" title="باز کردن انتخابگر رنگ">
+                                <input type="color" id="sa-c-primary" value="{{ $custom }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ دکمه‌ها و تأکیدها">
+                            </label>
+                            <input type="text" id="sa-c-primary-hex" dir="ltr" maxlength="7" value="{{ $custom }}"
+                                   class="ap-input w-24 text-center text-[11px] font-bold" placeholder="#D62976"
+                                   onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                                   aria-label="کد HEX رنگ دکمه‌ها">
+                            <button type="button" id="sa-c-primary-reset"
+                                    class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                    style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                    title="بازگشت رنگ دکمه‌ها به رنگ پیش‌فرض شخصی‌سازی">
+                                پیش‌فرض
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- رنگ متن --}}
+                    <div class="rounded-2xl border p-3.5" style="border-color: {{ $base }}33;">
+                        <p class="flex items-center gap-1.5 text-[12px] font-bold">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
+                                <path d="M4 7V5h16v2"/>
+                                <path d="M12 5v14"/>
+                                <path d="M9 19h6"/>
+                            </svg>
+                            رنگ متن
+                        </p>
+                        <div class="mt-3 flex flex-wrap items-center gap-2.5">
+                            <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                                   style="background: {{ $pvFont }}" title="باز کردن انتخابگر رنگ">
+                                <input type="color" id="sa-c-font" value="{{ $pvFont }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ متن">
+                            </label>
+                            <input type="text" id="sa-c-font-hex" dir="ltr" maxlength="7" value="{{ $customFont }}"
+                                   class="ap-input w-24 text-center text-[11px] font-bold" placeholder="پیش‌فرض"
+                                   onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                                   aria-label="کد HEX رنگ متن">
+                            <span class="flex shrink-0 items-center gap-1" title="نسخهٔ خودکار رنگ متن در تم شب">
+                                <span class="text-[9px] font-bold text-ink-3 dark:text-night-ink-2">شب:</span>
+                                <span id="sa-c-font-dark-chip" class="inline-block size-6 rounded-lg border border-black/10" style="background: {{ $pvFontDark }}" aria-hidden="true"></span>
+                            </span>
+                            <button type="button" id="sa-c-font-reset"
+                                    class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                    style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                    title="بازگشت رنگ متن به پیش‌فرض پنل">
+                                پیش‌فرض
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- رنگ سایدبار --}}
+                    <div class="rounded-2xl border p-3.5" style="border-color: {{ $base }}33;">
+                        <p class="flex items-center gap-1.5 text-[12px] font-bold">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
+                                <rect width="18" height="18" x="3" y="3" rx="2"/>
+                                <path d="M3 9h18"/><path d="M9 21V9"/>
+                            </svg>
+                            رنگ سایدبار
+                        </p>
+                        <div class="mt-3 flex flex-wrap items-center gap-2.5">
+                            <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                                   style="background: {{ $pvSide }}" title="باز کردن انتخابگر رنگ">
+                                <input type="color" id="sa-c-side" value="{{ $pvSide }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ سایدبار">
+                            </label>
+                            <input type="text" id="sa-c-side-hex" dir="ltr" maxlength="7" value="{{ $customSidebar }}"
+                                   class="ap-input w-24 text-center text-[11px] font-bold" placeholder="پیش‌فرض"
+                                   onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                                   aria-label="کد HEX رنگ سایدبار">
+                            <span class="flex shrink-0 items-center gap-1" title="نسخهٔ خودکار رنگ سایدبار در تم شب">
+                                <span class="text-[9px] font-bold text-ink-3 dark:text-night-ink-2">شب:</span>
+                                <span id="sa-c-side-dark-chip" class="inline-block size-6 rounded-lg border border-black/10" style="background: {{ $pvSideDark }}" aria-hidden="true"></span>
+                            </span>
+                            <button type="button" id="sa-c-side-reset"
+                                    class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                    style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                    title="بازگشت رنگ سایدبار به پیش‌فرض پنل">
+                                پیش‌فرض
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- رنگ صفحه --}}
+                    <div class="rounded-2xl border p-3.5" style="border-color: {{ $base }}33;">
+                        <p class="flex items-center gap-1.5 text-[12px] font-bold">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
+                                <rect width="20" height="14" x="2" y="5" rx="2"/>
+                                <path d="M2 10h20"/>
+                            </svg>
+                            رنگ صفحه
+                        </p>
+                        <div class="mt-3 flex flex-wrap items-center gap-2.5">
+                            <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
+                                   style="background: {{ $pvPage }}" title="باز کردن انتخابگر رنگ">
+                                <input type="color" id="sa-c-page" value="{{ $pvPage }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ صفحه">
+                            </label>
+                            <input type="text" id="sa-c-page-hex" dir="ltr" maxlength="7" value="{{ $customPage }}"
+                                   class="ap-input w-24 text-center text-[11px] font-bold" placeholder="پیش‌فرض"
+                                   onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
+                                   aria-label="کد HEX رنگ صفحه">
+                            <span class="flex shrink-0 items-center gap-1" title="نسخهٔ خودکار رنگ صفحه در تم شب">
+                                <span class="text-[9px] font-bold text-ink-3 dark:text-night-ink-2">شب:</span>
+                                <span id="sa-c-page-dark-chip" class="inline-block size-6 rounded-lg border border-black/10" style="background: {{ $pvPageDark }}" aria-hidden="true"></span>
+                            </span>
+                            <button type="button" id="sa-c-page-reset"
+                                    class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
+                                    style="border-color: {{ $base }}4D; color: {{ $base }}"
+                                    title="بازگشت رنگ صفحه به پیش‌فرض پنل">
+                                پیش‌فرض
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="mt-3.5 text-[10px] leading-5 text-ink-3 dark:text-night-ink-2">
+                    رنگِ سایدبار یا صفحه‌ای که خودش تیره است، در تم شب دست‌نخورده می‌ماند؛ رنگ‌های روشن
+                    به تیرهٔ هم‌خانوادهٔ همان تم می‌روند و متنِ تیره در شب به روشنِ هم‌خانواده — تا هیچ‌وقت
+                    متن یا دکمه‌ای نامعلوم نشود. خالی‌بودن هر رنگ یعنی همان پیش‌فرض پنل.
+                </p>
+            </div>
+
+            {{-- ===== میزان گرمی و سردیِ پالت ===== --}}
             <div id="sa-warmth-box" class="rounded-2xl border-2 border-dashed p-4 sm:p-5"
                  style="border-color: {{ $base }}55;">
                 <h4 class="text-[13px] font-bold">میزان گرمی و سردیِ پالت</h4>
                 <p class="mt-1 text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
-                    اسلایدر رنگِ پالت فعلی را تغییر می‌دهد؛ به سمت چپ گرم‌تر (سرخ/نارنجی و پررنگ‌تر)
-                    و به سمت راست سردتر (آبی و کم‌رنگ‌تر) می‌شود.
+                    اسلایدر کلِ بستهٔ رنگی (رنگ اصلی، سایدبار و صفحه) را با هم تغییر می‌دهد؛
+                    به سمت چپ گرم‌تر (سرخ/نارنجی و پررنگ‌تر) و به سمت راست سردتر (آبی و کم‌رنگ‌تر).
                 </p>
 
                 <div dir="ltr" class="mt-4 flex items-center gap-3">
@@ -162,7 +527,7 @@
                 </div>
 
                 <div class="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-2/70 px-3 py-2.5 dark:bg-night-3/60">
-                    <span class="text-[11px] font-semibold text-ink-3 dark:text-night-ink-2">حالت پیش‌فرض پالت:</span>
+                    <span class="text-[11px] font-semibold text-ink-3 dark:text-night-ink-2">رنگ پایهٔ پالت:</span>
                     <span class="flex items-center gap-2">
                         <button type="button" id="sa-warmth-reset"
                                 class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
@@ -173,330 +538,6 @@
                         <span id="sa-default-dot" class="inline-block size-4 rounded-full border border-black/10" style="background: {{ $rawBase }}" aria-hidden="true"></span>
                     </span>
                 </div>
-            </div>
-
-            {{-- شخصی‌سازی — رنگ اصلی --}}
-            <div id="sa-custom-box" class="rounded-2xl border-2 border-dashed p-4 sm:p-5 @if($palette !== 'custom') hidden @endif"
-                 style="border-color: {{ $base }}55;">
-                <h4 class="text-[13px] font-bold">رنگ اصلی</h4>
-                <p class="mt-1 text-[11px] text-ink-3 dark:text-night-ink-2">کد HEX را وارد کنید یا انتخابگرِ رنگ را باز کنید.</p>
-                <div class="mt-3 flex items-center gap-3">
-                    <label class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
-                           style="background: {{ $custom }}" title="باز کردن انتخابگر رنگ">
-                        <input type="color" id="sa-color-input" value="{{ $custom }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ اصلی">
-                    </label>
-                    <input type="text" id="sa-custom-hex" dir="ltr" maxlength="7" value="{{ $custom }}"
-                           class="ap-input w-40 text-center text-[12px] font-bold" placeholder="#D62976"
-                           onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
-                           aria-label="کد HEX رنگ اصلی">
-                </div>
-            </div>
-
-            {{-- ===== فاز ۲۱۰ — رنگ فونت ===== --}}
-            <div id="sa-font-box" class="rounded-2xl border-2 border-dashed p-4 sm:p-5"
-                 style="border-color: {{ $base }}55;">
-                <h4 class="text-[13px] font-bold">رنگ فونت</h4>
-                <p class="mt-1 text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
-                    رنگ متنِ همهٔ صفحات پنل را جدا برای حالت روشن و تم شب تنظیم کنید؛
-                    با دکمهٔ «پیش‌فرض» هر رنگ به مقدار اصلی پنل برمی‌گردد.
-                </p>
-
-                <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                    {{-- حالت روشن --}}
-                    <div class="rounded-2xl border p-4" style="border-color: {{ $base }}33;">
-                        <p class="mb-3 flex items-center gap-1.5 text-[12px] font-bold">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
-                                <circle cx="12" cy="12" r="4"/>
-                                <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/>
-                                <path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/>
-                                <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
-                            </svg>
-                            حالت روشن
-                        </p>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <label class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
-                                   style="background: {{ $saFontColor }}" title="باز کردن انتخابگر رنگ">
-                                <input type="color" id="sa-font-color" value="{{ $saFontColor }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ فونت حالت روشن">
-                            </label>
-                            <input type="text" id="sa-font-hex" dir="ltr" maxlength="7" value="{{ $fontColor }}"
-                                   class="ap-input w-32 text-center text-[12px] font-bold" placeholder="#1A2333"
-                                   onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
-                                   aria-label="کد HEX رنگ فونت حالت روشن">
-                            <button type="button" id="sa-font-reset"
-                                    class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
-                                    style="border-color: {{ $base }}4D; color: {{ $base }}"
-                                    title="بازگشت رنگ فونت روشن به پیش‌فرض پنل">
-                                پیش‌فرض
-                            </button>
-                        </div>
-                        <div class="mt-3 rounded-xl bg-surface px-3 py-2.5 border border-line">
-                            <p id="sa-font-sample" class="m-0 text-[12.5px] leading-6 font-semibold"
-                               style="color: {{ $saFontColor }};">
-                                نمونهٔ متن — لیست سفارش‌ها، محصولات و تنظیمات پنل.
-                            </p>
-                        </div>
-                    </div>
-
-                    {{-- تم شب --}}
-                    <div class="rounded-2xl border p-4" style="border-color: {{ $base }}33;">
-                        <p class="mb-3 flex items-center gap-1.5 text-[12px] font-bold">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
-                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-                            </svg>
-                            تم شب
-                        </p>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <label class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
-                                   style="background: {{ $saFontColorDark }}" title="باز کردن انتخابگر رنگ">
-                                <input type="color" id="sa-font-color-dark" value="{{ $saFontColorDark }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ فونت تم شب">
-                            </label>
-                            <input type="text" id="sa-font-hex-dark" dir="ltr" maxlength="7" value="{{ $fontColorDark }}"
-                                   class="ap-input w-32 text-center text-[12px] font-bold" placeholder="#E5EAF2"
-                                   onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
-                                   aria-label="کد HEX رنگ فونت تم شب">
-                            <button type="button" id="sa-font-reset-dark"
-                                    class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
-                                    style="border-color: {{ $base }}4D; color: {{ $base }}"
-                                    title="بازگشت رنگ فونت تم شب به پیش‌فرض پنل">
-                                پیش‌فرض
-                            </button>
-                        </div>
-                        <div class="mt-3 rounded-xl px-3 py-2.5 border border-night-line" style="background: #0d1219;">
-                            <p id="sa-font-sample-dark" class="m-0 text-[12.5px] leading-6 font-semibold"
-                               style="color: {{ $saFontColorDark }};">
-                                نمونهٔ متن در تم شب — سفارش‌ها، محصولات و تنظیمات پنل.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- ===== فاز ۲۱۰ — رنگ سایدبار و صفحه ===== --}}
-            <div id="sa-shell-box" class="rounded-2xl border-2 border-dashed p-4 sm:p-5"
-                 style="border-color: {{ $base }}55;">
-                <h4 class="text-[13px] font-bold">رنگ سایدبار و صفحه</h4>
-                <p class="mt-1 text-[11px] leading-5 text-ink-3 dark:text-night-ink-2">
-                    پس‌زمینهٔ منوی کنار (سایدبار) و پس‌زمینهٔ صفحات پنل را جدا برای حالت
-                    روشن و تم شب انتخاب کنید؛ متن و هاورِ سایدبار خودکار با رنگ انتخابی
-                    هماهنگ می‌شود و خوانایی در تم شب حفظ می‌ماند.
-                </p>
-
-                <div class="mt-4 space-y-4">
-                    {{-- سایدبار --}}
-                    <div class="rounded-2xl border p-4" style="border-color: {{ $base }}33;">
-                        <p class="mb-3 flex items-center gap-1.5 text-[12px] font-bold">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
-                                <rect width="18" height="18" x="3" y="3" rx="2"/>
-                                <path d="M3 9h18"/><path d="M9 21V9"/>
-                            </svg>
-                            رنگ سایدبار
-                        </p>
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="flex flex-wrap items-center gap-3">
-                                <span class="text-[11px] font-bold text-ink-3 dark:text-night-ink-2 w-12 shrink-0">روشن</span>
-                                <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
-                                       style="background: {{ $saSideColor }}" title="باز کردن انتخابگر رنگ">
-                                    <input type="color" id="sa-side-color" value="{{ $saSideColor }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ سایدبار حالت روشن">
-                                </label>
-                                <input type="text" id="sa-side-hex" dir="ltr" maxlength="7" value="{{ $sidebarColor }}"
-                                       class="ap-input w-28 text-center text-[12px] font-bold" placeholder="#FFFFFF"
-                                       onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
-                                       aria-label="کد HEX رنگ سایدبار روشن">
-                                <button type="button" id="sa-side-reset"
-                                        class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
-                                        style="border-color: {{ $base }}4D; color: {{ $base }}"
-                                        title="بازگشت رنگ سایدبار روشن به پیش‌فرض پنل">
-                                    پیش‌فرض
-                                </button>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-3">
-                                <span class="text-[11px] font-bold text-ink-3 dark:text-night-ink-2 w-12 shrink-0">تم شب</span>
-                                <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
-                                       style="background: {{ $saSideColorDark }}" title="باز کردن انتخابگر رنگ">
-                                    <input type="color" id="sa-side-color-dark" value="{{ $saSideColorDark }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ سایدبار تم شب">
-                                </label>
-                                <input type="text" id="sa-side-hex-dark" dir="ltr" maxlength="7" value="{{ $sidebarColorDark }}"
-                                       class="ap-input w-28 text-center text-[12px] font-bold" placeholder="#111827"
-                                       onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
-                                       aria-label="کد HEX رنگ سایدبار تم شب">
-                                <button type="button" id="sa-side-reset-dark"
-                                        class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
-                                        style="border-color: {{ $base }}4D; color: {{ $base }}"
-                                        title="بازگشت رنگ سایدبار تم شب به پیش‌فرض پنل">
-                                    پیش‌فرض
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- صفحه --}}
-                    <div class="rounded-2xl border p-4" style="border-color: {{ $base }}33;">
-                        <p class="mb-3 flex items-center gap-1.5 text-[12px] font-bold">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" style="color: {{ $base }}" aria-hidden="true">
-                                <rect width="20" height="14" x="2" y="5" rx="2"/>
-                                <path d="M2 10h20"/>
-                            </svg>
-                            رنگ صفحه
-                        </p>
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="flex flex-wrap items-center gap-3">
-                                <span class="text-[11px] font-bold text-ink-3 dark:text-night-ink-2 w-12 shrink-0">روشن</span>
-                                <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
-                                       style="background: {{ $saPageColor }}" title="باز کردن انتخابگر رنگ">
-                                    <input type="color" id="sa-page-color" value="{{ $saPageColor }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ صفحه حالت روشن">
-                                </label>
-                                <input type="text" id="sa-page-hex" dir="ltr" maxlength="7" value="{{ $pageColor }}"
-                                       class="ap-input w-28 text-center text-[12px] font-bold" placeholder="#F6F7F8"
-                                       onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
-                                       aria-label="کد HEX رنگ صفحه روشن">
-                                <button type="button" id="sa-page-reset"
-                                        class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
-                                        style="border-color: {{ $base }}4D; color: {{ $base }}"
-                                        title="بازگشت رنگ صفحه روشن به پیش‌فرض پنل">
-                                    پیش‌فرض
-                                </button>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-3">
-                                <span class="text-[11px] font-bold text-ink-3 dark:text-night-ink-2 w-12 shrink-0">تم شب</span>
-                                <label class="relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-black/10"
-                                       style="background: {{ $saPageColorDark }}" title="باز کردن انتخابگر رنگ">
-                                    <input type="color" id="sa-page-color-dark" value="{{ $saPageColorDark }}" class="absolute inset-0 size-full cursor-pointer opacity-0" aria-label="انتخاب رنگ صفحه تم شب">
-                                </label>
-                                <input type="text" id="sa-page-hex-dark" dir="ltr" maxlength="7" value="{{ $pageColorDark }}"
-                                       class="ap-input w-28 text-center text-[12px] font-bold" placeholder="#0D1219"
-                                       onkeydown="if (event.key === 'Enter') { event.preventDefault(); }"
-                                       aria-label="کد HEX رنگ صفحه تم شب">
-                                <button type="button" id="sa-page-reset-dark"
-                                        class="rounded-full border px-3 py-1 text-[10px] font-bold transition-colors"
-                                        style="border-color: {{ $base }}4D; color: {{ $base }}"
-                                        title="بازگشت رنگ صفحه تم شب به پیش‌فرض پنل">
-                                    پیش‌فرض
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- پیش‌نمایش زندهٔ سایدبار/صفحه --}}
-                    <div class="grid gap-3 sm:grid-cols-2">
-                        <div>
-                            <p class="mb-1.5 text-[10px] font-bold text-ink-3 dark:text-night-ink-2">پیش‌نمایش حالت روشن:</p>
-                            <div class="flex h-24 overflow-hidden rounded-xl border" style="border-color: {{ $base }}33;">
-                                <div id="sa-shell-preview-side" class="w-1/3 shrink-0 p-2"
-                                     style="background: {{ $saSideColor }};">
-                                    <div class="mb-2 flex items-center gap-1.5">
-                                        <span class="flex size-4 items-center justify-center rounded-md text-[8px] text-white" style="background: {{ $base }}">P</span>
-                                        <span id="sa-shell-preview-side-title" class="text-[8px] font-bold" style="color: {{ $saSideInk }};">پنل</span>
-                                    </div>
-                                    <div id="sa-shell-preview-link1" class="mb-1 rounded-md px-1.5 py-1 text-[8px] font-semibold" style="background: color-mix(in srgb, {{ $base }} 14%, {{ $saSideColor }}); color: {{ $saSideInk }};">منو فعال</div>
-                                    <div id="sa-shell-preview-link2" class="rounded-md px-1.5 py-1 text-[8px]" style="color: color-mix(in srgb, {{ $saSideInk }} 72%, {{ $saSideColor }});">منو دیگر</div>
-                                </div>
-                                <div id="sa-shell-preview-page" class="flex-1 p-2"
-                                     style="background: {{ $saPageColor }};">
-                                    <div class="h-full rounded-lg border bg-white" style="border-color: rgba(0,0,0,.06);"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <p class="mb-1.5 text-[10px] font-bold text-ink-3 dark:text-night-ink-2">پیش‌نمایش تم شب:</p>
-                            <div class="flex h-24 overflow-hidden rounded-xl border" style="border-color: {{ $base }}33;">
-                                <div id="sa-shell-preview-side-dark" class="w-1/3 shrink-0 p-2"
-                                     style="background: {{ $saSideColorDark }};">
-                                    <div class="mb-2 flex items-center gap-1.5">
-                                        <span class="flex size-4 items-center justify-center rounded-md text-[8px] text-white" style="background: {{ $base }}">P</span>
-                                        <span id="sa-shell-preview-side-title-dark" class="text-[8px] font-bold" style="color: {{ $saSideInkDark }};">پنل</span>
-                                    </div>
-                                    <div id="sa-shell-preview-link1-dark" class="mb-1 rounded-md px-1.5 py-1 text-[8px] font-semibold" style="background: color-mix(in srgb, {{ $base }} 22%, {{ $saSideColorDark }}); color: {{ $saSideInkDark }};">منو فعال</div>
-                                    <div id="sa-shell-preview-link2-dark" class="rounded-md px-1.5 py-1 text-[8px]" style="color: color-mix(in srgb, {{ $saSideInkDark }} 72%, {{ $saSideColorDark }});">منو دیگر</div>
-                                </div>
-                                <div id="sa-shell-preview-page-dark" class="flex-1 p-2"
-                                     style="background: {{ $saPageColorDark }};">
-                                    <div class="h-full rounded-lg border" style="background: #111827; border-color: rgba(255,255,255,.06);"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- طیف تولیدشده --}}
-            <div class="rounded-2xl bg-surface-2/60 p-4 sm:p-5 dark:bg-night-3/50">
-                <p class="mb-3 text-[12px] font-bold">
-                    طیف تولیدشده (۵۰ تا ۹۵۰)
-                    <span class="font-normal text-ink-3 dark:text-night-ink-2">— از این رنگ‌ها در کل پنل استفاده می‌شود:</span>
-                </p>
-                <div dir="ltr" class="grid grid-cols-6 gap-1.5 sm:grid-cols-11">
-                    @foreach ($steps as $step)
-                        <div class="sa-swatch cursor-pointer" wire:key="sa-sw-{{ $step }}" data-step="{{ $step }}"
-                             title="{{ $scale[$step] }}" role="button" tabindex="0"
-                             aria-label="کپی رنگ پلهٔ {{ $step }}">
-                            <span class="sa-color-chip block h-10 rounded-lg border border-black/5 transition-transform hover:scale-105 sm:h-11"
-                                  style="background: {{ $scale[$step] }}" aria-hidden="true"></span>
-                            <span class="mt-1 block text-center text-[9px] font-bold text-ink-3 dark:text-night-ink-2">{{ $step }}</span>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- پیش‌نمایش زنده --}}
-            <div class="rounded-2xl border-2 border-dashed p-4 sm:p-5" style="border-color: {{ $base }}55;">
-                <p class="mb-3 text-[12px] font-bold">پیش‌نمایش زنده:</p>
-                <div class="flex flex-wrap items-center gap-3">
-                    <button type="button" id="sa-preview-solid" class="rounded-xl px-4 py-2 text-[12px] font-bold text-white"
-                            style="background: {{ $base }}; box-shadow: 0 5px 12px {{ $base }}40;">
-                        دکمه اصلی
-                    </button>
-                    <button type="button" id="sa-preview-outline" class="rounded-xl border-2 bg-transparent px-4 py-2 text-[12px] font-bold"
-                            style="border-color: {{ $base }}; color: {{ $base }};">
-                        دکمه خطی
-                    </button>
-                    <span id="sa-preview-badge" class="rounded-full px-3 py-1 text-[11px] font-bold"
-                          style="background: {{ $scale['50'] }}; color: {{ $scale['700'] }};">
-                        برچسب
-                    </span>
-                    <button type="button" id="sa-preview-cart" class="flex size-9 items-center justify-center rounded-full text-white"
-                            style="background: {{ $base }}; box-shadow: 0 4px 10px {{ $base }}40;" title="سبد خرید" aria-label="پیش‌نمایش دکمهٔ سبد خرید">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
-                            <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
-                            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            {{-- حالت پیش‌فرض پنل --}}
-            <div>
-                <h4 class="mb-3 text-[13px] font-bold">حالت پیش‌فرض پنل</h4>
-                <div class="grid grid-cols-2 gap-3">
-                    <button type="button" data-mode="light"
-                            class="sa-mode-card rounded-2xl border-2 p-4 text-center transition-all duration-150"
-                            style="{{ $mode === 'light' ? 'border-color: '.$base.'; background: '.$base.'0F; color: '.$base.';' : '' }}"
-                            :aria-pressed="{{ $mode === 'light' ? 'true' : 'false' }}">
-                        <span class="flex items-center justify-center gap-1.5 text-[13px] font-bold">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
-                                <circle cx="12" cy="12" r="4"/>
-                                <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/>
-                                <path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/>
-                                <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
-                            </svg>
-                            روشن
-                        </span>
-                    </button>
-                    <button type="button" data-mode="dark"
-                            class="sa-mode-card rounded-2xl border-2 p-4 text-center transition-all duration-150"
-                            style="{{ $mode === 'dark' ? 'border-color: '.$base.'; background: '.$base.'0F; color: '.$base.';' : '' }}"
-                            :aria-pressed="{{ $mode === 'dark' ? 'true' : 'false' }}">
-                        <span class="flex items-center justify-center gap-1.5 text-[13px] font-bold">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
-                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-                            </svg>
-                            تیره
-                        </span>
-                    </button>
-                </div>
-                <p class="mt-2 text-[10px] leading-5 text-ink-3 dark:text-night-ink-2">
-                    این انتخاب فقط حالت اولیهٔ پنل را تعیین می‌کند؛ کاربرانِ پنل همچنان می‌توانند
-                    از دکمهٔ ماه (بالا)، بین روشن و تیره جابه‌جا شوند.
-                </p>
             </div>
 
             {{-- پانویس: بازگشت به پیش‌فرض + ذخیره --}}
@@ -530,11 +571,15 @@
 @script
 <script>
     /* ============================================================
-       فاز ۲۰۸ — پیش‌نمایش زندهٔ تنظیمات ظاهری پنل (سمت مرورگر)
+       فاز ۲۱۱ — پیش‌نمایش زندهٔ تنظیمات ظاهری پنل (سمت مرورگر)
        • ریاضی رنگ قرینهٔ App\Support\PaletteEngine (PHP) است؛
          منبع حقیقتِ ذخیره همان PHP است.
-       • پس از ذخیره/بازگشت، متغیرهای --color-brand-* همان لحظه
-         روی <html> اعمال می‌شوند تا کل پنل بدون رفرش رنگ بگیرد.
+       • نقش‌ها: هر پالتِ آماده سایدبار/صفحهٔ هم‌خانواده دارد و با
+         گرمی/سردی همه با هم می‌چرخند؛ در شخصی‌سازی، نسخهٔ تم‌شبِ
+         هر رنگ با همان قواعد PHP مشتق می‌شود.
+       • پس از ذخیره/بازگشت، متغیرهای --color-brand-* و متغیرهای
+         سایدبار/صفحه/متن همان لحظه روی <html> و #ap-sidebar
+         اعمال می‌شوند تا کل پنل بدون رفرش رنگ بگیرد.
        ============================================================ */
     const saRoot = document.getElementById('saniar-appearance');
     const saPalettes = @json($palettes);
@@ -545,17 +590,13 @@
         palette: @json($palette),
         warmth: {{ $warmth }},
         custom: @json($custom),
-        mode: @json($mode),
-        fontColor: @json($fontColor),
-        fontColorDark: @json($fontColorDark),
-        sidebarColor: @json($sidebarColor),
-        sidebarColorDark: @json($sidebarColorDark),
-        pageColor: @json($pageColor),
-        pageColorDark: @json($pageColorDark),
+        customFont: @json($customFont),
+        customSidebar: @json($customSidebar),
+        customPage: @json($customPage),
     };
 
-    /* فاز ۲۱۰ — پیش‌فرض‌های پنل برای دکمه‌های «پیش‌فرض» */
-    const saShellDefaults = {
+    /* پیش‌فرض‌های پنل (قرینهٔ ثابت‌های PaletteEngine) */
+    const saDefaults = {
         font: @json(\App\Support\PaletteEngine::DEFAULT_FONT_COLOR),
         fontDark: @json(\App\Support\PaletteEngine::DEFAULT_FONT_COLOR_DARK),
         side: @json(\App\Support\PaletteEngine::DEFAULT_SIDEBAR_COLOR),
@@ -564,13 +605,33 @@
         pageDark: @json(\App\Support\PaletteEngine::DEFAULT_PAGE_COLOR_DARK),
     };
 
+    /* آستانه‌های مشتق‌سازی — قرینهٔ دقیق PHP */
+    const saThresholds = {
+        sideLightYiq: @json(\App\Support\PaletteEngine::SIDE_LIGHT_YIQ),
+        pageLightYiq: @json(\App\Support\PaletteEngine::PAGE_LIGHT_YIQ),
+        fontDarkYiq: @json(\App\Support\PaletteEngine::FONT_DARK_YIQ),
+        sideDarkS: @json(\App\Support\PaletteEngine::SIDE_DARK_S),
+        sideDarkL: @json(\App\Support\PaletteEngine::SIDE_DARK_L),
+        pageDarkS: @json(\App\Support\PaletteEngine::PAGE_DARK_S),
+        pageDarkL: @json(\App\Support\PaletteEngine::PAGE_DARK_L),
+        fontDarkS: @json(\App\Support\PaletteEngine::FONT_DARK_S),
+        fontDarkL: @json(\App\Support\PaletteEngine::FONT_DARK_L),
+    };
+
     /* کنتراست YIQ روی رنگ پس‌زمینه — قرینهٔ PaletteEngine::contrastInk (PHP) */
     function saContrastInk(hex) {
         const r = parseInt(hex.slice(1, 3), 16);
         const g = parseInt(hex.slice(3, 5), 16);
         const b = parseInt(hex.slice(5, 7), 16);
         const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-        return yiq >= 150 ? saShellDefaults.font : '#F2F5FA';
+        return yiq >= 150 ? saDefaults.font : '#F2F5FA';
+    }
+
+    function saYiq(hex) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return (r * 299 + g * 587 + b * 114) / 1000;
     }
 
     /* ---------- ریاضی رنگ (قرینهٔ PHP — طیف با پلهٔ ۶۰۰ = رنگ اصلی) ---------- */
@@ -648,6 +709,10 @@
         return saHslToHex(saWrapHue(h + rot), s, l);
     }
 
+    function saTinted(hue, s, l) {
+        return saHslToHex(saWrapHue(hue), s, l);
+    }
+
     function saGenerateScale(baseHex) {
         const [h, s, l] = saHexToHsl(baseHex);
         const anchor = saClamp(l, 38, 60);
@@ -669,17 +734,113 @@
         return out;
     }
 
-    function saComputePreview() {
+    /* ---------- محاسبهٔ کامل وضعیت (قرینهٔ PaletteEngine::resolve) ---------- */
+    function saCompute() {
         const def = saIndex[saState.palette] || saIndex['emerald'];
         const rawBase = saState.palette === 'custom' ? saState.custom : def.base;
-        const [base, rot] = saWarmthRotation(rawBase, saState.warmth);
-        const scale = (!saState.warmth && def.fixed_scale) ? { ...def.fixed_scale } : saGenerateScale(base);
+        const [shifted, rot] = saWarmthRotation(rawBase, saState.warmth);
+        const scale = (!saState.warmth && def.fixed_scale) ? { ...def.fixed_scale } : saGenerateScale(shifted);
         const stops = (def.gradient || [scale[400], scale[600]]).map((c) => saRotateHue(c, rot));
-        return { base: scale[600], scale, stops, rawBase, def, angle: def.gradient_angle || 135 };
+
+        let side = null, sideDark = null, page = null, pageDark = null, font = null, fontDark = null;
+
+        if (saState.palette === 'custom') {
+            const hue = saHexToHsl(shifted)[0];
+            font = saState.customFont || null;
+            side = saState.customSidebar || null;
+            page = saState.customPage || null;
+
+            if (side) {
+                sideDark = saYiq(side) >= saThresholds.sideLightYiq
+                    ? saTinted(hue, saThresholds.sideDarkS, saThresholds.sideDarkL)
+                    : side;
+            }
+            if (page) {
+                pageDark = saYiq(page) >= saThresholds.pageLightYiq
+                    ? saTinted(hue, saThresholds.pageDarkS, saThresholds.pageDarkL)
+                    : page;
+            }
+            if (font) {
+                fontDark = saYiq(font) < saThresholds.fontDarkYiq
+                    ? saTinted(hue, saThresholds.fontDarkS, saThresholds.fontDarkL)
+                    : font;
+            }
+        } else if (def.roles) {
+            side = saRotateHue(def.roles.side_light, rot);
+            sideDark = saRotateHue(def.roles.side_dark, rot);
+            page = saRotateHue(def.roles.page_light, rot);
+            pageDark = saRotateHue(def.roles.page_dark, rot);
+        }
+
+        return {
+            base: scale[600],
+            darkBase: scale[400],
+            scale,
+            stops,
+            angle: def.gradient_angle || 135,
+            rawBase: rawBase.toUpperCase(),
+            side: side || saDefaults.side,
+            sideDark: sideDark || saDefaults.sideDark,
+            page: page || saDefaults.page,
+            pageDark: pageDark || saDefaults.pageDark,
+            font: font || saDefaults.font,
+            fontDark: fontDark || saDefaults.fontDark,
+        };
     }
 
     /* ---------- اعمال روی UI ---------- */
-    let saLast = saComputePreview();
+    let saLast = saCompute();
+
+    function saApplyPreviewVars(pv) {
+        const light = document.getElementById('sa-pv-light');
+        const dark = document.getElementById('sa-pv-dark');
+        if (light) {
+            light.style.setProperty('--pv-side', pv.side);
+            light.style.setProperty('--pv-side-ink', saContrastInk(pv.side));
+            light.style.setProperty('--pv-page', pv.page);
+            light.style.setProperty('--pv-ink', pv.font);
+            light.style.setProperty('--pv-primary', pv.base);
+        }
+        if (dark) {
+            dark.style.setProperty('--pv-side', pv.sideDark);
+            dark.style.setProperty('--pv-side-ink', saContrastInk(pv.sideDark));
+            dark.style.setProperty('--pv-page', pv.pageDark);
+            dark.style.setProperty('--pv-ink', pv.fontDark);
+            dark.style.setProperty('--pv-primary', pv.base);
+        }
+    }
+
+    /* اعمال فوری پس از ذخیره/بازگشت (بدون رفرش).
+       متغیرهای سطحِ سایدبار باید روی خودِ #ap-sidebar ست شوند نه روی <html>؛
+       وگرنه کارت‌ها و سطوحِ کل پنل هم رنگ می‌گرفتند. */
+    function saApplyShellVars(pv) {
+        const s = document.documentElement.style;
+        s.setProperty('--color-ink', pv.font);
+        s.setProperty('--color-night-ink', pv.fontDark);
+        s.setProperty('--ap-side-bg', pv.side);
+        s.setProperty('--ap-side-bg-dark', pv.sideDark);
+        s.setProperty('--ap-page-bg', pv.page);
+        s.setProperty('--ap-page-bg-dark', pv.pageDark);
+
+        const sideEl = document.getElementById('ap-sidebar');
+        if (sideEl) {
+            const ink = saContrastInk(pv.side);
+            const inkD = saContrastInk(pv.sideDark);
+            const st = sideEl.style;
+            st.setProperty('--color-surface', pv.side);
+            st.setProperty('--color-surface-2', 'color-mix(in srgb, ' + pv.side + ' 93%, ' + ink + ')');
+            st.setProperty('--color-surface-3', 'color-mix(in srgb, ' + pv.side + ' 87%, ' + ink + ')');
+            st.setProperty('--color-line', 'color-mix(in srgb, ' + pv.side + ' 82%, ' + ink + ')');
+            st.setProperty('--color-ink', ink);
+            st.setProperty('--color-ink-2', 'color-mix(in srgb, ' + ink + ' 76%, ' + pv.side + ')');
+            st.setProperty('--color-ink-3', 'color-mix(in srgb, ' + ink + ' 56%, ' + pv.side + ')');
+            st.setProperty('--color-night-2', pv.sideDark);
+            st.setProperty('--color-night-3', 'color-mix(in srgb, ' + pv.sideDark + ' 86%, ' + inkD + ')');
+            st.setProperty('--color-night-line', 'color-mix(in srgb, ' + pv.sideDark + ' 80%, ' + inkD + ')');
+            st.setProperty('--color-night-ink', inkD);
+            st.setProperty('--color-night-ink-2', 'color-mix(in srgb, ' + inkD + ' 72%, ' + pv.sideDark + ')');
+        }
+    }
 
     function saApplyAdminVars(scale) {
         if (!scale) return;
@@ -687,48 +848,8 @@
         Object.keys(scale).forEach((step) => s.setProperty('--color-brand-' + step, scale[step]));
     }
 
-    /* فاز ۲۱۰ — اعمال فوری فونت/سایدبار/صفحه پس از ذخیره یا بازگشت (بدون رفرش).
-       مهم: متغیرهای سطحِ سایدبار باید روی خودِ #ap-sidebar ست شوند نه روی <html>؛
-       وگرنه کارت‌ها و سطوح سفیدِ کل پنل هم رنگ می‌گرفتند. حالت «پیش‌فرض» هم با
-       ست‌کردن مقدار پیش‌فرض پنل اعمال می‌شود تا بلوک استایل قبلیِ ذخیره‌شده بی‌اثر شود. */
-    function saApplyShellVars() {
-        const s = document.documentElement.style;
-        const sideColor = saState.sidebarColor || saShellDefaults.side;
-        const sideColorDark = saState.sidebarColorDark || saShellDefaults.sideDark;
-
-        /* رنگ فونت — متغیرهای سراسری؛ خالی = پیش‌فرض پنل */
-        s.setProperty('--color-ink', saState.fontColor || saShellDefaults.font);
-        s.setProperty('--color-night-ink', saState.fontColorDark || saShellDefaults.fontDark);
-
-        /* پس‌زمینهٔ سایدبار/صفحه — فقط متغیرها (قواعد تزریقی layout از همین‌ها می‌خوانند) */
-        s.setProperty('--ap-side-bg', sideColor);
-        s.setProperty('--ap-side-bg-dark', sideColorDark);
-        s.setProperty('--ap-page-bg', saState.pageColor || saShellDefaults.page);
-        s.setProperty('--ap-page-bg-dark', saState.pageColorDark || saShellDefaults.pageDark);
-
-        /* متغیرهای مشتق سطح سایدبار — فقط داخل #ap-sidebar */
-        const side = document.getElementById('ap-sidebar');
-        if (side) {
-            const ink = saContrastInk(sideColor);
-            const inkD = saContrastInk(sideColorDark);
-            const st = side.style;
-            st.setProperty('--color-surface', sideColor);
-            st.setProperty('--color-surface-2', 'color-mix(in srgb, ' + sideColor + ' 93%, ' + ink + ')');
-            st.setProperty('--color-surface-3', 'color-mix(in srgb, ' + sideColor + ' 87%, ' + ink + ')');
-            st.setProperty('--color-line', 'color-mix(in srgb, ' + sideColor + ' 82%, ' + ink + ')');
-            st.setProperty('--color-ink', ink);
-            st.setProperty('--color-ink-2', 'color-mix(in srgb, ' + ink + ' 76%, ' + sideColor + ')');
-            st.setProperty('--color-ink-3', 'color-mix(in srgb, ' + ink + ' 56%, ' + sideColor + ')');
-            st.setProperty('--color-night-2', sideColorDark);
-            st.setProperty('--color-night-3', 'color-mix(in srgb, ' + sideColorDark + ' 86%, ' + inkD + ')');
-            st.setProperty('--color-night-line', 'color-mix(in srgb, ' + sideColorDark + ' 80%, ' + inkD + ')');
-            st.setProperty('--color-night-ink', inkD);
-            st.setProperty('--color-night-ink-2', 'color-mix(in srgb, ' + inkD + ' 72%, ' + sideColorDark + ')');
-        }
-    }
-
     function saApplyUI() {
-        const pv = saComputePreview();
+        const pv = saCompute();
         saLast = pv;
         const base = pv.base;
 
@@ -751,7 +872,7 @@
             range.style.accentColor = base;
         }
 
-        // ردیف «حالت پیش‌فرض پالت»
+        // ردیف «رنگ پایهٔ پالت»
         const defHexEl = document.getElementById('sa-default-hex');
         const defDotEl = document.getElementById('sa-default-dot');
         const defBtn = document.getElementById('sa-warmth-reset');
@@ -760,88 +881,43 @@
         if (defBtn) { defBtn.style.borderColor = base + '4D'; defBtn.style.color = base; }
 
         // جعبه‌های خط‌چین
-        ['sa-warmth-box', 'sa-custom-box', 'sa-font-box', 'sa-shell-box'].forEach((id) => {
+        ['sa-preview-box', 'sa-custom-box', 'sa-warmth-box'].forEach((id) => {
             const box = document.getElementById(id);
             if (box) box.style.borderColor = base + '55';
         });
+
+        // شخصی‌سازی — نمایش/مخفی + مقادیر + چیپ‌های نسخهٔ شب
         const customBox = document.getElementById('sa-custom-box');
         if (customBox) customBox.classList.toggle('hidden', saState.palette !== 'custom');
 
-        /* فاز ۲۱۰ — رنگ فونت: نمونه‌های زنده + نشانگر انتخابگر + دکمهٔ پیش‌فرض */
-        const fontSample = document.getElementById('sa-font-sample');
-        const fontSampleDark = document.getElementById('sa-font-sample-dark');
-        const fontInput = document.getElementById('sa-font-color');
-        const fontInputDark = document.getElementById('sa-font-color-dark');
-        const fontReset = document.getElementById('sa-font-reset');
-        const fontResetDark = document.getElementById('sa-font-reset-dark');
-        if (fontSample) fontSample.style.color = saState.fontColor || saShellDefaults.font;
-        if (fontSampleDark) fontSampleDark.style.color = saState.fontColorDark || saShellDefaults.fontDark;
-        if (fontInput) fontInput.value = saState.fontColor || saShellDefaults.font;
-        if (fontInputDark) fontInputDark.value = saState.fontColorDark || saShellDefaults.fontDark;
-        if (fontReset) { fontReset.style.borderColor = base + '4D'; fontReset.style.color = base; }
-        if (fontResetDark) { fontResetDark.style.borderColor = base + '4D'; fontResetDark.style.color = base; }
+        const isCustom = saState.palette === 'custom';
+        const cPrimary = document.getElementById('sa-c-primary');
+        const cPrimaryHex = document.getElementById('sa-c-primary-hex');
+        const cFont = document.getElementById('sa-c-font');
+        const cFontHex = document.getElementById('sa-c-font-hex');
+        const cSide = document.getElementById('sa-c-side');
+        const cSideHex = document.getElementById('sa-c-side-hex');
+        const cPage = document.getElementById('sa-c-page');
+        const cPageHex = document.getElementById('sa-c-page-hex');
+        if (isCustom) {
+            if (cPrimary) cPrimary.value = saState.custom;
+            if (cPrimaryHex) cPrimaryHex.value = saState.custom;
+            if (cFont) cFont.value = saState.customFont || saDefaults.font;
+            if (cFontHex) cFontHex.value = saState.customFont;
+            if (cSide) cSide.value = saState.customSidebar || saDefaults.side;
+            if (cSideHex) cSideHex.value = saState.customSidebar;
+            if (cPage) cPage.value = saState.customPage || saDefaults.page;
+            if (cPageHex) cPageHex.value = saState.customPage;
+        }
+        const fontChip = document.getElementById('sa-c-font-dark-chip');
+        const sideChip = document.getElementById('sa-c-side-dark-chip');
+        const pageChip = document.getElementById('sa-c-page-dark-chip');
+        if (fontChip) fontChip.style.background = pv.fontDark;
+        if (sideChip) sideChip.style.background = pv.sideDark;
+        if (pageChip) pageChip.style.background = pv.pageDark;
 
-        /* فاز ۲۱۰ — رنگ سایدبار/صفحه: پیش‌نمایش زنده + نشانگرها + دکمه‌های پیش‌فرض */
-        const sideColor = saState.sidebarColor || saShellDefaults.side;
-        const sideColorDark = saState.sidebarColorDark || saShellDefaults.sideDark;
-        const pageColor = saState.pageColor || saShellDefaults.page;
-        const pageColorDark = saState.pageColorDark || saShellDefaults.pageDark;
-        const sideInk = saContrastInk(sideColor);
-        const sideInkDark = saContrastInk(sideColorDark);
-
-        const pvSide = document.getElementById('sa-shell-preview-side');
-        const pvSideDark = document.getElementById('sa-shell-preview-side-dark');
-        const pvPage = document.getElementById('sa-shell-preview-page');
-        const pvPageDark = document.getElementById('sa-shell-preview-page-dark');
-        if (pvSide) pvSide.style.background = sideColor;
-        if (pvSideDark) pvSideDark.style.background = sideColorDark;
-        if (pvPage) pvPage.style.background = pageColor;
-        if (pvPageDark) pvPageDark.style.background = pageColorDark;
-
-        const pvSideTitle = document.getElementById('sa-shell-preview-side-title');
-        const pvSideTitleDark = document.getElementById('sa-shell-preview-side-title-dark');
-        const pvLink1 = document.getElementById('sa-shell-preview-link1');
-        const pvLink1Dark = document.getElementById('sa-shell-preview-link1-dark');
-        const pvLink2 = document.getElementById('sa-shell-preview-link2');
-        const pvLink2Dark = document.getElementById('sa-shell-preview-link2-dark');
-        if (pvSideTitle) pvSideTitle.style.color = sideInk;
-        if (pvSideTitleDark) pvSideTitleDark.style.color = sideInkDark;
-        if (pvLink1) { pvLink1.style.background = 'color-mix(in srgb, ' + base + ' 14%, ' + sideColor + ')'; pvLink1.style.color = sideInk; }
-        if (pvLink1Dark) { pvLink1Dark.style.background = 'color-mix(in srgb, ' + base + ' 22%, ' + sideColorDark + ')'; pvLink1Dark.style.color = sideInkDark; }
-        if (pvLink2) pvLink2.style.color = 'color-mix(in srgb, ' + sideInk + ' 72%, ' + sideColor + ')';
-        if (pvLink2Dark) pvLink2Dark.style.color = 'color-mix(in srgb, ' + sideInkDark + ' 72%, ' + sideColorDark + ')';
-
-        const sideInput = document.getElementById('sa-side-color');
-        const sideInputDark = document.getElementById('sa-side-color-dark');
-        const pageInput = document.getElementById('sa-page-color');
-        const pageInputDark = document.getElementById('sa-page-color-dark');
-        if (sideInput) sideInput.value = sideColor;
-        if (sideInputDark) sideInputDark.value = sideColorDark;
-        if (pageInput) pageInput.value = pageColor;
-        if (pageInputDark) pageInputDark.value = pageColorDark;
-        ['sa-side-reset', 'sa-side-reset-dark', 'sa-page-reset', 'sa-page-reset-dark'].forEach((id) => {
-            const btn = document.getElementById(id);
-            if (btn) { btn.style.borderColor = base + '4D'; btn.style.color = base; }
-        });
-
-        // طیف تولیدشده
-        saRoot.querySelectorAll('.sa-swatch').forEach((sw) => {
-            const chip = sw.querySelector('.sa-color-chip');
-            const hex = pv.scale[sw.getAttribute('data-step')];
-            if (!chip || !hex) return;
-            chip.style.background = hex;
-            sw.setAttribute('title', hex);
-        });
-
-        // پیش‌نمایش زنده
-        const solid = document.getElementById('sa-preview-solid');
-        const outline = document.getElementById('sa-preview-outline');
-        const badge = document.getElementById('sa-preview-badge');
-        const cart = document.getElementById('sa-preview-cart');
-        if (solid) { solid.style.background = base; solid.style.boxShadow = '0 5px 12px ' + base + '40'; }
-        if (outline) { outline.style.borderColor = base; outline.style.color = base; }
-        if (badge) { badge.style.background = pv.scale[50]; badge.style.color = pv.scale[700]; }
-        if (cart) { cart.style.background = base; cart.style.boxShadow = '0 4px 10px ' + base + '40'; }
+        // پیش‌نمایش زندهٔ دوحالته
+        saApplyPreviewVars(pv);
 
         // دکمهٔ ذخیره + آیکن سربرگ = گرادیان پالت
         const gradientCss = 'linear-gradient(' + pv.angle + 'deg, ' + pv.stops.join(', ') + ')';
@@ -853,18 +929,6 @@
         // دکمهٔ بازگشت به پیش‌فرض
         const resetBtn = document.getElementById('sa-reset');
         if (resetBtn) { resetBtn.style.borderColor = base + '66'; resetBtn.style.color = base; }
-
-        saApplyModeUI(pv.base);
-    }
-
-    function saApplyModeUI(baseColor) {
-        const base = baseColor || saComputePreview().base;
-        saRoot.querySelectorAll('[data-mode]').forEach((btn) => {
-            const sel = btn.getAttribute('data-mode') === saState.mode;
-            btn.style.borderColor = sel ? base : '';
-            btn.style.background = sel ? base + '0F' : '';
-            btn.style.color = sel ? base : '';
-        });
     }
 
     /* ---------- رویدادها ---------- */
@@ -891,37 +955,12 @@
         });
     }
 
-    const saColorInput = document.getElementById('sa-color-input');
-    const saHexInput = document.getElementById('sa-custom-hex');
-    if (saColorInput) {
-        saColorInput.addEventListener('input', () => {
-            saState.custom = saColorInput.value.toUpperCase();
-            if (saHexInput) saHexInput.value = saState.custom;
-            saApplyUI();
-        });
-    }
-    if (saHexInput) {
-        saHexInput.addEventListener('input', () => {
-            const v = saHexInput.value.trim();
-            if (/^#?[0-9a-fA-F]{6}$/.test(v)) {
-                saState.custom = ('#' + v.replace('#', '')).toUpperCase();
-                if (saColorInput) saColorInput.value = saState.custom;
-                saApplyUI();
-            }
-        });
-    }
-
-    saRoot.querySelectorAll('[data-mode]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            saState.mode = btn.getAttribute('data-mode');
-            saApplyUI();
-        });
-    });
-
-    /* ---------- فاز ۲۱۰ — رویدادهای رنگ فونت/سایدبار/صفحه ---------- */
-    const saBindPair = (inputId, hexId, stateKey, applyKey) => {
+    /* بایند انتخابگرهای شخصی‌سازی (color + hex + reset) */
+    const saBindPicker = (inputId, hexId, resetId, stateKey, emptyFallback) => {
         const input = document.getElementById(inputId);
         const hexInput = document.getElementById(hexId);
+        const resetBtn = document.getElementById(resetId);
+
         if (input) {
             input.addEventListener('input', () => {
                 saState[stateKey] = input.value.toUpperCase();
@@ -939,40 +978,18 @@
                 }
             });
         }
-        const resetBtn = document.getElementById(applyKey);
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
-                saState[stateKey] = '';
+                saState[stateKey] = emptyFallback || '';
                 saApplyUI();
             });
         }
     };
 
-    saBindPair('sa-font-color', 'sa-font-hex', 'fontColor', 'sa-font-reset');
-    saBindPair('sa-font-color-dark', 'sa-font-hex-dark', 'fontColorDark', 'sa-font-reset-dark');
-    saBindPair('sa-side-color', 'sa-side-hex', 'sidebarColor', 'sa-side-reset');
-    saBindPair('sa-side-color-dark', 'sa-side-hex-dark', 'sidebarColorDark', 'sa-side-reset-dark');
-    saBindPair('sa-page-color', 'sa-page-hex', 'pageColor', 'sa-page-reset');
-    saBindPair('sa-page-color-dark', 'sa-page-hex-dark', 'pageColorDark', 'sa-page-reset-dark');
-
-    // کلیک روی پله‌های طیف = کپی کد رنگ
-    saRoot.querySelectorAll('.sa-swatch').forEach((sw) => {
-        sw.addEventListener('click', () => {
-            const hex = saLast.scale[sw.getAttribute('data-step')] || '';
-            if (!hex) return;
-            const notifyCopied = () => $wire.dispatch('toast', { message: 'کد رنگ ' + hex + ' کپی شد.', type: 'info' });
-            const notifyPlain = () => $wire.dispatch('toast', { message: 'کد رنگ: ' + hex, type: 'info' });
-            try {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(hex).then(notifyCopied).catch(notifyPlain);
-                } else {
-                    notifyPlain();
-                }
-            } catch (e) {
-                notifyPlain();
-            }
-        });
-    });
+    saBindPicker('sa-c-primary', 'sa-c-primary-hex', 'sa-c-primary-reset', 'custom', '{{ \App\Support\PaletteEngine::DEFAULT_CUSTOM }}');
+    saBindPicker('sa-c-font', 'sa-c-font-hex', 'sa-c-font-reset', 'customFont', '');
+    saBindPicker('sa-c-side', 'sa-c-side-hex', 'sa-c-side-reset', 'customSidebar', '');
+    saBindPicker('sa-c-page', 'sa-c-page-hex', 'sa-c-page-reset', 'customPage', '');
 
     // ذخیرهٔ پوسته — اول همگام‌سازی وضعیت، بعد فراخوانی اکشن + رنگ‌کردن فوری پنل
     const saSaveBtn = document.getElementById('sa-save');
@@ -982,14 +999,13 @@
             saSaveBtn.style.opacity = '0.7';
             try {
                 await $wire.syncState(
-                    saState.palette, saState.warmth, saState.custom, saState.mode,
-                    saState.fontColor, saState.fontColorDark,
-                    saState.sidebarColor, saState.sidebarColorDark,
-                    saState.pageColor, saState.pageColorDark
+                    saState.palette, saState.warmth, saState.custom,
+                    saState.customFont, saState.customSidebar, saState.customPage
                 );
                 await $wire.call('saveSkin');
-                saApplyAdminVars(saComputePreview().scale);
-                saApplyShellVars();
+                const pv = saCompute();
+                saApplyAdminVars(pv.scale);
+                saApplyShellVars(pv);
             } finally {
                 saSaveBtn.disabled = false;
                 saSaveBtn.style.opacity = '1';
@@ -1016,18 +1032,13 @@
         if (data.palette) saState.palette = data.palette;
         if (data.warmth !== undefined && data.warmth !== null) saState.warmth = parseInt(data.warmth, 10) || 0;
         if (data.custom) saState.custom = data.custom;
-        if (data.mode) saState.mode = data.mode;
-        if (data.fontColor !== undefined && data.fontColor !== null) saState.fontColor = data.fontColor;
-        if (data.fontColorDark !== undefined && data.fontColorDark !== null) saState.fontColorDark = data.fontColorDark;
-        if (data.sidebarColor !== undefined && data.sidebarColor !== null) saState.sidebarColor = data.sidebarColor;
-        if (data.sidebarColorDark !== undefined && data.sidebarColorDark !== null) saState.sidebarColorDark = data.sidebarColorDark;
-        if (data.pageColor !== undefined && data.pageColor !== null) saState.pageColor = data.pageColor;
-        if (data.pageColorDark !== undefined && data.pageColorDark !== null) saState.pageColorDark = data.pageColorDark;
-        if (saHexInput) saHexInput.value = saState.custom;
-        if (saColorInput) saColorInput.value = saState.custom;
+        if (data.customFont !== undefined && data.customFont !== null) saState.customFont = data.customFont;
+        if (data.customSidebar !== undefined && data.customSidebar !== null) saState.customSidebar = data.customSidebar;
+        if (data.customPage !== undefined && data.customPage !== null) saState.customPage = data.customPage;
         saApplyUI();
-        saApplyAdminVars(saComputePreview().scale);
-        saApplyShellVars();
+        const pv = saCompute();
+        saApplyAdminVars(pv.scale);
+        saApplyShellVars(pv);
     });
 </script>
 @endscript

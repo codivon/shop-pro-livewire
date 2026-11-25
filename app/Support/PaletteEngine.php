@@ -3,19 +3,33 @@
 namespace App\Support;
 
 /* ============================================================
-   PaletteEngine (فاز ۲۰۸ — فاز ۲۱۰) — موتور پوستهٔ رنگی «پنل مدیریت»
+   PaletteEngine (فاز ۲۱۱) — موتور پوستهٔ رنگی «پنل مدیریت»
    ------------------------------------------------------------
-   همان زبانِ طراحیِ بخش «ظاهر و رنگ‌بندی» قالب سانیار، این‌بار
-   برای خودِ پنل: ۱۲ پالت آماده + شخصی‌سازی + اسلایدر گرمی/سردی
-   + طیف ۵۰..۹۵۰ + حالت پیش‌فرض روشن/تیره.
+   طراحی کاملاً تازه نسبت به فاز ۲۰۸/۲۱۰:
+   هر پالتِ آماده یک «بستهٔ رنگیِ هماهنگِ چندنقشی» است — نه یک
+   رنگِ واحد. هر پالت این نقش‌ها را با هم تغییر می‌دهد:
+     • رنگ اصلی (دکمه‌ها، لینک‌ها، آیکن‌ها، حالت فعال) ← طیف brand-50..950
+     • رنگ سایدبار — نسخهٔ روشن و تم شب (تیِنِ هم‌خانواده با رنگ اصلی)
+     • رنگ صفحه — نسخهٔ روشن و تم شب (کمی عمیق‌تر از سایدبار)
+     • رنگ متن — در پالت‌های آماده همان پیش‌فرضِ پنل می‌ماند تا
+       خوانایی همیشه تضمین شود؛ فقط در «شخصی‌سازی» قابل تغییر است.
+   ⇒ همهٔ بخش‌های پنل رنگ می‌گیرند، اما «همه‌چیز یک‌رنگ» نمی‌شود؛
+   سایدبار/صفحه تِینِ لطیفِ همان خانوادهٔ رنگی‌اند و متن‌ها و
+   دکمه‌ها در روشن و تیره به‌صورت خودکار خوانا می‌مانند.
 
-   فاز ۲۱۰ — علاوه بر پالت:
-   • رنگ فونت (متن) پنل — جدا برای حالت روشن و تم شب
-     (بازنویسی --color-ink و --color-night-ink).
-   • رنگ سایدبار و رنگ صفحه — جدا برای حالت روشن و تم شب؛
-     رنگ متن/هاور/خط سایدبار خودکار از همان رنگِ انتخابی مشتق
-     می‌شود (color-mix + کنتراست YIQ) تا همیشه خوانا بماند و
-     با تم شب هماهنگ باشد.
+   حالت پیش‌فرضِ روشن/تیرهٔ پنل از جای دیگر (کوکی کاربر / دکمهٔ ماه)
+   تنظیم می‌شود و اینجا فقط «سازگار» است: هر پالت همیشه نسخهٔ
+   روشن و تیرهٔ هماهنگ دارد و متنِ سایدبار با کنتراست YIQ از خودِ
+   رنگِ سایدبار مشتق می‌شود.
+
+   شخصی‌سازی (پالت «custom»): مدیر رنگ دکمه‌ها/متن/سایدبار/صفحه را
+   یک‌بار انتخاب می‌کند؛ نسخهٔ تم‌شبِ هر رنگ به‌صورت خودکار و هماهنگ
+   (هیو بر اساس رنگ اصلی، روشنایی متناسب) ساخته می‌شود:
+     • سایدبار روشن‌تر از YIQ۱۴۰ ⇒ در شب به تیرهٔ هم‌خانواده می‌رود
+     • صفحهٔ روشن‌تر از YIQ۱۲۰ ⇒ در شب به تیرهٔ هم‌خانواده می‌رود
+     • متنِ تیره‌تر از YIQ۱۵۰ ⇒ در شب به روشنِ هم‌خانواده می‌رود
+   • رنگی که خودش تیره است (مثل سایدبار شب‌رنگ) در تم شب دست‌نخورده
+     می‌ماند — چون همان حالت شب‌پسند است.
 
    تفاوت با نسخهٔ قالب (Themes\SaniarTheme\src\Support):
    • کلید option: «admin_appearance» (مستقل از زبان — در
@@ -23,11 +37,11 @@ namespace App\Support;
      فعلیِ پنل (هیچ تغییر ظاهری بدون انتخاب مدیر رخ نمی‌دهد).
    • طیف حول رنگ اصلی با «پلهٔ ۶۰۰ = رنگ اصلی» ساخته می‌شود چون
      رنگِ برندِ پنل، پلهٔ brand-600 است (دکمه‌ها/سایدبار/تیترها).
-   • پالت «زمرّد» طیفِ ثابتِ تیلویندِ زمردی دارد (fixed_scale) تا
-     پنلِ بدون پوسته ذخیره‌نشده، پیکسل‌به‌پیکسل ظاهر فعلی را حفظ کند.
+   • پالت «زمرّد» طیفِ ثابتِ تیلویند دارد (fixed_scale) تا ظاهر فعلی
+     پنل پیکسل‌به‌پیکسل حفظ شود (brand-600=#059669، brand-500=#10b981، …).
    • خروجی (payload) در layout پنل به‌صورت بازنویسی متغیرهای
-     --color-brand-* تزریق می‌شود؛ پنل با Tailwind 4 از همین
-     متغیرها استفاده می‌کند ⇒ کل پنل یک‌جا رنگ می‌گیرد.
+     --color-brand-* + متغیرهای سایدبار/صفحه/متن تزریق می‌شود؛
+     کلیدهای payload با فاز ۲۱۰ یکسان‌اند (layoutها دست‌نخورده).
    ============================================================ */
 
 class PaletteEngine
@@ -41,13 +55,13 @@ class PaletteEngine
     /** رنگ اصلی پیش‌فرض حالت شخصی‌سازی */
     public const DEFAULT_CUSTOM = '#D62976';
 
-    /* فاز ۲۱۰ — پیش‌فرض‌های رنگ فونت/سایدبار/صفحه (= مقادیر فعلی پنل؛
-       خالی بودن هرکدام در payload یعنی «بدون بازنویسی، همان پیش‌فرض پنل») */
+    /* پیش‌فرض‌های نقش‌های پنل (= مقادیر فعلی پنل؛ خالی بودن هرکدام در
+       payloadِ شخصی‌سازی یعنی «همان پیش‌فرض پنل، بدون بازنویسی») */
 
-    /** رنگ فونت پنل در حالت روشن (‎--color-ink در admin.css) */
+    /** رنگ متن پنل در حالت روشن (‎--color-ink در admin.css) */
     public const DEFAULT_FONT_COLOR = '#1A2333';
 
-    /** رنگ فونت پنل در تم شب (‎--color-night-ink در admin.css) */
+    /** رنگ متن پنل در تم شب (‎--color-night-ink در admin.css) */
     public const DEFAULT_FONT_COLOR_DARK = '#E5EAF2';
 
     /** رنگ سایدبار در حالت روشن (bg-surface) */
@@ -62,42 +76,49 @@ class PaletteEngine
     /** رنگ صفحه در تم شب (dark:bg-night بدنه) */
     public const DEFAULT_PAGE_COLOR_DARK = '#0D1219';
 
+    /* آستانه‌های مشتق‌سازی خودکار نسخهٔ تم‌شب (شخصی‌سازی) —
+       قرینهٔ دقیق در JS صفحهٔ تنظیمات پیاده شده است */
+
+    /** سایدبار روشن‌تر از این YIQ ⇒ در تم شب تیرهٔ هم‌خانواده می‌شود */
+    public const SIDE_LIGHT_YIQ = 140.0;
+
+    /** صفحهٔ روشن‌تر از این YIQ ⇒ در تم شب تیرهٔ هم‌خانواده می‌شود */
+    public const PAGE_LIGHT_YIQ = 120.0;
+
+    /** متن تیره‌تر از این YIQ ⇒ در تم شب روشنِ هم‌خانواده می‌شود */
+    public const FONT_DARK_YIQ = 150.0;
+
+    /** روشنایی/اشباع تیرهٔ هم‌خانوادهٔ سایدبار (تم شب) */
+    public const SIDE_DARK_S = 30.0;
+    public const SIDE_DARK_L = 10.5;
+
+    /** روشنایی/اشباع تیرهٔ هم‌خانوادهٔ صفحه (تم شب) */
+    public const PAGE_DARK_S = 26.0;
+    public const PAGE_DARK_L = 7.0;
+
+    /** روشنایی/اشباع روشنِ هم‌خانوادهٔ متن (تم شب) */
+    public const FONT_DARK_S = 24.0;
+    public const FONT_DARK_L = 88.0;
+
     /**
-     * پالت‌های آماده — ترتیب آرایه = چیدمان گرید RTL (اولین = راست‌ترین کارت)
-     * مثل بخش قالب؛ فقط پیش‌فرضِ انتخاب‌شدهٔ اولیه، زمردی است.
+     * پالت‌های آماده — هر پالت یک بستهٔ رنگیِ هماهنگِ چندنقشی است.
+     * «roles» = رنگ سایدبار/صفحه در روشن و تم شب (تیِنِ هم‌خانوادهٔ رنگ اصلی).
+     * ترتیب آرایه = چیدمان گرید RTL (اولین = راست‌ترین کارت).
      */
     public static function palettes(): array
     {
         return [
             [
-                'key'            => 'instagram',
-                'title'          => 'گرادیان اینستاگرامی',
-                'desc'           => 'اینستا - مدرن - جذاب',
-                'base'           => '#D62976',
-                'swatch'         => ['#F58529', '#DD2A7B', '#8134AF'],
-                'gradient'       => ['#F58529', '#DD2A7B', '#8134AF', '#515BD4'],
-                'gradient_angle' => 45,
-            ],
-            [
-                'key'    => 'sapphire',
-                'title'  => 'آبی سافایر',
-                'desc'   => 'رنگ تکنولوژی، امنیت و اعتماد',
-                'base'   => '#275FE0',
-                'swatch' => ['#60A5FA', '#1D4ED8'],
-            ],
-            [
-                'key'    => 'royal-purple',
-                'title'  => 'بنفش سلطنتی',
-                'desc'   => 'شیک و مدرن و لاکچری',
-                'base'   => '#9333EA',
-                'swatch' => ['#C084FC', '#7E22CE'],
-            ],
-            [
-                'key'         => 'emerald',
-                'title'       => 'زمرّد',
-                'desc'        => 'سبز رویش و امید',
-                'base'        => '#059669',
-                'swatch'      => ['#34D399', '#047857'],
+                'key'    => 'emerald',
+                'title'  => 'زمرّد',
+                'desc'   => 'سبزِ رویش — پیش‌فرض پنل',
+                'base'   => '#059669',
+                'roles'  => [
+                    'side_light' => '#FFFFFF',
+                    'side_dark'  => '#111827',
+                    'page_light' => '#F6F7F8',
+                    'page_dark'  => '#0D1219',
+                ],
                 // طیف ثابت تیلویند زمردی — ظاهرِ فعلی پنل، پیکسل‌به‌پیکسل حفظ می‌شود
                 'fixed_scale' => [
                     50  => '#ECFDF5',
@@ -112,70 +133,145 @@ class PaletteEngine
                     900 => '#064E3B',
                     950 => '#022C22',
                 ],
-                'default'     => true,
+                'default' => true,
             ],
             [
-                'key'    => 'calm-ocean',
-                'title'  => 'اقیانوس آرام',
-                'desc'   => 'فیروزه‌ای عمیق و آرامش‌بخش',
-                'base'   => '#0891B2',
-                'swatch' => ['#22D3EE', '#0E7490'],
+                'key'    => 'sapphire',
+                'title'  => 'سافایر',
+                'desc'   => 'آبیِ اعتماد و تکنولوژی',
+                'base'   => '#275FE0',
+                'roles'  => [
+                    'side_light' => '#F4F7FE',
+                    'side_dark'  => '#101828',
+                    'page_light' => '#EEF3FB',
+                    'page_dark'  => '#0B1220',
+                ],
             ],
             [
                 'key'    => 'midnight',
                 'title'  => 'نیلی شب',
-                'desc'   => 'نیلی عمیق و شبانه',
+                'desc'   => 'نیلیِ عمیق و شبانه',
                 'base'   => '#4F46E5',
-                'swatch' => ['#818CF8', '#4338CA'],
+                'roles'  => [
+                    'side_light' => '#F4F5FD',
+                    'side_dark'  => '#14142B',
+                    'page_light' => '#EEF0FA',
+                    'page_dark'  => '#0F0F20',
+                ],
             ],
             [
-                'key'    => 'fiery-sunset',
-                'title'  => 'غروب آتشین',
-                'desc'   => 'نارنجی آتشین و پرانرژی',
-                'base'   => '#EA580C',
-                'swatch' => ['#FB923C', '#DC2626'],
+                'key'    => 'royal-purple',
+                'title'  => 'بنفش سلطنتی',
+                'desc'   => 'شیک، مدرن و لاکچری',
+                'base'   => '#9333EA',
+                'roles'  => [
+                    'side_light' => '#F9F5FE',
+                    'side_dark'  => '#181029',
+                    'page_light' => '#F3EDFB',
+                    'page_dark'  => '#120C1C',
+                ],
             ],
             [
-                'key'    => 'amber',
-                'title'  => 'کهربای گرم',
-                'desc'   => 'طلایی گرم و درخشان',
-                'base'   => '#D97706',
-                'swatch' => ['#F59E0B', '#B45309'],
-            ],
-            [
-                'key'    => 'crimson',
-                'title'  => 'سرخ گلگون',
-                'desc'   => 'قرمز غلیظ و پرانرژی',
-                'base'   => '#DC2626',
-                'swatch' => ['#F87171', '#B91C1C'],
+                'key'    => 'fuchsia',
+                'title'  => 'ارغوانی',
+                'desc'   => 'درخشش لوکس و ماندگار',
+                'base'   => '#C026D3',
+                'roles'  => [
+                    'side_light' => '#FCF3FD',
+                    'side_dark'  => '#1F1226',
+                    'page_light' => '#F8EDFA',
+                    'page_dark'  => '#170E1D',
+                ],
             ],
             [
                 'key'    => 'coral',
                 'title'  => 'مرجانی',
-                'desc'   => 'سرخ گلی ملایم و شاد',
+                'desc'   => 'سرخِ گلیِ ملایم و شاد',
                 'base'   => '#F43F5E',
-                'swatch' => ['#FB7185', '#E11D48'],
+                'roles'  => [
+                    'side_light' => '#FEF3F6',
+                    'side_dark'  => '#241118',
+                    'page_light' => '#FCEDF1',
+                    'page_dark'  => '#180E13',
+                ],
             ],
             [
-                'key'    => 'fuchsia',
-                'title'  => 'ارغوانی تون',
-                'desc'   => 'درخششی ماندگار و لوکس',
-                'base'   => '#C026D3',
-                'swatch' => ['#E879F9', '#A21CAF'],
+                'key'    => 'crimson',
+                'title'  => 'سرخ گلگون',
+                'desc'   => 'قرمزِ پرانرژی و جدی',
+                'base'   => '#DC2626',
+                'roles'  => [
+                    'side_light' => '#FEF3F2',
+                    'side_dark'  => '#241211',
+                    'page_light' => '#FCEDEB',
+                    'page_dark'  => '#180D0C',
+                ],
+            ],
+            [
+                'key'    => 'fiery-sunset',
+                'title'  => 'غروب آتشین',
+                'desc'   => 'نارنجیِ گرم و پرانرژی',
+                'base'   => '#EA580C',
+                'roles'  => [
+                    'side_light' => '#FEF6EF',
+                    'side_dark'  => '#241408',
+                    'page_light' => '#FCEFE5',
+                    'page_dark'  => '#180F08',
+                ],
+            ],
+            [
+                'key'    => 'amber',
+                'title'  => 'کهربای زعفرانی',
+                'desc'   => 'طلاییِ گرم و درخشان',
+                'base'   => '#D97706',
+                'roles'  => [
+                    'side_light' => '#FDF9EC',
+                    'side_dark'  => '#221B09',
+                    'page_light' => '#FAF4E1',
+                    'page_dark'  => '#181206',
+                ],
+            ],
+            [
+                'key'    => 'calm-ocean',
+                'title'  => 'اقیانوس آرام',
+                'desc'   => 'فیروزه‌ایِ عمیق و آرامش‌بخش',
+                'base'   => '#0891B2',
+                'roles'  => [
+                    'side_light' => '#F0F9FC',
+                    'side_dark'  => '#0A1D26',
+                    'page_light' => '#E9F4F8',
+                    'page_dark'  => '#08161D',
+                ],
             ],
             [
                 'key'    => 'caspian',
-                'title'  => 'فیروزه خزر',
-                'desc'   => 'ترکیبی از سبز و آبی و شاداب',
+                'title'  => 'فیروزهٔ خزر',
+                'desc'   => 'ترکیبِ سبز و آبیِ شاداب',
                 'base'   => '#0D9488',
-                'swatch' => ['#2DD4BF', '#0F766E'],
+                'roles'  => [
+                    'side_light' => '#F0FAF8',
+                    'side_dark'  => '#0A1F1B',
+                    'page_light' => '#E9F5F2',
+                    'page_dark'  => '#081814',
+                ],
+            ],
+            [
+                'key'    => 'graphite',
+                'title'  => 'گرافیت',
+                'desc'   => 'خاکستریِ حرفه‌ای و بی‌طرف',
+                'base'   => '#475569',
+                'roles'  => [
+                    'side_light' => '#F5F7F9',
+                    'side_dark'  => '#15181D',
+                    'page_light' => '#F0F2F5',
+                    'page_dark'  => '#0F1114',
+                ],
             ],
             [
                 'key'    => 'custom',
                 'title'  => 'شخصی‌سازی',
-                'desc'   => 'رنگ‌های خودت را بساز',
+                'desc'   => 'رنگ‌ها را خودت بساز',
                 'base'   => self::DEFAULT_CUSTOM,
-                'swatch' => ['#8B5CF6', '#EC4899', '#F97316', '#FACC15', '#10B981', '#3B82F6'],
                 'custom' => true,
             ],
         ];
@@ -193,7 +289,7 @@ class PaletteEngine
     }
 
     /* ========================================================
-       ریاضی رنگ — HEX ↔ HSL
+       ریاضی رنگ — HEX ↔ HSL ↔ YIQ
        ======================================================== */
 
     public static function normalizeHex(?string $value, string $fallback = self::DEFAULT_CUSTOM): string
@@ -207,7 +303,7 @@ class PaletteEngine
     }
 
     /**
-     * فاز ۲۱۰ — نرمال‌سازی HEX با اجازهٔ خالی بودن.
+     * نرمال‌سازی HEX با اجازهٔ خالی بودن.
      * خالی/نامعتبر = null یعنی «پیش‌فرض پنل» (بدون بازنویسی متغیر).
      */
     public static function normalizeHexOrNull(?string $value): ?string
@@ -220,16 +316,21 @@ class PaletteEngine
         return null;
     }
 
+    /** درخشندگی YIQ (معیار کنتراست) */
+    public static function yiq(string $hex): float
+    {
+        [$r, $g, $b] = self::hexToRgb($hex);
+
+        return (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+    }
+
     /**
-     * فاز ۲۱۰ — رنگ متنِ خوانا روی پس‌زمینهٔ داده‌شده (معیار YIQ).
+     * رنگ متنِ خوانا روی پس‌زمینهٔ داده‌شده (معیار YIQ).
      * برای سایدبارِ رنگی: متن تیره روی رنگ روشن و متن روشن روی رنگ تیره.
      */
     public static function contrastInk(string $hex): string
     {
-        [$r, $g, $b] = self::hexToRgb($hex);
-        $yiq = (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
-
-        return $yiq >= 150 ? self::DEFAULT_FONT_COLOR : '#F2F5FA';
+        return self::yiq($hex) >= 150 ? self::DEFAULT_FONT_COLOR : '#F2F5FA';
     }
 
     /** HEX -> "R, G, B" (for rgba() shadows in the injected style) */
@@ -378,7 +479,7 @@ class PaletteEngine
         return [self::hslToHex(self::wrapHue($h + $rotation), $s2, $l), $rotation];
     }
 
-    /** چرخش Hue یک رنگ به میزان مشخص (برای رنگ‌های گرادیان) */
+    /** چرخش Hue یک رنگ به میزان مشخص (برای رنگ‌های گرادیان و نقش‌ها) */
     public static function rotateHue(string $hex, float $rotation): string
     {
         if ($rotation == 0.0) {
@@ -390,9 +491,15 @@ class PaletteEngine
         return self::hslToHex(self::wrapHue($h + $rotation), $s, $l);
     }
 
+    /** رنگِ هم‌خانواده با هیوی داده‌شده (برای مشتق‌سازی خودکار نسخهٔ تم‌شب) */
+    private static function tinted(float $hue, float $saturation, float $lightness): string
+    {
+        return self::hslToHex(self::wrapHue($hue), $saturation, $lightness);
+    }
+
     /**
      * طیف ۵۰..۹۵۰ حول رنگ اصلی — رنگ اصلی دقیقاً در پلهٔ ۶۰۰ می‌نشیند
-     * (رنگ برندِ پنل brand-600 است: دکمهٔ اصلی/سایدبار/تیترها).
+     * (رنگ برندِ پنل brand-600 است: دکمهٔ اصلی/لینک‌ها/آیکن‌ها).
      */
     public static function scale(string $baseHex): array
     {
@@ -440,12 +547,72 @@ class PaletteEngine
     }
 
     /* ========================================================
+       نقش‌های رنگی — سایدبار/صفحه/متن
+       ======================================================== */
+
+    /**
+     * محاسبهٔ نقش‌های رنگی (سایدبار/صفحه/متن × روشن/تم شب).
+     * پالت‌های آماده: نقش‌ها از تعریف پالت + چرخش گرمی/سردی.
+     * شخصی‌سازی: نقش‌ها از ورودی مدیر + مشتق‌سازی خودکار نسخهٔ تم‌شب.
+     * خروجی: [side_light, side_dark, page_light, page_dark, font_light, font_dark]
+     *         null = پیش‌فرض پنل (بدون بازنویسی متغیر).
+     */
+    private static function resolveRoles(array $palette, string $paletteKey, string $baseHex, float $rotation, ?array $extras): array
+    {
+        if ($paletteKey === 'custom') {
+            $font = self::normalizeHexOrNull($extras['font_color'] ?? null);
+            $side = self::normalizeHexOrNull($extras['sidebar_color'] ?? null);
+            $page = self::normalizeHexOrNull($extras['page_color'] ?? null);
+
+            // هیوی مشترک = هیوی رنگ اصلی — همهٔ مشتق‌ها هم‌خانواده می‌مانند
+            $hue = self::hexToHsl($baseHex)[0];
+
+            $sideDark = null;
+            if ($side !== null) {
+                // سایدبارِ روشن در شب به تیرهٔ هم‌خانواده می‌رود؛ سایدبارِ تیره دست‌نخورده می‌ماند
+                $sideDark = self::yiq($side) >= self::SIDE_LIGHT_YIQ
+                    ? self::tinted($hue, self::SIDE_DARK_S, self::SIDE_DARK_L)
+                    : $side;
+            }
+
+            $pageDark = null;
+            if ($page !== null) {
+                $pageDark = self::yiq($page) >= self::PAGE_LIGHT_YIQ
+                    ? self::tinted($hue, self::PAGE_DARK_S, self::PAGE_DARK_L)
+                    : $page;
+            }
+
+            $fontDark = null;
+            if ($font !== null) {
+                // متنِ تیره در شب به روشنِ هم‌خانواده می‌رود تا خوانا بماند
+                $fontDark = self::yiq($font) < self::FONT_DARK_YIQ
+                    ? self::tinted($hue, self::FONT_DARK_S, self::FONT_DARK_L)
+                    : $font;
+            }
+
+            return [$side, $sideDark, $page, $pageDark, $font, $fontDark];
+        }
+
+        $roles = $palette['roles'];
+
+        return [
+            self::rotateHue($roles['side_light'], $rotation),
+            self::rotateHue($roles['side_dark'], $rotation),
+            self::rotateHue($roles['page_light'], $rotation),
+            self::rotateHue($roles['page_dark'], $rotation),
+            null, // فونت پالت‌های آماده = پیش‌فرض پنل (خوانایی تضمینی)
+            null,
+        ];
+    }
+
+    /* ========================================================
        ساخت payload نهایی + خواندن/ذخیرهٔ option
        ======================================================== */
 
     /**
      * محاسبهٔ کامل وضعیت پوسته از ورودی‌های خام.
      * خروجی = همان JSON ذخیره‌شونده در option (layout پنل فقط مصرف‌کننده است).
+     * کلیدهای خروجی با فاز ۲۱۰ یکسان‌اند تا layoutها بدون تغییر کار کنند.
      */
     public static function resolve(string $paletteKey, int $warmth, ?string $customHex = null, ?string $mode = 'light', ?array $extras = null): array
     {
@@ -480,8 +647,11 @@ class PaletteEngine
             $label .= $warmth < 0 ? ' — گرم‌تر' : ' — سردتر';
         }
 
+        [$sideLight, $sideDark, $pageLight, $pageDark, $fontLight, $fontDark] =
+            self::resolveRoles($palette, $paletteKey, $base, $rotation, $extras);
+
         return [
-            'v'              => 2,
+            'v'              => 3,
             'palette'        => $paletteKey,
             'warmth'         => $warmth,
             'custom'         => $custom,
@@ -495,14 +665,14 @@ class PaletteEngine
             'gradient'       => array_values($stops),
             'gradient_angle' => (int) ($palette['gradient_angle'] ?? 135),
 
-            /* فاز ۲۱۰ — رنگ فونت/سایدبار/صفحه (جدا برای روشن و تم شب)؛
-               null یعنی «پیش‌فرض پنل» و در تزریق CSS رد می‌شود. */
-            'font_color'         => self::normalizeHexOrNull($extras['font_color'] ?? null),
-            'font_color_dark'    => self::normalizeHexOrNull($extras['font_color_dark'] ?? null),
-            'sidebar_color'      => self::normalizeHexOrNull($extras['sidebar_color'] ?? null),
-            'sidebar_color_dark' => self::normalizeHexOrNull($extras['sidebar_color_dark'] ?? null),
-            'page_color'         => self::normalizeHexOrNull($extras['page_color'] ?? null),
-            'page_color_dark'    => self::normalizeHexOrNull($extras['page_color_dark'] ?? null),
+            /* نقش‌های رنگی — جدا برای روشن و تم شب.
+               null = «پیش‌فرض پنل» و در تزریق CSS رد می‌شود. */
+            'font_color'         => $fontLight,
+            'font_color_dark'    => $fontDark,
+            'sidebar_color'      => $sideLight,
+            'sidebar_color_dark' => $sideDark,
+            'page_color'         => $pageLight,
+            'page_color_dark'    => $pageDark,
         ];
     }
 
@@ -510,21 +680,13 @@ class PaletteEngine
     public static function isDefaultState(array $payload): bool
     {
         return ($payload['palette'] ?? '') === self::DEFAULT_PALETTE
-            && (int) ($payload['warmth'] ?? 0) === 0
-            && ($payload['mode'] ?? 'light') === 'light';
+            && (int) ($payload['warmth'] ?? 0) === 0;
     }
 
     /** پوشهٔ پیش‌فرض پنل (زمردیِ فعلی — وقتی چیزی ذخیره نشده یا مقدار خراب است) */
     public static function defaultPayload(): array
     {
-        $payload = self::resolve(self::DEFAULT_PALETTE, 0, self::DEFAULT_CUSTOM, 'light', [
-            'font_color'         => self::DEFAULT_FONT_COLOR,
-            'font_color_dark'    => self::DEFAULT_FONT_COLOR_DARK,
-            'sidebar_color'      => self::DEFAULT_SIDEBAR_COLOR,
-            'sidebar_color_dark' => self::DEFAULT_SIDEBAR_COLOR_DARK,
-            'page_color'         => self::DEFAULT_PAGE_COLOR,
-            'page_color_dark'    => self::DEFAULT_PAGE_COLOR_DARK,
-        ]);
+        $payload = self::resolve(self::DEFAULT_PALETTE, 0, self::DEFAULT_CUSTOM, 'light');
         $payload['label'] = 'زمرّد (پیش‌فرض)';
 
         return $payload;
@@ -550,35 +712,32 @@ class PaletteEngine
             || ! is_string($data['palette'])
         ) {
             return [
-                'palette'            => self::DEFAULT_PALETTE,
-                'warmth'             => 0,
-                'custom'             => self::DEFAULT_CUSTOM,
-                'mode'               => 'light',
-                'font_color'         => '',
-                'font_color_dark'    => '',
-                'sidebar_color'      => '',
-                'sidebar_color_dark' => '',
-                'page_color'         => '',
-                'page_color_dark'    => '',
-                'label'              => 'زمرّد (پیش‌فرض)',
-                'saved'              => false,
-                'payload'            => self::defaultPayload(),
+                'palette'        => self::DEFAULT_PALETTE,
+                'warmth'         => 0,
+                'custom'         => self::DEFAULT_CUSTOM,
+                'mode'           => 'light',
+                'custom_font'    => '',
+                'custom_sidebar' => '',
+                'custom_page'    => '',
+                'label'          => 'زمرّد (پیش‌فرض)',
+                'saved'          => false,
+                'payload'        => self::defaultPayload(),
             ];
         }
+
+        // ورودی‌های شخصی‌سازی فقط برای پالت «custom» معنا دارند
+        $isCustom = $data['palette'] === 'custom';
 
         $payload = self::resolve(
             (string) $data['palette'],
             (int) ($data['warmth'] ?? 0),
             isset($data['custom']) ? (string) $data['custom'] : self::DEFAULT_CUSTOM,
             ($data['mode'] ?? 'light') === 'dark' ? 'dark' : 'light',
-            [
-                'font_color'         => isset($data['font_color']) ? (string) $data['font_color'] : '',
-                'font_color_dark'    => isset($data['font_color_dark']) ? (string) $data['font_color_dark'] : '',
-                'sidebar_color'      => isset($data['sidebar_color']) ? (string) $data['sidebar_color'] : '',
-                'sidebar_color_dark' => isset($data['sidebar_color_dark']) ? (string) $data['sidebar_color_dark'] : '',
-                'page_color'         => isset($data['page_color']) ? (string) $data['page_color'] : '',
-                'page_color_dark'    => isset($data['page_color_dark']) ? (string) $data['page_color_dark'] : '',
-            ]
+            $isCustom ? [
+                'font_color'    => isset($data['font_color']) ? (string) $data['font_color'] : '',
+                'sidebar_color' => isset($data['sidebar_color']) ? (string) $data['sidebar_color'] : '',
+                'page_color'    => isset($data['page_color']) ? (string) $data['page_color'] : '',
+            ] : null
         );
 
         if (self::isDefaultState($payload)) {
@@ -586,27 +745,16 @@ class PaletteEngine
         }
 
         return [
-            'palette'            => $payload['palette'],
-            'warmth'             => $payload['warmth'],
-            'custom'             => $payload['custom'],
-            'mode'               => $payload['mode'],
-            'font_color'         => $payload['font_color'] ?? '',
-            'font_color_dark'    => $payload['font_color_dark'] ?? '',
-            'sidebar_color'      => $payload['sidebar_color'] ?? '',
-            'sidebar_color_dark' => $payload['sidebar_color_dark'] ?? '',
-            'page_color'         => $payload['page_color'] ?? '',
-            'page_color_dark'    => $payload['page_color_dark'] ?? '',
-            'label'              => $payload['label'],
-            'saved'              => true,
-            'payload'            => $payload,
+            'palette'        => $payload['palette'],
+            'warmth'         => $payload['warmth'],
+            'custom'         => $payload['custom'],
+            'mode'           => $payload['mode'],
+            'custom_font'    => $isCustom ? (string) ($payload['font_color'] ?? '') : '',
+            'custom_sidebar' => $isCustom ? (string) ($payload['sidebar_color'] ?? '') : '',
+            'custom_page'    => $isCustom ? (string) ($payload['page_color'] ?? '') : '',
+            'label'          => $payload['label'],
+            'saved'          => true,
+            'payload'        => $payload,
         ];
-    }
-
-    /** استایل گرادیان کارت پالت (نمونهٔ رنگی روی هر کارت) */
-    public static function swatchStyle(array $palette): string
-    {
-        $stops = implode(', ', $palette['swatch']);
-
-        return 'linear-gradient(135deg, '.$stops.')';
     }
 }

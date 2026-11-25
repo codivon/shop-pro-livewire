@@ -450,26 +450,30 @@
             var count = 0;
             var parsedCanvas = null;
 
-            /* ۱) شمارندهٔ صریح پاسخ سرور (فاز ۲۱۰) */
-            if (typeof explicitCount === 'number' && !isNaN(explicitCount) && explicitCount >= 0) {
-                count = explicitCount;
-            } else if (typeof cartHtml === 'string') {
+            /* ۱) همیشه HTML سبد را تجزیه کن تا محتوای سایدبار هم به‌روز شود؛
+                  شمارندهٔ صریحِ سرور (فاز ۲۱۰) فقط «عدد» را تعیین می‌کند. */
+            if (typeof cartHtml === 'string') {
                 var match = cartHtml.match(/data-cart-count="(\d+)"/);
                 if (match) { count = parseInt(match[1], 10) || 0; }
 
                 var tpl = document.createElement('template');
                 tpl.innerHTML = cartHtml;
                 parsedCanvas = tpl.content.querySelector('.cart-canvas') || tpl.content.firstElementChild;
-            } else if (cartHtml.getAttribute) {
+            } else if (cartHtml && cartHtml.getAttribute) {
                 count = parseInt(cartHtml.getAttribute('data-cart-count') || '0', 10) || 0;
                 parsedCanvas = cartHtml;
             }
 
-            /* ۲) جایگزین: شمارش آیتم‌های محصول در DOM تازه (آیتم‌های دارای تصویر —
-               ردیف فاکتور و باکس «سبد خالی» تصویر ندارند) — فقط وقتی شمارندهٔ
-               صریح و regex هر دو در دسترس نبودند */
-            if (typeof explicitCount !== 'number' && !count) {
-                var fresh = parsedCanvas && parsedCanvas.querySelector ? parsedCanvas.querySelector('.cart-canvases') : null;
+            /* ۲) شمارندهٔ صریح پاسخ سرور مقدم است (بدون خطا/NaN) */
+            if (typeof explicitCount === 'number' && !isNaN(explicitCount) && explicitCount >= 0) {
+                count = explicitCount;
+            }
+
+            /* ۳) جایگزین: شمارش آیتم‌های محصول در DOM تازه (آیتم‌های دارای تصویر —
+               ردیف فاکتور و باکس «سبد خالی» تصویر ندارند) — فقط وقتی هیچ شمارنده‌ای
+               در دسترس نبود */
+            if (!count && parsedCanvas && parsedCanvas.querySelector) {
+                var fresh = parsedCanvas.querySelector('.cart-canvases');
                 if (fresh) {
                     count = fresh.querySelectorAll(':scope > .item .image').length;
                 }

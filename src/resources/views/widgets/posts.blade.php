@@ -39,6 +39,8 @@
                                     <a href="{{ route('front.articles.show', $post->slug) }}">
                                         <div class="image">
                                             <img loading="lazy" decoding="async" src="{{ $post->image ? asset($post->image) : asset('/no-image-product.svg') }}" alt="{{ $post->title }}" class="img-fluid">
+                                            {{-- فاز ۲۰۶ — نشان ویدیو (پلی) / پادکست (هدفون) در صفحهٔ اصلی فروشگاه --}}
+                                            @include('front::partials.post-type-badge', ['post' => $post])
                                         </div>
                                         <div class="title">
                                             <div class="d-flex align-items-center justify-content-between">

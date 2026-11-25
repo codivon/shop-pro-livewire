@@ -959,6 +959,10 @@ return [
                     [
                         'value' => 'index_banners_place3',
                         'title' => 'گروه سوم'
+                    ],
+                    [
+                        'value' => 'index_banners_place4',
+                        'title' => 'گروه چهارم'
                     ]
                 ],
 
@@ -1004,6 +1008,10 @@ return [
                     [
                         'value' => 'index_banners_place3',
                         'title' => 'گروه سوم'
+                    ],
+                    [
+                        'value' => 'index_banners_place4',
+                        'title' => 'گروه چهارم'
                     ]
                 ],
 
@@ -1049,6 +1057,10 @@ return [
                     [
                         'value' => 'index_banners_place3',
                         'title' => 'گروه سوم'
+                    ],
+                    [
+                        'value' => 'index_banners_place4',
+                        'title' => 'گروه چهارم'
                     ]
                 ],
 
@@ -1094,6 +1106,10 @@ return [
                     [
                         'value' => 'index_banners_place3',
                         'title' => 'گروه سوم'
+                    ],
+                    [
+                        'value' => 'index_banners_place4',
+                        'title' => 'گروه چهارم'
                     ]
                 ],
 

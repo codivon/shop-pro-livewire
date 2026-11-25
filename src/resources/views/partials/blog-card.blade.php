@@ -23,7 +23,7 @@
                 @if($blogCardIsVideo)
                     <i class="bi bi-play-btn-fill"></i>
                 @elseif($blogCardIsPodcast)
-                    <i class="bi bi-soundwave"></i>
+                    <i class="bi bi-headphones"></i>
                 @else
                     <i class="bi bi-tag"></i>
                 @endif

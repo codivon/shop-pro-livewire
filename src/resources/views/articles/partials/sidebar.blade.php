@@ -42,8 +42,11 @@
                                                 </div>
                                             </div>
                                             <h4 class="font-16 text-overflow-1 h4">
+                                                {{-- فاز ۲۰۶ — نشان ویدیو (پلی) / پادکست (هدفون) --}}
                                                 @if($suggestion->post_type=="video")
                                                     <i class="bi bi-play-circle-fill main-color-one-color me-1"></i>
+                                                @elseif($suggestion->post_type=="podcast")
+                                                    <i class="bi bi-headphones main-color-one-color me-1"></i>
                                                 @endif
                                                 {{ $suggestion->title }}
                                             </h4>

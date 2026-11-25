@@ -54,29 +54,35 @@ return [
                     ['value' => 'no',  'title' => 'خیر'],
                 ],
             ],
+            /* فاز ۲۰۶ — بنر از ویجت‌های بنر: نوع بنر (تکی/دوتایی/سه‌تایی/چهارتایی)
+               + گروه نمایش (گروه اول تا چهارم) از تنظیمات همین ابزارک انتخاب می‌شود.
+               بنرها در پنل «بنرها» با گروه متناظر آپلود می‌شوند؛ بنرِ بدون «گروه
+               نمایش» در همهٔ گروه‌ها نمایش داده می‌شود تا هیچ بنری پنهان نماند. */
             [
-                'title'      => 'بنر بالای خبرها',
-                'key'        => 'show_banner',
-                'input-type' => 'select',
-                'class'      => 'col-md-4 col-6',
-                'default'    => 'yes',
-                'options'    => [
-                    ['value' => 'yes', 'title' => 'بله'],
-                    ['value' => 'no',  'title' => 'خیر'],
-                ],
-            ],
-            [
-                'title'      => 'گروه بنر (بنر را در پنل با همین گروه و صفحهٔ «صفحه اصلی مقالات» آپلود کنید)',
-                'key'        => 'banner_group',
+                'title'      => 'نوع بنر بالای خبرها',
+                'key'        => 'banner_type',
                 'input-type' => 'select',
                 'class'      => 'col-md-4 col-6',
                 'default'    => 'index_middle_banners',
                 'options'    => [
+                    ['value' => 'none',                   'title' => 'بدون بنر'],
                     ['value' => 'index_middle_banners',   'title' => 'بنر تکی'],
                     ['value' => 'index_middle_2_banners', 'title' => 'بنر دوتایی'],
+                    ['value' => 'index_middle_3_banners', 'title' => 'بنر سه‌تایی'],
                     ['value' => 'index_middle_4_banners', 'title' => 'بنر چهارتایی'],
-                    ['value' => 'index_slider_banners',   'title' => 'بنر کنار اسلایدر اصلی'],
-                    ['value' => 'index_highest_banner',   'title' => 'بنر تکی بالای هدر'],
+                ],
+            ],
+            [
+                'title'      => 'گروه نمایش بنر (بنر را در پنل بنرها با همین گروه و صفحهٔ «صفحه اصلی مقالات» آپلود کنید)',
+                'key'        => 'banner_place',
+                'input-type' => 'select',
+                'class'      => 'col-md-4 col-6',
+                'default'    => 'index_banners_place1',
+                'options'    => [
+                    ['value' => 'index_banners_place1', 'title' => 'گروه اول'],
+                    ['value' => 'index_banners_place2', 'title' => 'گروه دوم'],
+                    ['value' => 'index_banners_place3', 'title' => 'گروه سوم'],
+                    ['value' => 'index_banners_place4', 'title' => 'گروه چهارم'],
                 ],
             ],
             [
@@ -901,20 +907,13 @@ return [
         'title' => 'بنر تکی',
         'image' => 'widgets/banner.png',
         'options' => [
-            [
-                'title'      => 'تعداد قابل نمایش',
-                'key'        => 'number',
-                'input-type' => 'input',
-                'type'       => 'number',
-                'default'    => '1',
-                'class'      => 'col-md-4 col-6',
-                'attributes' => 'required'
-            ],
+            /* فاز ۲۰۰ — تعداد ثابت = ۱ (اسم ابزارک: بنر تکی) */
             [
                 'title'      => 'ترتیب نمایش',
                 'key'        => 'ordering',
                 'input-type' => 'select',
                 'class'      => 'col-md-4',
+                'default'    => 'asc',
                 'options'    => [
                     [
                         'value' => 'asc',
@@ -926,11 +925,13 @@ return [
                     ]
                 ],
             ],
+            /* فاز ۲۰۶ — گروه چهارم اضافه شد + پیش‌فرض گروه اول */
             [
-                'title'      => 'گروه',
+                'title'      => 'گروه نمایش (بنرِ بدون گروه نمایش در همهٔ گروه‌ها دیده می‌شود)',
                 'key'        => 'place',
                 'input-type' => 'select',
                 'class'      => 'col-md-4',
+                'default'    => 'index_banners_place1',
                 'options'    => [
                     [
                         'value' => 'index_banners_place1',
@@ -943,13 +944,17 @@ return [
                     [
                         'value' => 'index_banners_place3',
                         'title' => 'گروه سوم'
+                    ],
+                    [
+                        'value' => 'index_banners_place4',
+                        'title' => 'گروه چهارم'
                     ]
                 ],
 
             ],
         ],
         'rules' => [
-            'number' => 'required',
+            'place' => 'required|in:index_banners_place1,index_banners_place2,index_banners_place3,index_banners_place4',
         ]
     ],
 
@@ -957,20 +962,13 @@ return [
         'title' => 'بنر دوتایی',
         'image' => 'widgets/banner-2.jpg',
         'options' => [
-            [
-                'title'      => 'تعداد قابل نمایش',
-                'key'        => 'number',
-                'input-type' => 'input',
-                'type'       => 'number',
-                'default'    => '2',
-                'class'      => 'col-md-4 col-6',
-                'attributes' => 'required'
-            ],
+            /* فاز ۲۰۰ — تعداد ثابت = ۲ (اسم ابزارک: بنر دوتایی) */
             [
                 'title'      => 'ترتیب نمایش',
                 'key'        => 'ordering',
                 'input-type' => 'select',
                 'class'      => 'col-md-4',
+                'default'    => 'asc',
                 'options'    => [
                     [
                         'value' => 'asc',
@@ -982,11 +980,13 @@ return [
                     ]
                 ],
             ],
+            /* فاز ۲۰۶ — گروه چهارم اضافه شد + پیش‌فرض گروه اول */
             [
-                'title'      => 'گروه',
+                'title'      => 'گروه نمایش (بنرِ بدون گروه نمایش در همهٔ گروه‌ها دیده می‌شود)',
                 'key'        => 'place',
                 'input-type' => 'select',
                 'class'      => 'col-md-4',
+                'default'    => 'index_banners_place1',
                 'options'    => [
                     [
                         'value' => 'index_banners_place1',
@@ -999,13 +999,71 @@ return [
                     [
                         'value' => 'index_banners_place3',
                         'title' => 'گروه سوم'
+                    ],
+                    [
+                        'value' => 'index_banners_place4',
+                        'title' => 'گروه چهارم'
                     ]
                 ],
 
             ],
         ],
         'rules' => [
-            'number' => 'required',
+            'place' => 'required|in:index_banners_place1,index_banners_place2,index_banners_place3,index_banners_place4',
+        ]
+    ],
+
+    /* فاز ۲۰۶ — ویجت «بنر سه‌تایی» برای صفحهٔ مقالات (همگام با صفحهٔ اصلی) */
+    'middle-banners-3' => [
+        'title' => 'بنر سه‌تایی',
+        'image' => 'widgets/banner-3.jpg',
+        'options' => [
+            [
+                'title'      => 'ترتیب نمایش',
+                'key'        => 'ordering',
+                'input-type' => 'select',
+                'class'      => 'col-md-4',
+                'default'    => 'asc',
+                'options'    => [
+                    [
+                        'value' => 'asc',
+                        'title' => 'صعودی'
+                    ],
+                    [
+                        'value' => 'desc',
+                        'title' => 'نزولی'
+                    ]
+                ],
+            ],
+            [
+                'title'      => 'گروه نمایش (بنرِ بدون گروه نمایش در همهٔ گروه‌ها دیده می‌شود)',
+                'key'        => 'place',
+                'input-type' => 'select',
+                'class'      => 'col-md-4',
+                'default'    => 'index_banners_place1',
+                'options'    => [
+                    [
+                        'value' => 'index_banners_place1',
+                        'title' => 'گروه اول'
+                    ],
+                    [
+                        'value' => 'index_banners_place2',
+                        'title' => 'گروه دوم'
+                    ],
+                    [
+                        'value' => 'index_banners_place3',
+                        'title' => 'گروه سوم'
+                    ],
+                    [
+                        'value' => 'index_banners_place4',
+                        'title' => 'گروه چهارم'
+                    ]
+                ],
+
+            ],
+        ],
+        'rules' => [
+            'place' => 'required|in:index_banners_place1,index_banners_place2,index_banners_place3,index_banners_place4',
         ]
     ],
 
@@ -1013,20 +1071,13 @@ return [
         'title' => 'بنر چهارتایی',
         'image' => 'widgets/banner-4.png',
         'options' => [
-            [
-                'title'      => 'تعداد قابل نمایش',
-                'key'        => 'number',
-                'input-type' => 'input',
-                'type'       => 'number',
-                'default'    => '4',
-                'class'      => 'col-md-4 col-6',
-                'attributes' => 'required'
-            ],
+            /* فاز ۲۰۰ — تعداد ثابت = ۴ (اسم ابزارک: بنر چهارتایی) */
             [
                 'title'      => 'ترتیب نمایش',
                 'key'        => 'ordering',
                 'input-type' => 'select',
                 'class'      => 'col-md-4',
+                'default'    => 'asc',
                 'options'    => [
                     [
                         'value' => 'asc',
@@ -1038,11 +1089,13 @@ return [
                     ]
                 ],
             ],
+            /* فاز ۲۰۶ — گروه چهارم اضافه شد + پیش‌فرض گروه اول */
             [
-                'title'      => 'گروه',
+                'title'      => 'گروه نمایش (بنرِ بدون گروه نمایش در همهٔ گروه‌ها دیده می‌شود)',
                 'key'        => 'place',
                 'input-type' => 'select',
                 'class'      => 'col-md-4',
+                'default'    => 'index_banners_place1',
                 'options'    => [
                     [
                         'value' => 'index_banners_place1',
@@ -1055,6 +1108,10 @@ return [
                     [
                         'value' => 'index_banners_place3',
                         'title' => 'گروه سوم'
+                    ],
+                    [
+                        'value' => 'index_banners_place4',
+                        'title' => 'گروه چهارم'
                     ]
                 ],
 
@@ -1062,7 +1119,7 @@ return [
 
         ],
         'rules' => [
-            'number' => 'required',
+            'place' => 'required|in:index_banners_place1,index_banners_place2,index_banners_place3,index_banners_place4',
         ]
     ],
 

@@ -41,13 +41,21 @@
                                                 @foreach($videoSidebarPosts as $sidebarVideo)
                                                     <li class="nav-item">
                                                         <a href="{{ route('front.articles.show', ['slug' => $sidebarVideo->slug]) }}" class="nav-link" aria-label="{{ $sidebarVideo->title }}">
-                                                            <div class="video-blog-item @if($sidebarVideo->post_type !== 'video' && $sidebarVideo->post_type !== 'podcast') video-item-text @endif">
+                                                            <div class="video-blog-item @if($sidebarVideo->post_type === 'video') @elseif($sidebarVideo->post_type === 'podcast') video-item-podcast @else video-item-text @endif">
                                                                 <div class="image">
                                                                     <img src="{{ $sidebarVideo->image ? asset($sidebarVideo->image) : asset('/no-image-product.svg') }}"
                                                                          loading="lazy" decoding="async" class="img-fluid" alt="{{ $sidebarVideo->title }}">
                                                                 </div>
                                                                 <div class="d-flex align-items-start desc flex-wrap flex-column justify-content-between">
-                                                                    <h5 class="title">{{ $sidebarVideo->title }}</h5>
+                                                                    <h5 class="title">
+                                                                        {{-- فاز ۲۰۶ — نشان ویدیو (پلی) / پادکست (هدفون) --}}
+                                                                        @if($sidebarVideo->post_type === 'video')
+                                                                            <i class="bi bi-play-btn-fill main-color-one-color me-1"></i>
+                                                                        @elseif($sidebarVideo->post_type === 'podcast')
+                                                                            <i class="bi bi-headphones main-color-one-color me-1"></i>
+                                                                        @endif
+                                                                        {{ $sidebarVideo->title }}
+                                                                    </h5>
                                                                     <div class="d-flex align-items-center">
                                                                         <p class="text-muted mb-0">{{ jdate($sidebarVideo->created_at)->format('d F Y') }}</p>
                                                                         <div class="text-end ms-2"><i class="bi bi-arrow-left main-color-one-color"></i></div>

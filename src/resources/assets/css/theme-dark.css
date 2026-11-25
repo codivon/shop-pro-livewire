@@ -875,6 +875,21 @@ html[data-theme="dark"] .navbar-video .navbar-nav::-webkit-scrollbar-thumb {
     background: var(--dk-border);
 }
 
+/* ---------- فاز ۲۰۶ — هم‌ترازی سایدبار وبلاگ + نشان ویدیو/پادکست ---------- */
+html[data-theme="dark"] .snr-blog-side .navbar-blog::-webkit-scrollbar-thumb {
+    background: var(--dk-border);
+}
+
+html[data-theme="dark"] .snr-blog-side .navbar-blog::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+html[data-theme="dark"] .snr-type-badge {
+    background-color: var(--main-color-one);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+}
+
 /* ---------- ۵) نوار برندها (فروشگاه سانیار) ---------- */
 html[data-theme="dark"] .service {
     background-color: var(--dk-bg-soft);

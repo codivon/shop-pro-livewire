@@ -39,6 +39,8 @@
                                                     data-src="{{ $post->image ? $post->image : asset('/no-image-product.svg') }}"
                                                     alt="{{ $post->title }}">
                                             </a>
+                                            {{-- فاز ۲۰۶ — نشان ویدیو (پلی) / پادکست (هدفون) --}}
+                                            @include('front::partials.post-type-badge', ['post' => $post])
                                             <span
                                                 class="post-tag">{{ $post->category ? $post->category->title : 'دسته بندی نشده' }}</span>
 

@@ -50,7 +50,7 @@
                             @if($bigBoxPost->post_type === 'video')
                                 <span class="snr-play"><i class="bi bi-play-fill"></i></span>
                             @elseif($bigBoxPost->post_type === 'podcast')
-                                <span class="snr-play"><i class="bi bi-soundwave"></i></span>
+                                <span class="snr-play"><i class="bi bi-headphones"></i></span>
                             @endif
                         </a>
                         <div class="body">

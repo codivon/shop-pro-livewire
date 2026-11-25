@@ -299,6 +299,8 @@
                                             <img src="{{ $relatedPost->image ? asset($relatedPost->image) : theme_asset('image/blog-1.jpg') }}" alt="{{ $relatedPost->title }}" loading="lazy">
                                             @if($relatedPost->post_type == 'video')
                                                 <span class="snr-related-video"><i class="bi bi-play-circle-fill"></i></span>
+                                            @elseif($relatedPost->post_type == 'podcast')
+                                                <span class="snr-related-video"><i class="bi bi-headphones"></i></span>
                                             @endif
                                         </div>
                                         <div class="snr-related-body">

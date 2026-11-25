@@ -146,6 +146,65 @@ function front_products_freshness(): string
 }
 }
 
+/**
+ * فاز ۲۰۶ — واکشی مشترک بنرهای «تکی/دوتایی/سه‌تایی/چهارتایی» برای ویجت‌ها:
+ *
+ * ریشهٔ گزارشِ «بنر اضافه کردم اما نمایش نمی‌دهد»:
+ *   ۱) فیلتر SQL روی places با مقدارِ خالی/نالِ گزینهٔ «گروه» ابزارک
+ *      (whereJsonContains('places', null) همیشه خالی برمی‌گرداند)
+ *   ۲) فیلتر دوباره در ویو با in_array روی placesِ خالیِ بنر
+ *
+ * منطق جدید:
+ *   - گروه بنر ثابت است (پارامتر)؛ فقط «گروه نمایش/موقعیت» (place1 تا place4)
+ *     از تنظیمات خود ابزارک خوانده می‌شود.
+ *   - بنرِ بدون هیچ موقعیت ثبت‌شده، در همهٔ گروه‌های نمایش دیده می‌شود
+ *     (تا بنرهایی که فقط گروه و صفحه‌شان ثبت شده پنهان نشوند).
+ *   - صفحه: اول بنرهای همین صفحه؛ اگر نبود، فالبک به بنرهای بی‌محدودیت/همان
+ *     گروه تا ابزار هیچ‌وقت جلوه‌گاه خالی ندهد.
+ *
+ * @param mixed  $widget
+ * @param string $group    گروه بنر (index_middle_banners و ...)
+ * @param int    $count    تعداد ثابت ابزارک (۱/۲/۳/۴)
+ * @param string $placeKey کلید گزینهٔ «گروه نمایش» در تنظیمات ابزارک
+ * @return \Illuminate\Support\Collection
+ */
+if (!function_exists('front_widget_banners')) {
+function front_widget_banners($widget, string $group, int $count, string $placeKey = 'place')
+{
+    $place    = $widget->option($placeKey, 'index_banners_place1');
+    $ordering = $widget->option('ordering', 'asc');
+
+    $groupBanners = Banner::whereJsonContains('groups', $group)
+        ->where('published', true)
+        ->orderBy('ordering', in_array($ordering, ['asc', 'desc']) ? $ordering : 'asc')
+        ->get();
+
+    /* فیلتر موقعیت: بنر بدون موقعیت = همهٔ گروه‌ها */
+    $byPlace = function ($banners) use ($place) {
+        return $banners->filter(function (Banner $banner) use ($place) {
+            return empty($banner->places) || in_array($place, (array) $banner->places, true);
+        })->values();
+    };
+
+    /* فیلتر صفحه: بنرِ بدون صفحه ثبت‌شده = همهٔ صفحات */
+    $byPage = function ($banners, string $page) {
+        return $banners->filter(function (Banner $banner) use ($page) {
+            return empty($banner->pages) || in_array($page, (array) $banner->pages, true);
+        })->values();
+    };
+
+    $banners = $byPlace($byPage($groupBanners, (string) $widget->page));
+
+    /* فالبک: اگر ادمین بنر را فقط برای صفحهٔ دیگری آپلود کرده باشد (اشتباه رایج)،
+       بنرهای همان گروه/موقعیت بدون محدودیت صفحه نمایش داده شوند */
+    if (count($banners) === 0) {
+        $banners = $byPlace($groupBanners);
+    }
+
+    return $banners->take($count)->values();
+}
+}
+
 if (!function_exists('get_widget')) {
 function get_widget($widget)
 {
@@ -262,17 +321,16 @@ function get_widget_uncached($widget)
             break;
         }
 
+        /* فاز ۲۰۶ — منطق مشترک بنرهای «تکی/دوتایی/سه‌تایی/چهارتایی»:
+           ریشهٔ «بنر نمایش داده نمی‌شود» دو باگ بود:
+           ۱) فیلتر SQL با مقدار null/خالیِ گزینهٔ «گروه» (whereJsonContains روی null)
+           ۲) فیلتر دوباره در ویو (in_array روی places خالی بنر)
+           حالا: واکشی کل بنرهای گروه + فیلتر صفحه/موقعیت در PHP؛ بنر بدون
+           هیچ موقعیت ثبت‌شده در همهٔ گروه‌ها دیده می‌شود و اگر ادمین بنر را
+           فقط برای صفحهٔ دیگری آپلود کرده باشد، فالبک بنر همان گروه جلوه‌گاه
+           خالی را می‌بندد. */
         case 'middle-banners': {
-            /* گروه بنرها از تنظیمات خود ابزارک («گروه»)
-               فاز ۲۰۰ — تعداد ثابت = ۱ (اسم ابزارک: بنر تکی)
-               (فیلد «تعداد قابل نمایش» از تنظیمات ابزارک حذف شد) */
-            $variables['index_middle_banners'] = Banner::whereJsonContains('groups', $widget->option('place', 'index_middle_banners'))
-                ->whereJsonContains('pages', $widget->page)
-                ->where('published', true)
-                ->orderBy('ordering', $widget->option('ordering', 'asc'))
-                ->take(1)
-                ->get();
-
+            $variables['index_middle_banners'] = front_widget_banners($widget, 'index_middle_banners', 1);
             break;
         }
 
@@ -411,41 +469,20 @@ function get_widget_uncached($widget)
         }
 
         case 'middle-banners-2': {
-            /* گروه بنرها از تنظیمات خود ابزارک — فاز ۲۰۰: تعداد ثابت = ۲ */
-            $variables['index_middle_2_banners'] = Banner::whereJsonContains('groups', 'index_middle_2_banners')
-                ->whereJsonContains('places', $widget->option('place'))
-                ->whereJsonContains('pages', $widget->page)
-                ->where('published', true)
-                ->orderBy('ordering', $widget->option('ordering', 'asc'))
-                ->take(2)
-                ->get();
-
+            /* فاز ۲۰۰: تعداد ثابت = ۲ — فاز ۲۰۶: واکشی مشترک با فیلتر درست موقعیت */
+            $variables['index_middle_2_banners'] = front_widget_banners($widget, 'index_middle_2_banners', 2);
             break;
         }
 
         case 'middle-banners-3': {
-            /* گروه بنرها از تنظیمات خود ابزارک — فاز ۲۰۰: تعداد ثابت = ۳ */
-            $variables['index_middle_3_banners'] = Banner::whereJsonContains('groups', 'index_middle_3_banners')
-                ->whereJsonContains('places', $widget->option('place'))
-                ->whereJsonContains('pages', $widget->page)
-                ->where('published', true)
-                ->orderBy('ordering', $widget->option('ordering', 'asc'))
-                ->take(3)
-                ->get();
-
+            /* فاز ۲۰۰: تعداد ثابت = ۳ — فاز ۲۰۶: واکشی مشترک با فیلتر درست موقعیت */
+            $variables['index_middle_3_banners'] = front_widget_banners($widget, 'index_middle_3_banners', 3);
             break;
         }
 
         case 'middle-banners-4': {
-            /* گروه بنرها از تنظیمات خود ابزارک — فاز ۲۰۰: تعداد ثابت = ۴ */
-            $variables['index_middle_4_banners'] = Banner::whereJsonContains('groups', 'index_middle_4_banners')
-                ->whereJsonContains('places', $widget->option('place'))
-                ->whereJsonContains('pages', $widget->page)
-                ->where('published', true)
-                ->orderBy('ordering', $widget->option('ordering', 'asc'))
-                ->take(4)
-                ->get();
-
+            /* فاز ۲۰۰: تعداد ثابت = ۴ — فاز ۲۰۶: واکشی مشترک با فیلتر درست موقعیت */
+            $variables['index_middle_4_banners'] = front_widget_banners($widget, 'index_middle_4_banners', 4);
             break;
         }
 
@@ -821,15 +858,26 @@ function get_widget_uncached($widget)
                 ->orderBy('ordering')
                 ->get(['id', 'title', 'slug', 'image']);
 
-            /* بنر بالای خبرها (گروه بنر تکی + صفحهٔ مقالات — بدون تغییر هسته) */
-            $variables['blog_header_banner'] = null;
-            if ($widget->option('show_banner', 'yes') === 'yes') {
-                $variables['blog_header_banner'] = Banner::whereJsonContains('groups', $widget->option('banner_group', 'index_middle_banners'))
-                    ->whereJsonContains('pages', $widget->page)
-                    ->where('published', true)
-                    ->orderBy('ordering')
-                    ->first();
+            /* فاز ۲۰۶ — بنر از ویجت‌های بنر (تکی/دوتایی/سه‌تایی/چهارتایی):
+               نوع بنر + گروه نمایش (گروه اول تا چهارم) از تنظیمات خود ابزارک؛
+               بنرِ بدون هیچ موقعیت ثبت‌شده در همهٔ گروه‌ها دیده می‌شود و اگر
+               ادمین بنر را فقط برای صفحهٔ اصلی آپلود کرده باشد، فالبک همان
+               گروه نشان داده می‌شود تا جلوه‌گاه خالی نماند. */
+            $variables['blog_header_banners'] = collect();
+            $blogHeaderBannerGroup = $widget->option('banner_type', 'index_middle_banners');
+            if ($blogHeaderBannerGroup !== 'none') {
+                $blogHeaderBannerCount = match (true) {
+                    $blogHeaderBannerGroup === 'index_middle_2_banners' => 2,
+                    $blogHeaderBannerGroup === 'index_middle_3_banners' => 3,
+                    $blogHeaderBannerGroup === 'index_middle_4_banners' => 4,
+                    default => 1,
+                };
+
+                $variables['blog_header_banners'] = front_widget_banners($widget, $blogHeaderBannerGroup, $blogHeaderBannerCount, 'banner_place');
             }
+
+            /* سازگاری: کلید قدیمی (اولین بنر) برای ویوهای سفارشی احتمالی */
+            $variables['blog_header_banner'] = $variables['blog_header_banners']->first();
 
             /* خبرهای داغ (۳ کارت blog-news-item) */
             $headerNewsQuery = Post::query()
@@ -1371,7 +1419,9 @@ function widget_seeder()
             'options' => [
                 ['key' => 'show_search', 'value' => 'yes'],
                 ['key' => 'show_categories', 'value' => 'yes'],
-                ['key' => 'show_banner', 'value' => 'yes'],
+                /* فاز ۲۰۶ — بنر از ویجت‌های بنر: نوع بنر + گروه نمایش */
+                ['key' => 'banner_type', 'value' => 'index_middle_banners'],
+                ['key' => 'banner_place', 'value' => 'index_banners_place1'],
                 ['key' => 'news_number', 'value' => '3'],
                 ['key' => 'sort_type', 'value' => 'latest'],
                 ['key' => 'news_editor_pick', 'value' => 'no'],

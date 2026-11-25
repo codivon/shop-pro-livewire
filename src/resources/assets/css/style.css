@@ -4803,8 +4803,14 @@ img{
 }
 
 /* آیکون پخش/پادکست روی گرید ویدیوها */
+/* فاز ۲۰۶ — پادکست: آیکون هدفون (f413) به‌جای soundwave */
 .tv-blog-item.tv-item-podcast::before {
-    content: '\f57c';
+    content: '\f413';
+}
+
+/* فاز ۲۰۶ — پلی‌لیست کناری: پادکست‌ها آیکون هدفون روی تصویر بگیرند */
+.video-blog-item.video-item-podcast .image::before {
+    content: '\f413';
 }
 
 .tv-blog-item.tv-item-text::before,
@@ -4836,6 +4842,129 @@ img{
 .side-left-blog > .row > .col-12 > a > img {
     width: 100%;
     object-fit: cover;
+}
+
+/* ==================================================================
+   فاز ۲۰۶ — هدر وبلاگ: هم‌ترازی ارتفاع سایدبار + گرید بنر + نشان ویدیو/پادکست
+   ================================================================== */
+
+/* ۱) ارتفاع کادر دسته‌بندی‌ها هرگز نباید از ستون بنر/خبرها بلندتر شود:
+      زنجیرهٔ flex کادر را پر می‌کند و فهرست بلند دسته‌بندی‌ها اسکرول داخلی می‌گیرد */
+.snr-blog-header-row {
+    align-items: stretch;
+}
+
+.snr-blog-side .content-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.snr-blog-side .content-box > .container-fluid {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.snr-blog-side .side-right-blog {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.snr-blog-side .search-form {
+    flex: 0 0 auto;
+}
+
+@media (min-width: 992px) {
+    /* حالت هم‌ترازی (فقط وقتی ستون چپ = بنر/خبرها وجود دارد فعال می‌شود):
+       کادر سایدبار absolute می‌شود تا ارتفاع محتوایش ردیف را بلند نکند؛
+       ارتفاعش دقیقاً برابر ارتفاع ستون چپ (بنر بزرگ‌تر → سایدبار بلندتر) می‌شود */
+    .snr-blog-side--sync {
+        position: relative;
+    }
+
+    .snr-blog-side--sync > .content-box {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        /* Bootstrap 4: نصف gutter ستون‌ها ۱۵ پیکسل است تا لبهٔ کادر دقیقاً
+           با لبهٔ محتوای ستون چپ (بنر/خبرها) تراز بماند */
+        right: 15px;
+        left: 15px;
+        height: auto;
+        max-height: 100%;
+        /* حاشیهٔ پایهٔ content-box در حالت هم‌ترازی حذف می‌شود تا لبهٔ پایین
+           کادر دسته‌بندی‌ها دقیقاً با لبهٔ پایین ستون بنر/خبرها تراز بماند */
+        margin-bottom: 0;
+    }
+
+    .snr-blog-side--sync .navbar-blog {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        max-height: 100%;
+        padding-left: 4px;
+        scrollbar-width: thin;
+        overscroll-behavior: contain;
+    }
+}
+
+/* حالت غیر هم‌ترازی (موبایل یا وقتی ستون چپ خالی است): سقف منطقی + اسکرول */
+.snr-blog-side:not(.snr-blog-side--sync) .navbar-blog {
+    max-height: 520px;
+    overflow-y: auto;
+    padding-left: 4px;
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
+}
+
+.snr-blog-side .navbar-blog::-webkit-scrollbar {
+    width: 5px;
+}
+
+.snr-blog-side .navbar-blog::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.snr-blog-side .navbar-blog::-webkit-scrollbar-thumb {
+    background: var(--main-color-one-shadow, #d5dbe1);
+    border-radius: 10px;
+}
+
+/* ۲) گرید بنر هدر وبلاگ (تکی/دوتایی/سه‌تایی/چهارتایی):
+      همهٔ بنرهای یک ردیف هم‌ارتفاع می‌شوند */
+.side-left-blog .row [class*='col-'] > a > img.snr-blog-banner-img,
+.side-left-blog .row [class*='col-'] > img.snr-blog-banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ۳) نشان ویدیو (پلی) / پادکست (هدفون) روی تصویر مقاله — همهٔ بخش‌ها */
+.snr-type-badge {
+    position: absolute;
+    top: 10px;
+    inset-inline-start: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    line-height: 1;
+    color: #fff;
+    background-color: var(--main-color-one);
+    box-shadow: var(--shadow-box);
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* کارت صفحهٔ دسته‌بندی مقالات: بستر موقعیت برای نشان */
+.post-card .post-thumbnail {
+    position: relative;
 }
 
 /*  پایان ویجت‌های مقالات */

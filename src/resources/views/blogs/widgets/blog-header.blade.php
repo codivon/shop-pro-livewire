@@ -1,23 +1,39 @@
 {{-- هدر وبلاگ سانیار (مطابق blog.html تمپلیت) --}}
 {{-- جستجوی مقالات + فهرست دسته‌بندی‌ها (سایدبار) + بنر + خبرهای داغ --}}
 {{-- استایلها در style.css تمپلیت (بخش .side-right-blog / .blog-news-item / .navbar-blog) --}}
-{{-- بنر بدون تصویر رندر نمی‌شود (به‌جای کادر «تصویری انتخابی نیست») --}}
+{{-- فاز ۲۰۶ — بنر از ویجت‌های بنر (تکی/دوتایی/سه‌تایی/چهارتایی) با گروه نمایش
+     (گروه اول تا چهارم) از تنظیمات ابزارک؛ ارتفاع سایدبار دسته‌بندی‌ها همیشه
+     هم‌ترازِ ستون بنر/خبرهاست و اگر دسته‌بندی‌ها زیاد شوند اسکرول داخلی می‌گیرد
+     (کلاس snr-blog-side--sync فقط وقتی ستون چپ وجود دارد فعال می‌شود) --}}
 @php
     $variables            = get_widget($widget);
     $blogHeaderCategories = $variables['blog_header_categories'] ?? collect();
-    $blogHeaderBanner     = $variables['blog_header_banner'] ?? null;
+    $blogHeaderBanners    = $variables['blog_header_banners'] ?? collect();
     $blogHeaderNews       = $variables['blog_header_news'] ?? collect();
 
     /* آیکون‌های چرخشی فهرست دسته‌بندی‌ها (مطابق تمپلیت) */
     $blogCatIcons = ['bi-newspaper', 'bi-bounding-box-circles', 'bi-controller', 'bi-journal-richtext', 'bi-film', 'bi-cup-hot', 'bi-tag', 'bi-book'];
+
+    /* ستون چپ (بنر + خبرهای داغ) — شرط هم‌ترازی ارتفاع سایدبار */
+    $blogHeaderHasLeft = count($blogHeaderBanners) || count($blogHeaderNews);
+    $blogHeaderHasSide = $widget->option('show_search', 'yes') === 'yes'
+        || ($widget->option('show_categories', 'yes') === 'yes' && count($blogHeaderCategories));
+
+    /* ستون‌بندی گرید بنر بر اساس تعداد (دوتایی: کنار هم، چهارتایی: ۴ ستون) */
+    $blogBannerCol = [
+        1 => 'col-12',
+        2 => 'col-md-6 col-12',
+        3 => 'col-md-4 col-12',
+        4 => 'col-md-3 col-12',
+    ][min(count($blogHeaderBanners), 4)] ?? 'col-12';
 @endphp
 
-@if($widget->option('show_search', 'yes') === 'yes' || $widget->option('show_categories', 'yes') === 'yes' || ($blogHeaderBanner && $blogHeaderBanner->image) || count($blogHeaderNews))
+@if($blogHeaderHasSide || $blogHeaderHasLeft)
     <div class="container-fluid py-20">
-        <div class="row gy-3">
+        <div class="row gy-3 snr-blog-header-row">
             {{-- سایدبار: جستجو + دسته‌بندی‌ها --}}
-            @if($widget->option('show_search', 'yes') === 'yes' || ($widget->option('show_categories', 'yes') === 'yes' && count($blogHeaderCategories)))
-                <div class="col-lg-3">
+            @if($blogHeaderHasSide)
+                <div class="col-lg-3 snr-blog-side {{ $blogHeaderHasLeft ? 'snr-blog-side--sync' : '' }}">
                     <div class="content-box h-100">
                         <div class="container-fluid">
                             <div class="side-right-blog">
@@ -62,25 +78,27 @@
                 </div>
             @endif
 
-            {{-- بنر + خبرهای داغ --}}
-            @if(($blogHeaderBanner && $blogHeaderBanner->image) || count($blogHeaderNews))
-                <div class="{{ ($widget->option('show_search', 'yes') === 'yes' || ($widget->option('show_categories', 'yes') === 'yes' && count($blogHeaderCategories))) ? 'col-lg-9' : 'col-12' }}">
+            {{-- بنر (از ویجت‌های بنر: تکی/دوتایی/سه‌تایی/چهارتایی) + خبرهای داغ --}}
+            @if($blogHeaderHasLeft)
+                <div class="{{ $blogHeaderHasSide ? 'col-lg-9' : 'col-12' }}">
                     <div class="side-left-blog">
                         <div class="row gy-3">
-                            @if($blogHeaderBanner && $blogHeaderBanner->image)
-                                <div class="col-12">
-                                    @if($blogHeaderBanner->link)
-                                        <a href="{{ $blogHeaderBanner->link }}" aria-label="{{ $blogHeaderBanner->title ?: 'بنر' }}">
+                            @if(count($blogHeaderBanners))
+                                @foreach($blogHeaderBanners as $blogHeaderBanner)
+                                    <div class="{{ $blogBannerCol }}">
+                                        @if($blogHeaderBanner->link)
+                                            <a href="{{ $blogHeaderBanner->link }}" aria-label="{{ $blogHeaderBanner->title ?: 'بنر' }}">
+                                                <img src="{{ $blogHeaderBanner->image ? asset($blogHeaderBanner->image) : asset('/no-image-product.svg') }}"
+                                                     class="img-fluid shadow-box rounded-4 snr-blog-banner-img" loading="lazy" decoding="async"
+                                                     alt="{{ $blogHeaderBanner->title ?: 'بنر' }}">
+                                            </a>
+                                        @else
                                             <img src="{{ $blogHeaderBanner->image ? asset($blogHeaderBanner->image) : asset('/no-image-product.svg') }}"
-                                                 class="img-fluid shadow-box rounded-4" loading="lazy" decoding="async"
+                                                 class="img-fluid shadow-box rounded-4 snr-blog-banner-img" loading="lazy" decoding="async"
                                                  alt="{{ $blogHeaderBanner->title ?: 'بنر' }}">
-                                        </a>
-                                    @else
-                                        <img src="{{ $blogHeaderBanner->image ? asset($blogHeaderBanner->image) : asset('/no-image-product.svg') }}"
-                                             class="img-fluid shadow-box rounded-4" loading="lazy" decoding="async"
-                                             alt="{{ $blogHeaderBanner->title ?: 'بنر' }}">
-                                    @endif
-                                </div>
+                                        @endif
+                                    </div>
+                                @endforeach
                             @endif
 
                             @foreach($blogHeaderNews as $blogHeaderNewsItem)
@@ -92,10 +110,11 @@
                                                  alt="{{ $blogHeaderNewsItem->title }}" class="img-fluid">
                                             <div class="desc">
                                                 <h3 class="title">
+                                                    {{-- فاز ۲۰۶ — نشان ویدیو (پلی) / پادکست (هدفون) --}}
                                                     @if($blogHeaderNewsItem->post_type === 'video')
-                                                        <i class="bi bi-play-circle-fill main-color-one-color me-1"></i>
+                                                        <i class="bi bi-play-btn-fill main-color-one-color me-1"></i>
                                                     @elseif($blogHeaderNewsItem->post_type === 'podcast')
-                                                        <i class="bi bi-soundwave main-color-one-color me-1"></i>
+                                                        <i class="bi bi-headphones main-color-one-color me-1"></i>
                                                     @endif
                                                     {{ $blogHeaderNewsItem->title }}
                                                 </h3>

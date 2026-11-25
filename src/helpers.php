@@ -1248,6 +1248,58 @@ function front_filter_attribute_values(Category $category, $filter)
 }
 
 /**
+ * فاز ۲۰۷ — زمینهٔ فیلترهای استاتیک (StaticFilter) سایدبار دسته.
+ *
+ * ریشهٔ ارور «Undefined variable $products_id» در static-filters.blade.php:
+ * کنترلر هسته متغیرهای $products_id و $min_price/$max_price را به ویو نمی‌دهد،
+ * پس بلیدِ تم باید خودش این‌ها را بسازد. خروجی:
+ *   products_id : شناسهٔ محصولات منتشرشدهٔ زیردرخت دسته (برای فیلتر برند)
+ *   min_price/max_price : کف و سقف قیمتِ قیمت‌های منتشرشدهٔ همان محصولات (اسلایدر قیمت)
+ * با کش ۵ دقیقه‌ای هم‌سو با بقیهٔ هِلپرهای فیلتر.
+ */
+if (!function_exists('front_filter_static_context')) {
+function front_filter_static_context(Category $category): array
+{
+    $treeIds = front_category_subtree_ids($category);
+    $cacheKey = 'front.filter.static.' . $category->id . '.' . md5(json_encode($treeIds));
+
+    return Cache::remember($cacheKey, 300, function () use ($treeIds) {
+        $productsId = DB::table('category_product')
+            ->join('products', 'products.id', '=', 'category_product.product_id')
+            ->whereIn('category_product.category_id', $treeIds)
+            ->where('products.published', 1)
+            ->where(function ($q) {
+                $q->whereNull('products.publish_date')->orWhere('products.publish_date', '<=', now());
+            })
+            ->pluck('products.id')
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $minPrice = 0;
+        $maxPrice = 0;
+
+        if ($productsId !== []) {
+            $bounds = DB::table('prices')
+                ->whereIn('product_id', $productsId)
+                ->where('published', 1)
+                ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
+                ->first();
+
+            $minPrice = (int) ($bounds->min_price ?? 0);
+            $maxPrice = (int) ($bounds->max_price ?? 0);
+        }
+
+        return [
+            'products_id' => $productsId,
+            'min_price'   => $minPrice,
+            'max_price'   => $maxPrice,
+        ];
+    });
+}
+}
+
+/**
  * شرط WHERE جستجوی محصولات با استفاده از ایندکس FULLTEXT (در صورت وجود)
  * و فالبک LIKE فقط روی title برای توکن‌های خیلی کوتاه.
  * هرگز description را LIKE نمی‌زند (full-scan در میلیون رکورد).
@@ -1683,5 +1735,73 @@ if (!function_exists('get_search_sliders')) {
         } catch (\Throwable $e) {
             return collect();
         }
+    }
+}
+
+/* =====================================================================
+ |  فاز ۲۰۷ — مجوزها/نشان‌های اعتماد (اینماد، ساماندهی و ...)
+ |  منبع: option «info_licenses» (JSON لیست مجوزهای تنظیمات کلی → تب مجوزها).
+ |  فالبک: اگر option هنوز ثبت نشده بود، کدهای قدیمی info_enamad/info_samandehi
+ |  به‌صورت مجوزِ نوع HTML بازگردانده می‌شوند (سازگاری با داده‌های قبل از فاز ۲۰۷).
+ |  ===================================================================== */
+if (!function_exists('front_trust_badges')) {
+    function front_trust_badges(): array
+    {
+        $raw = trim((string) option('info_licenses'));
+
+        if ($raw !== '') {
+            $decoded = json_decode($raw, true);
+
+            if (is_array($decoded)) {
+                $badges = [];
+
+                foreach ($decoded as $row) {
+                    $type = (string) ($row['type'] ?? 'html');
+
+                    if (! in_array($type, ['image', 'html', 'link'], true)) {
+                        $type = 'html';
+                    }
+
+                    // فقط ردیف‌های فعال نمایش داده می‌شوند
+                    if (empty($row['active'])) {
+                        continue;
+                    }
+
+                    $badge = [
+                        'type'  => $type,
+                        'title' => trim((string) ($row['title'] ?? '')),
+                        'image' => trim((string) ($row['image'] ?? '')),
+                        'code'  => (string) ($row['code'] ?? ''),
+                        'link'  => trim((string) ($row['link'] ?? '')),
+                    ];
+
+                    // ردیف کاملاً خالی نمایش داده نمی‌شود
+                    if ($badge['code'] === '' && $badge['image'] === '' && $badge['link'] === '') {
+                        continue;
+                    }
+
+                    $badges[] = $badge;
+                }
+
+                return $badges;
+            }
+        }
+
+        // فالبک مهاجرت: کدهای HTML قدیمی اینماد/ساماندهی
+        $badges = [];
+
+        $enamad = trim((string) option('info_enamad'));
+
+        if ($enamad !== '') {
+            $badges[] = ['type' => 'html', 'title' => 'اینماد', 'image' => '', 'code' => $enamad, 'link' => ''];
+        }
+
+        $samandehi = trim((string) option('info_samandehi'));
+
+        if ($samandehi !== '') {
+            $badges[] = ['type' => 'html', 'title' => 'ساماندهی', 'image' => '', 'code' => $samandehi, 'link' => ''];
+        }
+
+        return $badges;
     }
 }

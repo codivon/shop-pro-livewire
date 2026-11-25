@@ -155,20 +155,37 @@
         </div>
 
         {{-- ۴) دربارهٔ ما — لوگو راست، نشان‌های اعتماد چپ، متن زیر، «اطلاعات بیشتر» پایین-چپ (مطابق نمونه) --}}
-        @if ($footerAboutText !== '' || option('info_enamad') || option('info_samandehi'))
+        @php($snr_badges = front_trust_badges())
+        @if ($footerAboutText !== '' || $snr_badges)
         <div class="snr-footer-about">
             <div class="snr-about-top">
                 <img loading="lazy" decoding="async"
                      src="{{ option('info_logo', theme_asset('image/logo.png')) }}"
                      class="snr-about-logo" alt="{{ option('info_site_title', 'او پی شاپ') }}">
-                @if(option('info_enamad') || option('info_samandehi'))
+                @if($snr_badges)
                     <div class="snr-footer-badges">
-                        @if(option('info_enamad'))
-                            {!! option('info_enamad') !!}
-                        @endif
-                        @if(option('info_samandehi'))
-                            {!! option('info_samandehi') !!}
-                        @endif
+                        @foreach ($snr_badges as $snr_badge)
+                            {{-- فاز ۲۰۷ — مجوزها از تنظیمات (تب مجوزها): html / تصویر / لینک --}}
+                            @if ($snr_badge['type'] === 'html')
+                                {!! $snr_badge['code'] !!}
+                            @elseif ($snr_badge['type'] === 'image')
+                                @if ($snr_badge['link'] !== '')
+                                    <a href="{{ $snr_badge['link'] }}" target="_blank" rel="nofollow noopener"
+                                       class="snr-footer-badge-link" title="{{ $snr_badge['title'] }}">
+                                        <img loading="lazy" decoding="async" src="{{ $snr_badge['image'] }}"
+                                             alt="{{ $snr_badge['title'] ?: 'مجوز' }}" class="snr-footer-badge-img">
+                                    </a>
+                                @else
+                                    <img loading="lazy" decoding="async" src="{{ $snr_badge['image'] }}"
+                                         alt="{{ $snr_badge['title'] ?: 'مجوز' }}" class="snr-footer-badge-img">
+                                @endif
+                            @else
+                                <a href="{{ $snr_badge['link'] }}" target="_blank" rel="nofollow noopener"
+                                   class="snr-footer-badge-text" title="{{ $snr_badge['title'] }}">
+                                    {{ $snr_badge['title'] ?: 'مجوز' }}
+                                </a>
+                            @endif
+                        @endforeach
                     </div>
                 @endif
             </div>

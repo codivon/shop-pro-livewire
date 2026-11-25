@@ -2945,6 +2945,26 @@ html[data-theme="dark"] .snr-footer-badges img:hover {
     border-color: #5bd0c8;
 }
 
+/* فاز ۲۰۷ — مجوزهای نوع «تصویر» و «لینک» در حالت شب */
+html[data-theme="dark"] .snr-footer-badge-img {
+    background: #16181d;
+    border-color: #262a31;
+}
+
+html[data-theme="dark"] .snr-footer-badge-link:hover .snr-footer-badge-img {
+    border-color: #5bd0c8;
+}
+
+html[data-theme="dark"] .snr-footer-badge-text {
+    color: #c8d2e1;
+    background: #16181d;
+    border-color: #262a31;
+}
+
+html[data-theme="dark"] .snr-footer-badge-text:hover {
+    border-color: #5bd0c8;
+}
+
 html[data-theme="dark"] .snr-footer-copy {
     border-top-color: #1c2027;
 }

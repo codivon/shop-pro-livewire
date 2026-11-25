@@ -1,5 +1,11 @@
 {{-- فیلترهای استاتیک (موجودی/برند/دسته‌بندی/قیمت) — اسکین سانیار --}}
 {{-- در اسکوپ لوپ category-filters-body اجرا می‌شود: $filter، $loop، $category، $products_id، $min_price، $max_price --}}
+{{-- فاز ۲۰۷ — متغیرها توسط category-filters-body (هِلپر front_filter_static_context) پاس داده می‌شوند؛ مقادیر پیش‌فرض فقط محافظ است --}}
+@php
+    $products_id = isset($products_id) && is_array($products_id) ? $products_id : [];
+    $min_price   = isset($min_price) ? (int) $min_price : 0;
+    $max_price   = isset($max_price) ? (int) $max_price : 0;
+@endphp
 @switch($filter->filterable->type)
     @case('stock')
         <div class="filter-item">

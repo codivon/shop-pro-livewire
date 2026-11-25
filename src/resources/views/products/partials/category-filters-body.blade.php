@@ -1,5 +1,9 @@
 {{-- بدنه فرم فیلتر محصولات دسته‌بندی — مشترک بین سایدبار دسکتاپ و آفسکانس موبایل --}}
 {{-- متغیرهای مورد انتظار: $category، $scope (پیشوند یکتا برای آیدی‌ها) --}}
+{{-- فاز ۲۰۷ — زمینهٔ فیلترهای استاتیک یک‌بار پیش از حلقه ساخته می‌شود (رفع ارور Undefined variable $products_id) --}}
+@php
+    $static_filter_ctx = front_filter_static_context($category);
+@endphp
 <form class="products-filter-form" action="{{ route('front.products.category-products', ['category' => $category]) }}">
 
     <div class="filter-item">
@@ -92,7 +96,11 @@
 
                 @break
             @case('App\Models\StaticFilter')
-                @include('front::products.partials.static-filters')
+                @include('front::products.partials.static-filters', [
+                    'products_id' => $static_filter_ctx['products_id'],
+                    'min_price'   => $static_filter_ctx['min_price'],
+                    'max_price'   => $static_filter_ctx['max_price'],
+                ])
                 @break
 
         @endswitch

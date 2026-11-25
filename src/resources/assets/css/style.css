@@ -7966,6 +7966,53 @@ body:has(#offcanvasCart.show) #back-to-top {
     line-height: 0;
 }
 
+/* فاز ۲۰۷ — مجوزهای نوع «تصویر» و «لینک» از تب مجوزهای تنظیمات */
+.snr-footer-badge-link {
+    display: inline-block;
+    line-height: 0;
+}
+
+.snr-footer-badge-img {
+    width: 118px;
+    height: 118px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid #eef0f3;
+    border-radius: 16px;
+    padding: 8px;
+    transition: .2s all ease-in-out;
+    -webkit-transition: .2s all ease-in-out;
+}
+
+.snr-footer-badge-link:hover .snr-footer-badge-img {
+    border-color: var(--main-color-one-shadow, #f2f6ff);
+    transform: translateY(-2px);
+}
+
+.snr-footer-badge-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 118px;
+    height: 118px;
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--main-color-one, #0e3468);
+    background: #fff;
+    border: 1px solid #eef0f3;
+    border-radius: 16px;
+    transition: .2s all ease-in-out;
+    -webkit-transition: .2s all ease-in-out;
+}
+
+.snr-footer-badge-text:hover {
+    border-color: var(--main-color-one-shadow, #f2f6ff);
+    transform: translateY(-2px);
+}
+
 .snr-about-text {
     font-size: 13px;
     line-height: 2.15;

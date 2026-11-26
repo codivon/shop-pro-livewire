@@ -113,7 +113,7 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=186">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=187">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=174">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛

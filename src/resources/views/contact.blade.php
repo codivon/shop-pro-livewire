@@ -1,8 +1,8 @@
 @extends('front::layouts.master', ['title' => 'تماس با ما'])
 
 @push('styles')
-    <link rel="stylesheet" href="{{ theme_asset('mapp/css/mapp.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('mapp/css/fa/style.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('plugin/mapp/css/mapp.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('plugin/mapp/css/fa/style.css') }}">
     {{-- فاز ۱۹۲ — بازطراحی مدرن صفحهٔ تماس با ما --}}
     <link rel="stylesheet" href="{{ theme_asset('css/pages/contact.css') }}?v=2">
 @endpush
@@ -210,8 +210,8 @@
     <script src="{{ theme_asset('js/plugins/jquery-validation/jquery.validate.min.js') }}"></script>
     <script src="{{ theme_asset('js/plugins/jquery-validation/localization/messages_fa.min.js') }}?v=2"></script>
     @if(option('info_map_type')=='mapir')
-        <script type="text/javascript" src="{{ theme_asset('mapp/js/mapp.env.js') }}"></script>
-        <script type="text/javascript" src="{{ theme_asset('mapp/js/mapp.min.js?v=1') }}"></script>
+        <script type="text/javascript" src="{{ theme_asset('plugin/mapp/js/mapp.env.js') }}"></script>
+        <script type="text/javascript" src="{{ theme_asset('plugin/mapp/js/mapp.min.js?v=1') }}"></script>
     @elseif(option('info_map_type')=='google')
         {{-- defer: اسکریپت گوگل‌مپ روی IP ایران چندثانیه پارس را قفل می‌کند؛ contact.js گارد typeof google دارد --}}
         <script src="https://maps.googleapis.com/maps/api/js?key={{ option('map_api') }}" defer></script>

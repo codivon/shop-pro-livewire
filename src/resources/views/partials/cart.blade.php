@@ -81,7 +81,7 @@
                     <div class="factor">
                         <div class="title">
                             <div class="d-flex align-items-center">
-                                <img src="{{ theme_asset('image/shopping-bag.png') }}" class="img-fluid" alt="">
+                                <img src="{{ theme_asset('images/shopping-bag.png') }}" class="img-fluid" alt="">
                                 <h6 class="font-16">سفارش شما</h6>
                             </div>
                         </div>
@@ -111,7 +111,7 @@
             @else
                 <div class="item">
                     <div class="cart-canvas-empty text-center py-5">
-                        <img src="{{ theme_asset('image/empty-cart.svg') }}" alt="سبد خرید خالی" class="img-fluid mb-3" width="160">
+                        <img src="{{ theme_asset('images/empty-cart.svg') }}" alt="سبد خرید خالی" class="img-fluid mb-3" width="160">
                         <p class="text-muted mb-3">سبد خرید شما خالی است ...</p>
                         <a href="{{ route('front.index') }}" class="btn main-color-one-bg rounded-pill border-0">مشاهده محصولات</a>
                     </div>

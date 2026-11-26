@@ -9,7 +9,7 @@
                 <div class="auth-form-title d-flex align-items-center justify-content-between title-panel mb-4 slider-title-desc-center">
                     <h2 class="text-center h4 text-muted title-font">یاد آوری کلمه عبور</h2>
                     <a href="{{ route('front.index') }}">
-                        <img src="{{ option('info_logo', theme_asset('image/logo.png')) }}" width="120" alt="{{ option('info_site_title', 'او پی شاپ') }}">
+                        <img src="{{ option('info_logo', theme_asset('images/logo-default.png')) }}" width="120" alt="{{ option('info_site_title', 'او پی شاپ') }}">
                     </a>
                 </div>
 

@@ -116,13 +116,13 @@
                     <div class="snr-article-card">
                         <div class="snr-article-media">
                             @if($isMedia)
-                                <video class="articles-video-player shadow-box rounded-3 w-100" controls poster="{{ $post->image ? asset($post->image) : theme_asset('image/blog-1.jpg') }}">
+                                <video class="articles-video-player shadow-box rounded-3 w-100" controls poster="{{ $post->image ? asset($post->image) : theme_asset('images/blog-1.jpg') }}">
                                     <source src="{{ asset($mediaUrl) }}" type="video/mp4">
                                     مرورگر شما از ویدیو پشتیبانی نمی‌کند.
                                 </video>
                             @else
                                 <figure class="snr-article-figure mb-0">
-                                    <img src="{{ $post->image ? asset($post->image) : theme_asset('image/blog-1.jpg') }}" alt="{{ $post->title }}" loading="lazy">
+                                    <img src="{{ $post->image ? asset($post->image) : theme_asset('images/blog-1.jpg') }}" alt="{{ $post->title }}" loading="lazy">
                                 </figure>
                             @endif
                         </div>
@@ -214,7 +214,7 @@
                                 @forelse(($latestPosts ?? collect())->take(5) as $latestPost)
                                     <a href="{{ route('front.articles.show', $latestPost->slug) }}" class="snr-mini-post">
                                         <div class="snr-mini-post-img">
-                                            <img src="{{ $latestPost->image ? asset($latestPost->image) : theme_asset('image/blog-1.jpg') }}" alt="{{ $latestPost->title }}" loading="lazy">
+                                            <img src="{{ $latestPost->image ? asset($latestPost->image) : theme_asset('images/blog-1.jpg') }}" alt="{{ $latestPost->title }}" loading="lazy">
                                         </div>
                                         <div class="snr-mini-post-body">
                                             <h5>{{ $latestPost->title }}</h5>
@@ -242,7 +242,7 @@
                                     @foreach($trendingPosts as $trendingPost)
                                         <a href="{{ route('front.articles.show', $trendingPost->slug) }}" class="snr-trending-item">
                                             <div class="snr-trending-img">
-                                                <img src="{{ $trendingPost->image ? asset($trendingPost->image) : theme_asset('image/blog-1.jpg') }}" alt="{{ $trendingPost->title }}" loading="lazy">
+                                                <img src="{{ $trendingPost->image ? asset($trendingPost->image) : theme_asset('images/blog-1.jpg') }}" alt="{{ $trendingPost->title }}" loading="lazy">
                                                 <span class="snr-trending-views"><i class="bi bi-eye-fill"></i> {{ number_format($trendingPost->view) }}</span>
                                             </div>
                                             <span class="snr-trending-title">{{ $trendingPost->title }}</span>
@@ -296,7 +296,7 @@
                                 <div class="swiper-slide">
                                     <a href="{{ route('front.articles.show', $relatedPost->slug) }}" class="snr-related-card">
                                         <div class="snr-related-img">
-                                            <img src="{{ $relatedPost->image ? asset($relatedPost->image) : theme_asset('image/blog-1.jpg') }}" alt="{{ $relatedPost->title }}" loading="lazy">
+                                            <img src="{{ $relatedPost->image ? asset($relatedPost->image) : theme_asset('images/blog-1.jpg') }}" alt="{{ $relatedPost->title }}" loading="lazy">
                                             @if($relatedPost->post_type == 'video')
                                                 <span class="snr-related-video"><i class="bi bi-play-circle-fill"></i></span>
                                             @elseif($relatedPost->post_type == 'podcast')

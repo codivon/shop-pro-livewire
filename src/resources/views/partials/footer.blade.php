@@ -160,7 +160,7 @@
         <div class="snr-footer-about">
             <div class="snr-about-top">
                 <img loading="lazy" decoding="async"
-                     src="{{ option('info_logo', theme_asset('image/logo.png')) }}"
+                     src="{{ option('info_logo', theme_asset('images/logo-default.png')) }}"
                      class="snr-about-logo" alt="{{ option('info_site_title', 'او پی شاپ') }}">
                 @if($snr_badges)
                     <div class="snr-footer-badges">

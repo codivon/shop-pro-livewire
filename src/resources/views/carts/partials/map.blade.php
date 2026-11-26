@@ -16,7 +16,7 @@
         </div>
     </div>
     <div id="map-element"></div>
-    <div id="center-marker" style="background-image:url({{theme_asset('img/pin-location.svg')}})"></div>
+    <div id="center-marker" style="background-image:url({{theme_asset('images/pin-location.svg')}})"></div>
 </div>
 
 @push('scripts-top-js')

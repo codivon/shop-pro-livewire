@@ -2,7 +2,7 @@
 
 @push('styles')
     {{-- آیکون‌های وضعیت مرجوعی از مدل با کلاس‌های font-awesome می‌آیند --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/font-awesome.min.css?v=2') }}">
 @endpush
 
 @section('user-content')

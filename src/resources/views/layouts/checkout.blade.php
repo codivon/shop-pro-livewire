@@ -25,8 +25,8 @@
     <script src="{{ theme_asset('js/theme-init.js') }}"></script>
 
     {{-- Favicon --}}
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ option('info_icon', theme_asset('image/logo.png')) }}">
-    <link rel="apple-touch-icon" sizes="144x144" href="{{ option('info_icon', theme_asset('image/logo.png')) }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ option('info_icon', theme_asset('images/logo-default.png')) }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ option('info_icon', theme_asset('images/logo-default.png')) }}">
 
     {{-- برای ایجکسی‌های چک‌اوت (قیمت‌ها، آدرس، کد تخفیف) --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -39,15 +39,15 @@
 
     {{-- بوت‌استرپ ۵ RTL + آیکون‌ها (همان ست هدر اصلی) --}}
     <link rel="stylesheet" href="{{ theme_asset('css/bootstrap.rtl.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('font/bootstrap-icon/bootstrap-icons.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-icon/bootstrap-icons.css?v=2') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css?v=2') }}">
 
     {{-- استایل‌های مشترک تم (متغیرهای رنگ، content-box، bank-item، pay-table و ...) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=175">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=189">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
 
     {{-- تم تیرهٔ چک‌اوت (قوانین اختصاصی چک‌اوت انتهای همین فایل است) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=27">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=33">
 
     {{-- فاز ۲۱۰ — پوستهٔ رنگی قالب در چک‌اوت و نتیجهٔ پرداخت:
          این لایوت تا فاز ۲۰۹ تزریق متغیرهای پوسته را نداشت و
@@ -92,7 +92,7 @@
 
             <a href="{{ route('front.index') }}" class="snr-checkout-logo"
                 aria-label="{{ option('info_site_title', 'او پی شاپ') }}">
-                <img src="{{ option('info_logo', theme_asset('image/logo.png')) }}"
+                <img src="{{ option('info_logo', theme_asset('images/logo-default.png')) }}"
                     alt="{{ option('info_site_title', 'او پی شاپ') }}">
             </a>
 

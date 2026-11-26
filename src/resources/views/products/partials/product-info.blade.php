@@ -303,7 +303,7 @@
 
     @if ($product->sizeType)
         <div class="mt-3 size-guide d-flex align-items-center gap-2">
-            <img src="{{ theme_asset('img/size.png') }}" width="25" alt="size">
+            <img src="{{ theme_asset('images/size.png') }}" width="25" alt="size">
             <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#size-modal"
                class="mt-0 link--with-border-bottom font-14">راهنمای سایزبندی</a>
         </div>

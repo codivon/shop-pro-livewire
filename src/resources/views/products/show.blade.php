@@ -7,7 +7,7 @@
 @push('befor-styles')
     <link rel="stylesheet" href="{{ theme_asset('css/vendor/fancybox.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/owl.carousel.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/font-awesome.min.css?v=2') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/pages/products/show.css') }}?v=22">
 @endpush
 
@@ -249,7 +249,7 @@
                                     <div class="product-slider related-products-slider">
                                         <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
                                             <div class="title d-flex align-items-center">
-                                                <img src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
+                                                <img src="{{ theme_asset('images/square.png') }}" alt="" class="img-fluid">
                                                 <h5 class="font-16 ms-3">محصولات <span class="main-color-one-color d-inline-block">مرتبط</span></h5>
                                             </div>
                                         </div>
@@ -754,7 +754,7 @@
                  /۱۸۴ — ?v=5: اندازهٔ متناسب (عرض هم با طول مقیاس می‌شود) + چینش راست/وسط/چپ با dt-pa-wrap --}}
             <link rel="stylesheet" href="{{ theme_asset('css/pages/products/price-alert.css') }}?v=5">
             @if(str_starts_with($paBtnIcon, 'mdi'))
-                <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css') }}">
+                <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css?v=2') }}">
             @endif
         @endpush
 

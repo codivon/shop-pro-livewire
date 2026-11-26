@@ -6,12 +6,12 @@
 
 @font-face {
     font-family: 'main-font';
-    src: url('../font/iran-yekan/iranyekanwebregularfanum.woff') format('woff');
+    src: url('../plugin/iran-yekan/iranyekanwebregularfanum.woff') format('woff');
 }
 
 @font-face {
     font-family: 'title-font';
-    src: url('../font/iran-yekan/IRANSansWeb(FaNum)_Black.woff2') format('woff');
+    src: url('../plugin/iran-yekan/IRANSansWeb-FaNum-Black.woff2') format('woff');
 }
 
 :root {
@@ -2531,7 +2531,7 @@ a.image-data-src{
 .site-slider .parent {
     position: relative;
     /* height: 550px;
-    background-image: url("../image/banner-section-blue.webp");
+    background-image: url("../images/banner-section-blue.webp");
     background-repeat: no-repeat;
     background-position: center center; */
 }
@@ -5997,7 +5997,7 @@ html {
 /* start page register */
 
 .bg-auth {
-    background: url('../image/auth-bg.jpg') no-repeat;
+    background: url('../images/auth-bg.jpg') no-repeat;
     background-size: cover;
 }
 

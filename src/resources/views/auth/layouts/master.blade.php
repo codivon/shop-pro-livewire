@@ -25,8 +25,8 @@
     <meta name="msapplication-navbutton-color" content="{{ $sa_auth_meta_color }}">
     <meta name="apple-mobile-web-app-status-bar-style" content="{{ $sa_auth_meta_color }}">
     {{-- Favicon --}}
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ option('info_icon', theme_asset('image/logo.png')) }}">
-    <link rel="apple-touch-icon" sizes="144x144" href="{{ option('info_icon', theme_asset('image/logo.png')) }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ option('info_icon', theme_asset('images/logo-default.png')) }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ option('info_icon', theme_asset('images/logo-default.png')) }}">
 
     <title>
         @isset($title)
@@ -42,18 +42,18 @@
     {{-- قالب سانیار — همان فایل‌های css صفحات قالب (register.html) --}}
     {{-- فاز ۱۹۴ — نسخه‌ها با لایوت اصلی یکسان شد تا در mergeNewHead dedupe شود --}}
     <link rel="stylesheet" href="{{ theme_asset('css/bootstrap.rtl.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('font/bootstrap-icon/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-icon/bootstrap-icons.css?v=2') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/waves/waves.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=179">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=189">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/auth.css') }}">
 
     {{-- دارک مود در صفحات ورود/ثبت‌نام --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=27">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=33">
 
     {{-- فاز ۲۱۰ — پوستهٔ رنگی قالب در صفحات ورود/ثبت‌نام:
          این لایوت تا فاز ۲۰۹ تزریق متغیرهای پوسته را نداشت و

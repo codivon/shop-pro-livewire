@@ -60,8 +60,8 @@
     <script src="{{ theme_asset('js/theme-init.js') }}?v=2"></script>
 
     {{-- Favicon --}}
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ option('info_icon', theme_asset('image/logo.png')) }}">
-    <link rel="apple-touch-icon" sizes="144x144" href="{{ option('info_icon', theme_asset('image/logo.png')) }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ option('info_icon', theme_asset('images/logo-default.png')) }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ option('info_icon', theme_asset('images/logo-default.png')) }}">
 
     {{-- SEO & Robots --}}
     <meta name="robots" content="{{ $robots ?? 'index, follow' }}">
@@ -78,7 +78,7 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:site_name" content="{{ option('info_site_title', 'او پی شاپ') }}">
     <meta property="og:description" content="{{ $description ?? option('info_short_description') }}">
-    @php $ogImage = $og_image ?? option('info_logo', theme_asset('image/logo.png')); @endphp
+    @php $ogImage = $og_image ?? option('info_logo', theme_asset('images/logo-default.png')); @endphp
     <meta property="og:image" content="{{ $ogImage }}">
 
     {{-- Twitter Card --}}
@@ -108,12 +108,12 @@
 
     {{-- سانیار — CSS تمپلیت (ترتیب دقیق مطابق index.html) --}}
     <link rel="stylesheet" href="{{ theme_asset('css/bootstrap.rtl.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('font/bootstrap-icon/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-icon/bootstrap-icons.css?v=2') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/waves/waves.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=188">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=189">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=175">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
@@ -126,7 +126,7 @@
     <link rel="stylesheet" href="{{ theme_asset('css/theme-pages.css') }}">
 
     {{-- /۱۵۸ — حالت شب (دارک مود) — بعد از همهٔ استایل‌ها تا بتواند بازنویسی کند --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=32">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=33">
 
     {{-- CSS عملکردی مشترک (توست‌ها + آیکون‌های منوهای داینامیک) --}}
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
@@ -218,7 +218,7 @@
 
     {{-- آیکون‌های اعلان‌ها (mdi) — فقط برای کاربر وارد شده تا رندر هدر کند نشود --}}
     @if(auth('web')->check())
-        <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css') }}">
+        <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css?v=2') }}">
     @endif
 
     @stack('styles')
@@ -417,7 +417,7 @@
                             </div>
                             <div class="offcanvas-body">
                                 <a href="{{ route('front.index') }}" class="text-center d-block mb-3">
-                                    <img src="{{ option('info_logo', theme_asset('image/logo.png')) }}" alt="{{ option('info_site_title', 'او پی شاپ') }}" class="img-fluid" width="200">
+                                    <img src="{{ option('info_logo', theme_asset('images/logo-default.png')) }}" alt="{{ option('info_site_title', 'او پی شاپ') }}" class="img-fluid" width="200">
                                 </a>
                                 <div class="header-bottom-form mb-4 w-100">
                                     <div class="search-form">
@@ -438,7 +438,7 @@
                     </div>
                     <a href="{{ route('front.index') }}">
                         <div class="logo">
-                            <img src="{{ option('info_logo', theme_asset('image/logo.png')) }}"
+                            <img src="{{ option('info_logo', theme_asset('images/logo-default.png')) }}"
                                  alt="{{ option('info_site_title', 'او پی شاپ') }}" class="img-fluid">
                         </div>
                     </a>
@@ -469,7 +469,7 @@
                             <a href="#" data-bs-toggle="dropdown" aria-expanded="false" role="button"
                                class="btn btn-white header-register border-0 rounded-pill">
                                 <figure class="avatar">
-                                    <img src="{{ auth('web')->user()->image_url ?? theme_asset('image/user.png') }}" alt="user">
+                                    <img src="{{ auth('web')->user()->image_url ?? theme_asset('images/user.png') }}" alt="user">
                                 </figure>
                             </a>
                             @include('front::partials.user-menu')

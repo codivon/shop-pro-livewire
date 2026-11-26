@@ -16,12 +16,12 @@
     <!--    font-->
     {{-- خودمیزبانی FA: cdnjs روی IPهای ایران کند است و رندر را بلاک می‌کرد --}}
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="{{theme_asset('css/font-awesome.min.css')}}">
-    <link rel="stylesheet" href="{{theme_asset('css/materialdesignicons.css')}}">
+    <link rel="stylesheet" href="{{theme_asset('css/font-awesome.min.css?v=2')}}">
+    <link rel="stylesheet" href="{{theme_asset('css/materialdesignicons.css?v=2')}}">
     <!--    font-->
     <link rel="stylesheet" href="{{theme_asset('css/bootstrap.css')}}">
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
-    <link rel="stylesheet" href="{{theme_asset('css/style.css')}}">
+    <link rel="stylesheet" href="{{theme_asset('css/style.css?v=189')}}">
     @stack('styles')
 </head>
 
@@ -31,7 +31,7 @@
     <div class="container">
         <div class="header-shopping-logo">
             <a href="{{ route('front.index') }}">
-                <img src="{{ option('info_logo', theme_asset('img/logo.png')) }}" alt="{{ option('info_site_title', 'او پی شاپ') }}">
+                <img src="{{ option('info_logo', theme_asset('images/logo-default.png')) }}" alt="{{ option('info_site_title', 'او پی شاپ') }}">
             </a>
         </div>
 

@@ -1104,7 +1104,7 @@ html[data-theme="dark"] .profile-box-nav ul li a.profile-menu-url .badge.badge-p
 
 /* ---------- ۱۰) صفحهٔ ورود / ثبت‌نام ---------- */
 html[data-theme="dark"] .bg-auth {
-    background-image: linear-gradient(rgba(13, 15, 19, .88), rgba(13, 15, 19, .94)), url('../image/auth-bg.jpg');
+    background-image: linear-gradient(rgba(13, 15, 19, .88), rgba(13, 15, 19, .94)), url('../images/auth-bg.jpg');
 }
 
 html[data-theme="dark"] .auth-form.bg-white,

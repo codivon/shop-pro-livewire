@@ -63,7 +63,7 @@
                 </div>
                 <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
                     <div class="title d-flex align-items-center">
-                        <img src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
+                        <img src="{{ theme_asset('images/square.png') }}" alt="" class="img-fluid">
                         <h5 class="font-16 ms-3 mb-0">مطالب <span class="main-color-one-color d-inline-block">منتشر شده توسط نویسنده</span></h5>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
             {{-- مرتب‌سازی — سانیار header-content --}}
             <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
                 <div class="title d-flex align-items-center">
-                    <img src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
+                    <img src="{{ theme_asset('images/square.png') }}" alt="" class="img-fluid">
                     <h5 class="font-16 ms-3 mb-0">مرتب سازی <span class="main-color-one-color d-inline-block">بر اساس:</span></h5>
                 </div>
                 <div class="link d-flex align-items-center flex-wrap overflow-auto py-1">

@@ -4,7 +4,7 @@
             <div class="factor checkout-summary page-aside">
                 <div class="title">
                     <div class="d-flex align-items-center">
-                        <img src="{{ theme_asset('image/shopping-bag.png') }}" class="img-fluid" alt="">
+                        <img src="{{ theme_asset('images/shopping-bag.png') }}" class="img-fluid" alt="">
                         <h6 class="font-16">سفارش شما</h6>
                     </div>
                 </div>

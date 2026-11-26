@@ -11,7 +11,7 @@
                 <div class="container-fluid">
                     <div class="header-content mb-4 d-flex align-items-center justify-content-between flex-wrap">
                         <div class="title d-flex align-items-center">
-                            <img src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
+                            <img src="{{ theme_asset('images/square.png') }}" alt="" class="img-fluid">
                             <h5 class="font-16 ms-3 mb-0">{{ $widget->option('title', 'هشتگ‌های') }} <span class="main-color-one-color d-inline-block">داغ</span></h5>
                         </div>
                     </div>

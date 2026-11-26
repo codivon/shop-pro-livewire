@@ -9,7 +9,7 @@
     {{-- کارت پروفایل --}}
     <div class="usp-profile-box">
         <a href="{{ route('front.user.profile.edit') }}" class="usp-avatar-link" title="ویرایش اطلاعات شخصی">
-            <img src="{{ auth('web')->user()->image_url ?? theme_asset('image/user.png') }}"
+            <img src="{{ auth('web')->user()->image_url ?? theme_asset('images/user.png') }}"
                  class="usp-avatar" alt="{{ $user->fullname }}">
         </a>
         <div class="usp-profile-meta">

@@ -41,7 +41,7 @@
                                  onerror="window.snrBrandImgFallback && window.snrBrandImgFallback(this)">
                             <span class="brand-page-logo-fallback" hidden aria-hidden="true">{{ mb_substr(trim($brandName), 0, 1) }}</span>
                         @endif
-                        <img src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
+                        <img src="{{ theme_asset('images/square.png') }}" alt="" class="img-fluid">
                         <h1 class="font-16 ms-3 mb-0">همه محصولات برند <span class="main-color-one-color d-inline-block">{{ $brandName }}</span></h1>
                     </div>
                 </div>

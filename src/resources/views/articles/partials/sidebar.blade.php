@@ -6,7 +6,7 @@
         <div class="container-fluid">
             <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
                 <div class="title d-flex align-items-center">
-                    <img src="{{ theme_asset('image/square.png') }}" alt="" class="img-fluid">
+                    <img src="{{ theme_asset('images/square.png') }}" alt="" class="img-fluid">
                     <h5 class="font-16 ms-3 mb-0">پیشنهادهایی <span class="main-color-one-color d-inline-block">برای شما</span></h5>
                 </div>
                 <div class="link">
@@ -27,7 +27,7 @@
                                 <div class="blog-item position-relative">
                                     <a href="{{ route('front.articles.show', $suggestion->slug) }}">
                                         <div class="image">
-                                            <img src="{{ $suggestion->image ? asset($suggestion->image) : theme_asset('image/blog-1.jpg') }}"
+                                            <img src="{{ $suggestion->image ? asset($suggestion->image) : theme_asset('images/blog-1.jpg') }}"
                                                  alt="{{ $suggestion->title }}" class="img-fluid" loading="lazy">
                                         </div>
                                         <div class="title">
@@ -52,7 +52,7 @@
                                             </h4>
                                             <div class="d-flex align-items-center mt-2">
                                                 <img class="rounded-circle me-2"
-                                                     src="{{ $suggestion->admin?->imageUrl ?? theme_asset('image/logo.png') }}"
+                                                     src="{{ $suggestion->admin?->imageUrl ?? theme_asset('images/logo-default.png') }}"
                                                      alt="{{ $suggestion->admin?->full_name ?? 'ناشناس' }} " width="24" height="24" loading="lazy">
                                                 <span class="text-muted font-12">{{ $suggestion->admin?->full_name ?? 'ناشناس' }}</span>
                                             </div>
@@ -86,7 +86,7 @@
                                 <a href="{{ route('front.articles.show', $latestPost->slug) }}" class="nav-link">
                                     <div class="mini-blog-item">
                                         <div class="image">
-                                            <img src="{{ $latestPost->image ? asset($latestPost->image) : theme_asset('image/blog-1.jpg') }}" class="img-fluid" alt="{{ $latestPost->title }}" loading="lazy">
+                                            <img src="{{ $latestPost->image ? asset($latestPost->image) : theme_asset('images/blog-1.jpg') }}" class="img-fluid" alt="{{ $latestPost->title }}" loading="lazy">
                                         </div>
                                         <div class="d-flex align-items-start desc flex-wrap flex-column justify-content-between">
                                             <h5 class="title">{{ $latestPost->title }}</h5>

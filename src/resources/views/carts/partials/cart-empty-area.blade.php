@@ -4,7 +4,7 @@
         <div class="content-box">
             <div class="container-fluid">
                 <div class="text-center py-5">
-                    <img src="{{ theme_asset('image/empty-cart.svg') }}" style="max-width: 400px;"
+                    <img src="{{ theme_asset('images/empty-cart.svg') }}" style="max-width: 400px;"
                         alt="سبد خرید خالی" class="mx-auto d-block img-fluid">
                     <h6 class="font-18 mt-4">سبد خرید شما خالی است!</h6>
                     <p class="text-muted font-14 mt-2 mb-4">

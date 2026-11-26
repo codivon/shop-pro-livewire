@@ -8127,3 +8127,30 @@ body > footer.footer {
     padding-bottom: 0;
     margin-top: auto;
 }
+
+/* ============================================================
+   فاز ۲۱۴ — منوی موبایل باز ⇒ ویجت‌های شناور پنهان
+   هم‌الگوی سبد خرید (فاز ۲۰۲): چت‌بات پشتیبانی، چت‌بات هوشمند و
+   «برگشت به بالا» نباید روی سایدبار منو بیفتند. کلاس body.snr-menu-open
+   را main.js با رویدادهای Bootstrap ست/برداشته می‌کند؛ فالبک :has()
+   هم برای مرورگرهای مدرن وقتی رویداد به هر دلیلی نخورده باشد.
+   ============================================================ */
+body.snr-menu-open .fw-wrapper,
+body.snr-menu-open .aichw-wrapper,
+body.snr-menu-open #back-to-top,
+body:has(#responsiveMenu.show) .fw-wrapper,
+body:has(#responsiveMenu.showing) .fw-wrapper,
+body:has(#responsiveMenu.hiding) .fw-wrapper,
+body:has(#responsiveMenu.show) .aichw-wrapper,
+body:has(#responsiveMenu.showing) .aichw-wrapper,
+body:has(#responsiveMenu.hiding) .aichw-wrapper,
+body:has(#responsiveMenu.show) #back-to-top,
+body:has(#responsiveMenu.showing) #back-to-top,
+body:has(#responsiveMenu.hiding) #back-to-top {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(12px);
+    transition: opacity .2s ease, visibility .2s ease, transform .25s ease;
+    -webkit-transition: opacity .2s ease, visibility .2s ease, transform .25s ease;
+}

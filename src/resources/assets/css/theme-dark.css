@@ -2968,3 +2968,43 @@ html[data-theme="dark"] .snr-footer-badge-text:hover {
 html[data-theme="dark"] .snr-footer-copy {
     border-top-color: #1c2027;
 }
+
+/* ============================================================
+   فاز ۲۱۴ — هدر موبایل و منوی موبایل در حالت شب
+   چیپ‌های اکشن هدر (سبد/حساب/روزوشب) و دکمهٔ بستن منو
+   باید در تم شب هم واضح و هماهنگ باشند.
+   ============================================================ */
+html[data-theme="dark"] .mobile-header-actions .theme-toggle-btn {
+    background: var(--dk-surface-2);
+    border-color: var(--dk-border);
+}
+
+html[data-theme="dark"] .mobile-header-actions .btn-action-cart,
+html[data-theme="dark"] .mobile-header-actions .header-register {
+    background: var(--dk-surface-2);
+    border-color: var(--dk-border);
+    color: var(--dk-text);
+}
+
+html[data-theme="dark"] .mobile-header-actions .btn-action-cart:hover,
+html[data-theme="dark"] .mobile-header-actions .header-register:hover {
+    background: var(--dk-surface);
+    border-color: var(--dk-border);
+}
+
+html[data-theme="dark"] .mobile-header-actions .btn-action-cart .header-cart-counter {
+    box-shadow: 0 0 0 2px var(--dk-surface-2);
+    -webkit-box-shadow: 0 0 0 2px var(--dk-surface-2);
+}
+
+html[data-theme="dark"] .snr-menu-close {
+    background: var(--dk-surface-2);
+    border-color: var(--dk-border);
+    color: var(--dk-text);
+}
+
+html[data-theme="dark"] .snr-menu-close:hover {
+    background: var(--main-color-one);
+    border-color: var(--main-color-one);
+    color: #fff;
+}

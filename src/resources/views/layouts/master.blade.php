@@ -113,20 +113,20 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=187">
-    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=174">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=188">
+    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=175">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
          بدون این CSS آفست افقی تمام‌صفحه ایجاد می‌شد --}}
     <link rel="stylesheet" href="{{ theme_asset('css/owl.carousel.min.css') }}">
 
     {{-- اصلاحات ظاهری ریز (هدر/محصول/صفحات) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-header.css') }}?v=164">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-header.css') }}?v=165">
     <link rel="stylesheet" href="{{ theme_asset('css/theme-product.css') }}?v=21">
     <link rel="stylesheet" href="{{ theme_asset('css/theme-pages.css') }}">
 
     {{-- /۱۵۸ — حالت شب (دارک مود) — بعد از همهٔ استایل‌ها تا بتواند بازنویسی کند --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=31">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=32">
 
     {{-- CSS عملکردی مشترک (توست‌ها + آیکون‌های منوهای داینامیک) --}}
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
@@ -407,10 +407,13 @@
                         </button>
                         <div class="offcanvas offcanvas-start" tabindex="-1" id="responsiveMenu"
                              aria-labelledby="responsive menu">
-                            <div class="offcanvas-header">
+                            {{-- فاز ۲۱۴ — هدر منوی موبایل با دکمهٔ بستن (×) واضح و مدرن --}}
+                            <div class="offcanvas-header snr-menu-top">
                                 <h5 class="offcanvas-title" id="offcanvasRightLabel">{{ option('info_site_title', 'فروشگاه سانیار') }}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
-                                        aria-label="Close"></button>
+                                <button type="button" class="snr-menu-close" data-bs-dismiss="offcanvas"
+                                        aria-label="بستن منو">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
                             </div>
                             <div class="offcanvas-body">
                                 <a href="{{ route('front.index') }}" class="text-center d-block mb-3">
@@ -443,25 +446,25 @@
             </div>
             {{-- پایان لوگو --}}
 
-            {{-- اکشن موبایل (سبد + حساب) --}}
+            {{-- اکشن موبایل (سبد + حساب) — فاز ۲۱۴: چیپ‌های کوچک و مدرن --}}
             <div class="d-lg-none d-block col-6 order-lg-5 order-2">
-                <div class="d-flex align-items-center justify-content-end">
+                <div class="d-flex align-items-center justify-content-end mobile-header-actions">
                     {{-- کلید روز/شب (موبایل) --}}
-                    <button type="button" class="theme-toggle-btn me-2 shadow-sm"
+                    <button type="button" class="theme-toggle-btn shadow-sm"
                             aria-pressed="false" aria-label="تغییر حالت روز و شب"
                             title="تغییر حالت روز و شب">
                         <i class="bi bi-sun icon-sun"></i>
                         <i class="bi bi-moon-stars icon-moon"></i>
                     </button>
-                    <a class="btn btn-light no-highlight btn-lg btn-action-cart shadow-sm"
+                    <a class="btn btn-light no-highlight btn-action-cart"
                        data-bs-toggle="offcanvas" href="#offcanvasCart" role="button"
-                       aria-controls="offcanvasCart">
-                        <i class="bi bi-basket font-30"></i>
+                       aria-controls="offcanvasCart" aria-label="سبد خرید">
+                        <i class="bi bi-basket"></i>
                         <span class="header-cart-counter main-color-one-bg d-inline-block rounded-pill">
                             {{ $cart ? $cart->products()->count() : 0 }}
                         </span>
                     </a>
-                    <div class="dropdown ms-3">
+                    <div class="dropdown">
                         @if(auth('web')->check())
                             <a href="#" data-bs-toggle="dropdown" aria-expanded="false" role="button"
                                class="btn btn-white header-register border-0 rounded-pill">
@@ -471,9 +474,9 @@
                             </a>
                             @include('front::partials.user-menu')
                         @else
-                            <a href="{{ route('login') }}" role="button"
+                            <a href="{{ route('login') }}" role="button" aria-label="حساب کاربری"
                                class="btn btn-white header-register border-0 rounded-pill">
-                                <i class="bi bi-person font-20"></i>
+                                <i class="bi bi-person"></i>
                             </a>
                         @endif
                     </div>
@@ -669,7 +672,7 @@
 <script src="{{theme_asset('js/owl.carousel.min.js')}}" data-navigate-once></script>
 <script src="{{ asset('back/assets/js/customToast.js') }}?v=9" data-navigate-once></script>
 <script src="{{ theme_asset("js/scripts.js") }}?v=14" data-navigate-once></script>
-<script src="{{theme_asset('js/main.js')}}?v=24" data-navigate-once></script>
+<script src="{{theme_asset('js/main.js')}}?v=25" data-navigate-once></script>
 @stack('scripts')
 
 {!! option('info_scripts') !!}

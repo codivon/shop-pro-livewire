@@ -964,6 +964,18 @@ $(document).off('shown.bs.offcanvas.snrCartOpen hidden.bs.offcanvas.snrCartOpen 
         $(document.body).removeClass('snr-cart-open');
     });
 
+/* فاز ۲۱۴ — وقتی منوی موبایل (#responsiveMenu) باز است، ویجت‌های شناور
+   (پشتیبانی/چت‌بات هوشمند/برگشت به بالا) پنهان می‌شوند تا روی سایدبار منو
+   نیفتند؛ هم‌الگوی snr-cart-open + فالبک CSS با :has().
+   رویداد show (نه shown) تا بلافاصله قبل از انیمیشن کلاس ست شود. */
+$(document).off('show.bs.offcanvas.snrMenuOpen shown.bs.offcanvas.snrMenuOpen hidden.bs.offcanvas.snrMenuClose')
+    .on('show.bs.offcanvas.snrMenuOpen shown.bs.offcanvas.snrMenuOpen', '#responsiveMenu', function () {
+        $(document.body).addClass('snr-menu-open');
+    })
+    .on('hidden.bs.offcanvas.snrMenuClose', '#responsiveMenu', function () {
+        $(document.body).removeClass('snr-menu-open');
+    });
+
 /* فاز ۲۰۱ — خبرنامهٔ فوتر (فرم کلاسیکِ فال‌بک وقتی Livewire غیرفعال است):
    • بایند delegate تا اگر فرم دیر رندر شد هم کار کند
    • سلکتور دکمه با fallback (button[type=submit] یا هر button داخل فرم)

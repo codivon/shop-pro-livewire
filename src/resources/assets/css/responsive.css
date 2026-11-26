@@ -506,3 +506,45 @@
         font-size: 32px;
     }
 }
+
+/* ============================================================
+   فاز ۲۱۴ — سه اصلاح موبایل
+   ============================================================ */
+@media only screen and (max-width: 992px) {
+
+    /* ---------- [۱] سایدبار منو اولویت دارد ----------
+       آف‌کانواس منو داخل <header> چسبان (z-index:1044) است؛ چون header
+       یک stacking context می‌سازد، پنل منو و پس‌زمینهٔ تیره‌اش زیر
+       نوار دسترسی سریع ادمین (z-index:1045) می‌افتادند. با باز شدن منو
+       موقتاً header از نوار ادمین بالاتر می‌رود و پس‌زمینهٔ تیره هم
+       روی نوار ادمین می‌نشیند — یعنی سایدبار روی همه‌چیز دیده می‌شود. */
+    body:has(#responsiveMenu.show) header,
+    body:has(#responsiveMenu.showing) header,
+    body:has(#responsiveMenu.hiding) header {
+        z-index: 1048;
+    }
+
+    body:has(#responsiveMenu.show) .offcanvas-backdrop,
+    body:has(#responsiveMenu.showing) .offcanvas-backdrop,
+    body:has(#responsiveMenu.hiding) .offcanvas-backdrop {
+        z-index: 1046;
+    }
+
+    /* ---------- [۲] چت‌بات هوشمند روی منوی پایین نیفتد ----------
+       ویجت AI ماژول (aichw) در موبایل bottom:16px دارد و دقیقاً روی
+       آیتم‌های منوی پایین موبایل می‌افتد؛ مانند ویجت پشتیبانی، بالای
+       منو برده می‌شود. !important چون CSS ماژول بعد از تم لود می‌شود. */
+    .aichw-wrapper[data-pos="bottom-right"],
+    .aichw-wrapper[data-pos="bottom-left"],
+    .aichw-wrapper[data-pos="bottom-center"] {
+        bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .aichw-wrapper[data-pos="bottom-right"] {
+        right: 14px;
+    }
+
+    .aichw-wrapper[data-pos="bottom-left"] {
+        left: 14px;
+    }
+}

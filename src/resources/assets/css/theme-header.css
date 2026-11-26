@@ -1057,3 +1057,159 @@
         height: 135px;
     }
 }
+
+/* ============================================================
+   فاز ۲۱۴ — هدر موبایل: چیپ‌های کوچک و مدرن + دکمهٔ بستن منو
+   ============================================================ */
+
+/* ---------- [۱] اکشن‌های هدر موبایل (روزوشب / سبد / حساب) ----------
+   قبلاً آیکون سبد و آواتار حساب در موبایل خیلی بزرگ بودند (۹۰px+
+   با آیکون ۳۰px). همه به چیپ‌های هم‌اندازهٔ ۴۲px با گوشهٔ نرم و
+   پس‌زمینهٔ ملایم تبدیل می‌شوند تا هدر موبایل مدرن و مرتب دیده شود. */
+@media (max-width: 991.98px) {
+    .mobile-header-actions {
+        gap: 9px;
+    }
+
+    .mobile-header-actions .theme-toggle-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        background: #f6f6f9;
+        border-color: #ececf2;
+        box-shadow: none;
+    }
+
+    .mobile-header-actions .theme-toggle-btn i {
+        font-size: 18px;
+    }
+
+    .mobile-header-actions .btn-action-cart {
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        background: #f6f6f9;
+        border: 1px solid #ececf2;
+        box-shadow: none;
+        color: #3f3f46;
+        transition: background .25s ease, border-color .25s ease, transform .2s ease;
+        -webkit-transition: background .25s ease, border-color .25s ease, transform .2s ease;
+    }
+
+    .mobile-header-actions .btn-action-cart i {
+        font-size: 19px;
+    }
+
+    .mobile-header-actions .btn-action-cart:hover {
+        background: #ededf3;
+        border-color: #e0e0e9;
+        transform: translateY(-1px);
+    }
+
+    /* نشان تعداد سبد — کوچک و گوشهٔ چیپ */
+    .mobile-header-actions .btn-action-cart .header-cart-counter {
+        top: -6px;
+        right: -6px;
+        transform: none;
+        height: 19px;
+        line-height: 19px;
+        min-width: 19px;
+        font-size: 10.5px;
+        padding: 0 4px;
+        box-shadow: 0 0 0 2px #fff;
+        -webkit-box-shadow: 0 0 0 2px #fff;
+    }
+
+    /* چیپ حساب کاربری — آواتار مدرن داخل چیپ ۴۲px */
+    .mobile-header-actions .header-register {
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f6f6f9;
+        border: 1px solid #ececf2;
+        border-radius: 13px;
+        box-shadow: none;
+        transition: background .25s ease, border-color .25s ease, transform .2s ease;
+        -webkit-transition: background .25s ease, border-color .25s ease, transform .2s ease;
+    }
+
+    .mobile-header-actions .header-register:hover {
+        background: #ededf3;
+        border-color: #e0e0e9;
+        transform: translateY(-1px);
+    }
+
+    .mobile-header-actions .header-register i {
+        font-size: 21px;
+        color: #3f3f46;
+    }
+
+    .mobile-header-actions figure.avatar {
+        height: 40px;
+        width: 40px;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        border: 0;
+        border-radius: 11px;
+        overflow: hidden;
+    }
+
+    .mobile-header-actions figure.avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 11px;
+    }
+}
+
+/* ---------- [۲] دکمهٔ بستن (×) منوی موبایل — واضح و مدرن ----------
+   قبلاً btn-close پیش‌فرض بوت‌استرپ (۱em با شفافیت ۰٫۵) عملاً
+   دیده نمی‌شد؛ با یک دکمهٔ واقعی ۴۲px جایگزین شده است. */
+.snr-menu-top {
+    align-items: center;
+    padding: 16px 20px 4px;
+}
+
+.snr-menu-top .offcanvas-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.snr-menu-close {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    background: #f4f4f8;
+    border: 1px solid #e8e8ef;
+    color: #3f3f46;
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    transition: background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease;
+    -webkit-transition: background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease;
+}
+
+.snr-menu-close:hover {
+    background: var(--main-color-one);
+    border-color: var(--main-color-one);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.snr-menu-close:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, .08);
+}

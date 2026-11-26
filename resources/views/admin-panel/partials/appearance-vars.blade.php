@@ -1,5 +1,5 @@
 {{-- ============================================================
-     فاز ۲۱۲ — پارشیال مشترکِ تزریق پوستهٔ رنگی پنل
+     فاز ۲۱۳ — پارشیال مشترکِ تزریق پوستهٔ رنگی پنل
      همهٔ لایوت‌های پنل (layout / module-new / builder / login)
      این پارشیال را include می‌کنند تا پوستهٔ انتخابی مدیر در
      «تنظیمات ظاهری» یک‌جا و یکسان روی کل پنل اعمال شود.
@@ -12,6 +12,9 @@
             ink / ink-2 / ink-3 (کارت‌ها، صفحه، خط‌ها، متن‌ها)
           • تم شب: night / night-1..3 / night-line / night-ink-2
           • متغیرهای CKEditor هم‌رنگ برند
+          • تازهٔ ۲۱۳: گرادیانِ امضای پالت (--ap-grad) روی دکمهٔ
+            اصلی، لوگوی سایدبار و نشانگر صفحهٔ نوار بالا + شستوی
+            محیطی صفحه (body::before) + اسکرول‌بار هم‌رنگ پوسته
        ۲) admin-appearance-shell — سایدبار با رنگ اختصاصی خودش:
           توکن‌های سطح/خط/متن فقط داخل #ap-sidebar با رنگ سایدبار
           بازتعریف می‌شوند (متن با کنتراست YIQ همیشه خوانا).
@@ -29,6 +32,13 @@
     $apv_side_d     = $ap_appearance_payload['sidebar_color_dark'] ?? null;
     $apv_side_ink   = $apv_side   ? \App\Support\PaletteEngine::contrastInk($apv_side)   : null;
     $apv_side_ink_d = $apv_side_d ? \App\Support\PaletteEngine::contrastInk($apv_side_d) : null;
+
+    /* فاز ۲۱۳ — گرادیان دوتُنیِ پالت (جفت رنگ دست‌چین هر پالت؛ اگر پوستهٔ
+       قدیمیِ بدون گرادیان ذخیره شده باشد، از طیف برند مشتق می‌شود) */
+    $apv_grad    = is_array($ap_appearance_payload['gradient'] ?? null) ? $ap_appearance_payload['gradient'] : [];
+    $apv_grad_a  = $apv_grad[0] ?? ($apv_scale[400] ?? $apv_base);
+    $apv_grad_b  = $apv_grad[1] ?? $apv_base;
+    $apv_angle   = (int) ($ap_appearance_payload['gradient_angle'] ?? 135);
 @endphp
 <style id="admin-appearance-vars">
     :root {
@@ -49,6 +59,13 @@
         --ck-color-base-active: var(--color-brand-600);
         --ck-color-base-action-muted: var(--color-brand-100);
         --ck-focus-border-color: var(--color-brand-600);
+
+        /* فاز ۲۱۳ — گرادیانِ امضای پالت: دکمه‌ها و نشانگرهای اصلی پنل */
+        --ap-grad: linear-gradient({{ $apv_angle }}deg, {{ $apv_grad_a }}, {{ $apv_grad_b }});
+        --ap-grad-hover: linear-gradient({{ $apv_angle }}deg, {{ $apv_grad_b }}, {{ $apv_grad_a }});
+        --ap-grad-soft: linear-gradient({{ $apv_angle }}deg,
+            color-mix(in srgb, {{ $apv_grad_a }} 18%, transparent),
+            color-mix(in srgb, {{ $apv_grad_b }} 10%, transparent));
     }
 @if (! empty($apv_tokens_d))
     html.dark {
@@ -57,9 +74,60 @@
 @endforeach
     }
 @endif
-    /* سایهٔ هاردکد دکمهٔ اصلی (قرینهٔ admin.css با رنگ پوستهٔ فعال) */
+
+    /* ================================================================
+       فاز ۲۱۳ — لایهٔ زیباییِ سراسری پنل (همهٔ لایوت‌ها، روشن و تم شب)
+       ================================================================ */
+
+    /* ۱) شستوی محیطی صفحه: هالهٔ ملایمِ هم‌خانوادهٔ برند بالای صفحه —
+          زیر محتوا (z-index:-1) و بی‌اثر روی موس؛ کل حس پنل را مدرن می‌کند */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        inset-inline: 0;
+        height: 420px;
+        z-index: -1;
+        pointer-events: none;
+        background:
+            radial-gradient(56% 130% at 88% -12%, color-mix(in srgb, var(--color-brand-600) 10%, transparent), transparent 66%),
+            radial-gradient(42% 110% at 10% -10%, color-mix(in srgb, var(--color-brand-400) 8%, transparent), transparent 62%);
+    }
+    html.dark body::before {
+        background:
+            radial-gradient(56% 130% at 88% -12%, color-mix(in srgb, var(--color-brand-500) 15%, transparent), transparent 66%),
+            radial-gradient(42% 110% at 10% -10%, color-mix(in srgb, var(--color-brand-700) 18%, transparent), transparent 62%);
+    }
+
+    /* ۲) دکمهٔ اصلی: گرادیان دوتُنیِ پالت + سایهٔ رنگیِ هم‌خانواده؛
+          هاور = جابه‌جایی نرم دو رنگ گرادیان (کمی عمیق‌تر) */
     .ap-btn-primary {
-        box-shadow: 0 6px 16px -6px {{ $apv_base }}73;
+        background-image: var(--ap-grad);
+        box-shadow: 0 8px 20px -8px color-mix(in srgb, {{ $apv_grad_b }} 62%, transparent);
+    }
+    .ap-btn-primary:hover:not(:disabled) {
+        background-image: var(--ap-grad-hover);
+        box-shadow: 0 10px 24px -8px color-mix(in srgb, {{ $apv_grad_b }} 74%, transparent);
+    }
+
+    /* ۳) لوگوی سایدبار و نشانگر صفحهٔ نوار بالا: گرادیان امضای پالت */
+    #ap-sidebar .bg-brand-600 {
+        background-image: var(--ap-grad);
+    }
+    .ap-page-chip {
+        background-image: var(--ap-grad) !important;
+        box-shadow: 0 6px 14px -6px color-mix(in srgb, {{ $apv_grad_b }} 55%, transparent);
+    }
+
+    /* ۴) اسکرول‌بار هم‌رنگ پوسته (به‌جای خاکستری ثابت) */
+    *::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, var(--color-brand-600) 34%, transparent);
+    }
+    *::-webkit-scrollbar-thumb:hover {
+        background: color-mix(in srgb, var(--color-brand-600) 55%, transparent);
+    }
+    html {
+        scrollbar-color: color-mix(in srgb, var(--color-brand-600) 40%, transparent) transparent;
     }
 </style>
 

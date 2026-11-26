@@ -1,18 +1,23 @@
 {{-- ============================================================
-     پنل مدیریت — تنظیمات ظاهری (فاز ۲۱۲ — بازطراحی کامل)
+     پنل مدیریت — تنظیمات ظاهری (فاز ۲۱۳ — پالایش زیبایی)
      ------------------------------------------------------------
      هر پالتِ آماده «کل توکن‌های پنل» را با هم عوض می‌کند:
        • طیف brand → دکمه‌ها، لینک‌ها، آیکن‌ها، حالت فعال
+       • گرادیانِ امضای پالت (دوتُنیِ دست‌چین) → دکمهٔ اصلی، لوگو،
+         نشانگر صفحه و سربرگِ همین صفحه — مدرن و یکپارچه
        • سایدبار = رنگِ عمیقِ مدرن (حتی در حالت روشن) با متنِ
          خودکارِ خوانا (کنتراست YIQ) + نسخهٔ مخصوص تم شب
-       • صفحه = شستوی رنگیِ هم‌خانواده؛ کارت‌ها سفیدِ تمیز
-       • خط‌ها، متن‌ها (اصلی/متوسط/کم‌رنگ) و هاورها هم‌خانواده
+       • صفحه = شستوی رنگیِ هم‌خانواده + هالهٔ محیطیِ ملایم بالای صفحه
+       • کارت‌ها سفیدِ تمیز؛ خط‌ها، متن‌ها و هاورها هم‌خانواده
        • تم شب = تیرهٔ رنگ‌گرفتهٔ همان خانواده (نه خاکستری خام)
      ⇒ با انتخاب هر پالت «کل پنل» همان لحظه رنگ می‌گیرد (زنده)،
        تا ذخیره موقتی است؛ متن‌ها و دکمه‌ها در روشن و تیره همیشه
        خوانا می‌مانند (زوج‌های کنتراست قبل از انتشار تایید شده‌اند).
-     بخش‌ها: پیش‌نمایش زندهٔ دوحالته | پالت‌های آماده |
+     بخش‌ها: سربرگ گرادیانی با طیف زنده | پیش‌نمایش زندهٔ دوحالته |
+       پالت‌های آماده (با گرادیان در مینیاتورها) |
        شخصی‌سازی (رنگ دکمه‌ها/متن/سایدبار/صفحه) | گرمی/سردی
+     فاز ۲۱۳ — رفع دکمهٔ ذخیره: cursor-pointer + یک رفت‌وبرگشتِ
+       واحد (saveSkin با آرگومان) + اسپاینر wire:loading و حالت busy.
      حالت پیش‌فرض روشن/تیره از جای دیگر تنظیم می‌شود (کوکی کاربر)
      و اینجا فقط «سازگاری» تضمین می‌شود — بدون هیچ کلیدی.
      JS همین صفحه قرینهٔ دقیق App\Support\PaletteEngine است؛
@@ -51,6 +56,8 @@
         $cSideD = $r['sidebar_color_dark'] ?: $pe::DEFAULT_SIDEBAR_COLOR_DARK;
         $cards[$p['key']] = [
             'primary'  => $r['base'],
+            'grad'     => $r['gradient'],
+            'angle'    => (int) ($r['gradient_angle'] ?? 135),
             'side'     => $cSide,
             'sideInk'  => $r['side_ink'] ?: $pe::contrastInk($cSide),
             'sideD'    => $cSideD,
@@ -70,10 +77,13 @@
 @endphp
 <div class="mx-auto max-w-6xl space-y-5">
 
-    {{-- ===== سربرگ صفحه ===== --}}
-    <div class="relative overflow-hidden rounded-3xl bg-linear-to-bl from-brand-700 via-brand-600 to-brand-500 p-5 text-white shadow-lg shadow-brand-600/20 sm:p-6">
-        <span class="pointer-events-none absolute -top-10 -left-10 size-44 rounded-full bg-white/10 blur-2xl" aria-hidden="true"></span>
-        <span class="pointer-events-none absolute -bottom-14 left-1/3 size-52 rounded-full bg-white/10 blur-2xl" aria-hidden="true"></span>
+    {{-- ===== سربرگ صفحه (فاز ۲۱۳ — گرادیانِ امضای پوسته + نمایش زندهٔ رنگ‌ها) ===== --}}
+    <div id="sa-hero" class="relative overflow-hidden rounded-3xl p-5 text-white shadow-xl sm:p-6"
+         style="background: linear-gradient({{ $preview['gradient_angle'] ?? 135 }}deg, {{ implode(', ', $preview['gradient']) }});">
+        {{-- هاله‌های شیشه‌ای تزئینی --}}
+        <span class="pointer-events-none absolute -top-12 -left-12 size-48 rounded-full bg-white/10 blur-3xl" aria-hidden="true"></span>
+        <span class="pointer-events-none absolute -bottom-16 left-1/3 size-56 rounded-full bg-white/10 blur-3xl" aria-hidden="true"></span>
+        <span class="pointer-events-none absolute -top-8 right-1/4 size-32 rounded-full bg-white/10 blur-2xl" aria-hidden="true"></span>
 
         <div class="relative flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-3.5">
@@ -90,13 +100,21 @@
                     <h1 class="text-lg font-bold sm:text-xl">تنظیمات ظاهری</h1>
                     <p class="mt-1 flex flex-wrap items-center gap-2 text-xs text-white/85">
                         <span>پوستهٔ رنگی پنل مدیریت:</span>
-                        <span class="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold">{{ $savedLabel }}</span>
+                        <span class="rounded-full bg-white/18 px-2 py-0.5 text-[10px] font-bold">{{ $savedLabel }}</span>
                     </p>
                 </div>
             </div>
-            <p class="hidden text-[11px] leading-6 text-white/80 sm:block sm:max-w-96">
-                با انتخاب هر پالت، کل پنل — سایدبار، صفحه، کارت‌ها، خط‌ها، متن‌ها و دکمه‌ها — همان لحظه و هماهنگ رنگ می‌گیرد.
-            </p>
+            <div class="flex flex-col items-start gap-2 sm:items-end">
+                <div class="flex items-center gap-1.5" title="طیف رنگیِ پوستهٔ فعال">
+                    @foreach ([50, 300, 500, 600, 800, 950] as $saHeroStep)
+                        <span class="size-5 rounded-full border border-white/30 shadow-sm"
+                              style="background: {{ $scale[$saHeroStep] }}" aria-hidden="true"></span>
+                    @endforeach
+                </div>
+                <p class="hidden text-[11px] leading-6 text-white/80 sm:block sm:max-w-96">
+                    با انتخاب هر پالت، کل پنل — سایدبار، صفحه، کارت‌ها، خط‌ها، متن‌ها و دکمه‌های گرادیانی — همان لحظه و هماهنگ رنگ می‌گیرد.
+                </p>
+            </div>
         </div>
     </div>
 
@@ -109,8 +127,69 @@
                 border-color: var(--sa-base) !important;
                 box-shadow: 0 0 0 3px rgba(var(--sa-base-rgb), .16) !important;
             }
+            /* فاز ۲۱۳ — همهٔ عناصر قابل‌کلیک صفحه نشانگر pointer بگیرند
+               (پری‌فلایت Tailwind 4 روی button مقدار cursor:default می‌گذارد) */
+            #saniar-appearance button,
+            #saniar-appearance label[title="باز کردن انتخابگر رنگ"],
             #saniar-appearance input[type="color"] { cursor: pointer; }
             #saniar-appearance input[type="range"] { accent-color: var(--sa-base); }
+
+            /* فاز ۲۱۳ — اسلایدر گرمی/سردی با ریل گرادیانیِ گرم→سرد و انگشتِ رنگی */
+            #saniar-appearance #sa-warmth {
+                -webkit-appearance: none;
+                appearance: none;
+                height: 7px;
+                border-radius: 999px;
+                outline-offset: 5px;
+                background: linear-gradient(to right,
+                    #E11D48 0%, #F97316 18%, #FBBF24 40%,
+                    #A3B8C7 50%,
+                    #7DD3FC 60%, #38BDF8 82%, #6366F1 100%);
+            }
+            #saniar-appearance #sa-warmth::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #fff;
+                border: 3.5px solid var(--sa-base);
+                box-shadow: 0 3px 10px rgba(0, 0, 0, .22), 0 0 0 4px rgba(var(--sa-base-rgb), .14);
+                cursor: grab;
+                transition: transform .15s ease;
+            }
+            #saniar-appearance #sa-warmth::-webkit-slider-thumb:hover { transform: scale(1.12); }
+            #saniar-appearance #sa-warmth::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.05); }
+            #saniar-appearance #sa-warmth::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #fff;
+                border: 3.5px solid var(--sa-base);
+                box-shadow: 0 3px 10px rgba(0, 0, 0, .22), 0 0 0 4px rgba(var(--sa-base-rgb), .14);
+                cursor: grab;
+            }
+            #saniar-appearance #sa-warmth:focus-visible {
+                outline: 2px solid var(--sa-base);
+            }
+
+            /* اسپاینر لودینگ دکمه‌ها (ذخیره/بازگشت) */
+            .sa-spinner {
+                display: inline-block;
+                width: 13px;
+                height: 13px;
+                border: 2px solid currentColor;
+                border-top-color: transparent;
+                border-radius: 50%;
+                opacity: .9;
+                animation: sa-spin .7s linear infinite;
+            }
+            @keyframes sa-spin { to { transform: rotate(360deg); } }
+
+            /* حالت busy دکمهٔ ذخیره (بازخورد فوری JS تا شروع درخواست Livewire) */
+            #sa-save.sa-busy .sa-save-idle { display: none !important; }
+            #sa-save.sa-busy .sa-save-busy { display: inline-flex !important; }
+            #sa-save.sa-busy, #sa-reset.sa-busy { opacity: .85; pointer-events: none; }
         </style>
 
         {{-- سربرگ کارت --}}
@@ -169,7 +248,7 @@
                                 {{-- سایدبار (RTL — سمت راست) --}}
                                 <div class="flex w-[30%] shrink-0 flex-col gap-1.5 p-2.5" style="background: var(--pv-side)">
                                     <div class="mb-0.5 flex items-center gap-1.5">
-                                        <span class="flex size-5 shrink-0 items-center justify-center rounded-lg text-[8px] font-black text-white" style="background: var(--pv-primary)">P</span>
+                                        <span class="flex size-5 shrink-0 items-center justify-center rounded-lg text-[8px] font-black text-white" style="background: var(--pv-grad)">P</span>
                                         <span class="truncate text-[9.5px] font-bold" style="color: var(--pv-side-ink)">پنل مدیریت</span>
                                     </div>
                                     <span class="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[9px] font-bold" style="background: color-mix(in srgb, var(--pv-primary) 20%, var(--pv-side)); color: var(--pv-side-ink)">
@@ -194,7 +273,7 @@
                                     <div class="flex items-center justify-between border-b px-3 py-2" style="background: var(--pv-card); border-color: var(--pv-line)">
                                         <span class="text-[9.5px] font-bold" style="color: var(--pv-ink)">داشبورد</span>
                                         <div class="flex items-center gap-1.5">
-                                            <span class="flex size-5 items-center justify-center rounded-full text-white" style="background: var(--pv-primary)">
+                                            <span class="flex size-5 items-center justify-center rounded-full text-white" style="background: var(--pv-grad)">
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-2.5" aria-hidden="true">
                                                     <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
                                                     <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
@@ -216,7 +295,7 @@
                                             <span class="text-[8px]" style="color: var(--pv-ink3)">وضعیت سفارش</span>
                                             <span class="mt-1.5 w-fit rounded-full px-1.5 py-0.5 text-[7.5px] font-bold text-white" style="background: var(--pv-primary)">فعال</span>
                                             <div class="mt-auto flex gap-1.5">
-                                                <span class="rounded-lg px-2 py-1 text-[8px] font-bold text-white" style="background: var(--pv-primary)">ذخیره</span>
+                                                <span class="rounded-lg px-2 py-1 text-[8px] font-bold text-white" style="background: var(--pv-grad)">ذخیره</span>
                                                 <span class="rounded-lg border px-2 py-1 text-[8px] font-bold" style="border-color: color-mix(in srgb, var(--pv-primary) 45%, transparent); color: var(--pv-primary)">انصراف</span>
                                             </div>
                                         </div>
@@ -240,7 +319,7 @@
                                 {{-- سایدبار --}}
                                 <div class="flex w-[30%] shrink-0 flex-col gap-1.5 p-2.5" style="background: var(--pv-side)">
                                     <div class="mb-0.5 flex items-center gap-1.5">
-                                        <span class="flex size-5 shrink-0 items-center justify-center rounded-lg text-[8px] font-black text-white" style="background: var(--pv-primary)">P</span>
+                                        <span class="flex size-5 shrink-0 items-center justify-center rounded-lg text-[8px] font-black text-white" style="background: var(--pv-grad)">P</span>
                                         <span class="truncate text-[9.5px] font-bold" style="color: var(--pv-side-ink)">پنل مدیریت</span>
                                     </div>
                                     <span class="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[9px] font-bold" style="background: color-mix(in srgb, var(--pv-primary) 24%, var(--pv-side)); color: var(--pv-side-ink)">
@@ -265,7 +344,7 @@
                                     <div class="flex items-center justify-between border-b px-3 py-2" style="background: var(--pv-card); border-color: var(--pv-line)">
                                         <span class="text-[9.5px] font-bold" style="color: var(--pv-ink)">داشبورد</span>
                                         <div class="flex items-center gap-1.5">
-                                            <span class="flex size-5 items-center justify-center rounded-full text-white" style="background: var(--pv-primary)">
+                                            <span class="flex size-5 items-center justify-center rounded-full text-white" style="background: var(--pv-grad)">
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-2.5" aria-hidden="true">
                                                     <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
                                                     <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
@@ -287,7 +366,7 @@
                                             <span class="text-[8px]" style="color: var(--pv-ink3)">وضعیت سفارش</span>
                                             <span class="mt-1.5 w-fit rounded-full px-1.5 py-0.5 text-[7.5px] font-bold text-white" style="background: var(--pv-primary)">فعال</span>
                                             <div class="mt-auto flex gap-1.5">
-                                                <span class="rounded-lg px-2 py-1 text-[8px] font-bold text-white" style="background: var(--pv-primary)">ذخیره</span>
+                                                <span class="rounded-lg px-2 py-1 text-[8px] font-bold text-white" style="background: var(--pv-grad)">ذخیره</span>
                                                 <span class="rounded-lg border px-2 py-1 text-[8px] font-bold" style="border-color: color-mix(in srgb, var(--pv-primary) 45%, transparent); color: var(--pv-primary)">انصراف</span>
                                             </div>
                                         </div>
@@ -323,7 +402,7 @@
                                 <span class="flex h-10" style="background: {{ $c['page'] }}">
                                     <span class="w-[30%] shrink-0 p-1" style="background: {{ $c['side'] }}">
                                         <span class="flex items-center gap-1">
-                                            <span class="size-2 rounded-[3px]" style="background: {{ $c['primary'] }}"></span>
+                                            <span class="size-2 rounded-[3px]" style="background: linear-gradient({{ $c['angle'] }}deg, {{ $c['grad'][0] }}, {{ $c['grad'][1] }})"></span>
                                             <span class="h-[3px] w-3 rounded-full" style="background: color-mix(in srgb, {{ $c['sideInk'] }} 72%, transparent)"></span>
                                         </span>
                                         <span class="mt-1 block h-[5px] w-full rounded-[3px]" style="background: color-mix(in srgb, {{ $c['primary'] }} 22%, {{ $c['side'] }})"></span>
@@ -335,14 +414,14 @@
                                             <span class="size-2 rounded-full" style="background: {{ $c['primary'] }}"></span>
                                         </span>
                                         <span class="block flex-1 rounded-[4px] border" style="background: {{ $c['card'] }}; border-color: {{ $c['line'] }}"></span>
-                                        <span class="block h-[6px] w-9 rounded-[3px]" style="background: {{ $c['primary'] }}"></span>
+                                        <span class="block h-[6px] w-9 rounded-[3px]" style="background: linear-gradient({{ $c['angle'] }}deg, {{ $c['grad'][0] }}, {{ $c['grad'][1] }})"></span>
                                     </span>
                                 </span>
                                 {{-- تم شب --}}
                                 <span class="flex h-10 border-t" style="background: {{ $c['pageD'] }}; border-color: rgba(0,0,0,.35)">
                                     <span class="w-[30%] shrink-0 p-1" style="background: {{ $c['sideD'] }}">
                                         <span class="flex items-center gap-1">
-                                            <span class="size-2 rounded-[3px]" style="background: {{ $c['primary'] }}"></span>
+                                            <span class="size-2 rounded-[3px]" style="background: linear-gradient({{ $c['angle'] }}deg, {{ $c['grad'][0] }}, {{ $c['grad'][1] }})"></span>
                                             <span class="h-[3px] w-3 rounded-full" style="background: color-mix(in srgb, {{ $c['sideInkD'] }} 72%, transparent)"></span>
                                         </span>
                                         <span class="mt-1 block h-[5px] w-full rounded-[3px]" style="background: color-mix(in srgb, {{ $c['primary'] }} 26%, {{ $c['sideD'] }})"></span>
@@ -354,7 +433,7 @@
                                             <span class="size-2 rounded-full" style="background: {{ $c['primary'] }}"></span>
                                         </span>
                                         <span class="block flex-1 rounded-[4px] border" style="background: {{ $c['cardD'] }}; border-color: {{ $c['lineD'] }}"></span>
-                                        <span class="block h-[6px] w-9 rounded-[3px]" style="background: {{ $c['primary'] }}"></span>
+                                        <span class="block h-[6px] w-9 rounded-[3px]" style="background: linear-gradient({{ $c['angle'] }}deg, {{ $c['grad'][0] }}, {{ $c['grad'][1] }})"></span>
                                     </span>
                                 </span>
                             </span>
@@ -557,7 +636,7 @@
                 </div>
             </div>
 
-            {{-- پانویس: بازگشت به پیش‌فرض + ذخیره --}}
+            {{-- پانویس: بازگشت به پیش‌فرض + ذخیره (فاز ۲۱۳ — لودینگ واقعی + cursor) --}}
             <div class="flex flex-wrap items-center justify-between gap-3 border-t border-dashed pt-4" style="border-color: rgba(var(--sa-base-rgb), .2);">
                 <p class="flex items-center gap-1.5 text-[11px] text-ink-3 dark:text-night-ink-2">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="size-3.5 shrink-0" aria-hidden="true">
@@ -567,17 +646,33 @@
                 </p>
                 <div class="flex items-center gap-2.5">
                     <button type="button" id="sa-reset"
-                            class="rounded-full border-2 bg-transparent px-4 py-2 text-[12px] font-bold transition-colors"
-                            style="border-color: rgba(var(--sa-base-rgb), .4); color: var(--sa-base);">
-                        بازگشت به پیش‌فرض
+                            class="sa-clickable cursor-pointer rounded-full border-2 bg-transparent px-4 py-2 text-[12px] font-bold transition-all active:scale-[.97]"
+                            style="border-color: rgba(var(--sa-base-rgb), .4); color: var(--sa-base);"
+                            wire:loading.attr="disabled" wire:target="resetSkin"
+                            title="بازگرداندن پوستهٔ پنل به پیش‌فرض">
+                        <span wire:loading.remove wire:target="resetSkin">بازگشت به پیش‌فرض</span>
+                        <span class="inline-flex items-center gap-1.5" wire:loading wire:target="resetSkin">
+                            <span class="sa-spinner" aria-hidden="true"></span>
+                            در حال بازگشت…
+                        </span>
                     </button>
                     <button type="button" id="sa-save"
-                            class="inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-[12px] font-bold text-white shadow-md transition-all"
-                            style="background: var(--sa-grad);">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
-                            <path d="M20 6 9 17l-5-5"/>
-                        </svg>
-                        ذخیره پوسته
+                            class="sa-clickable inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full px-5 py-2 text-[12px] font-bold text-white shadow-md transition-all active:scale-[.97]"
+                            style="background: var(--sa-grad);"
+                            wire:loading.attr="disabled" wire:target="saveSkin"
+                            title="ذخیرهٔ پوستهٔ انتخابی روی کل پنل">
+                        {{-- حالت عادی --}}
+                        <span class="sa-save-idle inline-flex items-center gap-1.5">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
+                                <path d="M20 6 9 17l-5-5"/>
+                            </svg>
+                            ذخیره پوسته
+                        </span>
+                        {{-- حالت در حال ذخیره — wire:loading (سازوکار Livewire) + کلاس sa-busy (بازخورد فوری JS) --}}
+                        <span class="sa-save-busy hidden items-center gap-1.5" wire:loading.class="!inline-flex" wire:target="saveSkin">
+                            <span class="sa-spinner" aria-hidden="true"></span>
+                            در حال ذخیره…
+                        </span>
                     </button>
                 </div>
             </div>
@@ -588,13 +683,14 @@
 @script
 <script>
     /* ============================================================
-       فاز ۲۱۲ — پیش‌نمایش زندهٔ تنظیمات ظاهری پنل (سمت مرورگر)
+       فاز ۲۱۳ — پیش‌نمایش زندهٔ تنظیمات ظاهری پنل (سمت مرورگر)
        • ریاضی رنگ قرینهٔ دقیق App\Support\PaletteEngine (PHP) است؛
          منبع حقیقتِ ذخیره همان PHP است.
        • هر تغییر (پالت/گرمی/شخصی‌سازی) همان لحظه:
            ۱) متغیرهای کل پنل را در <style id="ap-live-vars"> می‌نویسد
-              (کارت‌ها، خط‌ها، متن‌ها، سایدبار، تم شب — همه با هم)
+              (کارت‌ها، خط‌ها، متن‌ها، سایدبار، گرادیان امضا، تم شب)
            ۲) پیش‌نمایش دوحالته و رنگ‌های تأکیدی صفحه را به‌روز می‌کند
+           ۳) سربرگ صفحه هم با گرادیانِ امضای پالت زنده می‌شود
        • پیش از ناوبری SPA، استایل زنده حذف می‌شود تا صفحهٔ بعدی
          همان پوستهٔ «ذخیره‌شده» را نشان دهد.
        ============================================================ */
@@ -851,8 +947,11 @@
             sideDark: sideDark,
             sideInk: side ? contrastInk(side) : contrastInk(saR.defaults.side),
             sideInkDark: sideDark ? contrastInk(sideDark) : contrastInk(saR.defaults.sideDark),
-            gradient: [scale[400], scale[600]],
-            angle: 135,
+            /* فاز ۲۱۳ — گرادیان دوتُنیِ پالت (قرینهٔ resolve در PHP):
+               پالت‌های آماده جفت دست‌چین خودشان را دارند (با چرخش گرمی/سردی)؛
+               شخصی‌سازی از طیف مشتق می‌شود. */
+            gradient: p.gradient ? p.gradient.map((c) => rotateHue(c, rotation)) : [scale[400], scale[600]],
+            angle: p.gradient_angle || 135,
         };
     }
 
@@ -865,6 +964,10 @@
         css += '--ck-color-base-action:var(--color-brand-600);--ck-color-base-action-hover:var(--color-brand-700);'
             + '--ck-color-base-focus:var(--color-brand-600);--ck-color-base-active:var(--color-brand-600);'
             + '--ck-color-base-action-muted:var(--color-brand-100);--ck-focus-border-color:var(--color-brand-600);';
+        /* فاز ۲۱۳ — گرادیانِ امضای پالت زنده (دکمه‌ها، لوگو، نشانگر صفحه و
+           شستوی محیطی — قرینهٔ پارشیال appearance-vars در سرور) */
+        css += '--ap-grad:linear-gradient(' + skin.angle + 'deg,' + skin.gradient.join(',') + ');'
+            + '--ap-grad-hover:linear-gradient(' + skin.angle + 'deg,' + skin.gradient.slice().reverse().join(',') + ');';
         css += '}';
         css += 'html.dark{';
         Object.keys(T.dark).forEach((k) => { css += '--color-' + k.replace(/_/g, '-') + ':' + T.dark[k] + ';'; });
@@ -908,19 +1011,20 @@
     /* ============ پیش‌نمایش دوحالته + رنگ‌های تأکیدی صفحه ============ */
     function updatePreview(skin) {
         const L = skin.tokens.light, D = skin.tokens.dark;
+        const grad = 'linear-gradient(' + skin.angle + 'deg,' + skin.gradient.join(',') + ')';
         const set = (id, css) => { const el = document.getElementById(id); if (el) el.style.cssText = css; };
         set('sa-pv-light',
             '--pv-side:' + (skin.side || saR.defaults.side) + ';'
             + '--pv-side-ink:' + (skin.side ? skin.sideInk : contrastInk(saR.defaults.side)) + ';'
             + '--pv-page:' + L.surface_2 + ';--pv-card:' + L.surface + ';--pv-line:' + L.line + ';'
             + '--pv-ink:' + L.ink + ';--pv-ink2:' + L.ink_2 + ';--pv-ink3:' + L.ink_3 + ';'
-            + '--pv-primary:' + skin.base + ';');
+            + '--pv-primary:' + skin.base + ';--pv-grad:' + grad + ';');
         set('sa-pv-dark',
             '--pv-side:' + (skin.sideDark || saR.defaults.sideDark) + ';'
             + '--pv-side-ink:' + (skin.sideDark ? skin.sideInkDark : contrastInk(saR.defaults.sideDark)) + ';'
             + '--pv-page:' + D.night + ';--pv-card:' + D.night_2 + ';--pv-line:' + D.night_line + ';'
             + '--pv-ink:' + D.night_ink + ';--pv-ink2:' + D.night_ink_2 + ';--pv-ink3:' + D.night_ink_2 + ';'
-            + '--pv-primary:' + skin.base + ';');
+            + '--pv-primary:' + skin.base + ';--pv-grad:' + grad + ';');
     }
 
     function updateAccents(skin) {
@@ -928,7 +1032,11 @@
         saRoot.style.setProperty('--sa-base', skin.base);
         saRoot.style.setProperty('--sa-base-rgb', hexToRgb(skin.base).join(', '));
         saRoot.style.setProperty('--sa-deep', skin.scale[700]);
-        saRoot.style.setProperty('--sa-grad', 'linear-gradient(135deg, ' + skin.gradient.join(', ') + ')');
+        saRoot.style.setProperty('--sa-grad', 'linear-gradient(' + skin.angle + 'deg, ' + skin.gradient.join(', ') + ')');
+
+        /* فاز ۲۱۳ — سربرگ صفحه هم زنده با گرادیانِ امضای پالت رنگ می‌گیرد */
+        const hero = document.getElementById('sa-hero');
+        if (hero) hero.style.background = 'linear-gradient(' + skin.angle + 'deg, ' + skin.gradient.join(', ') + ')';
     }
 
     function updateCustomUi(skin) {
@@ -1032,19 +1140,48 @@
     bindCustom('sa-c-side', 'sa-c-side-hex', 'sa-c-side-sw', 'sa-c-side-reset', 'customSidebar');
     bindCustom('sa-c-page', 'sa-c-page-hex', 'sa-c-page-sw', 'sa-c-page-reset', 'customPage');
 
-    /* ذخیره — یک رفت‌وبرگشت برای همهٔ مقادیر، بعد ذخیرهٔ سمت سرور */
+    /* ذخیره — فاز ۲۱۳: یک رفت‌وبرگشتِ واحد؛ همهٔ مقادیر به‌عنوان آرگومان
+       saveSkin می‌روند و همان‌جا همگام + ذخیره می‌شوند (قبلاً دو فراخوانی
+       جدا بود و بازخورد لودینگ هم وجود نداشت). بازخورد فوری = کلاس sa-busy
+       روی دکمه + سازوکار wire:loading در blade. */
     const saveBtn = document.getElementById('sa-save');
     if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
-            $wire.call('syncState', saState.palette, saState.warmth, saState.custom, saState.customFont, saState.customSidebar, saState.customPage);
-            $wire.call('saveSkin');
+        saveBtn.addEventListener('click', async () => {
+            if (saveBtn.classList.contains('sa-busy')) return; // جلوگیری از دابل‌کلیک
+            saveBtn.classList.add('sa-busy');
+            saveBtn.setAttribute('aria-busy', 'true');
+            try {
+                await $wire.call('saveSkin', saState.palette, saState.warmth, saState.custom, saState.customFont, saState.customSidebar, saState.customPage);
+            } catch (err) {
+                console.error('saveSkin failed:', err);
+            } finally {
+                /* کمی مکث تا toast دیده شود و حالت busy نپرد */
+                setTimeout(() => {
+                    saveBtn.classList.remove('sa-busy');
+                    saveBtn.removeAttribute('aria-busy');
+                }, 500);
+            }
         });
     }
 
-    /* بازگشت به پیش‌فرض */
+    /* بازگشت به پیش‌فرض — با بازخورد busy مشابه ذخیره */
     const resetBtn = document.getElementById('sa-reset');
     if (resetBtn) {
-        resetBtn.addEventListener('click', () => { $wire.call('resetSkin'); });
+        resetBtn.addEventListener('click', async () => {
+            if (resetBtn.classList.contains('sa-busy')) return;
+            resetBtn.classList.add('sa-busy');
+            resetBtn.setAttribute('aria-busy', 'true');
+            try {
+                await $wire.call('resetSkin');
+            } catch (err) {
+                console.error('resetSkin failed:', err);
+            } finally {
+                setTimeout(() => {
+                    resetBtn.classList.remove('sa-busy');
+                    resetBtn.removeAttribute('aria-busy');
+                }, 400);
+            }
+        });
     }
 
     $wire.on('appearance-reset', (data) => {

@@ -114,10 +114,24 @@ class AppearanceSettings extends Component
         ];
     }
 
-    /** ذخیرهٔ پوستهٔ پنل — همان لحظه روی کل پنل اعمال می‌شود */
-    public function saveSkin(): void
+    /**
+     * ذخیرهٔ پوستهٔ پنل — همان لحظه روی کل پنل اعمال می‌شود
+     * -----------------------------------------------------------
+     * فاز ۲۱۳ — رفع «دکمهٔ ذخیره کار نمی‌کند»:
+     *   • قبلاً JS دو فراخوانی جدا می‌فرستاد (syncState + saveSkin) و هیچ
+     *     بازخوردی (لودینگ/دیس‌ابل) وجود نداشت؛ الان همهٔ مقادیر به‌عنوان
+     *     آرگومان در «یک رفت‌وبرگشت» همین‌جا همگام و ذخیره می‌شوند.
+     *   • در blade: cursor-pointer + اسپاینر wire:loading + wire:target
+     *     «saveSkin» + حالت busy سمت JS — بازخورد فوری و قطعی.
+     *
+     * آرگومان‌ها اختیاری‌اند تا فراخوانی بدون آرگومان هم معتبر بماند.
+     */
+    public function saveSkin($palette = null, $warmth = null, $custom = null, $customFont = null, $customSidebar = null, $customPage = null): void
     {
         auth('adminPanel')->user()?->can('themes.settings') ?: abort(403);
+
+        // همگام‌سازی وضعیتِ انتخاب‌شده در مرورگر (پالت/گرمی/شخصی‌سازی) قبل از ذخیره
+        $this->syncState($palette, $warmth, $custom, $customFont, $customSidebar, $customPage);
 
         $previous = PaletteEngine::stateFromOption();
         $payload = PaletteEngine::resolve($this->palette, $this->warmth, $this->custom, $this->mode, $this->customExtras());

@@ -59,7 +59,8 @@
         {{-- عنوان صفحه + آیکون --}}
         <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
-                <span class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-500 to-brand-700 text-white shadow-md shadow-brand-500/25">
+                {{-- فاز ۲۱۳ — ap-page-chip: گرادیانِ امضای پوسته از پارشیال appearance-vars --}}
+                <span class="ap-page-chip flex size-8 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-500 to-brand-700 text-white shadow-md shadow-brand-500/25">
                     <x-admin-panel::icon name="{{ $pageIcon }}" class="size-4.5" />
                 </span>
                 <h1 class="truncate text-[15px] font-bold leading-6">{{ $pageTitle ?: 'داشبورد' }}</h1>

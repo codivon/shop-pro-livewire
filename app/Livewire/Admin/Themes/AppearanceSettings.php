@@ -136,12 +136,14 @@ class AppearanceSettings extends Component
             'پالت' => $payload['label'],
             'رنگ اصلی (دکمه‌ها و آیکن‌ها)' => $payload['base'],
             'گرمی/سردی' => $payload['warmth'],
-            'رنگ سایدبار (روشن)' => $payload['sidebar_color'] ?? 'پیش‌فرض',
-            'رنگ سایدبار (تم شب)' => $payload['sidebar_color_dark'] ?? 'پیش‌فرض',
-            'رنگ صفحه (روشن)' => $payload['page_color'] ?? 'پیش‌فرض',
-            'رنگ صفحه (تم شب)' => $payload['page_color_dark'] ?? 'پیش‌فرض',
-            'رنگ متن (روشن)' => $payload['font_color'] ?? 'پیش‌فرض',
-            'رنگ متن (تم شب)' => $payload['font_color_dark'] ?? 'پیش‌فرض',
+            'سایدبار (روشن)' => $payload['sidebar_color'] ?? 'پیش‌فرض',
+            'سایدبار (تم شب)' => $payload['sidebar_color_dark'] ?? 'پیش‌فرض',
+            'صفحه (روشن)' => $payload['page_color'],
+            'صفحه (تم شب)' => $payload['page_color_dark'],
+            'متن (روشن)' => $payload['font_color'] ?? 'پیش‌فرض',
+            'متن (تم شب)' => $payload['font_color_dark'] ?? 'پیش‌فرض',
+            'خط‌ها (روشن)' => $payload['tokens']['light']['line'] ?? null,
+            'کارت‌ها (تم شب)' => $payload['tokens']['dark']['night_2'] ?? null,
         ];
 
         activity()
@@ -198,7 +200,7 @@ class AppearanceSettings extends Component
         $this->savedLabel = $default['label'];
         $this->saved = false;
 
-        // وضعیت تازه برای JS (UI انتخاب‌ها و پیش‌نمایش باید ریست شود)
+        // وضعیت تازه برای JS (UI انتخاب‌ها، پیش‌نمایش و متغیرهای زندهٔ کل پنل باید ریست شوند)
         $this->dispatch('appearance-reset', palette: $this->palette, warmth: $this->warmth, custom: $this->custom, customFont: '', customSidebar: '', customPage: '', label: $this->savedLabel);
 
         $this->dispatch('toast', message: 'پوستهٔ پنل به حالت پیش‌فرض (زمردی) بازگشت.', type: 'info');
@@ -209,9 +211,19 @@ class AppearanceSettings extends Component
         // پیش‌نمایش زندهٔ سمت سرور برای رندر اولیه؛ پس از آن JS لحظه‌ای به‌روزرسانی می‌کند
         $preview = PaletteEngine::resolve($this->palette, $this->warmth, $this->custom, $this->mode, $this->customExtras());
 
+        // مینیاتورِ هر پالتِ آماده با توکن‌های واقعیِ خودش (بدون گرمی/سردی) —
+        // پالت شخصی‌سازی با رنگ‌های فعلیِ مدیر رندر می‌شود
+        $previews = [];
+        foreach (PaletteEngine::palettes() as $p) {
+            $previews[$p['key']] = $p['key'] === 'custom'
+                ? PaletteEngine::resolve('custom', 0, $this->custom, 'light', $this->customExtras())
+                : PaletteEngine::resolve($p['key'], 0, $this->custom, 'light');
+        }
+
         return view('admin-panel::livewire.admin.themes.appearance', [
             'palettes' => PaletteEngine::palettes(),
-            'preview' => $preview,
+            'preview'  => $preview,
+            'previews' => $previews,
         ])->layout('admin-panel::layout');
     }
 }

@@ -1,6 +1,6 @@
 {{-- Layout تمام‌صفحه‌ی ویجت‌ساز — مستقل از سایدبار/تاپ‌بار پنل --}}
 @php
-    /* فاز ۲۰۸ — پوستهٔ رنگی پنل (تنظیمات ظاهری سایدبار) — مثل layout اصلی */
+    /* فاز ۲۱۲ — پوستهٔ رنگی پنل (تنظیمات ظاهری سایدبار) — مثل layout اصلی */
     try {
         $ap_appearance_payload = \App\Support\PaletteEngine::stateFromOption()['payload'] ?? null;
     } catch (\Throwable $ap_appearance_error) {
@@ -15,12 +15,7 @@
         : ($ap_admin_theme_cookie === 'light'
             ? ''
             : (($ap_appearance_payload['mode'] ?? 'light') === 'dark' ? 'dark' : ''));
-    $ap_scale = $ap_appearance_payload['scale'];
-    $ap_base = $ap_appearance_payload['base'] ?? ($ap_scale[600] ?? '#059669');
-
-    /* فاز ۲۱۰ — رنگ فونت پنل از پوستهٔ فعال (بدون سایدبار در این صفحه) */
-    $ap_font      = $ap_appearance_payload['font_color'] ?? null;
-    $ap_font_dark = $ap_appearance_payload['font_color_dark'] ?? null;
+    $ap_base_extra = $ap_appearance_payload['base'] ?? '#059669';
 @endphp
 <!DOCTYPE html>
 <html lang="fa" dir="rtl"
@@ -37,44 +32,21 @@
     @vite(['resources/admin-panel/css/admin.css', 'resources/admin-panel/js/admin.js'])
     @livewireStyles
 
-    <style id="admin-appearance-vars">
-        :root {
-@if (! empty($ap_scale) && is_array($ap_scale))
-@foreach ($ap_scale as $ap_step => $ap_hex)
-            --color-brand-{{ $ap_step }}: {{ $ap_hex }};
-@endforeach
-@endif
-            --ck-color-base-action: var(--color-brand-600);
-            --ck-color-base-action-hover: var(--color-brand-700);
-            --ck-color-base-focus: var(--color-brand-600);
-            --ck-color-base-active: var(--color-brand-600);
-            --ck-color-base-action-muted: var(--color-brand-100);
-            --ck-focus-border-color: var(--color-brand-600);
-@if ($ap_font)
-            /* فاز ۲۱۰ — رنگ فونت پنل (روشن) */
-            --color-ink: {{ $ap_font }};
-@endif
-@if ($ap_font_dark)
-            /* فاز ۲۱۰ — رنگ فونت پنل (تم شب) */
-            --color-night-ink: {{ $ap_font_dark }};
-@endif
-        }
+    {{-- فاز ۲۱۲ — پوستهٔ رنگی پنل: بازنویسی کامل توکن‌ها با پارشیال مشترک --}}
+    @include('admin-panel::partials.appearance-vars')
 
-        .ap-btn-primary {
-            box-shadow: 0 6px 16px -6px {{ $ap_base }}73;
-        }
-
+    <style id="admin-appearance-extra">
         .cat-row.ap-drop-before {
-            box-shadow: inset 0 3px 0 0 var(--color-brand-500), 0 6px 16px -8px {{ $ap_base }}59;
+            box-shadow: inset 0 3px 0 0 var(--color-brand-500), 0 6px 16px -8px {{ $ap_base_extra }}59;
         }
 
         .cat-row.ap-drop-after {
-            box-shadow: inset 0 -3px 0 0 var(--color-brand-500), 0 6px 16px -8px {{ $ap_base }}59;
+            box-shadow: inset 0 -3px 0 0 var(--color-brand-500), 0 6px 16px -8px {{ $ap_base_extra }}59;
         }
 
         @keyframes pulse-dot {
-            0%, 100% { box-shadow: 0 0 0 0 {{ $ap_base }}80; }
-            50% { box-shadow: 0 0 0 5px {{ $ap_base }}00; }
+            0%, 100% { box-shadow: 0 0 0 0 {{ $ap_base_extra }}80; }
+            50% { box-shadow: 0 0 0 5px {{ $ap_base_extra }}00; }
         }
     </style>
 </head>

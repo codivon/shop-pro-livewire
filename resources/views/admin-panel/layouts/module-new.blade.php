@@ -335,72 +335,8 @@
         });
     </script>
 
-    {{-- فاز ۲۰۸ — پوستهٔ رنگی پنل: بازنویسی توکن‌های برند (پس از @vite تا برنده شود) --}}
-    <style id="admin-appearance-vars">
-        :root {
-@if (! empty($ap_appearance_payload['scale']) && is_array($ap_appearance_payload['scale']))
-@foreach ($ap_appearance_payload['scale'] as $ap_step => $ap_hex)
-            --color-brand-{{ $ap_step }}: {{ $ap_hex }};
-@endforeach
-@endif
-            --ck-color-base-action: var(--color-brand-600);
-            --ck-color-base-action-hover: var(--color-brand-700);
-            --ck-color-base-focus: var(--color-brand-600);
-            --ck-color-base-active: var(--color-brand-600);
-            --ck-color-base-action-muted: var(--color-brand-100);
-            --ck-focus-border-color: var(--color-brand-600);
-@if ($ap_appearance_payload['font_color'] ?? null)
-            /* فاز ۲۱۰ — رنگ فونت پنل (روشن) */
-            --color-ink: {{ $ap_appearance_payload['font_color'] }};
-@endif
-@if ($ap_appearance_payload['font_color_dark'] ?? null)
-            /* فاز ۲۱۰ — رنگ فونت پنل (تم شب) */
-            --color-night-ink: {{ $ap_appearance_payload['font_color_dark'] }};
-@endif
-        }
-
-        .ap-btn-primary {
-            box-shadow: 0 6px 16px -6px {{ $ap_appearance_payload['base'] ?? '#059669' }}73;
-        }
-    </style>
-
-    {{-- فاز ۲۱۰ — رنگ سایدبار و صفحه (عیناً مثل layout.blade.php) --}}
-    <style id="admin-appearance-shell">
-        #ap-sidebar { background-color: var(--ap-side-bg, var(--color-surface)); }
-        html.dark #ap-sidebar { background-color: var(--ap-side-bg-dark, var(--color-night-2)); }
-        body { background-color: var(--ap-page-bg, var(--color-surface-2)); }
-        html.dark body { background-color: var(--ap-page-bg-dark, var(--color-night)); }
-@if ($ap_appearance_payload['sidebar_color'] ?? null)
-        #ap-sidebar {
-            --ap-side-bg: {{ $ap_appearance_payload['sidebar_color'] }};
-            --color-surface: {{ $ap_appearance_payload['sidebar_color'] }};
-            --ap-side-ink: {{ \App\Support\PaletteEngine::contrastInk($ap_appearance_payload['sidebar_color']) }};
-            --color-surface-2: color-mix(in srgb, {{ $ap_appearance_payload['sidebar_color'] }} 93%, var(--ap-side-ink));
-            --color-surface-3: color-mix(in srgb, {{ $ap_appearance_payload['sidebar_color'] }} 87%, var(--ap-side-ink));
-            --color-line: color-mix(in srgb, {{ $ap_appearance_payload['sidebar_color'] }} 82%, var(--ap-side-ink));
-            --color-ink: var(--ap-side-ink);
-            --color-ink-2: color-mix(in srgb, var(--ap-side-ink) 76%, {{ $ap_appearance_payload['sidebar_color'] }});
-            --color-ink-3: color-mix(in srgb, var(--ap-side-ink) 56%, {{ $ap_appearance_payload['sidebar_color'] }});
-        }
-@endif
-@if ($ap_appearance_payload['sidebar_color_dark'] ?? null)
-        html.dark #ap-sidebar {
-            --ap-side-bg-dark: {{ $ap_appearance_payload['sidebar_color_dark'] }};
-            --color-night-2: {{ $ap_appearance_payload['sidebar_color_dark'] }};
-            --ap-side-ink-d: {{ \App\Support\PaletteEngine::contrastInk($ap_appearance_payload['sidebar_color_dark']) }};
-            --color-night-3: color-mix(in srgb, {{ $ap_appearance_payload['sidebar_color_dark'] }} 86%, var(--ap-side-ink-d));
-            --color-night-line: color-mix(in srgb, {{ $ap_appearance_payload['sidebar_color_dark'] }} 80%, var(--ap-side-ink-d));
-            --color-night-ink: var(--ap-side-ink-d);
-            --color-night-ink-2: color-mix(in srgb, var(--ap-side-ink-d) 72%, {{ $ap_appearance_payload['sidebar_color_dark'] }});
-        }
-@endif
-@if ($ap_appearance_payload['page_color'] ?? null)
-        html { --ap-page-bg: {{ $ap_appearance_payload['page_color'] }}; }
-@endif
-@if ($ap_appearance_payload['page_color_dark'] ?? null)
-        html.dark { --ap-page-bg-dark: {{ $ap_appearance_payload['page_color_dark'] }}; }
-@endif
-    </style>
+    {{-- فاز ۲۱۲ — پوستهٔ رنگی پنل: بازنویسی کامل توکن‌ها با پارشیال مشترک (پس از @vite تا برنده شود) --}}
+    @include('admin-panel::partials.appearance-vars')
 
     <meta name="admin-appearance-mode" content="{{ $ap_appearance_payload['mode'] ?? 'light' }}">
 

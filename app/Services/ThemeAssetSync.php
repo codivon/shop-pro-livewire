@@ -36,11 +36,15 @@ class ThemeAssetSync
      * @param  bool|null  $force  نوسازی اجباری برای تست/کامند
      * @param  string|null  $srcOverride  مسیر منبع جایگزین (تست‌پذیری)
      * @param  string|null  $linkOverride  مسیر لینک جایگزین (تست‌پذیری)
+     * @param  string|null  $version  نسخهٔ تم (فاز ۲۱۴ اصلاحیه ۲) — اگر با مُهرِ
+     *   داخل مارکر فرق داشته باشد، بدون توجه به mtime/کش، دارایی‌ها اجباری
+     *   بازسازی می‌شوند (ترمیم «کپیِ کهنه» بعد از هر انتشار تم حتی وقتی
+     *   mtime فایل‌ها به‌درستی رشد نکرده باشند).
      * @return array{status: string, stamp?: int}
      *
      * status ها: no-source | not-our-copy | fresh | refreshed | rebuilt | link-failed
      */
-    public static function syncIfStale(string $theme, ?bool $force = null, ?string $srcOverride = null, ?string $linkOverride = null): array
+    public static function syncIfStale(string $theme, ?bool $force = null, ?string $srcOverride = null, ?string $linkOverride = null, ?string $version = null): array
     {
         $src = $srcOverride ?: base_path("themes/{$theme}/src/resources/assets");
         $link = $linkOverride ?: public_path("themes/{$theme}");
@@ -56,6 +60,7 @@ class ThemeAssetSync
         if (! is_dir($link)) {
             try {
                 ThemeAssetLinker::linkOrCopy($src, $link);
+                self::stampVersion(rtrim($link, '/').'/'.ThemeAssetLinker::COPY_MARKER, $version);
 
                 return ['status' => 'rebuilt', 'stamp' => self::maxMtime($src)];
             } catch (Throwable $e) {
@@ -76,6 +81,7 @@ class ThemeAssetSync
             if (ThemeAssetLinker::dirIsEmpty($link)) {
                 try {
                     ThemeAssetLinker::linkOrCopy($src, $link);
+                    self::stampVersion($marker, $version);
 
                     return ['status' => 'rebuilt', 'stamp' => self::maxMtime($src)];
                 } catch (Throwable $e) {
@@ -89,7 +95,16 @@ class ThemeAssetSync
         }
 
         // مارکرهای متنی قدیمی به‌صورت ۰ خوانده می‌شوند → یک‌بار نوسازی خودکار
-        $stamp = (int) @file_get_contents($marker);
+        $rawMarker = (string) @file_get_contents($marker);
+        $stamp = (int) $rawMarker;
+
+        /* فاز ۲۱۴ اصلاحیه ۲ — نسخهٔ تم داخل مارکر (بخش سوم بعد از «mtime|تعداد»)؛
+           فرمت‌های قدیمی فقط «mtime|تعداد» دارند → storedVersion = null →
+           اولین بوت بعد از آپدیت master/تم، بازسازی اجباری یک‌بار انجام می‌شود
+           و بعد از آن مُهر نسخه ذخیره شده و مقایسه‌ها سبک می‌مانند. */
+        $markerParts = explode('|', $rawMarker);
+        $storedVersion = (isset($markerParts[2]) && $markerParts[2] !== '') ? $markerParts[2] : null;
+        $versionChanged = ($version !== null && $version !== $storedVersion);
 
         /* فاز ۱۹۰ — وضعیت «مارکرِ بی‌محتوا»:
          * فایل .shoplink-copy هست ولی هیچ فایل دارایی دیگری کنارش کپی نشده
@@ -100,6 +115,7 @@ class ThemeAssetSync
         if (! ThemeAssetLinker::hasRealAssets($link)) {
             try {
                 ThemeAssetLinker::linkOrCopy($src, $link);
+                self::stampVersion($marker, $version);
 
                 return ['status' => 'rebuilt', 'stamp' => self::maxMtime($src)];
             } catch (Throwable $e) {
@@ -109,10 +125,16 @@ class ThemeAssetSync
             }
         }
 
-        $maxMtime = Cache::remember(self::SCAN_CACHE_KEY.$theme, self::CACHE_TTL, fn () => self::maxMtime($src));
+        /* فاز ۲۱۴ اصلاحیه ۲ — تغییر نسخهٔ تم ⇒ بدون توجه به mtime و کشِ اسکن،
+           بازسازی اجباری. مسیر سبکِ «fresh» فقط وقتی است که نسخه هم یکسان باشد. */
+        if ($versionChanged) {
+            // بازسازی در ادامهٔ متد انجام می‌شود (بدون خواندن کش maxMtime)
+        } else {
+            $maxMtime = Cache::remember(self::SCAN_CACHE_KEY.$theme, self::CACHE_TTL, fn () => self::maxMtime($src));
 
-        if ($maxMtime <= $stamp && ! $force) {
-            return ['status' => 'fresh'];
+            if ($maxMtime <= $stamp && ! $force) {
+                return ['status' => 'fresh'];
+            }
         }
 
         // کپی کهنه است → پاک و از نو بساز (ThemeAssetLinker خودش مُهر جدید را می‌نویسد)
@@ -128,6 +150,7 @@ class ThemeAssetSync
          * اجازه ندهیم استثنا به فرانت برسد و کل صفحه بخوابد. */
         try {
             ThemeAssetLinker::linkOrCopy($src, $link);
+            self::stampVersion($marker, $version);
         } catch (Throwable $e) {
             report($e);
 
@@ -135,6 +158,26 @@ class ThemeAssetSync
         }
 
         return ['status' => 'refreshed', 'stamp' => self::maxMtime($src)];
+    }
+
+    /**
+     * فاز ۲۱۴ اصلاحیه ۲ — درج نسخهٔ تم در مارکر «mtime|تعداد|نسخه».
+     * بی‌صدا و بی‌خطر: اگر نسخه‌ای پاس نشده باشد، مارکر دست نمی‌خورد
+     * تا فرمت قدیمی «mtime|تعداد» حفظ شود.
+     */
+    private static function stampVersion(string $marker, ?string $version): void
+    {
+        if ($version === null || ! is_file($marker)) {
+            return;
+        }
+
+        try {
+            $parts = explode('|', (string) @file_get_contents($marker));
+            $parts[2] = $version;
+            @file_put_contents($marker, implode('|', array_slice($parts, 0, 3)));
+        } catch (Throwable) {
+            // نوشتن مارکر حیاتی نیست — خطا بی‌صدا نادیده می‌شود
+        }
     }
 
     /** بیشترین mtime فایل‌های یک پوشه به‌صورت بازگشتی (بدون استثنا) */

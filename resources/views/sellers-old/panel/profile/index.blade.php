@@ -5,7 +5,7 @@
         <div class="c-grid__col">
             <div class="c-content-page__header">
                 <span class="c-content-page__header-action">پروفایل </span>
-                <span class="c-content-page__header-desc">برای ویرایش پروفایل یا تغییر رمز ورود خود از این قسمت استفاده نمایید.</span>
+                <span class="c-content-page__header-desc">برای ویرایش اطلاعات پروفایل خود از این قسمت استفاده نمایید؛ تغییر لوگو و رمز ورود در صفحهٔ «حساب و امنیت» انجام می‌شود.</span>
             </div>
         </div>
     </div>
@@ -33,9 +33,8 @@
                             <li class="nav-item">
                                 <a class="nav-link menu-title show-pass-tab" data-toggle="tab" href="#econtract">اطلاعات قرارداد</a>
                             </li>
-                            <li class="nav-item left-0">
-                                <a class="nav-link menu-title" data-toggle="tab" href="#login">  تغییر رمز ورود</a>
-                            </li>
+                            {{-- فاز ۲۱۶ — تب «تغییر رمز ورود» حذف شد؛ تغییر رمز به صفحهٔ
+                                 مستقل «حساب و امنیت» منتقل شد (بدون تایید مدیر) --}}
 
                         </ul>
 
@@ -199,31 +198,13 @@
                                     </div>
 
                                     <div class="row w-100">
-                                        <div class="col-md-2">
-                                            <label>لوگوی فروشنده</label>
-                                            <div class="users-view-image">
-                                                <img src="{{ $seller->seller_info->logo ? asset($seller->seller_info->logo) : asset('/empty.svg') }}" class="users-avatar-shadow w-100 rounded mb-2 ml-1" alt="avatar">
-                                            </div>
-
-
-                                        </div>
-
-                                        <div class="col-md-10">
+                                        {{-- فاز ۲۱۶ — بلوک «لوگوی فروشنده» و فیلد «تغییر لوگو» از این صفحه
+                                             حذف شد؛ تغییر لوگو در صفحهٔ «حساب و امنیت» بدون تایید مدیر انجام می‌شود --}}
+                                        <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>درباره فروشنده</label>
                                                 <textarea name="bio" class="form-control valid" rows="3">{{$seller->seller_info->bio}}</textarea>
                                             </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <fieldset class="form-group">
-                                                <label>تغییر لوگو</label>
-                                                <div class="custom-file">
-                                                    <input type="file" accept="image/*" name="image" class="custom-file-input valid" aria-invalid="false">
-                                                    <label class="custom-file-label" for="image"></label>
-                                                    <p><small>بهترین اندازه <span class="text-danger">600 * 600</span> پیکسل میباشد.</small></p>
-                                                </div>
-                                            </fieldset>
                                         </div>
                                     </div>
 
@@ -446,40 +427,9 @@
                                 </div>
                             </div>
 
-                              <div class="tab-pane container fade" id="login">
-                                  <div class="card-body ">
-                                      <div class="row">
-                                          <div class="col-md-6 col-sm-12 m-auto">
-                                              <div class="col-12">
-                                                  <div class="form-group">
-                                                      <label for="old-password">گذرواژه قبلی</label>
-                                                      <input type="password" id="old-password" class="form-control ltr" name="prev_password">
-                                                  </div>
-                                              </div>
-                                              <div class=" col-12">
-                                                  <div class="form-group">
-                                                      <label>گذرواژه جدید</label>
-                                                      <input type="password" id="password" class="form-control ltr" name="password">
-                                                  </div>
-                                              </div>
-                                              <div class="col-12">
-                                                  <div class="form-group">
-                                                      <label>تکرار گذرواژه جدید</label>
-                                                      <input type="password" class="form-control ltr" name="password_confirmation">
-                                                  </div>
-                                              </div>
-                                          </div>
-
-                                          <div class="col-12">
-                                              <div class="alert alert-info mt-1 alert-validation-msg" role="alert">
-                                                  <i class="feather icon-info ml-1 align-middle"></i>
-                                                  <span>در صورتی که نمیخواهید گذرواژه  را عوض کنید، فیلدهای گذرواژه را خالی بگذارید.</span>
-                                              </div>
-                                          </div>
-                                      </div>
-
-                                  </div>
-                              </div>
+                              {{-- فاز ۲۱۶ — تب‌پین «تغییر رمز ورود» (#login) حذف شد؛ تغییر رمز
+                                   به صفحهٔ مستقل «حساب و امنیت» منتقل شد تا مثل لوگو،
+                                   بدون تایید کارشناس و بلافاصله اعمال شود. --}}
 
 
                         </div>

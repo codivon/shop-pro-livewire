@@ -15,7 +15,7 @@ use Livewire\WithFileUploads;
  * کلیدهای options دقیقاً همان قدیمی‌ها هستند (info_* / map_api / multi_language_enabled).
  *
  * تفاوت‌های مستندشده با قدیمی:
- *  1. تصاویر (info_icon/info_logo/info_logo_dark/info_logo_seller/info_logo_panel_seller/info_og_image)
+ *  1. تصاویر (info_icon/info_logo/info_logo_dark/info_og_image)
  *     مثل پنل قدیمی از File Manager سایت (Alexusmai FM) انتخاب می‌شوند — انتخابگر رسانه
  *     پنل جدید همان URL/مسیر رشته‌ای را در option ذخیره می‌کند (مقدار قبلی حفظ/جایگزین).
  *  3. فاز ۲۱۵ — فیلد «لوگوی حالت دارک» (info_logo_dark) اضافه شد؛ در فرانت، تم
@@ -64,10 +64,6 @@ class Information extends Component
     /** فاز ۲۱۵ — لوگوی اختصاصی حالت دارک فرانت (خالی یعنی «بدون تغییر») */
     public string $info_logo_dark = '';
 
-    public string $info_logo_seller = '';
-
-    public string $info_logo_panel_seller = '';
-
     public string $info_og_image = '';
 
     /** مسیرهای فعلی (برای پیش‌نمایش) — یک‌بار در mount خوانده می‌شود */
@@ -77,10 +73,6 @@ class Information extends Component
 
     /** فاز ۲۱۵ — مسیر فعلی لوگوی دارک (برای پیش‌نمایش) */
     public string $current_info_logo_dark = '';
-
-    public string $current_info_logo_seller = '';
-
-    public string $current_info_logo_panel_seller = '';
 
     public string $current_info_og_image = '';
 
@@ -161,8 +153,6 @@ class Information extends Component
         $this->current_info_icon = (string) option('info_icon');
         $this->current_info_logo = (string) option('info_logo');
         $this->current_info_logo_dark = (string) option('info_logo_dark');
-        $this->current_info_logo_seller = (string) option('info_logo_seller');
-        $this->current_info_logo_panel_seller = (string) option('info_logo_panel_seller');
         $this->current_info_og_image = (string) option('info_og_image');
 
         $this->admin_route_prefix = (string) config('general.admin_route_prefix');
@@ -386,8 +376,6 @@ class Information extends Component
             'info_icon' => 'nullable|string|max:2048',
             'info_logo' => 'nullable|string|max:2048',
             'info_logo_dark' => 'nullable|string|max:2048',
-            'info_logo_seller' => 'nullable|string|max:2048',
-            'info_logo_panel_seller' => 'nullable|string|max:2048',
             'info_og_image' => 'nullable|string|max:2048',
             'info_city_id' => 'nullable|exists:cities,id',
             'info_province_id' => 'nullable|exists:provinces,id',
@@ -406,8 +394,6 @@ class Information extends Component
             'info_icon.max' => 'آدرس تصویر آیکون سایت معتبر نیست.',
             'info_logo.max' => 'آدرس تصویر لوگو معتبر نیست.',
             'info_logo_dark.max' => 'آدرس تصویر لوگوی حالت دارک معتبر نیست.',
-            'info_logo_seller.max' => 'آدرس تصویر لوگوی فروشندگان معتبر نیست.',
-            'info_logo_panel_seller.max' => 'آدرس تصویر لوگوی پنل فروشندگان معتبر نیست.',
             'info_og_image.max' => 'آدرس تصویر OG معتبر نیست.',
             'info_city_id.exists' => 'شهر انتخاب‌شده معتبر نیست.',
             'info_province_id.exists' => 'استان انتخاب‌شده معتبر نیست.',
@@ -431,8 +417,6 @@ class Information extends Component
             'info_icon' => 'آیکون سایت',
             'info_logo' => 'لوگوی شرکت',
             'info_logo_dark' => 'لوگوی حالت دارک',
-            'info_logo_seller' => 'لوگوی شرکت فروشندگان',
-            'info_logo_panel_seller' => 'لوگوی پنل فروشندگان',
             'info_og_image' => 'تصویر OG (اشتراک‌گذاری)',
         ];
 
@@ -592,8 +576,6 @@ class Information extends Component
             'info_icon' => 'آیکون سایت',
             'info_logo' => 'لوگوی شرکت',
             'info_logo_dark' => 'لوگوی حالت دارک',
-            'info_logo_seller' => 'لوگوی شرکت فروشندگان',
-            'info_logo_panel_seller' => 'لوگوی پنل فروشندگان',
             'info_og_image' => 'تصویر OG (اشتراک‌گذاری)',
             'info_tags' => 'کلمات کلیدی',
             'info_canonical' => 'آدرس کانونیکال',

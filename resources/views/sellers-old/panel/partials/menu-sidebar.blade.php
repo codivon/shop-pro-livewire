@@ -124,6 +124,14 @@
                 </a>
             </li>
 
+            {{-- فاز ۲۱۶ — حساب و امنیت: لوگو + گذرواژه (بدون تایید مدیر) --}}
+            <li class="{{ active_class('seller.profile.account') }} nav-item">
+                <a href="{{ route('seller.profile.account') }}">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span class="menu-title">حساب و امنیت</span>
+                </a>
+            </li>
+
             <li class="{{ active_class('seller.notifications.index') }} nav-item">
                 <a href="{{ route('seller.notifications.index') }}">
                     <i class="fa-regular fa-envelope"></i>

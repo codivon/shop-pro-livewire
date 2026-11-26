@@ -65,6 +65,7 @@ use App\Livewire\Seller\Products\Find as ProductFind;
 use App\Livewire\Seller\Products\Index as ProductIndex;
 use App\Livewire\Seller\Products\Variants as ProductVariants;
 use App\Livewire\Seller\Profile;
+use App\Livewire\Seller\ProfileAccount;
 use App\Livewire\Seller\Questions\Index as QuestionsIndex;
 use App\Livewire\Seller\Questions\Show as QuestionsShow;
 use App\Livewire\Seller\Reviews;
@@ -196,6 +197,13 @@ Route::group(['as' => 'seller.', 'prefix' => 'seller'], function () {
         // ========== پروفایل فروشنده ==========
         Route::prefix('profile')->name('profile.')->group(function () use ($modern) {
             Route::get('/', $modern ? Profile::class : [ProfileSellerController::class, 'index'])->name('index');
+
+            // فاز ۲۱۶ — «حساب و امنیت»: لوگو + گذرواژه؛ تغییر این دو بدون تایید مدیر
+            // و بلافاصله اعمال می‌شود (برخلاف فرم پروفایل که به چرخهٔ EditProfile می‌رود)
+            Route::get('account', $modern ? ProfileAccount::class : [ProfileSellerController::class, 'account'])->name('account');
+            Route::post('account/logo', [ProfileSellerController::class, 'updateLogo'])->name('account.logo');
+            Route::post('account/password', [ProfileSellerController::class, 'updatePassword'])->name('account.password');
+
             Route::post('/', [ProfileSellerController::class, 'store'])->name('store');
             Route::put('{seller}/update', [ProfileSellerController::class, 'update'])->name('update');
             Route::post('set-econtract', [ProfileSellerController::class, 'set_econtract'])->name('set_econtract');

@@ -30,6 +30,89 @@ class ProfileSellerController extends Controller
         return view('sellers-old.panel.profile.index', compact('seller', 'seller_info', 'categories', 'provinces', 'econtract'));
     }
 
+    /**
+     * فاز ۲۱۶ — صفحهٔ «حساب و امنیت» پنل قدیمی.
+     *
+     * لوگو و گذرواژه از پروفایل جدا شدند: تغییر این دو نباید کل پروفایل را وارد
+     * چرخهٔ تایید مدیر (status_work = EditProfile) کند — فروشنده بدون انتظار
+     * باید بتواند لوگوی فروشگاه و رمز ورود خودش را عوض کند.
+     */
+    public function account()
+    {
+        $seller = Seller::find(Auth::guard('seller')->id());
+        $seller_info = SellerInfo::where('seller_id', $seller->id)->first();
+
+        return view('sellers-old.panel.profile.account', [
+            'seller' => $seller,
+            'seller_info' => $seller_info,
+            'logoUrl' => route('seller.profile.account.logo'),
+            'passwordUrl' => route('seller.profile.account.password'),
+        ]);
+    }
+
+    /**
+     * فاز ۲۱۶ — تغییر لوگوی فروشنده بدون تایید مدیر (اثر فوری).
+     */
+    public function updateLogo(Request $request)
+    {
+        $seller = Seller::find(Auth::guard('seller')->id());
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp,gif|max:3072',
+        ], [
+            'image.required' => 'انتخاب تصویر لوگو الزامی است.',
+            'image.image' => 'فایل انتخاب‌شده باید تصویر باشد.',
+            'image.mimes' => 'فرمت مجاز تصویر: JPG، PNG، WEBP یا GIF.',
+            'image.max' => 'حداکثر حجم تصویر لوگو ۳ مگابایت است.',
+        ], [
+            'image' => 'لوگو',
+        ]);
+
+        $seller_info = SellerInfo::where('seller_id', $seller->id)->first();
+        $seller_info->logo = uploadOptimizedImage($request->file('image'), 'sellers/logo', $seller->id);
+        $seller_info->save();
+
+        session()->put('toast-success', 'لوگوی فروشنده با موفقیت به‌روزرسانی شد.');
+
+        return response('success');
+    }
+
+    /**
+     * فاز ۲۱۶ — تغییر گذرواژه فروشنده بدون تایید مدیر (اثر فوری).
+     * برخلاف update() پروفایل، وضعیت status_work را تغییر نمی‌دهد و
+     * به کارشناسان اعلان نمی‌فرستد.
+     */
+    public function updatePassword(Request $request)
+    {
+        $seller = Seller::find(Auth::guard('seller')->id());
+
+        $request->validate([
+            'prev_password' => 'required',
+            'password' => 'required|string|min:6|confirmed',
+        ], [
+            'prev_password.required' => 'وارد کردن گذرواژه قبلی الزامی است.',
+            'password.required' => 'وارد کردن گذرواژه جدید الزامی است.',
+            'password.min' => 'گذرواژه جدید باید حداقل ۶ کاراکتر باشد.',
+            'password.confirmed' => 'تکرار گذرواژه جدید با گذرواژه جدید یکسان نیست.',
+        ], [
+            'prev_password' => 'گذرواژه قبلی',
+            'password' => 'گذرواژه جدید',
+        ]);
+
+        if (! Hash::check($request->prev_password, $seller->password)) {
+            throw ValidationException::withMessages([
+                'prev_password' => 'رمز عبور قبلی وارد شده اشتباه است',
+            ]);
+        }
+
+        $seller->password = Hash::make($request->password);
+        $seller->save();
+
+        session()->put('toast-success', 'رمز ورود شما تغییر کرد.');
+
+        return response('success');
+    }
+
     public function update(UpdateSellerRequest $request, Seller $seller)
     {
         if ($seller->id != Auth::guard('seller')->id()) {

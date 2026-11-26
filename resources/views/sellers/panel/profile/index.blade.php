@@ -145,9 +145,24 @@
         <p class="mt-1 text-xs text-ink-500 dark:text-night-ink-2">اطلاعات حساب، آدرس و مدارک فروشندگی خود را از این قسمت مدیریت کنید.</p>
     </div>
 
+    {{-- فاز ۲۱۶ — اطلاع‌رسانی جابه‌جایی لوگو/گذرواژه به «حساب و امنیت" --}}
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-3 text-xs text-ink-600 dark:border-night-line dark:bg-night-2 dark:text-night-ink-2">
+        <span class="flex items-center gap-2">
+            <x-admin-panel::icon name="shield-check" class="size-4 shrink-0 text-brand-600 dark:text-brand-400" />
+            تغییر لوگوی فروشنده و گذرواژه به صفحهٔ «حساب و امنیت» منتقل شد؛ آنجا بلافاصله و بدون تایید کارشناس اعمال می‌شوند.
+        </span>
+        <a href="{{ route('seller.profile.account') }}" wire:navigate
+           class="ap-btn-primary inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-[11px] font-bold">
+            <x-admin-panel::icon name="lock" class="size-3.5" />
+            حساب و امنیت
+        </a>
+    </div>
+
     {{-- ================= تب‌ها ================= --}}
     <div class="mb-4 flex gap-1.5 overflow-x-auto pb-1 sp-scroll">
-        @foreach (['info' => 'اطلاعات کلی', 'address' => 'آدرس', 'bank' => 'حساب بانکی', 'econtract' => 'اطلاعات قرارداد', 'documents' => 'مدارک', 'login' => 'گذرواژه'] as $key => $label)
+        @foreach (['info' => 'اطلاعات کلی', 'address' => 'آدرس', 'bank' => 'حساب بانکی', 'econtract' => 'اطلاعات قرارداد', 'documents' => 'مدارک'] as $key => $label)
+            {{-- فاز ۲۱۶ — تب «گذرواژه» از این صفحه حذف شد (تغییر رمز نباید وارد
+                 چرخهٔ تایید مدیر شود) → صفحهٔ مستقل «حساب و امنیت" --}}
             <button type="button" x-on:click="tab = '{{ $key }}'"
                     class="min-h-11 shrink-0 rounded-xl px-4 text-xs font-bold transition-colors"
                     x-bind:class="tab === '{{ $key }}'
@@ -248,23 +263,13 @@
                 </label>
             </div>
 
-            <div class="mt-4 grid grid-cols-1 gap-4 border-t border-line pt-4 lg:grid-cols-3 dark:border-night-line">
-                <div>
-                    <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">لوگوی فروشنده</span>
-                    <img src="{{ $seller->seller_info->logo ? asset($seller->seller_info->logo) : asset('/empty.svg') }}"
-                         class="h-24 w-24 rounded-xl border border-line object-cover dark:border-night-line" alt="لوگوی فروشنده">
-                </div>
-                <div class="lg:col-span-2">
-                    <label class="block">
-                        <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">درباره فروشنده</span>
-                        <textarea name="bio" rows="3" class="ap-input w-full">{{ $seller->seller_info->bio }}</textarea>
-                    </label>
-                    <label class="mt-3 block">
-                        <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">تغییر لوگو</span>
-                        <input type="file" accept="image/*" name="image" class="ap-input w-full file:mr-3 file:rounded-lg file:border-0 file:bg-brand-600 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white">
-                        <small class="mt-1 block text-[11px] text-ink-400 dark:text-night-ink-2">بهترین اندازه <span class="text-red-500">600 * 600</span> پیکسل میباشد.</small>
-                    </label>
-                </div>
+            <div class="mt-4 border-t border-line pt-4 dark:border-night-line">
+                {{-- فاز ۲۱۶ — لوگوی فروشنده از این صفحه حذف شد؛ تغییر لوگو بدون
+                     چرخهٔ تایید مدیر باید انجام شود → صفحهٔ «حساب و امنیت" --}}
+                <label class="block">
+                    <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">درباره فروشنده</span>
+                    <textarea name="bio" rows="3" class="ap-input w-full">{{ $seller->seller_info->bio }}</textarea>
+                </label>
             </div>
         </section>
 
@@ -477,27 +482,9 @@
             </div>
         </section>
 
-        {{-- ---------- تب گذرواژه ---------- --}}
-        <section class="ap-card p-4 sm:p-6" x-show="tab === 'login'" role="tabpanel" aria-label="گذرواژه" x-cloak>
-            <div class="mx-auto grid max-w-xl grid-cols-1 gap-4">
-                <label class="block">
-                    <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">گذرواژه قبلی</span>
-                    <input type="password" name="prev_password" class="ap-input w-full" dir="ltr" autocomplete="current-password">
-                </label>
-                <label class="block">
-                    <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">گذرواژه جدید</span>
-                    <input type="password" name="password" class="ap-input w-full" dir="ltr" autocomplete="new-password">
-                </label>
-                <label class="block">
-                    <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">تکرار گذرواژه جدید</span>
-                    <input type="password" name="password_confirmation" class="ap-input w-full" dir="ltr" autocomplete="new-password">
-                </label>
-                <div class="flex items-start gap-2 rounded-xl border border-line bg-surface-2 p-3 text-xs text-ink-600 dark:border-night-line dark:bg-night-2 dark:text-night-ink-2">
-                    <x-admin-panel::icon name="info" class="mt-0.5 size-4 shrink-0" />
-                    در صورتی که نمیخواهید گذرواژه را عوض کنید، فیلدهای گذرواژه را خالی بگذارید.
-                </div>
-            </div>
-        </section>
+        {{-- ---------- تب گذرواژه — فاز ۲۱۶ حذف شد ----------
+             تغییر رمز عبور به صفحهٔ مستقل «حساب و امنیت» منتقل شد تا مثل
+             لوگو، بدون تایید کارشناس و بلافاصله اعمال شود. --}}
     </form>
 
     {{-- دکمهٔ ثبت تغییرات — با مودال تأیید (پورت error-edit-modal قدیمی) --}}

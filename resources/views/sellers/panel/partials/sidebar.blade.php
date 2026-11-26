@@ -269,12 +269,24 @@
             <li>
                 <a href="{{ route('seller.profile.index') }}" wire:navigate
                    class="flex min-h-11 items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200
-                          {{ request()->routeIs('seller.profile.*')
+                          {{ (request()->routeIs('seller.profile.*') && ! request()->routeIs('seller.profile.account*'))
                               ? 'bg-brand-500/15 font-bold text-emerald-300'
                               : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
-                   @if(request()->routeIs('seller.profile.*')) aria-current="page" @endif>
+                   @if(request()->routeIs('seller.profile.*') && ! request()->routeIs('seller.profile.account*')) aria-current="page" @endif>
                     <x-admin-panel::icon name="user" class="size-[18px] shrink-0 opacity-80" />
                     <span class="flex-1">پروفایل شما</span>
+                </a>
+            </li>
+            {{-- فاز ۲۱۶ — حساب و امنیت: لوگو + گذرواژه (بدون تایید مدیر) --}}
+            <li>
+                <a href="{{ route('seller.profile.account') }}" wire:navigate
+                   class="flex min-h-11 items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200
+                          {{ request()->routeIs('seller.profile.account*')
+                              ? 'bg-brand-500/15 font-bold text-emerald-300'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
+                   @if(request()->routeIs('seller.profile.account*')) aria-current="page" @endif>
+                    <x-admin-panel::icon name="shield-check" class="size-[18px] shrink-0 opacity-80" />
+                    <span class="flex-1">حساب و امنیت</span>
                 </a>
             </li>
 

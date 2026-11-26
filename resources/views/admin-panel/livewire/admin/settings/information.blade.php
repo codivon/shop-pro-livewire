@@ -82,6 +82,7 @@
                         @foreach ([
                             ['key' => 'info_icon', 'current' => 'current_info_icon', 'label' => 'آیکون سایت', 'hint' => 'بهترین اندازه: ۳۲×۳۲ پیکسل'],
                             ['key' => 'info_logo', 'current' => 'current_info_logo', 'label' => 'لوگوی شرکت', 'hint' => 'بهترین اندازه: ۲۰۰×۶۰ پیکسل'],
+                            ['key' => 'info_logo_dark', 'current' => 'current_info_logo_dark', 'label' => 'لوگوی حالت دارک', 'hint' => 'فاز ۲۱۵ — در دارک‌مود فرانت نمایش داده می‌شود؛ بهترین اندازه: ۲۰۰×۶۰ پیکسل'],
                             ['key' => 'info_logo_seller', 'current' => 'current_info_logo_seller', 'label' => 'لوگوی شرکت فروشندگان', 'hint' => 'بهترین اندازه: ۲۰۰×۶۰ پیکسل'],
                             ['key' => 'info_logo_panel_seller', 'current' => 'current_info_logo_panel_seller', 'label' => 'لوگوی پنل فروشندگان', 'hint' => 'بهترین اندازه: ۲۰۰×۶۰ پیکسل'],
                             ['key' => 'info_og_image', 'current' => 'current_info_og_image', 'label' => 'تصویر OG (اشتراک‌گذاری)', 'hint' => 'اندازه پیشنهادی: ۱۲۰۰×۶۳۰ پیکسل'],

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\NewSeller;
 use App\Models\Seller;
+use App\Models\SellerBankAccount;
 use App\Models\SellerInfo;
 use App\Models\SellerRegistration;
 use App\Models\Wallet;
@@ -391,7 +392,11 @@ class SellerRegistrationController extends Controller
             'info_correct.accepted' => 'برای ادامه باید صحت اطلاعات را تأیید کنید',
         ]);
 
-        $nationalCode = en_digits(trim((string) $request->input('national_code')));
+        // فاز ۲۱۷ — علاوه بر تبدیل ارقام فارسی/عربی، هر نویسهٔ غیررقمی (فاصلهٔ
+        // میانی، نیم‌فاصلهٔ نامرئی U+200C که کیبورد موبایل می‌گذارد و…) هم حذف
+        // می‌شود تا مقدار دریافتی سرور با مقدارِ نرمال‌شدهٔ کلاینت دقیقاً یکی باشد
+        // و کدملی درست در موبایل هم رد نشود.
+        $nationalCode = preg_replace('/[^0-9]/', '', en_digits(trim((string) $request->input('national_code'))));
         $warning = null;
 
         // احراز هویت فینوتک (شاهکار): فقط وقتی از تنظیمات فعال، کلیدها پر و
@@ -477,7 +482,10 @@ class SellerRegistrationController extends Controller
             'post_code' => $isLegal ? 'required' : 'required|digits:10',
             'phone' => $isLegal ? 'required' : 'required|digits:11',
             'business_name' => 'required|unique:sellers_info|'.($isLegal ? 'persian_alpha_num' : 'persian_alpha_eng_num'),
-            'shaba_number' => 'required',
+            // فاز ۲۱۷ — حساب بانکی تسویه اجباری شد: صاحب حساب (از اطلاعات هویتی،
+            // فقط نمایش) + شماره کارت ۱۶ رقمی با کنترل Luhn + شبای IR+۲۴رقم با MOD-97
+            'card_number' => ['required', 'ir_bank_card_number'],
+            'shaba_number' => ['required', 'ir_iban'],
             'main_supply_category_id' => 'required',
             'number_of_products' => 'required',
             'econtract' => 'required',
@@ -492,6 +500,13 @@ class SellerRegistrationController extends Controller
             $draft->save();
         }
 
+        // فاز ۲۱۷ — نرمال‌سازی کارت/شبا قبل از ولیدیشن (فاصله/خط تیره/ارقام فارسی؛
+        // شبای ۲۴ رقمی بدون پیشوند، IR می‌گیرد) تا کلاینت و سرور روی یک مقدار توافق کنند
+        $request->merge([
+            'card_number' => preg_replace('/[^0-9]/', '', en_digits((string) $request->input('card_number'))),
+            'shaba_number' => $this->normalizeSheba((string) $request->input('shaba_number')),
+        ]);
+
         $this->validate($request, $rules, [
             'email.required' => 'ایمیل را وارد کنید',
             'email.unique' => 'این ایمیل قبلاً در سیستم ثبت شده است',
@@ -505,6 +520,9 @@ class SellerRegistrationController extends Controller
             'business_name.required' => 'نام فروشگاه را وارد کنید',
             'business_name.unique' => 'نام فروشگاه قبلا انتخاب شده',
             'shaba_number.required' => 'شمارهٔ شبا را وارد کنید',
+            'shaba_number.ir_iban' => 'شمارهٔ شبا وارد شده معتبر نیست؛ شبای ۲۶ رقمی (IR + ۲۴ رقم) را مطابق اطلاعات بانکی بررسی کنید',
+            'card_number.required' => 'شمارهٔ کارت بانکی را وارد کنید',
+            'card_number.ir_bank_card_number' => 'شمارهٔ کارت وارد شده معتبر نیست؛ کارت بانکی ۱۶ رقمی را بررسی کنید',
             'main_supply_category_id.required' => 'دستهٔ اصلی تأمین کالا را انتخاب کنید',
             'number_of_products.required' => 'تعداد محصولات قابل ارائه را انتخاب کنید',
             'econtract.required' => 'پذیرش قرارداد الکترونیکی الزامی است',
@@ -563,11 +581,29 @@ class SellerRegistrationController extends Controller
         $sellerInfo->mobile = $draft->mobile;
 
         $sellerInfo->business_name = $request->input('business_name');
-        $sellerInfo->shaba_number = $request->input('shaba_number');
+        // فاز ۲۱۷ — شبای نرمال‌شده (IR + ۲۴ رقم) ذخیره می‌شود؛ کارت بانکی هم
+        // در جدول اختصاصی seller_bank_accounts به‌عنوان اولین (پیش‌فرض) کارت ثبت می‌شود
+        $sellerInfo->shaba_number = (string) $request->input('shaba_number');
         $sellerInfo->main_supply_category_id = $request->input('main_supply_category_id');
         $sellerInfo->number_of_products = $request->input('number_of_products');
         $sellerInfo->econtract = $request->input('econtract');
         $sellerInfo->save();
+
+        // فاز ۲۱۷ — نام صاحب حساب از اطلاعات هویتی خود فروشنده (گام اطلاعات
+        // تکمیلی) ساخته می‌شود؛ فیلد فقط‌نمایش است و مقدار ارسالیِ فرم نادیده گرفته می‌شود
+        $holderName = trim(((string) $draft->first_name).' '.((string) $draft->last_name));
+
+        if ($holderName === '') {
+            $holderName = (string) $request->input('business_name');
+        }
+
+        SellerBankAccount::create([
+            'seller_id' => $seller->id,
+            'holder_name' => $holderName,
+            'card_number' => (string) $request->input('card_number'),
+            'sheba_number' => (string) $request->input('shaba_number'),
+            'is_default' => true,
+        ]);
 
         $wallet = new Wallet;
         $wallet->seller_id = $seller->id;
@@ -593,6 +629,21 @@ class SellerRegistrationController extends Controller
     }
 
     /* ================= هلپرهای مشترک ================= */
+
+    /**
+     * فاز ۲۱۷ — نرمال‌سازی شبای واردشده: حذف فاصله/خط تیره/نویسه‌های اضافه،
+     * تبدیل ارقام فارسی/عربی و افزودن خودکار پیشوند IR به شبای ۲۴ رقمی.
+     */
+    private function normalizeSheba(string $value): string
+    {
+        $sheba = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', en_digits($value)));
+
+        if (preg_match('/^[0-9]{24}$/', $sheba)) {
+            $sheba = 'IR'.$sheba;
+        }
+
+        return $sheba;
+    }
 
     /**
      * پیش‌نویس فعال را برمی‌گرداند؛ نبودش ریدایرکت به گام اول (برای JSON هم

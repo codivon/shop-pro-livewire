@@ -29,6 +29,7 @@ use App\Http\Controllers\Seller\ProductSellerController;
 use App\Http\Controllers\Seller\ProfileSellerController;
 use App\Http\Controllers\Seller\QuestionSellerController;
 use App\Http\Controllers\Seller\SellerCarrierController;
+use App\Http\Controllers\Seller\SellerBankAccountController;
 use App\Http\Controllers\Seller\SellerController;
 use App\Http\Controllers\Seller\SellerDemandController;
 use App\Http\Controllers\Seller\SellerInventoryController;
@@ -207,6 +208,13 @@ Route::group(['as' => 'seller.', 'prefix' => 'seller'], function () {
             Route::post('/', [ProfileSellerController::class, 'store'])->name('store');
             Route::put('{seller}/update', [ProfileSellerController::class, 'update'])->name('update');
             Route::post('set-econtract', [ProfileSellerController::class, 'set_econtract'])->name('set_econtract');
+
+            // فاز ۲۱۷ — کارت‌های بانکی فروشنده (تسویه): مدیریت مستقل و فوری،
+            // خارج از فرم کلاسیک پروفایل و بدون چرخهٔ تایید مدیر؛ حداقل یک کارت باید بماند
+            Route::post('bank', [SellerBankAccountController::class, 'store'])->name('bank.store');
+            Route::put('bank/{bank_account}', [SellerBankAccountController::class, 'update'])->name('bank.update');
+            Route::delete('bank/{bank_account}', [SellerBankAccountController::class, 'destroy'])->name('bank.destroy');
+            Route::post('bank/{bank_account}/default', [SellerBankAccountController::class, 'setDefault'])->name('bank.default');
         });
 
         // ========== اعلان‌ها ==========

@@ -90,9 +90,11 @@
                     <label class="mb-1.5 block text-xs font-bold" for="id-nin">
                         کد ملی <span class="text-red-500">*</span>
                     </label>
+                    {{-- فاز ۲۱۷ — نرمال‌سازی زنده حین تایپ (رفع باگ موبایل) + ولیدیشن زنده پس از ۱۰ رقم --}}
                     <input id="id-nin" type="text" name="national_code" inputmode="numeric" maxlength="10" required
-                           value="{{ $draft['national_code'] }}" x-on:input="delete errors.national_code"
-                           class="ap-input py-3! fa-digits" placeholder="کد ملی ۱۰ رقمی بدون خط تیره">
+                           value="{{ $draft['national_code'] }}"
+                           x-on:input="spNormalizeDigitsInput($event); delete errors.national_code; spLiveNationalCodeCheck(this.$refs.form, this.errors)"
+                           class="ap-input py-3! fa-digits" placeholder="کد ملی ۱۰ رقمی بدون خط تیره" autocomplete="off">
                     <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="errors.national_code" x-text="(errors.national_code || [])[0]" x-cloak></p>
                     <p class="mt-1.5 text-[11px] font-semibold text-ink-3 dark:text-night-ink-2" x-show="! errors.national_code">کد ملی باید متعلق به مالک شمارهٔ موبایل <span class="fa-digits font-bold">{{ $draft['mobile'] }}</span> باشد</p>
                 </div>
@@ -188,18 +190,21 @@
                         <div>
                             <label class="mb-1.5 block text-xs font-bold" for="id-crn">شمارهٔ ثبت <span class="text-red-500">*</span></label>
                             <input id="id-crn" type="text" name="company_registration_number" inputmode="numeric" required value="{{ $draft['company_registration_number'] }}"
+                                   x-on:input="spNormalizeDigitsInput($event); delete errors.company_registration_number"
                                    class="ap-input py-3! fa-digits">
                             <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="errors.company_registration_number" x-text="(errors.company_registration_number || [])[0]" x-cloak></p>
                         </div>
                         <div>
                             <label class="mb-1.5 block text-xs font-bold" for="id-cnin">شناسهٔ ملی شرکت <span class="text-red-500">*</span></label>
                             <input id="id-cnin" type="text" name="company_national_identity_number" inputmode="numeric" maxlength="11" required value="{{ $draft['company_national_identity_number'] }}"
+                                   x-on:input="spNormalizeDigitsInput($event); delete errors.company_national_identity_number"
                                    class="ap-input py-3! fa-digits">
                             <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="errors.company_national_identity_number" x-text="(errors.company_national_identity_number || [])[0]" x-cloak></p>
                         </div>
                         <div class="sm:col-span-2">
                             <label class="mb-1.5 block text-xs font-bold" for="id-cen">شمارهٔ اقتصادی</label>
                             <input id="id-cen" type="text" name="company_economic_number" inputmode="numeric" maxlength="12" value="{{ $draft['company_economic_number'] }}"
+                                   x-on:input="spNormalizeDigitsInput($event)"
                                    class="ap-input py-3! fa-digits">
                         </div>
                     </div>

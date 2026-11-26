@@ -105,6 +105,14 @@ class Seller extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
+    /**
+     * فاز ۲۱۷ — کارت‌های بانکی فروشنده (تسویه).
+     */
+    public function bankAccounts()
+    {
+        return $this->hasMany(SellerBankAccount::class);
+    }
+
     public function notifications()
     {
         return $this->belongsToMany(NotificationManage::class, 'notification_manage_users')

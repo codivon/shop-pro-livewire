@@ -4,7 +4,9 @@
      کنترلر قدیمی response("success") می‌دهد پس ارسال با fetch و ریدایرکت به
      seller.profile.index انجام می‌شود (هم‌الگوی index.js قدیمی). --}}
 <div x-data="{
-        tab: 'info',
+        // فاز ۲۱۷ — تب فعال از sessionStorage برمی‌گردد (بعد از ثبت کارت بانکی
+        // و رفرش صفحه، کاربر دوباره به تب حساب بانکی می‌رسد)
+        tab: sessionStorage.getItem('sp-profile-tab') || 'info',
         confirmOpen: false,
         econtractOpen: false,
         econtractChoice: '',
@@ -27,6 +29,18 @@
         updateUrl: @js($updateUrl),
         setEcontractUrl: @js($setEcontractUrl),
         citiesUrl: @js($citiesUrl),
+
+        // فاز ۲۱۷ — کارت‌های بانکی فروشنده (مدیریت مستقل تب حساب بانکی،
+        // خارج از فرم کلاسیک پروفایل و بدون چرخهٔ تایید مدیر)
+        bankAccounts: @js($bankAccounts),
+        bankStoreUrl: @js($bankStoreUrl),
+        bankModalOpen: false,
+        bankEditingId: null,
+        bankForm: { holder_name: '', card_number: '', sheba_number: '' },
+        bankErrors: {},
+        bankBusy: false,
+        bankDeleteId: null,
+        bankDeleteBusy: false,
 
         // پورت data-action قدیمی province → getCities
         async fetchCities() {
@@ -133,6 +147,191 @@
                 this.$dispatch('toast', { message: 'ارتباط با سرور برقرار نشد.', type: 'error' });
             } finally {
                 this.loading = false;
+            }
+        },
+
+        // ================= فاز ۲۱۷ — کارت‌های بانکی =================
+        // تبدیل ارقام فارسی/عربی به انگلیسی (داخل attribute کوتیشن دابل ممنوع است)
+        bankEnDigits(value) {
+            var map = { '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4', '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9', '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
+            return String(value || '').replace(/[۰-۹٠-٩]/g, function (d) { return map[d]; });
+        },
+        bankNormCard(value) {
+            return this.bankEnDigits(value).replace(/[^0-9]/g, '').slice(0, 16);
+        },
+        bankNormSheba(value) {
+            var s = this.bankEnDigits(value).toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (/^[0-9]{24}$/.test(s)) { s = 'IR' + s; }
+            return s.slice(0, 26);
+        },
+        // کنترل رقم کارت بانکی (الگوریتم Luhn)
+        bankValidCard(card) {
+            card = this.bankEnDigits(card).replace(/\D/g, '');
+            if (!/^[2569]\d{15}$/.test(card)) { return false; }
+            var sum = 0, alt = false;
+            for (var i = card.length - 1; i >= 0; i--) {
+                var d = parseInt(card[i], 10);
+                if (alt) { d *= 2; if (d > 9) { d -= 9; } }
+                sum += d;
+                alt = !alt;
+            }
+            return sum % 10 === 0;
+        },
+        // کنترل شبای ایرانی (IR + ۲۴ رقم، MOD-97؛ IR معادل 1827)
+        bankValidSheba(code) {
+            code = this.bankEnDigits(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (/^[0-9]{24}$/.test(code)) { code = 'IR' + code; }
+            if (!/^IR[0-9]{24}$/.test(code)) { return false; }
+            var s = code.substring(4) + '1827' + code.substring(2, 4);
+            var r = 0;
+            for (var i = 0; i < s.length; i++) { r = (r * 10 + parseInt(s[i], 10)) % 97; }
+            return r === 1;
+        },
+        bankMaskCard(card) {
+            var c = String(card || '');
+            if (c.length !== 16) { return c || '—'; }
+            return c.replace(/(\d{4})(?=\d)/g, '$1 ');
+        },
+        openBankAdd() {
+            this.bankEditingId = null;
+            this.bankForm = { holder_name: '', card_number: '', sheba_number: '' };
+            this.bankErrors = {};
+            this.bankModalOpen = true;
+        },
+        openBankEdit(account) {
+            this.bankEditingId = account.id;
+            this.bankForm = { holder_name: account.holder_name, card_number: account.card_number, sheba_number: account.sheba_number };
+            this.bankErrors = {};
+            this.bankModalOpen = true;
+        },
+        closeBankModal() {
+            this.bankModalOpen = false;
+            this.bankEditingId = null;
+            this.bankErrors = {};
+        },
+        bankFind(id) {
+            var found = null;
+            for (var i = 0; i < this.bankAccounts.length; i++) {
+                if (this.bankAccounts[i].id === id) { found = this.bankAccounts[i]; }
+            }
+            return found;
+        },
+        async saveBank() {
+            this.bankForm.holder_name = this.bankForm.holder_name.trim();
+            this.bankForm.card_number = this.bankNormCard(this.bankForm.card_number);
+            this.bankForm.sheba_number = this.bankNormSheba(this.bankForm.sheba_number);
+            this.bankErrors = {};
+
+            if (! this.bankForm.holder_name) { this.bankErrors.holder_name = ['نام صاحب حساب را وارد کنید']; }
+            if (! this.bankForm.card_number) {
+                this.bankErrors.card_number = ['شماره کارت را وارد کنید'];
+            } else if (! this.bankValidCard(this.bankForm.card_number)) {
+                this.bankErrors.card_number = ['شماره کارت وارد شده معتبر نیست؛ کارت بانکی ۱۶ رقمی را بررسی کنید'];
+            }
+            if (! this.bankForm.sheba_number) {
+                this.bankErrors.sheba_number = ['شماره شبا را وارد کنید'];
+            } else if (! this.bankValidSheba(this.bankForm.sheba_number)) {
+                this.bankErrors.sheba_number = ['شماره شبا وارد شده معتبر نیست؛ شبای ۲۶ رقمی (IR + ۲۴ رقم) را بررسی کنید'];
+            }
+            if (Object.keys(this.bankErrors).length) { return; }
+
+            this.bankBusy = true;
+            try {
+                var editing = this.bankEditingId ? this.bankFind(this.bankEditingId) : null;
+                var body = new FormData();
+                body.append('_token', document.querySelector('meta[name=csrf-token]').content);
+                if (editing) { body.append('_method', 'PUT'); }
+                body.append('holder_name', this.bankForm.holder_name);
+                body.append('card_number', this.bankForm.card_number);
+                body.append('sheba_number', this.bankForm.sheba_number);
+
+                const res = await fetch(editing ? editing.update_url : this.bankStoreUrl, {
+                    method: 'POST',
+                    body: body,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                });
+                const data = await res.json().catch(() => ({}));
+
+                if (res.ok) {
+                    this.closeBankModal();
+                    sessionStorage.setItem('sp-profile-tab', 'bank');
+                    this.$dispatch('toast', { message: data.message || 'کارت بانکی ذخیره شد.', type: 'success' });
+                    setTimeout(() => window.Livewire ? Livewire.navigate(window.location.href) : window.location.reload(), 700);
+                    return;
+                }
+                if (data.errors) {
+                    this.bankErrors = data.errors;
+                    this.$dispatch('toast', { message: Object.values(data.errors)[0][0], type: 'error' });
+                } else {
+                    this.$dispatch('toast', { message: data.message || 'ثبت کارت بانکی ناموفق بود.', type: 'error' });
+                }
+            } catch (e) {
+                this.$dispatch('toast', { message: 'ارتباط با سرور برقرار نشد.', type: 'error' });
+            } finally {
+                this.bankBusy = false;
+            }
+        },
+        askBankDelete(account) {
+            // شرط «حداقل یک کارت» — حذف آخرین کارت ممنوع است
+            if (this.bankAccounts.length <= 1) {
+                this.$dispatch('toast', { message: 'حداقل یک کارت بانکی باید در پروفایل شما باقی بماند؛ ابتدا کارت دیگری اضافه کنید.', type: 'error' });
+                return;
+            }
+            this.bankDeleteId = account.id;
+        },
+        async destroyBank() {
+            var target = this.bankDeleteId ? this.bankFind(this.bankDeleteId) : null;
+            if (! target) { return; }
+
+            this.bankDeleteBusy = true;
+            try {
+                var body = new FormData();
+                body.append('_token', document.querySelector('meta[name=csrf-token]').content);
+                body.append('_method', 'DELETE');
+
+                const res = await fetch(target.destroy_url, {
+                    method: 'POST',
+                    body: body,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                });
+                const data = await res.json().catch(() => ({}));
+
+                if (res.ok) {
+                    this.bankDeleteId = null;
+                    sessionStorage.setItem('sp-profile-tab', 'bank');
+                    this.$dispatch('toast', { message: data.message || 'کارت بانکی حذف شد.', type: 'success' });
+                    setTimeout(() => window.Livewire ? Livewire.navigate(window.location.href) : window.location.reload(), 700);
+                    return;
+                }
+                this.$dispatch('toast', { message: data.message || 'حذف کارت بانکی ناموفق بود.', type: 'error' });
+            } catch (e) {
+                this.$dispatch('toast', { message: 'ارتباط با سرور برقرار نشد.', type: 'error' });
+            } finally {
+                this.bankDeleteBusy = false;
+            }
+        },
+        async setBankDefault(account) {
+            if (account.is_default) { return; }
+            try {
+                var body = new FormData();
+                body.append('_token', document.querySelector('meta[name=csrf-token]').content);
+
+                const res = await fetch(account.default_url, {
+                    method: 'POST',
+                    body: body,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                });
+                const data = await res.json().catch(() => ({}));
+
+                if (res.ok) {
+                    sessionStorage.setItem('sp-profile-tab', 'bank');
+                    this.$dispatch('toast', { message: data.message || 'کارت پیش‌فرض تسویه تغییر کرد.', type: 'success' });
+                    setTimeout(() => window.Livewire ? Livewire.navigate(window.location.href) : window.location.reload(), 700);
+                    return;
+                }
+                this.$dispatch('toast', { message: data.message || 'تغییر کارت پیش‌فرض ناموفق بود.', type: 'error' });
+            } catch (e) {
+                this.$dispatch('toast', { message: 'ارتباط با سرور برقرار نشد.', type: 'error' });
             }
         },
      }">
@@ -383,20 +582,86 @@
             </div>
         </section>
 
-        {{-- ---------- تب حساب بانکی ---------- --}}
-        <section class="ap-card p-4 sm:p-6" x-show="tab === 'bank'" role="tabpanel" aria-label="حساب بانکی" x-cloak>
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <label class="block">
-                    <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">شماره شبا</span>
-                    {{-- ⑨-۳ — type="number" مقدار شبا با پیشوند IR را خالی می‌کند (مرورگر مقدار
-                         غیرعددی را نمی‌پذیرد) → بعد از ذخیره، ولیدیشن required می‌شکند؛
-                         مثل نسخهٔ قدیمی که همین باگ را داشت، در پنل مدرن text+ltr شد --}}
-                    <input type="text" name="shaba_number" value="{{ $seller->seller_info->shaba_number }}" class="ap-input w-full fa-digits" dir="ltr" inputmode="numeric" autocomplete="off">
-                </label>
-                <label class="block">
-                    <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">صاحب حساب</span>
-                    <input type="text" value="{{ $seller->seller_info->full_name }}" disabled class="ap-input w-full cursor-not-allowed opacity-60">
-                </label>
+        {{-- ---------- تب حساب بانکی — فاز ۲۱۷ بازطراحی کامل ----------
+             کارت‌های بانکی به‌صورت کارت‌نمای مدرن؛ افزودن/ویرایش/حذف مستقل
+             و فوری (بدون چرخهٔ تایید مدیر). حداقل یک کارت باید باقی بماند؛
+             کارت پیش‌فرض مقصد تسویه است و با sellers_info.shaba_number همگام می‌شود.
+             (شبا و صاحب حسابِ فقط‌نمایشی از فرم کلاسیک پروفایل حذف شدند) --}}
+        <section class="ap-card space-y-4 p-4 sm:p-6" x-show="tab === 'bank'" role="tabpanel" aria-label="حساب بانکی" x-cloak>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <p class="text-xs font-semibold leading-6 text-ink-500 dark:text-night-ink-2">
+                    کارت‌های بانکی خود را برای دریافت تسویه مدیریت کنید؛
+                    <span class="font-bold text-ink-600 dark:text-night-ink">حداقل یک کارت</span>
+                    باید در پروفایل شما باقی بماند.
+                </p>
+                <button type="button" x-on:click="openBankAdd()"
+                        class="ap-btn-primary inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-4 text-xs font-bold">
+                    <x-admin-panel::icon name="plus" class="size-4" />
+                    افزودن کارت جدید
+                </button>
+            </div>
+
+            {{-- کارت‌ها به‌صورت کارت‌نمای بانکی --}}
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <template x-for="account in bankAccounts" :key="account.id">
+                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-bl from-brand-600 via-brand-700 to-emerald-700 p-5 text-white shadow-xl transition-transform hover:scale-[1.01]">
+                        <div class="flex items-start justify-between gap-2">
+                            <span class="flex size-10 items-center justify-center rounded-xl bg-white/15">
+                                <x-admin-panel::icon name="credit-card" class="size-5" />
+                            </span>
+                            <span x-show="account.is_default"
+                                  class="flex items-center gap-1 rounded-full bg-white/25 px-2.5 py-1 text-[10px] font-black">
+                                <x-admin-panel::icon name="badge-check" class="size-3" />
+                                کارت پیش‌فرض تسویه
+                            </span>
+                        </div>
+
+                        <p dir="ltr" class="mt-5 text-start font-mono text-lg font-extrabold tracking-widest"
+                           x-text="bankMaskCard(account.card_number)"></p>
+                        <p x-show="! account.card_number"
+                           class="mt-2 rounded-lg bg-amber-400/20 px-2.5 py-1.5 text-[11px] font-bold text-amber-100">
+                            شماره کارت ثبت نشده است؛ برای تکمیل، کارت را ویرایش کنید.
+                        </p>
+
+                        <div class="mt-4 space-y-1.5 text-[12px]">
+                            <p class="flex items-center gap-1.5 font-bold">
+                                <x-admin-panel::icon name="user" class="size-3.5 shrink-0 opacity-75" />
+                                <span x-text="account.holder_name"></span>
+                            </p>
+                            <p dir="ltr" class="truncate font-mono text-[11px] text-white/80" x-text="account.sheba_number"></p>
+                        </div>
+
+                        <div class="mt-4 flex flex-wrap items-center gap-2 border-t border-white/15 pt-3">
+                            <button type="button" x-on:click="openBankEdit(account)"
+                                    class="inline-flex min-h-9 items-center gap-1 rounded-lg bg-white/15 px-3 text-[11px] font-bold transition-colors hover:bg-white/25">
+                                <x-admin-panel::icon name="pencil" class="size-3.5" />
+                                ویرایش
+                            </button>
+                            <button type="button" x-on:click="askBankDelete(account)"
+                                    class="inline-flex min-h-9 items-center gap-1 rounded-lg bg-red-500/25 px-3 text-[11px] font-bold transition-colors hover:bg-red-500/40">
+                                <x-admin-panel::icon name="trash-2" class="size-3.5" />
+                                حذف
+                            </button>
+                            <button type="button" x-show="! account.is_default" x-on:click="setBankDefault(account)"
+                                    class="inline-flex min-h-9 items-center gap-1 rounded-lg bg-emerald-400/20 px-3 text-[11px] font-bold transition-colors hover:bg-emerald-400/35">
+                                <x-admin-panel::icon name="badge-check" class="size-3.5" />
+                                انتخاب برای تسویه
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            {{-- حالت خالی (نبود کارت) --}}
+            <div x-show="! bankAccounts.length"
+                 class="rounded-2xl border border-dashed border-line p-8 text-center dark:border-night-line">
+                <x-admin-panel::icon name="credit-card" class="mx-auto size-8 text-ink-3" />
+                <p class="mt-3 text-xs font-bold text-ink-600 dark:text-night-ink-2">هنوز کارت بانکی ثبت نکرده‌اید</p>
+                <button type="button" x-on:click="openBankAdd()"
+                        class="ap-btn-primary mx-auto mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-4 text-xs font-bold">
+                    <x-admin-panel::icon name="plus" class="size-4" />
+                    افزودن کارت بانکی
+                </button>
             </div>
         </section>
 
@@ -557,6 +822,83 @@
                     </div>
                 </footer>
             @endif
+        </div>
+    </div>
+
+    {{-- ================= مودال افزودن/ویرایش کارت بانکی (فاز ۲۱۷) ================= --}}
+    <div x-show="bankModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40" x-on:click="closeBankModal()" x-transition.opacity></div>
+        <div class="ap-card relative z-10 w-full max-w-md" x-show="bankModalOpen" x-transition.scale.origin.center>
+            <header class="flex items-center justify-between border-b border-line px-4 py-3 dark:border-night-line">
+                <h3 class="flex items-center gap-2 text-sm font-bold">
+                    <x-admin-panel::icon name="credit-card" class="size-4 text-brand-600 dark:text-brand-400" />
+                    <span x-text="bankEditingId ? 'ویرایش کارت بانکی' : 'افزودن کارت بانکی جدید'"></span>
+                </h3>
+                <button type="button" x-on:click="closeBankModal()" class="min-h-9 rounded p-1 text-ink-500 hover:text-red-500" aria-label="بستن">
+                    <x-admin-panel::icon name="x" class="size-4" />
+                </button>
+            </header>
+            <div class="space-y-4 px-4 py-4">
+                <label class="block">
+                    <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">نام صاحب حساب <span class="text-red-500">*</span></span>
+                    <input type="text" x-model="bankForm.holder_name" x-on:input="delete bankErrors.holder_name"
+                           class="ap-input w-full" placeholder="نام و نام خانوادگی صاحب حساب">
+                    <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="bankErrors.holder_name" x-text="(bankErrors.holder_name || [])[0]" x-cloak></p>
+                </label>
+                <label class="block">
+                    <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">شماره کارت <span class="text-red-500">*</span></span>
+                    <input type="text" inputmode="numeric" maxlength="16" dir="ltr" autocomplete="off"
+                           x-model="bankForm.card_number"
+                           x-on:input="$event.target.value = bankNormCard($event.target.value); bankForm.card_number = $event.target.value; delete bankErrors.card_number"
+                           class="ap-input w-full fa-digits font-mono text-start" placeholder="6037991112345678">
+                    <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="bankErrors.card_number" x-text="(bankErrors.card_number || [])[0]" x-cloak></p>
+                </label>
+                <label class="block">
+                    <span class="mb-1 block text-xs font-semibold text-ink-600 dark:text-night-ink-2">شماره شبا <span class="text-red-500">*</span></span>
+                    <input type="text" dir="ltr" autocomplete="off"
+                           x-model="bankForm.sheba_number"
+                           x-on:input="$event.target.value = bankNormSheba($event.target.value); bankForm.sheba_number = $event.target.value; delete bankErrors.sheba_number"
+                           class="ap-input w-full fa-digits font-mono text-start" placeholder="IR______________________________">
+                    <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="bankErrors.sheba_number" x-text="(bankErrors.sheba_number || [])[0]" x-cloak></p>
+                </label>
+                <p class="rounded-xl bg-surface-2 p-3 text-[11px] font-semibold leading-5 text-ink-500 dark:bg-night-3 dark:text-night-ink-2">
+                    تسویه‌ها به کارتِ «پیش‌فرض» انجام می‌شود. شبای معتبر به‌صورت IR + ۲۴ رقم کنترل می‌شود تا تسویه بدون مشکل انجام شود.
+                </p>
+            </div>
+            <footer class="flex items-center gap-2 border-t border-line px-4 py-3 dark:border-night-line">
+                <button type="button" x-on:click="closeBankModal()"
+                        class="ap-btn-outline inline-flex min-h-11 items-center rounded-lg px-4 text-xs font-bold">انصراف</button>
+                <button type="button" x-on:click="saveBank()" :disabled="bankBusy" x-bind:class="bankBusy && 'opacity-60'"
+                        class="ap-btn-primary inline-flex min-h-11 items-center gap-1.5 rounded-lg px-4 text-xs font-bold">
+                    <x-admin-panel::icon name="loader-circle" class="size-4" x-show="bankBusy" x-cloak />
+                    ذخیره کارت
+                </button>
+            </footer>
+        </div>
+    </div>
+
+    {{-- ================= مودال تأیید حذف کارت بانکی (فاز ۲۱۷) ================= --}}
+    <div x-show="bankDeleteId !== null" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40" x-on:click="bankDeleteId = null" x-transition.opacity></div>
+        <div class="ap-card relative z-10 w-full max-w-sm" x-show="bankDeleteId !== null" x-transition.scale.origin.center>
+            <header class="border-b border-line px-4 py-3 dark:border-night-line">
+                <h3 class="flex items-center gap-2 text-sm font-bold">
+                    <x-admin-panel::icon name="triangle-alert" class="size-4 text-red-500" />
+                    حذف کارت بانکی
+                </h3>
+            </header>
+            <div class="px-4 py-4 text-xs leading-relaxed text-ink-600 dark:text-night-ink-2">
+                آیا از حذف این کارت بانکی مطمئن هستید؟ اگر کارت پیش‌فرض تسویه را حذف کنید، یکی از کارت‌های دیگر به‌صورت خودکار به‌عنوان پیش‌فرض انتخاب می‌شود.
+            </div>
+            <footer class="flex items-center gap-2 border-t border-line px-4 py-3 dark:border-night-line">
+                <button type="button" x-on:click="bankDeleteId = null"
+                        class="ap-btn-outline inline-flex min-h-11 items-center rounded-lg px-4 text-xs font-bold">خیر</button>
+                <button type="button" x-on:click="destroyBank()" :disabled="bankDeleteBusy" x-bind:class="bankDeleteBusy && 'opacity-60'"
+                        class="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-red-500 px-4 text-xs font-bold text-white transition-colors hover:bg-red-600">
+                    <x-admin-panel::icon name="loader-circle" class="size-4" x-show="bankDeleteBusy" x-cloak />
+                    بله، حذف شود
+                </button>
+            </footer>
         </div>
     </div>
 </div>

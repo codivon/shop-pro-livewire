@@ -119,7 +119,17 @@
         async submit() {
             this.busy = true;
             this.errors = {};
-            let fd = new FormData(this.$refs.form);
+            // فاز ۲۱۷ — نرمال‌سازی فیلدهای عددی قبل از ولیدیشن/ارسال
+            // (رفع باگ موبایل: مقدار ارسالی = مقدار نرمال‌شده‌ای که کاربر می‌بیند)
+            this.$refs.form.querySelectorAll('input[inputmode=numeric]').forEach(function (el) {
+                el.value = spEnDigits(el.value).replace(/[^0-9]/g, '').trim();
+            });
+            var shebaEl = this.$refs.form.querySelector('[name=shaba_number]');
+            if (shebaEl) {
+                var s = spEnDigits(shebaEl.value).toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (/^[0-9]{24}$/.test(s)) { s = 'IR' + s; }
+                shebaEl.value = s.slice(0, 26);
+            }
             // ولیدیشن کلاینتی فیلدهای الزامی (پیام فارسی، بدون حبابهٔ مرورگر)
             spRequire(this.$refs.form, this.errors, {
                 econtract: 'پذیرش قرارداد الکترونیکی الزامی است',
@@ -132,6 +142,23 @@
                 this.busy = false;
                 return;
             }
+            // فاز ۲۱۷ — کنترل کلاینتی کارت بانکی (Luhn) و شبا (MOD-97) با پیام فارسی فوری
+            var cardEl = this.$refs.form.querySelector('[name=card_number]');
+            if (cardEl && ! spValidCardNumber(cardEl.value)) {
+                this.errors.card_number = ['شمارهٔ کارت وارد شده معتبر نیست؛ کارت بانکی ۱۶ رقمی را بررسی کنید'];
+                spToast('شمارهٔ کارت وارد شده معتبر نیست', 'error');
+                cardEl.focus();
+                this.busy = false;
+                return;
+            }
+            if (shebaEl && ! spValidSheba(shebaEl.value)) {
+                this.errors.shaba_number = ['شمارهٔ شبا وارد شده معتبر نیست؛ شبای ۲۶ رقمی (IR + ۲۴ رقم) را مطابق اطلاعات بانکی بررسی کنید'];
+                spToast('شمارهٔ شبا وارد شده معتبر نیست', 'error');
+                shebaEl.focus();
+                this.busy = false;
+                return;
+            }
+            let fd = new FormData(this.$refs.form);
             try {
                 let data = await spPost('{{ route('seller.registration_business_store') }}', fd);
                 if (data.redirect) { window.location.href = data.redirect; return; }
@@ -274,13 +301,13 @@
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label class="mb-1.5 block text-xs font-bold" for="bd-post">کد پستی <span class="text-red-500">*</span></label>
-                        <input id="bd-post" type="text" name="post_code" inputmode="numeric" maxlength="10" required x-on:input="delete errors.post_code" class="ap-input py-3! fa-digits" placeholder="۱۲۳۴۵-۶۷۸۹۰">
+                        <input id="bd-post" type="text" name="post_code" inputmode="numeric" maxlength="10" required x-on:input="spNormalizeDigitsInput($event); delete errors.post_code" class="ap-input py-3! fa-digits" placeholder="۱۲۳۴۵۶۷۸۹۰">
                         <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="errors.post_code" x-text="(errors.post_code || [])[0]" x-cloak></p>
                         <p class="mt-1.5 text-[11px] font-semibold text-ink-3 dark:text-night-ink-2" x-show="! errors.post_code">کد پستی ۱۰ رقمی است</p>
                     </div>
                     <div>
                         <label class="mb-1.5 block text-xs font-bold" for="bd-phone">تلفن ثابت <span class="text-red-500">*</span></label>
-                        <input id="bd-phone" type="text" name="phone" inputmode="numeric" required x-on:input="delete errors.phone" class="ap-input py-3! fa-digits" placeholder="021-56000000">
+                        <input id="bd-phone" type="text" name="phone" inputmode="numeric" required x-on:input="spNormalizeDigitsInput($event); delete errors.phone" class="ap-input py-3! fa-digits" placeholder="02156000000">
                         <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="errors.phone" x-text="(errors.phone || [])[0]" x-cloak></p>
                         <p class="mt-1.5 text-[11px] font-semibold text-ink-3 dark:text-night-ink-2" x-show="! errors.phone">۱۱ رقم با کد شهر</p>
                     </div>
@@ -307,12 +334,7 @@
                            placeholder="نام فروشگاه شما در سایت {{ option('info_site_title', 'او پی شاپ') }}">
                     <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="errors.business_name" x-text="(errors.business_name || [])[0]" x-cloak></p>
                 </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-bold" for="bd-shaba">شمارهٔ شبا (برای تسویه) <span class="text-red-500">*</span></label>
-                    <input id="bd-shaba" type="text" dir="ltr" name="shaba_number" required x-on:input="delete errors.shaba_number" class="ap-input py-3! font-mono text-start" placeholder="IR______________________________">
-                    <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="errors.shaba_number" x-text="(errors.shaba_number || [])[0]" x-cloak></p>
-                    <p class="mt-1.5 text-[11px] font-semibold text-ink-3 dark:text-night-ink-2" x-show="! errors.shaba_number">شبا باید متعلق به همان شخص/شرکت باشد تا تسویه بدون مشکل انجام شود</p>
-                </div>
+                {{-- فاز ۲۱۷ — فیلد شبا از بخش «اطلاعات فروشگاه» به بخش مستقل «حساب بانکی» منتقل شد --}}
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {{-- دستهٔ اصلی تأمین کالا با کامبوباکس جستجودار؛
                          قبلاً کوئری where('category_id', null) هیچ ردیفی برنمی‌گرداند --}}
@@ -388,6 +410,42 @@
                         <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="errors.econtract" x-text="(errors.econtract || [])[0]" x-cloak></p>
                     </div>
                 @endif
+            </section>
+
+            {{-- فاز ۲۱۷ — حساب بانکی تسویه: بخش مستقل با آیکون؛ نام صاحب حساب
+                 از اطلاعات هویتی گام قبل خودکار پر می‌شود و قابل ویرایش نیست؛
+                 شماره کارت و شبا اجباری‌اند و اعتبارسنجی واقعی دارند --}}
+            <section class="space-y-4 rounded-2xl border border-line p-4 dark:border-night-line">
+                <h2 class="flex items-center gap-2 text-[13px] font-extrabold text-ink dark:text-night-ink">
+                    <x-admin-panel::icon name="landmark" class="size-4 text-brand-600 dark:text-brand-400" />
+                    حساب بانکی (تسویه)
+                </h2>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1.5 block text-xs font-bold" for="bd-holder">نام صاحب حساب <span class="text-red-500">*</span></label>
+                        <input id="bd-holder" type="text" name="bank_account_holder" readonly required value="{{ $draftHolderName }}"
+                               class="ap-input py-3! cursor-not-allowed
+                                      bg-surface-2! text-ink-2!
+                                      dark:bg-night-2! dark:text-night-ink! dark:border-night-line!">
+                        <p class="mt-1.5 text-[11px] font-semibold text-ink-3 dark:text-night-ink-2">این نام از اطلاعات هویتی شما (نام و نام خانوادگی) گرفته شده و در این گام قابل تغییر نیست</p>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-bold" for="bd-card">شماره کارت <span class="text-red-500">*</span></label>
+                        <input id="bd-card" type="text" name="card_number" inputmode="numeric" maxlength="16" required dir="ltr" autocomplete="off"
+                               x-on:input="spNormalizeDigitsInput($event); delete errors.card_number"
+                               class="ap-input py-3! fa-digits text-start font-mono" placeholder="6037991112345678">
+                        <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="errors.card_number" x-text="(errors.card_number || [])[0]" x-cloak></p>
+                        <p class="mt-1.5 text-[11px] font-semibold text-ink-3 dark:text-night-ink-2" x-show="! errors.card_number">کارت بانکی ۱۶ رقمی باید متعلق به صاحب حساب باشد</p>
+                    </div>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-bold" for="bd-shaba">شماره شبا (برای تسویه) <span class="text-red-500">*</span></label>
+                    <input id="bd-shaba" type="text" dir="ltr" name="shaba_number" required autocomplete="off"
+                           x-on:input="spNormalizeShebaInput($event); delete errors.shaba_number"
+                           class="ap-input py-3! font-mono text-start" placeholder="IR______________________________">
+                    <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400" x-show="errors.shaba_number" x-text="(errors.shaba_number || [])[0]" x-cloak></p>
+                    <p class="mt-1.5 text-[11px] font-semibold text-ink-3 dark:text-night-ink-2" x-show="! errors.shaba_number">شبا و کارت باید متعلق به همان شخص/شرکت باشد تا تسویه بدون مشکل انجام شود</p>
+                </div>
             </section>
 
             <button type="submit" class="ap-btn-primary w-full py-3.5!" :disabled="busy" x-bind:class="busy ? 'opacity-60' : ''">

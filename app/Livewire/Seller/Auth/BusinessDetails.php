@@ -34,6 +34,12 @@ class BusinessDetails extends Component
     /** وضعیت انتخابی (حقیقی/حقوقی) از پیش‌نویس */
     public ?string $draftType = null;
 
+    /**
+     * فاز ۲۱۷ — نام صاحب حساب بانکی (نام + نام خانوادگی واردشده در گام
+     * اطلاعات تکمیلی)؛ در گام کسب‌وکار فقط نمایش داده می‌شود و قابل ویرایش نیست.
+     */
+    public ?string $draftHolderName = null;
+
     /** قرارداد الکترونیکی (رکورد ۱ — مثل قدیمی) */
     public ?object $econtract = null;
 
@@ -73,6 +79,7 @@ class BusinessDetails extends Component
         $this->seller = ['mobile' => $draft->mobile];
         $this->draftEmail = $draft->email;
         $this->draftType = $draft->type;
+        $this->draftHolderName = trim(((string) $draft->first_name).' '.((string) $draft->last_name));
         $this->econtract = SellerEcontract::find(1);
         $this->provinces = Province::all();
 

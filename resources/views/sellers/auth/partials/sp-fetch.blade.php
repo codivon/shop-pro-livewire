@@ -70,6 +70,73 @@
         return parseInt(code[9], 10) === (r < 2 ? r : 11 - r);
     };
 
+    {{-- فاز ۲۱۷ — نرمال‌سازی زندهٔ فیلدهای عددی حین تایپ.
+         ریشهٔ باگ «کد ملی در گوشی اشتباه وارد می‌شود و رد می‌شود ولی در دسکتاپ درست است»:
+         کیبورد موبایل (چیدمان فارسی/پیشنهاد واژه) ارقام فارسی، فاصله یا نویسهٔ
+         نامرئی (نیم‌فاصله U+200C و…) داخل مقدار می‌گذارد؛ ولیدیشن کلاینت با
+         پاک‌سازی موقت رد می‌شد ولی همین مقدار خام به سرور می‌رفت و آنجا رد می‌شد.
+         حالا مقدار خودِ فیلد در لحظه پاک‌سازی می‌شود (تبدیل ارقام فارسی/عربی +
+         حذف هر نویسهٔ غیررقمی) تا مقدار ارسالی به سرور همیشه دقیقاً همان چیزی
+         باشد که کلاینت دیده — رفتار موبایل و دسکتاپ یکسان می‌شود. --}}
+    window.spNormalizeDigitsInput = function (event) {
+        var el = event.target;
+        var max = parseInt(el.getAttribute('maxlength') || '0', 10);
+        var clean = spEnDigits(el.value).replace(/[^0-9]/g, '');
+        if (max > 0 && clean.length > max) { clean = clean.slice(0, max); }
+        if (el.value !== clean) { el.value = clean; }
+    };
+
+    {{-- فاز ۲۱۷ — نرمال‌سازی زندهٔ شبا حین تایپ: بزرگ‌کردن، حذف فاصله/خط تیره/
+         نویسه‌های اضافه و افزودن خودکار پیشوند IR برای شبای ۲۴ رقمی --}}
+    window.spNormalizeShebaInput = function (event) {
+        var el = event.target;
+        var clean = spEnDigits(el.value).toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (/^[0-9]{24}$/.test(clean)) { clean = 'IR' + clean; }
+        if (clean.length > 26) { clean = clean.slice(0, 26); }
+        if (el.value !== clean) { el.value = clean; }
+    };
+
+    {{-- فاز ۲۱۷ — اعتبارسنجی کلاینتی شماره کارت بانکی ۱۶ رقمی (الگوریتم Luhn) --}}
+    window.spValidCardNumber = function (card) {
+        card = spEnDigits(card).replace(/\D/g, '');
+        if (!/^[2569]\d{15}$/.test(card)) return false;
+        var sum = 0, alt = false;
+        for (var i = card.length - 1; i >= 0; i--) {
+            var d = parseInt(card[i], 10);
+            if (alt) { d *= 2; if (d > 9) { d -= 9; } }
+            sum += d;
+            alt = !alt;
+        }
+        return sum % 10 === 0;
+    };
+
+    {{-- فاز ۲۱۷ — اعتبارسنجی کلاینتی شبا ایرانی (IR + ۲۴ رقم، الگوریتم MOD-97) --}}
+    window.spValidSheba = function (code) {
+        code = spEnDigits(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (/^[0-9]{24}$/.test(code)) { code = 'IR' + code; }
+        if (!/^IR[0-9]{24}$/.test(code)) return false;
+        // الگوریتم IBAN: چهار نویسهٔ اول به انتها می‌رود؛ IR معادل 1827 است
+        var s = code.substring(4) + '1827' + code.substring(2, 4);
+        var remainder = 0;
+        for (var i = 0; i < s.length; i++) {
+            remainder = (remainder * 10 + parseInt(s[i], 10)) % 97;
+        }
+        return remainder === 1;
+    };
+
+    {{-- فاز ۲۱۷ — ولیدیشن زندهٔ کد ملی: وقتی ۱۰ رقم کامل شد همان‌جا پیام فارسی
+         می‌نشیند (بدون رفت‌وبرگشت سرور) و با ویرایش مقدار پاک می‌شود --}}
+    window.spLiveNationalCodeCheck = function (form, errors) {
+        var el = form.querySelector('[name=national_code]');
+        if (! el) { return; }
+        var value = String(el.value || '');
+        if (value.length === 10 && ! spValidNationalCode(value)) {
+            errors.national_code = ['کد ملی وارد شده معتبر نیست؛ کد ملی ۱۰ رقمی را مطابق کارت ملی بررسی کنید'];
+        } else if (errors.national_code && errors.national_code[0] === 'کد ملی وارد شده معتبر نیست؛ کد ملی ۱۰ رقمی را مطابق کارت ملی بررسی کنید') {
+            delete errors.national_code;
+        }
+    };
+
     {{-- پاک‌کردن پیام «الزامی» کلاینت وقتی کاربر شروع به پرکردن کرد.
          scope = خود کامپوننت آلپاین (this در init) تا همیشه errors فعلی خوانده شود --}}
     window.spClearErrorOnInput = function (form, scope) {

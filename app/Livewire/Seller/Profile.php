@@ -39,12 +39,30 @@ class Profile extends Component
         $econtract = SellerEcontract::find(1);
         $provinces = Province::with('cities:id,province_id,name')->select('id', 'name')->get();
 
+        // فاز ۲۱۷ — کارت‌های بانکی فروشنده (مدیریت مستقل تب حساب بانکی، بدون چرخهٔ تایید مدیر)
+        $bankAccounts = $seller->bankAccounts()
+            ->orderByDesc('is_default')
+            ->orderBy('id')
+            ->get()
+            ->map(fn ($account) => [
+                'id' => $account->id,
+                'holder_name' => (string) $account->holder_name,
+                'card_number' => (string) $account->card_number,
+                'sheba_number' => (string) $account->sheba_number,
+                'is_default' => (bool) $account->is_default,
+                'update_url' => route('seller.profile.bank.update', $account),
+                'destroy_url' => route('seller.profile.bank.destroy', $account),
+                'default_url' => route('seller.profile.bank.default', $account),
+            ])->values()->all();
+
         return view('sellers.panel.profile.index', [
             'seller' => $seller,
             'seller_info' => $seller_info,
             'categories' => $categories,
             'provinces' => $provinces,
             'econtract' => $econtract,
+            'bankAccounts' => $bankAccounts,
+            'bankStoreUrl' => route('seller.profile.bank.store'),
             'updateUrl' => route('seller.profile.update', ['seller' => $seller]),
             'setEcontractUrl' => route('seller.profile.set_econtract'),
             'citiesUrl' => route('provinces.get-cities'),

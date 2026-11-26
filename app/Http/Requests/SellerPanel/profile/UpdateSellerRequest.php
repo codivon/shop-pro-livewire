@@ -31,7 +31,9 @@ class UpdateSellerRequest extends FormRequest
                 'address' => 'required|persian_alpha_eng_num',
                 'post_code' => 'required|digits:10',
                 'phone' => 'required|digits:11',
-                'shaba_number' => 'required',
+                // فاز ۲۱۷ — شبا از فرم کلاسیک پروفایل حذف شد؛ کارت‌های بانکی
+                // حالا در تب «حساب بانکی» به‌صورت مستقل و فوری مدیریت می‌شوند
+                // (کنترلر SellerBankAccountController) — بدون چرخهٔ تایید مدیر
                 'main_supply_category_id' => 'required',
                 'number_of_products' => 'required',
                 'password'   => ['nullable', 'string', 'min:6', 'confirmed:confirmed'],
@@ -71,7 +73,6 @@ class UpdateSellerRequest extends FormRequest
             'address' => 'آدرس',
             'post_code' => 'کد پستی',
             'phone' => 'تلفن ثابت',
-            'shaba_number' => 'شماره شبا',
             'main_supply_category_id' => 'قصد فروش کالا',
             'number_of_products' => 'تعداد تنوع کالا',
             'password' => 'رمز عبور',

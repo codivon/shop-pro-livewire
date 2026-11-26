@@ -152,7 +152,9 @@ class ProfileSellerController extends Controller
         $seller_info->post_code = $request->post_code;
         $seller_info->location = $request->lat_and_long;
 
-        $seller_info->shaba_number = $request->shaba_number;
+        // فاز ۲۱۷ — شبا دیگر از فرم کلاسیک پروفایل نمی‌آید؛ کارت‌های بانکی در
+        // تب «حساب بانکی» مستقل مدیریت می‌شوند (SellerBankAccountController) و
+        // شبای کارت پیش‌فرض همان‌جا به‌صورت همگام اینجا نوشته می‌شود.
         $seller_info->main_supply_category_id = $request->main_supply_category_id;
         $seller_info->number_of_products = $request->number_of_products;
 

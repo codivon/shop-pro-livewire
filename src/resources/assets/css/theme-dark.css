@@ -3181,3 +3181,104 @@ html[data-theme="dark"] .aichw-foot {
     background: var(--dk-surface) !important;
     color: var(--dk-text-muted) !important;
 }
+
+/* ============================================================
+   فاز ۲۱۶ — دارک مود فیلترهای صفحهٔ دسته‌بندی/جستجو
+   (/search/category-products) — باکس .filter-items قبلاً همیشه
+   سفید بود و متن‌هایش در تم شب ناخوانا می‌شد.
+   ============================================================ */
+
+/* کارت اصلی فیلترها — سایدبار دسکتاپ و آفسکانس موبایل */
+html[data-theme="dark"] .filter-items {
+    background-color: var(--dk-surface);
+    border: 1px solid var(--dk-border);
+    box-shadow: var(--dk-shadow);
+}
+
+/* عناوین بخش‌های فیلتر (جستجو، برند، قیمت و ...) */
+html[data-theme="dark"] .filter-items .filter-item-title {
+    color: var(--dk-text);
+    border-bottom: 2px solid var(--dk-border);
+}
+
+html[data-theme="dark"] .filter-items .filter-item-title i {
+    color: var(--dk-text-soft);
+}
+
+/* چک‌باکس‌ها و سوییچ‌ها */
+html[data-theme="dark"] .filter-items .form-check-label {
+    color: var(--dk-text-soft);
+}
+
+html[data-theme="dark"] .filter-items .form-check-input {
+    background-color: var(--dk-surface-2);
+    border-color: var(--dk-border);
+    cursor: pointer;
+}
+
+html[data-theme="dark"] .filter-items .form-check-input:checked {
+    background-color: var(--main-color-one);
+    border-color: var(--main-color-one);
+}
+
+/* فیلد جستجوی داخل فیلترها */
+html[data-theme="dark"] .filter-items .search-filed .search-input {
+    background-color: var(--dk-surface-2);
+    border-color: var(--dk-border);
+    color: var(--dk-text);
+}
+
+html[data-theme="dark"] .filter-items .search-filed .search-input::placeholder {
+    color: var(--dk-text-muted);
+}
+
+html[data-theme="dark"] .filter-items .search-filed .search-input:focus {
+    border-color: var(--main-color-one);
+}
+
+/* اسلایدر و ورودی‌های قیمت */
+html[data-theme="dark"] .filter-items .input-range-filter {
+    background-color: var(--dk-surface-2);
+    color: var(--dk-text);
+}
+
+html[data-theme="dark"] .filter-items .filter-range li {
+    color: var(--dk-text-muted);
+}
+
+html[data-theme="dark"] .filter-items .filter-range li input[type="text"] {
+    background-color: var(--dk-surface-2);
+    border-color: var(--dk-border);
+    color: var(--dk-text);
+    font-weight: 700;
+}
+
+/* ریل و دستگیرهٔ اسلایدر قیمت (noUi) */
+html[data-theme="dark"] .filter-items .filter-price .filter-slider .noUi-target {
+    background-color: var(--dk-border);
+}
+
+html[data-theme="dark"] .filter-items .filter-price .filter-slider .noUi-connect {
+    background-color: var(--main-color-one);
+}
+
+html[data-theme="dark"] .filter-items .filter-price .filter-slider .noUi-handle {
+    background-color: var(--main-color-one);
+}
+
+/* سواچ رنگ ویژگی‌ها (حاشیهٔ دور در زمینهٔ تیره) */
+html[data-theme="dark"] .filter-items .filter-color {
+    border: 2px solid var(--dk-border);
+}
+
+/* دکمهٔ «اعمال فیلتر» — قاب تیره روی زمینهٔ تیره دیده نمی‌شد */
+html[data-theme="dark"] .filter-items .btn-outline-site {
+    border: 2px solid var(--dk-text-soft);
+    color: var(--dk-text);
+}
+
+html[data-theme="dark"] .filter-items .btn-outline-site:hover {
+    background-color: var(--main-color-one);
+    border-color: var(--main-color-one);
+    color: #fff;
+}

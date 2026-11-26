@@ -165,7 +165,7 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=190">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=191">
     <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=176">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
@@ -173,12 +173,12 @@
     <link rel="stylesheet" href="{{ theme_asset('css/owl.carousel.min.css') }}">
 
     {{-- اصلاحات ظاهری ریز (هدر/محصول/صفحات) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-header.css') }}?v=165">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-header.css') }}?v=166">
     <link rel="stylesheet" href="{{ theme_asset('css/theme-product.css') }}?v=21">
     <link rel="stylesheet" href="{{ theme_asset('css/theme-pages.css') }}">
 
     {{-- /۱۵۸ — حالت شب (دارک مود) — بعد از همهٔ استایل‌ها تا بتواند بازنویسی کند --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=34">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=35">
 
     {{-- CSS عملکردی مشترک (توست‌ها + آیکون‌های منوهای داینامیک) --}}
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">

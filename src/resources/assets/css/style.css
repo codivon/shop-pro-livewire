@@ -2838,9 +2838,9 @@ a.image-data-src{
     transform: translateX(33px);
     text-align: center;
     line-height: 70px;
-    top: -50px;
-    width: 70px;
-    height: 70px;
+    top: -40px;
+    width: 60px;
+    height: 60px;
     background: var(--main-color-one);
     border-radius: 50%;
     box-shadow: var(--shadow-box);

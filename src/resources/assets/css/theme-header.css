@@ -1175,12 +1175,20 @@
    دیده نمی‌شد؛ با یک دکمهٔ واقعی ۴۲px جایگزین شده است. */
 .snr-menu-top {
     align-items: center;
+    justify-content: space-between;
     padding: 16px 20px 4px;
 }
 
 .snr-menu-top .offcanvas-title {
     font-size: 16px;
     font-weight: 700;
+}
+
+/* ---------- [فاز ۲۱۶] آفسکانس بالای همهٔ لایه‌ها ----------
+   نوار ادمین/استیکی هدر روی منوی موبایل می‌نشست؛ ۱۴۵۵ تضمین
+   می‌کند منو، سبد خرید و آفسکانس فیلترها همیشه رو هستند. */
+.offcanvas {
+    z-index: 1455;
 }
 
 .snr-menu-close {

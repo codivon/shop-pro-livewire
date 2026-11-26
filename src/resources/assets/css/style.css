@@ -8154,3 +8154,15 @@ body:has(#responsiveMenu.hiding) #back-to-top {
     transition: opacity .2s ease, visibility .2s ease, transform .25s ease;
     -webkit-transition: opacity .2s ease, visibility .2s ease, transform .25s ease;
 }
+
+/* ============================================================
+   فاز ۲۱۵ — لوگوی دوحالتهٔ سایت (روشن/تیره)
+   پیش‌فرض: فقط لوگوی روشن (snr-logo-light) دیده می‌شود.
+   اگر لوگوی دارک (info_logo_dark) در پنل آپلود شده باشد، پارشال
+   site-logo.blade.php تصویر دوم را با کلاس snr-logo-dark رندر
+   می‌کند و قواعد سوییچ در theme-dark.css قرار دارند
+   (html[data-theme="dark"] → روشن پنهان، تیره نمایش).
+   ============================================================ */
+.snr-logo-dark {
+    display: none !important;
+}

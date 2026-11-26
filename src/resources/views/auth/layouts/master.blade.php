@@ -99,13 +99,13 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=189">
-    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=190">
+    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=176">
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('css/auth.css') }}">
 
     {{-- دارک مود در صفحات ورود/ثبت‌نام --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=33">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=34">
 
     {{-- فاز ۲۱۰ — پوستهٔ رنگی قالب در صفحات ورود/ثبت‌نام:
          این لایوت تا فاز ۲۰۹ تزریق متغیرهای پوسته را نداشت و

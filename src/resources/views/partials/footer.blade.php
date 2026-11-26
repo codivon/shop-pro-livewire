@@ -159,9 +159,8 @@
         @if ($footerAboutText !== '' || $snr_badges)
         <div class="snr-footer-about">
             <div class="snr-about-top">
-                <img loading="lazy" decoding="async"
-                     src="{{ option('info_logo', theme_asset('images/logo-default.png')) }}"
-                     class="snr-about-logo" alt="{{ option('info_site_title', 'او پی شاپ') }}">
+                {{-- فاز ۲۱۵ — لوگوی دوحالتهٔ روشن/تیره --}}
+                @include('front::partials.site-logo', ['class' => 'snr-about-logo'])
                 @if($snr_badges)
                     <div class="snr-footer-badges">
                         @foreach ($snr_badges as $snr_badge)

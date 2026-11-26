@@ -165,8 +165,8 @@
     <link rel="stylesheet" href="{{ theme_asset('plugin/swiper/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/timer/timer.css') }}">
     <link rel="stylesheet" href="{{ theme_asset('plugin/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=189">
-    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=175">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=190">
+    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=176">
 
     {{-- اسلایدر owl در ویجت‌های پنل کاربری استفاده می‌شود؛
          بدون این CSS آفست افقی تمام‌صفحه ایجاد می‌شد --}}
@@ -178,7 +178,7 @@
     <link rel="stylesheet" href="{{ theme_asset('css/theme-pages.css') }}">
 
     {{-- /۱۵۸ — حالت شب (دارک مود) — بعد از همهٔ استایل‌ها تا بتواند بازنویسی کند --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=33">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=34">
 
     {{-- CSS عملکردی مشترک (توست‌ها + آیکون‌های منوهای داینامیک) --}}
     <link rel="stylesheet" href="{{ theme_asset('js/plugins/toastr/toastr.css') }}">
@@ -750,8 +750,9 @@
                                 </button>
                             </div>
                             <div class="offcanvas-body">
+                                {{-- فاز ۲۱۵ — لوگوی دوحالتهٔ روشن/تیره --}}
                                 <a href="{{ route('front.index') }}" class="text-center d-block mb-3">
-                                    <img src="{{ option('info_logo', theme_asset('images/logo-default.png')) }}" alt="{{ option('info_site_title', 'او پی شاپ') }}" class="img-fluid" width="200">
+                                    @include('front::partials.site-logo', ['width' => 200])
                                 </a>
                                 <div class="header-bottom-form mb-4 w-100">
                                     <div class="search-form">
@@ -772,8 +773,8 @@
                     </div>
                     <a href="{{ route('front.index') }}">
                         <div class="logo">
-                            <img src="{{ option('info_logo', theme_asset('images/logo-default.png')) }}"
-                                 alt="{{ option('info_site_title', 'او پی شاپ') }}" class="img-fluid">
+                            {{-- فاز ۲۱۵ — لوگوی دوحالتهٔ روشن/تیره --}}
+                            @include('front::partials.site-logo')
                         </div>
                     </a>
                 </div>

@@ -95,11 +95,11 @@
     <link rel="stylesheet" href="{{ theme_asset('css/materialdesignicons.css?v=2') }}">
 
     {{-- استایل‌های مشترک تم (متغیرهای رنگ، content-box، bank-item، pay-table و ...) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=189">
-    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=173">
+    <link rel="stylesheet" href="{{ theme_asset('css/style.css') }}?v=190">
+    <link rel="stylesheet" href="{{ theme_asset('css/responsive.css') }}?v=176">
 
     {{-- تم تیرهٔ چک‌اوت (قوانین اختصاصی چک‌اوت انتهای همین فایل است) --}}
-    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=33">
+    <link rel="stylesheet" href="{{ theme_asset('css/theme-dark.css') }}?v=34">
 
     {{-- فاز ۲۱۰ — پوستهٔ رنگی قالب در چک‌اوت و نتیجهٔ پرداخت:
          این لایوت تا فاز ۲۰۹ تزریق متغیرهای پوسته را نداشت و
@@ -426,8 +426,8 @@
 
             <a href="{{ route('front.index') }}" class="snr-checkout-logo"
                 aria-label="{{ option('info_site_title', 'او پی شاپ') }}">
-                <img src="{{ option('info_logo', theme_asset('images/logo-default.png')) }}"
-                    alt="{{ option('info_site_title', 'او پی شاپ') }}">
+                {{-- فاز ۲۱۵ — لوگوی دوحالتهٔ روشن/تیره --}}
+                @include('front::partials.site-logo')
             </a>
 
             <span class="snr-checkout-header-spacer" aria-hidden="true"></span>

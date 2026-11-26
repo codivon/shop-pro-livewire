@@ -3008,3 +3008,176 @@ html[data-theme="dark"] .snr-menu-close:hover {
     border-color: var(--main-color-one);
     color: #fff;
 }
+
+/* ============================================================
+   فاز ۲۱۵ — منوی پایین موبایل + ویجت‌های شناور پایین صفحه
+   (گزارش کاربر: «در حالت دارک مود، منوهای پایین سفید هست»)
+   ============================================================ */
+
+/* ---------- لوگوی اختصاصی حالت دارک (فاز ۲۱۵) ----------
+   اگر لوگوی دارک از پنل آپلود شده باشد، img دوم (snr-logo-dark) نمایش
+   داده می‌شود؛ قانون قدیمیِ سفیدسازیِ لوگو با فیلتر invert نباید روی
+   لوگوی اختصاصیِ دارک اعمال شود. */
+html[data-theme="dark"] .snr-logo-dark {
+    display: inline-block !important;
+    filter: none !important;
+    opacity: 1 !important;
+}
+
+html[data-theme="dark"] .snr-logo-light {
+    display: none !important;
+}
+
+/* ---------- منوی پایین موبایل (.mobile-footer) ---------- */
+html[data-theme="dark"] .mobile-footer {
+    background: var(--dk-bg-soft);
+    border-bottom-color: var(--dk-border);
+    filter: drop-shadow(0 -8px 30px rgba(0, 0, 0, .4));
+}
+
+html[data-theme="dark"] .mobile-footer .parent .item i {
+    color: var(--dk-text-soft);
+}
+
+html[data-theme="dark"] .mobile-footer .parent .item a:hover i,
+html[data-theme="dark"] .mobile-footer li.active i {
+    color: var(--main-color-one);
+}
+
+/* دکمهٔ وسط (سبد خرید) — همان رنگ اصلی با سایهٔ تیره‌تر */
+html[data-theme="dark"] .mobile-footer .item.item-float {
+    background: var(--main-color-one);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .45);
+}
+
+html[data-theme="dark"] .mobile-footer .item.item-float i {
+    color: #fff;
+}
+
+/* حلقهٔ دور بج سبد با رنگ پس‌زمینهٔ تیره هماهنگ می‌شود */
+html[data-theme="dark"] .mobile-footer .menu-cart-counter {
+    box-shadow: 0 0 0 1px var(--dk-bg-soft);
+    -webkit-box-shadow: var(--dk-bg-soft) 0 0 0 1px;
+}
+
+/* ---------- ویجت پشتیبانی شناور (fw-wrapper) ---------- */
+html[data-theme="dark"] .fw-fab {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .5);
+}
+
+html[data-theme="dark"] .fw-fab-label {
+    background: var(--dk-surface-2);
+    color: var(--dk-text);
+}
+
+html[data-theme="dark"] .fw-fab-label::after {
+    border-right-color: var(--dk-surface-2);
+}
+
+html[data-theme="dark"] .fw-panel {
+    background: var(--dk-surface);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .55), 0 4px 12px rgba(0, 0, 0, .35);
+}
+
+/* هدر گرادیانی پنل دست‌نخورده می‌ماند (روی رنگ اصلی خوانا است) */
+html[data-theme="dark"] .fw-tabs {
+    background: var(--dk-surface-2);
+}
+
+html[data-theme="dark"] .fw-tab-btn {
+    color: var(--dk-text-muted);
+}
+
+html[data-theme="dark"] .fw-tab-btn.fw-tab-active {
+    background: var(--dk-surface);
+    color: var(--fw-primary);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+}
+
+html[data-theme="dark"] .fw-channel,
+html[data-theme="dark"] .fw-contact-item {
+    background: var(--dk-surface-2);
+    color: var(--dk-text);
+}
+
+html[data-theme="dark"] .fw-channel:hover,
+html[data-theme="dark"] .fw-contact-item:hover {
+    background: var(--dk-surface);
+    border-color: var(--dk-border);
+}
+
+html[data-theme="dark"] .fw-ch-name {
+    color: var(--dk-text);
+}
+
+html[data-theme="dark"] .fw-ch-sub,
+html[data-theme="dark"] .fw-ch-arrow {
+    color: var(--dk-text-muted);
+}
+
+html[data-theme="dark"] .fw-contact-icon {
+    background: color-mix(in srgb, var(--fw-primary) 20%, transparent);
+    color: var(--fw-primary);
+}
+
+html[data-theme="dark"] .fw-hours-badge {
+    background: rgba(74, 222, 128, .12);
+    color: #4ade80;
+}
+
+html[data-theme="dark"] .fw-footer {
+    color: var(--dk-text-muted);
+    border-top-color: var(--dk-border);
+}
+
+/* ---------- چت‌بات هوشمند ماژول AI (aichw) ----------
+   CSS ماژول بعد از فایل‌های تم لود می‌شود → !important الزامی است */
+html[data-theme="dark"] .aichw-fab-label {
+    background: var(--dk-surface-2);
+    color: var(--dk-text);
+}
+
+html[data-theme="dark"] .aichw-fab-label::after {
+    border-right-color: var(--dk-surface-2);
+}
+
+html[data-theme="dark"] .aichw-panel {
+    background: var(--dk-surface) !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .6), 0 4px 14px rgba(0, 0, 0, .4) !important;
+}
+
+html[data-theme="dark"] .aichw-log {
+    background: var(--dk-bg-soft) !important;
+}
+
+html[data-theme="dark"] .aichw-log::-webkit-scrollbar-thumb {
+    background: var(--dk-border);
+}
+
+html[data-theme="dark"] .aichw-bubble--bot {
+    background: var(--dk-surface-2) !important;
+    color: var(--dk-text) !important;
+    border-color: var(--dk-border) !important;
+}
+
+/* حباب پیام کاربر گرادیانیِ رنگ اصلی را حفظ می‌کند (متن سفید خواناست) */
+
+html[data-theme="dark"] .aichw-inputbar {
+    background: var(--dk-surface) !important;
+    border-top-color: var(--dk-border) !important;
+}
+
+html[data-theme="dark"] .aichw-input {
+    background: var(--dk-surface-2) !important;
+    border-color: var(--dk-border) !important;
+    color: var(--dk-text) !important;
+}
+
+html[data-theme="dark"] .aichw-input::placeholder {
+    color: var(--dk-text-muted) !important;
+}
+
+html[data-theme="dark"] .aichw-foot {
+    background: var(--dk-surface) !important;
+    color: var(--dk-text-muted) !important;
+}

@@ -16,7 +16,7 @@
                         <div class="header d-flex qa-question-row">
 
                             <div class="faq-header-question">
-                                <span class="fa fa-question-circle-o"></span>
+                                <span class="bi bi-question-circle"></span>
                             </div>
                             <div class="qa-question-main">
                                 <div class="question-body">

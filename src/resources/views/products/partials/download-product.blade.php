@@ -52,12 +52,12 @@
                                 @if($product->gallery()->count()>=2)
                                 <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button"
                                    data-slide="prev">
-                                    <span class="fa fa-angle-left" aria-hidden="true"></span>
+                                    <span class="bi bi-chevron-left" aria-hidden="true"></span>
                                     <span class="sr-only">Previous</span>
                                 </a>
                                 <a class="carousel-control-next" href="#carouselExampleIndicators" role="button"
                                    data-slide="next">
-                                    <span class="fa fa-angle-right" aria-hidden="true"></span>
+                                    <span class="bi bi-chevron-right" aria-hidden="true"></span>
                                     <span class="sr-only">Next</span>
                                 </a>
                                 @endif
@@ -525,7 +525,7 @@
                                                 @if ($reviews->count())
                                                     <div class="product-star mb-3">
                                                         @for($i=1;$i<=5;$i++)
-                                                            <i class="fa fa-star @if($i<=$product->rating)active @endif"></i>
+                                                            <i class="bi bi-star-fill @if($i<=$product->rating)active @endif"></i>
                                                         @endfor
                                                     </div>
                                                     <div class="comments-side-rating-all">
@@ -534,7 +534,7 @@
                                                 @else
                                                     <div class="product-star mb-3">
                                                         @for($i=1;$i<=5;$i++)
-                                                            <i class="fa fa-star"></i>
+                                                            <i class="bi bi-star-fill"></i>
                                                         @endfor
                                                     </div>
                                                 @endif
@@ -567,7 +567,7 @@
                                             <button data-toggle="modal"
                                                     data-target="#add-product-review-modal"
                                                     class="dk-btn dk-btn-info">
-                                                <i class="fa fa-comments sign-in"></i>
+                                                <i class="bi bi-chat-dots sign-in"></i>
                                                 افزودن نظر جدید
                                             </button>
                                         @else
@@ -575,7 +575,7 @@
                                                class="parent-btn">
                                                 <button class="dk-btn dk-btn-info">
                                                     افزودن نظر جدید
-                                                    <i class="fa fa-comments sign-in"></i>
+                                                    <i class="bi bi-chat-dots sign-in"></i>
                                                 </button>
                                             </a>
 

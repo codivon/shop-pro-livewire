@@ -34,7 +34,7 @@
                                 @foreach (front_category_children($childMenu->category) as $childCategory)
                                     @if (front_category_children($childCategory)->isNotEmpty())
                                         <li class="snr-mega-group">
-                                            <a class="title" href="{{ $childCategory->link }}">{{ $childCategory->title }}<i class="fa fa-angle-left"></i></a>
+                                            <a class="title" href="{{ $childCategory->link }}">{{ $childCategory->title }}<i class="bi bi-chevron-left"></i></a>
                                             <ul class="snr-mega-group-list">
                                                 @foreach (front_category_children($childCategory) as $subChildCategory)
                                                     <li><a href="{{ $subChildCategory->link }}">{{ $subChildCategory->title }}</a></li>

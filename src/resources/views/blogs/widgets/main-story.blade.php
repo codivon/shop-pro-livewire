@@ -100,7 +100,7 @@
                                                         @if($story->cover_image)
                                                             <img src="{{asset($story->cover_image)}}" alt="avatar">
                                                         @else
-                                                            <i class="fa fa-store"></i>
+                                                            <i class="bi bi-shop"></i>
                                                         @endif
                                                     </div>
                                                     <div class="user-details">
@@ -110,7 +110,7 @@
                                                     </div>
                                                 </div>
                                                 <button class="close-story" data-bs-dismiss="modal" type="button" aria-label="بستن">
-                                                    <i class="fa fa-times"></i>
+                                                    <i class="bi bi-x-lg"></i>
                                                 </button>
                                             </div>
 
@@ -135,12 +135,12 @@
                                                 <ul class="story-likes-comments {{ $story->product_id ? 'with-product' : '' }}">
                                                     @if($story->active_likes)
                                                         <li class="story-likes {{$story->isLikedByUser() ? 'liked' : ''}}" data-action="{{route('front.setStoryLike')}}"><i
-                                                                class="fa fa-heart"></i><span>{{$story->likes_count}}</span>
+                                                                class="bi bi-heart-fill"></i><span>{{$story->likes_count}}</span>
                                                         </li>
                                                     @endif
                                                     @if($story->active_comments)
                                                         <li class="story-comments"><i
-                                                                class="fa fa-comment"></i><span>0</span></li>
+                                                                class="bi bi-chat"></i><span>0</span></li>
                                                     @endif
 
 
@@ -226,12 +226,12 @@
                                 {{-- کنترل‌های بوت‌استرپ ۵ --}}
                                 <a class="carousel-control-prev" role="button"
                                    data-bs-target="#carouselExampleIndicatorsStory" data-bs-slide="prev">
-                                    <span class="fa fa-angle-left" aria-hidden="true"></span>
+                                    <span class="bi bi-chevron-left" aria-hidden="true"></span>
                                     <span class="sr-only">Previous</span>
                                 </a>
                                 <a class="carousel-control-next" role="button"
                                    data-bs-target="#carouselExampleIndicatorsStory" data-bs-slide="next">
-                                    <span class="fa fa-angle-right" aria-hidden="true"></span>
+                                    <span class="bi bi-chevron-right" aria-hidden="true"></span>
                                     <span class="sr-only">Next</span>
                                 </a>
                             @endif

@@ -34,7 +34,7 @@
             </div>
         @endif
        {{-- <div class="product-box-timer">
-            <span class="fa fa-clock-o"></span>
+            <span class="bi bi-clock"></span>
             <div class="countdown countdown-style-3 h4"
                  data-date-time="10/10/2025 24:00"
                  data-labels='{"label-second": "", "label-minute": "", "label-hour": ""}'>

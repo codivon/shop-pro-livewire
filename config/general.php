@@ -3,6 +3,12 @@ $default_images_path = 'themes/SaniarTheme/src/resources/assets/img/default/';
 return [
     'theme_name' => 'SaniarTheme',
 
+    /* فاز ۲۱۴ اصلاحیه ۲ — نسخهٔ تم: با هر انتشار جدید باید افزایش یابد.
+       ThemeAssetSync این مقدار را با مُهرِ داخل مارکر .shoplink-copy در public
+       مقایسه می‌کند؛ در صورت اختلاف، دارایی‌ها بدون توجه به mtime از نو کپی
+       می‌شوند تا «کپیِ کهنه» بعد از هر به‌روزرسانی تم خودکار ترمیم شود. */
+    'version' => '2.14.2',
+
     'sliderGroups' => [
         'home' => [
             [

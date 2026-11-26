@@ -39,8 +39,19 @@ class ThemeServiceProvider extends ServiceProvider
         // اگر دارایی‌های تم روی هاست «کپی واقعی» است (بدون symlink) و
         // منبع بعد از git pull جدیدتر شده، خودکار نوسازی می‌شود (اسکن کش‌شده؛
         // پس از optimize:clear اولین بازدید تازه‌سازی می‌کند) — بدون shop:link دستی
+        //
+        // فاز ۲۱۴ اصلاحیه ۲ — نسخهٔ تم هم پاس داده می‌شود؛ تغییر config('front.version')
+        // یعنی بازسازی اجباری دارایی‌های public (ترمیم کپی کهنه، حتی اگر mtime ها
+        // درست رشد نکرده باشند). این آرگومان روی masterهای قدیمی‌تر که پارامتر
+        // پنجم را ندارند، به‌صورت آرگومان اضافه بی‌صدا نادیده گرفته می‌شود.
         try {
-            \App\Services\ThemeAssetSync::syncIfStale(basename(realpath(__DIR__.'/..')));
+            \App\Services\ThemeAssetSync::syncIfStale(
+                basename(realpath(__DIR__.'/..')),
+                null,
+                null,
+                null,
+                $this->app['config']->get('front.version')
+            );
         } catch (\Throwable $e) {
             report($e);
         }

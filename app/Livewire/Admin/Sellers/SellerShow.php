@@ -12,6 +12,7 @@ use App\Rules\PersianAlpha;
 use App\Rules\PersianAlphaEngNum;
 use App\Services\AdminPanel\SellerPersistence;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -537,6 +538,24 @@ class SellerShow extends Component
     }
 
     /* ---------------- آمار و جداول زیرین ---------------- */
+
+    /**
+     * فاز ۲۱۷ اصلاحیه — کارت‌های بانکی ثبت‌شدهٔ فروشنده برای نمایش مدیریتی
+     * در تب «حساب بانکی». اگر مایگریشن جدول هنوز روی این نصب اجرا نشده باشد
+     * صفحه نمی‌شکند و فقط لیست خالی نمایش داده می‌شود.
+     */
+    #[Computed]
+    public function bankAccounts()
+    {
+        if (! Schema::hasTable('seller_bank_accounts')) {
+            return collect();
+        }
+
+        return $this->seller->bankAccounts()
+            ->orderByDesc('is_default')
+            ->orderBy('id')
+            ->get();
+    }
 
     #[Computed]
     public function walletBalance(): int

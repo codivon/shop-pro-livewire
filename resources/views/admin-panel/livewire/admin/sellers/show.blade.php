@@ -335,10 +335,10 @@
                 </div>
 
                 {{-- تب حساب بانکی --}}
-                <div x-show="tab === 'bank'" x-cloak class="animate-fade-in space-y-4">
+                <div x-show="tab === 'bank'" x-cloak class="animate-fade-in space-y-5">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label class="mb-1.5 block text-[13px] font-semibold">شماره شبا</label>
+                            <label class="mb-1.5 block text-[13px] font-semibold">شماره شبا (همگام با کارت پیش‌فرض تسویه)</label>
                             <input type="text" wire:model="shabaNumber" class="ap-input fa-digits" placeholder="IR…">
                             @error('shabaNumber') <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
                         </div>
@@ -346,6 +346,60 @@
                             <label class="mb-1.5 block text-[13px] font-semibold">صاحب حساب</label>
                             <input type="text" value="{{ trim($firstName . ' ' . $lastName) ?: '—' }}" disabled class="ap-input bg-surface-2 dark:bg-night-3">
                         </div>
+                    </div>
+
+                    {{-- فاز ۲۱۷ اصلاحیه — کارت‌های بانکی ثبت‌شدهٔ فروشنده (فقط نمایش مدیریتی) --}}
+                    <div class="rounded-2xl border border-line p-4 dark:border-night-line">
+                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <p class="flex items-center gap-2 text-xs font-bold text-ink-600 dark:text-night-ink-2">
+                                <x-admin-panel::icon name="credit-card" class="size-4" />
+                                کارت‌های بانکی فروشنده
+                                <span class="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-black text-ink-500 dark:bg-night-3 dark:text-night-ink-2 fa-digits">{{ $this->bankAccounts->count() }} کارت</span>
+                            </p>
+                            <p class="hidden text-[11px] text-ink-3 sm:block">مدیریت کارت‌ها در پنل خودِ فروشنده انجام می‌شود</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            @foreach ($this->bankAccounts as $account)
+                                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-bl from-brand-600 via-brand-700 to-emerald-700 p-5 text-white shadow-lg transition-transform hover:scale-[1.01]">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <span class="flex size-10 items-center justify-center rounded-xl bg-white/15">
+                                            <x-admin-panel::icon name="credit-card" class="size-5" />
+                                        </span>
+                                        @if ($account->is_default)
+                                            <span class="flex items-center gap-1 rounded-full bg-white/25 px-2.5 py-1 text-[10px] font-black">
+                                                <x-admin-panel::icon name="badge-check" class="size-3" />
+                                                کارت پیش‌فرض تسویه
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    <p dir="ltr" class="mt-5 text-start font-mono text-lg font-extrabold tracking-widest">
+                                        {{ $account->card_number ? trim(chunk_split($account->card_number, 4, ' ')) : '—' }}
+                                    </p>
+                                    @if (! $account->card_number)
+                                        <p class="mt-2 rounded-lg bg-amber-400/20 px-2.5 py-1.5 text-[11px] font-bold text-amber-100">
+                                            شماره کارت هنوز توسط فروشنده تکمیل نشده است.
+                                        </p>
+                                    @endif
+
+                                    <div class="mt-4 space-y-1.5 text-[12px]">
+                                        <p class="flex items-center gap-1.5 font-bold">
+                                            <x-admin-panel::icon name="user" class="size-3.5 shrink-0 opacity-75" />
+                                            {{ $account->holder_name }}
+                                        </p>
+                                        <p dir="ltr" class="truncate font-mono text-[11px] text-white/80">{{ $account->sheba_number }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        @if ($this->bankAccounts->isEmpty())
+                            <div class="rounded-2xl border border-dashed border-line p-8 text-center dark:border-night-line">
+                                <x-admin-panel::icon name="credit-card" class="mx-auto size-8 text-ink-3" />
+                                <p class="mt-3 text-xs font-bold text-ink-600 dark:text-night-ink-2">فروشنده هنوز کارت بانکی ثبت نکرده است</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
 

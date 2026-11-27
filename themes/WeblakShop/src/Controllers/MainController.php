@@ -622,7 +622,14 @@ class  MainController extends Controller
         }
 
         $categorise=Category::whereIn('id',$categoryId)->get();
-        return view('front::sellerStore',compact('seller','seller_info','products', 'min_price', 'max_price','has_filter','filterable','products_id','categorise'));
+
+        // فاز ۲۱۷ اصلاحیه — کارت‌های بانکی فروشنده برای نمایش در صفحهٔ فروشگاه؛
+        // اگر مایگریشن جدول هنوز اجرا نشده باشد صفحه نمی‌شکند (لیست خالی).
+        $bank_accounts = \Illuminate\Support\Facades\Schema::hasTable('seller_bank_accounts')
+            ? $seller->bankAccounts()->orderByDesc('is_default')->orderBy('id')->get()
+            : collect();
+
+        return view('front::sellerStore',compact('seller','seller_info','products', 'min_price', 'max_price','has_filter','filterable','products_id','categorise','bank_accounts'));
     }
 
 }

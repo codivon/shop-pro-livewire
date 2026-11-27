@@ -97,6 +97,104 @@
              font-size: 13px;
              text-align: right;
          }
+
+         /* فاز ۲۱۷ اصلاحیه — کارت‌های حساب بانکی فروشنده */
+         .seller-bank-accounts .seller-bank-title {
+             display: flex;
+             align-items: center;
+             gap: 6px;
+             font-size: 14px;
+             font-weight: 700;
+             color: #2b2b2b
+         }
+         .seller-bank-accounts .seller-bank-title i {
+             color: #2c96ea;
+             font-size: 17px
+         }
+         .seller-bank-accounts .seller-bank-note {
+             font-size: 12px;
+             color: #979797;
+             margin: 6px 0 12px;
+             line-height: 22px
+         }
+         .seller-bank-card {
+             border: 1px solid #ececec;
+             border-radius: 14px;
+             padding: 12px 14px;
+             margin-bottom: 10px;
+             background: #fafafa
+         }
+         .seller-bank-card:last-child {
+             margin-bottom: 0
+         }
+         .seller-bank-card.is-default {
+             border-color: #16a34a;
+             background: #f0fdf4
+         }
+         .seller-bank-card-head {
+             display: flex;
+             align-items: center;
+             justify-content: space-between;
+             gap: 8px;
+             margin-bottom: 8px
+         }
+         .seller-bank-card-name {
+             font-size: 13px;
+             font-weight: 700
+         }
+         .seller-bank-card-badge {
+             font-size: 10px;
+             font-weight: 800;
+             color: #16a34a;
+             background: #dcfce7;
+             border-radius: 999px;
+             padding: 3px 9px;
+             white-space: nowrap
+         }
+         .seller-bank-card-row {
+             display: flex;
+             align-items: center;
+             gap: 8px;
+             margin-top: 5px;
+             flex-wrap: wrap
+         }
+         .seller-bank-card-row .lbl {
+             font-size: 11px;
+             color: #979797;
+             min-width: 54px
+         }
+         .seller-bank-card-row .val {
+             font-size: 12px;
+             font-weight: 700;
+             font-family: monospace, "Vazirmatn", sans-serif;
+             direction: ltr;
+             word-break: break-all;
+             flex: 1;
+             text-align: left;
+             color: #2b2b2b
+         }
+         .seller-bank-card-row .copy-btn {
+             font-size: 10px;
+             font-weight: 700;
+             border: 1px solid #ececec;
+             background: #fff;
+             color: #2b2b2b;
+             border-radius: 8px;
+             padding: 5px 12px;
+             cursor: pointer;
+             transition: all .2s ease;
+             min-height: 26px
+         }
+         .seller-bank-card-row .copy-btn:hover {
+             background: #2c96ea;
+             color: #fff;
+             border-color: #2c96ea
+         }
+         .seller-bank-card-row .copy-btn.copied {
+             background: #16a34a;
+             color: #fff;
+             border-color: #16a34a
+         }
      </style>
 @endpush
 @section('content')
@@ -146,6 +244,41 @@
 
                         </div>
                     </div>
+
+                    {{-- فاز ۲۱۷ اصلاحیه — کارت‌های حساب بانکی فروشنده (نمایش عمومی) --}}
+                    @if($bank_accounts->count())
+                        <div class="dt-sn mb-3">
+                            <div class="seller-bank-accounts card-body shadow-1">
+                                <div class="seller-bank-title">
+                                    <i class="ri-bank-card-line"></i>
+                                    <span>حساب‌های بانکی فروشنده</span>
+                                </div>
+                                <p class="seller-bank-note">برای پرداخت مستقیم به فروشنده می‌توانید از کارت‌های زیر استفاده کنید:</p>
+                                @foreach ($bank_accounts as $account)
+                                    <div class="seller-bank-card {{ $account->is_default ? 'is-default' : '' }}">
+                                        <div class="seller-bank-card-head">
+                                            <span class="seller-bank-card-name">{{ $account->holder_name }}</span>
+                                            @if ($account->is_default)
+                                                <span class="seller-bank-card-badge">کارت پیش‌فرض</span>
+                                            @endif
+                                        </div>
+                                        @if ($account->card_number)
+                                            <div class="seller-bank-card-row">
+                                                <span class="lbl">شماره کارت</span>
+                                                <span class="val" dir="ltr">{{ trim(chunk_split($account->card_number, 4, ' ')) }}</span>
+                                                <button type="button" class="copy-btn" data-copy="{{ $account->card_number }}">کپی</button>
+                                            </div>
+                                        @endif
+                                        <div class="seller-bank-card-row">
+                                            <span class="lbl">شبا</span>
+                                            <span class="val" dir="ltr">{{ $account->sheba_number }}</span>
+                                            <button type="button" class="copy-btn" data-copy="{{ $account->sheba_number }}">کپی</button>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
 
                 @if ($has_filter)
                     @include('front::products.partials.seller-filters',['seller'=>$seller,'filterable'=>$filterable,'products_id'=>$products_id,'categorise'=>$categorise])
@@ -216,6 +349,43 @@
         var selected_max_price = {{ request('max_price') ?: $max_price }};
         var products_min_price = {{ $min_price }};
         var products_max_price = {{ $max_price }};
+    </script>
+    <script>
+        /* فاز ۲۱۷ اصلاحیه — کپی شماره کارت/شبا در کارت‌های بانکی فروشنده */
+        (function () {
+            document.querySelectorAll('.seller-bank-accounts .copy-btn[data-copy]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var text = btn.getAttribute('data-copy') || '';
+                    var done = function () {
+                        var old = btn.textContent;
+                        btn.textContent = 'کپی شد';
+                        btn.classList.add('copied');
+                        setTimeout(function () {
+                            btn.textContent = old;
+                            btn.classList.remove('copied');
+                        }, 1500);
+                    };
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(text).then(done).catch(function () { fallbackCopy(text); done(); });
+                    } else {
+                        fallbackCopy(text);
+                        done();
+                    }
+                });
+            });
+
+            function fallbackCopy(text) {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); } catch (e) {}
+                document.body.removeChild(ta);
+            }
+        })();
     </script>
     <script src="{{ theme_asset('js/vendor/theia-sticky-sidebar.min.js') }}"></script>
     <script src="{{ theme_asset('js/vendor/jquery.horizontalmenu.js') }}"></script>

@@ -23,20 +23,31 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('seller_bank_accounts', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('seller_id');
-            $table->string('holder_name');
-            $table->string('card_number', 16)->nullable();
-            $table->string('sheba_number', 26);
-            $table->boolean('is_default')->default(false);
-            $table->timestamps();
+        // اصلاحیه — idempotent: روی بعضی نصب‌ها جدول از قبل ساخته شده ولی رکوردش
+        // در جدول migrations ثبت نشده است؛ در این حالت Schema::create با خطای
+        // «Base table or view already exists (1050)» شکست می‌خورد و بقیهٔ
+        // مایگریشن‌های معلق هم اجرا نمی‌شدند. حالا اگر جدول موجود باشد ساخت
+        // جدول میان‌پر می‌شود و فقط تکمیل داده‌ها بررسی می‌شود.
+        $freshTable = ! Schema::hasTable('seller_bank_accounts');
 
-            $table->index(['seller_id', 'is_default']);
-            $table->foreign('seller_id')->references('id')->on('sellers')->onDelete('cascade');
-        });
+        if ($freshTable) {
+            Schema::create('seller_bank_accounts', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('seller_id');
+                $table->string('holder_name');
+                $table->string('card_number', 16)->nullable();
+                $table->string('sheba_number', 26);
+                $table->boolean('is_default')->default(false);
+                $table->timestamps();
 
-        // مهاجرت داده‌های قبلی: شبای sellers_info → اولین کارت پیش‌فرض هر فروشنده
+                $table->index(['seller_id', 'is_default']);
+                $table->foreign('seller_id')->references('id')->on('sellers')->onDelete('cascade');
+            });
+        }
+
+        // مهاجرت داده‌های قبلی: شبای sellers_info → اولین کارت پیش‌فرض هر فروشنده.
+        // idempotent — فقط فروشندگانی که هنوز هیچ کارتی ندارند پر می‌شوند تا
+        // اجرای مجدد مایگریشن هرگز کارت تکراری نسازد.
         if (Schema::hasTable('sellers_info')) {
             $rows = DB::table('sellers_info')
                 ->whereNotNull('shaba_number')
@@ -44,6 +55,10 @@ return new class extends Migration
                 ->get(['seller_id', 'first_name', 'last_name', 'business_name', 'shaba_number']);
 
             foreach ($rows as $row) {
+                if (DB::table('seller_bank_accounts')->where('seller_id', $row->seller_id)->exists()) {
+                    continue;
+                }
+
                 $holder = trim(((string) $row->first_name).' '.((string) $row->last_name));
 
                 if ($holder === '') {

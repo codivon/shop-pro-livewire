@@ -8,6 +8,7 @@ use App\Models\Seller;
 use App\Models\SellerEcontract;
 use App\Models\SellerInfo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -40,20 +41,24 @@ class Profile extends Component
         $provinces = Province::with('cities:id,province_id,name')->select('id', 'name')->get();
 
         // فاز ۲۱۷ — کارت‌های بانکی فروشنده (مدیریت مستقل تب حساب بانکی، بدون چرخهٔ تایید مدیر)
-        $bankAccounts = $seller->bankAccounts()
-            ->orderByDesc('is_default')
-            ->orderBy('id')
-            ->get()
-            ->map(fn ($account) => [
-                'id' => $account->id,
-                'holder_name' => (string) $account->holder_name,
-                'card_number' => (string) $account->card_number,
-                'sheba_number' => (string) $account->sheba_number,
-                'is_default' => (bool) $account->is_default,
-                'update_url' => route('seller.profile.bank.update', $account),
-                'destroy_url' => route('seller.profile.bank.destroy', $account),
-                'default_url' => route('seller.profile.bank.default', $account),
-            ])->values()->all();
+        // اصلاحیه — اگر مایگریشن جدول هنوز روی این نصب اجرا نشده باشد صفحهٔ
+        // پروفایل نمی‌شکند و فقط تب حساب بانکی خالی می‌ماند.
+        $bankAccounts = Schema::hasTable('seller_bank_accounts')
+            ? $seller->bankAccounts()
+                ->orderByDesc('is_default')
+                ->orderBy('id')
+                ->get()
+                ->map(fn ($account) => [
+                    'id' => $account->id,
+                    'holder_name' => (string) $account->holder_name,
+                    'card_number' => (string) $account->card_number,
+                    'sheba_number' => (string) $account->sheba_number,
+                    'is_default' => (bool) $account->is_default,
+                    'update_url' => route('seller.profile.bank.update', $account),
+                    'destroy_url' => route('seller.profile.bank.destroy', $account),
+                    'default_url' => route('seller.profile.bank.default', $account),
+                ])->values()->all()
+            : [];
 
         return view('sellers.panel.profile.index', [
             'seller' => $seller,

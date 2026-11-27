@@ -334,73 +334,99 @@
                     </div>
                 </div>
 
-                {{-- تب حساب بانکی --}}
-                <div x-show="tab === 'bank'" x-cloak class="animate-fade-in space-y-5">
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label class="mb-1.5 block text-[13px] font-semibold">شماره شبا (همگام با کارت پیش‌فرض تسویه)</label>
-                            <input type="text" wire:model="shabaNumber" class="ap-input fa-digits" placeholder="IR…">
-                            @error('shabaNumber') <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-[13px] font-semibold">صاحب حساب</label>
-                            <input type="text" value="{{ trim($firstName . ' ' . $lastName) ?: '—' }}" disabled class="ap-input bg-surface-2 dark:bg-night-3">
-                        </div>
+                {{-- تب حساب بانکی — فاز ۲۱۷ اصلاحیه ۲: فقط کارت‌ها + مدیریت (افزودن/حذف/پیش‌فرض) --}}
+                <div x-show="tab === 'bank'" x-cloak class="animate-fade-in">
+                    <style>
+                        /* کارت‌نمای بانکی — مستقل از بیلد Tailwind تا با هر نسخهٔ CSS درست رندر شود */
+                        .sp-bank-card{position:relative;overflow:hidden;border-radius:16px;color:#fff;padding:14px 16px;min-height:150px;display:flex;flex-direction:column;background:linear-gradient(135deg,#0ba374 0%,#047857 52%,#04543f 100%);box-shadow:0 8px 20px -10px rgba(4,120,87,.55);transition:transform .18s ease,box-shadow .18s ease}
+                        .sp-bank-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px -10px rgba(4,120,87,.6)}
+                        .sp-bank-card.is-default{box-shadow:0 0 0 2px rgba(16,185,129,.45),0 8px 20px -10px rgba(4,120,87,.55)}
+                        .sp-bc-glow{position:absolute;top:-45px;left:-45px;width:150px;height:150px;border-radius:9999px;background:rgba(255,255,255,.1);pointer-events:none}
+                        .sp-bc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;position:relative}
+                        .sp-bc-chip{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18)}
+                        .sp-bc-badge{display:flex;align-items:center;gap:4px;border-radius:9999px;background:rgba(255,255,255,.24);padding:4px 10px;font-size:10px;font-weight:800;white-space:nowrap}
+                        .sp-bc-number{position:relative;margin-top:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:800;letter-spacing:2.5px;direction:ltr;text-align:left}
+                        .sp-bc-warning{position:relative;margin-top:7px;border-radius:8px;background:rgba(251,191,36,.24);padding:5px 9px;font-size:10.5px;font-weight:700;color:#fde68a}
+                        .sp-bc-meta{position:relative;margin-top:11px;display:flex;flex-direction:column;gap:4px;font-size:11.5px}
+                        .sp-bc-holder{display:flex;align-items:center;gap:5px;font-weight:700}
+                        .sp-bc-sheba{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:rgba(255,255,255,.85);direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+                        .sp-bc-actions{position:relative;margin-top:auto;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid rgba(255,255,255,.18);padding-top:10px}
+                        .sp-bank-card .sp-bc-actions{margin-top:12px}
+                        .sp-bc-btn{display:inline-flex;align-items:center;gap:4px;min-height:26px;border-radius:8px;background:rgba(255,255,255,.16);padding:3px 10px;font-size:10.5px;font-weight:700;color:#fff;transition:background .15s ease}
+                        .sp-bc-btn:hover{background:rgba(255,255,255,.3)}
+                        .sp-bc-btn.is-danger{background:rgba(239,68,68,.3)}
+                        .sp-bc-btn.is-danger:hover{background:rgba(239,68,68,.5)}
+                        .sp-bc-btn.is-success{background:rgba(16,185,129,.32)}
+                        .sp-bc-btn.is-success:hover{background:rgba(16,185,129,.52)}
+                    </style>
+
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <p class="flex items-center gap-2 text-xs font-bold text-ink-600 dark:text-night-ink-2">
+                            <x-admin-panel::icon name="credit-card" class="size-4" />
+                            کارت‌های بانکی فروشنده
+                            <span class="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-black text-ink-500 dark:bg-night-3 dark:text-night-ink-2 fa-digits">{{ $this->bankAccounts->count() }} کارت</span>
+                        </p>
+                        <button type="button" wire:click="openBankModal"
+                                class="ap-btn-primary inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-xs font-bold">
+                            <x-admin-panel::icon name="plus" class="size-4" />
+                            افزودن کارت
+                        </button>
                     </div>
 
-                    {{-- فاز ۲۱۷ اصلاحیه — کارت‌های بانکی ثبت‌شدهٔ فروشنده (فقط نمایش مدیریتی) --}}
-                    <div class="rounded-2xl border border-line p-4 dark:border-night-line">
-                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-                            <p class="flex items-center gap-2 text-xs font-bold text-ink-600 dark:text-night-ink-2">
-                                <x-admin-panel::icon name="credit-card" class="size-4" />
-                                کارت‌های بانکی فروشنده
-                                <span class="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-black text-ink-500 dark:bg-night-3 dark:text-night-ink-2 fa-digits">{{ $this->bankAccounts->count() }} کارت</span>
-                            </p>
-                            <p class="hidden text-[11px] text-ink-3 sm:block">مدیریت کارت‌ها در پنل خودِ فروشنده انجام می‌شود</p>
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            @foreach ($this->bankAccounts as $account)
-                                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-bl from-brand-600 via-brand-700 to-emerald-700 p-5 text-white shadow-lg transition-transform hover:scale-[1.01]">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <span class="flex size-10 items-center justify-center rounded-xl bg-white/15">
-                                            <x-admin-panel::icon name="credit-card" class="size-5" />
+                    <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        @foreach ($this->bankAccounts as $account)
+                            <div class="sp-bank-card {{ $account->is_default ? 'is-default' : '' }}" wire:key="bank-{{ $account->id }}">
+                                <span class="sp-bc-glow" aria-hidden="true"></span>
+                                <div class="sp-bc-top">
+                                    <span class="sp-bc-chip">
+                                        <x-admin-panel::icon name="credit-card" class="size-4" />
+                                    </span>
+                                    @if ($account->is_default)
+                                        <span class="sp-bc-badge">
+                                            <x-admin-panel::icon name="badge-check" class="size-3" />
+                                            پیش‌فرض تسویه
                                         </span>
-                                        @if ($account->is_default)
-                                            <span class="flex items-center gap-1 rounded-full bg-white/25 px-2.5 py-1 text-[10px] font-black">
-                                                <x-admin-panel::icon name="badge-check" class="size-3" />
-                                                کارت پیش‌فرض تسویه
-                                            </span>
-                                        @endif
-                                    </div>
-
-                                    <p dir="ltr" class="mt-5 text-start font-mono text-lg font-extrabold tracking-widest">
-                                        {{ $account->card_number ? trim(chunk_split($account->card_number, 4, ' ')) : '—' }}
-                                    </p>
-                                    @if (! $account->card_number)
-                                        <p class="mt-2 rounded-lg bg-amber-400/20 px-2.5 py-1.5 text-[11px] font-bold text-amber-100">
-                                            شماره کارت هنوز توسط فروشنده تکمیل نشده است.
-                                        </p>
                                     @endif
-
-                                    <div class="mt-4 space-y-1.5 text-[12px]">
-                                        <p class="flex items-center gap-1.5 font-bold">
-                                            <x-admin-panel::icon name="user" class="size-3.5 shrink-0 opacity-75" />
-                                            {{ $account->holder_name }}
-                                        </p>
-                                        <p dir="ltr" class="truncate font-mono text-[11px] text-white/80">{{ $account->sheba_number }}</p>
-                                    </div>
                                 </div>
-                            @endforeach
-                        </div>
 
-                        @if ($this->bankAccounts->isEmpty())
-                            <div class="rounded-2xl border border-dashed border-line p-8 text-center dark:border-night-line">
-                                <x-admin-panel::icon name="credit-card" class="mx-auto size-8 text-ink-3" />
-                                <p class="mt-3 text-xs font-bold text-ink-600 dark:text-night-ink-2">فروشنده هنوز کارت بانکی ثبت نکرده است</p>
+                                <p class="sp-bc-number">{{ $account->card_number ? trim(chunk_split($account->card_number, 4, ' ')) : '———— ———— ———— ————' }}</p>
+                                @if (! $account->card_number)
+                                    <p class="sp-bc-warning">شماره کارت ثبت نشده است</p>
+                                @endif
+
+                                <div class="sp-bc-meta">
+                                    <span class="sp-bc-holder">
+                                        <x-admin-panel::icon name="user" class="size-3 shrink-0 opacity-75" />
+                                        {{ $account->holder_name }}
+                                    </span>
+                                    <span class="sp-bc-sheba">{{ $account->sheba_number }}</span>
+                                </div>
+
+                                <div class="sp-bc-actions">
+                                    @if (! $account->is_default)
+                                        <button type="button" wire:click="setBankCardDefault({{ $account->id }})" class="sp-bc-btn is-success" title="انتخاب به‌عنوان کارت پیش‌فرض تسویه">
+                                            <x-admin-panel::icon name="badge-check" class="size-3" />
+                                            پیش‌فرض
+                                        </button>
+                                    @endif
+                                    <button type="button" wire:click="deleteBankCard({{ $account->id }})"
+                                            wire:confirm="این کارت بانکی حذف شود؟ اگر کارت پیش‌فرض را حذف کنید، یکی از کارت‌های دیگر به‌صورت خودکار پیش‌فرض می‌شود."
+                                            class="sp-bc-btn is-danger">
+                                        <x-admin-panel::icon name="trash-2" class="size-3" />
+                                        حذف
+                                    </button>
+                                </div>
                             </div>
-                        @endif
+                        @endforeach
                     </div>
+
+                    @if ($this->bankAccounts->isEmpty())
+                        <div class="mt-4 rounded-2xl border border-dashed border-line p-8 text-center dark:border-night-line">
+                            <x-admin-panel::icon name="credit-card" class="mx-auto size-8 text-ink-3" />
+                            <p class="mt-3 text-xs font-bold text-ink-600 dark:text-night-ink-2">فروشنده هنوز کارت بانکی ثبت نکرده است</p>
+                            <p class="mt-1 text-[11px] text-ink-3">با دکمهٔ «افزودن کارت» می‌توانید کارت تسویه ثبت کنید</p>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- تب تماس و آدرس --}}
@@ -1001,8 +1027,48 @@
         </div>
     </div>
 
+    {{-- مودال افزودن کارت بانکی (فاز ۲۱۷ اصلاحیه ۲) --}}
+    <div x-data="{ open: @entangle('bankModalOpen').live }"
+         x-show="open" x-cloak
+         class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" x-show="open" x-on:click="open=false" x-transition.opacity aria-hidden="true"></div>
+        <div x-show="open" x-on:click.stop
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+             class="relative w-full max-w-lg rounded-2xl border border-line bg-surface p-6 shadow-pop dark:border-night-line dark:bg-night-2"
+             role="dialog" aria-modal="true">
+            <h3 class="text-base font-bold">افزودن کارت بانکی</h3>
+            <p class="mt-1 text-xs leading-6 text-ink-3 dark:text-night-ink-2">شبای کارت پیش‌فرض تسویه به‌صورت خودکار با شماره شبای فروشگاه همگام می‌شود.</p>
+
+            <div class="mt-4 space-y-4">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold">نام صاحب حساب <span class="text-red-500">*</span></label>
+                    <input type="text" wire:model="bankForm.holder_name" class="ap-input">
+                    @error('bankForm.holder_name') <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold">شماره کارت <span class="text-red-500">*</span></label>
+                    <input type="text" wire:model="bankForm.card_number" class="ap-input fa-digits" dir="ltr" placeholder="6037 9912 1234 5678">
+                    @error('bankForm.card_number') <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold">شماره شبا <span class="text-red-500">*</span></label>
+                    <input type="text" wire:model="bankForm.sheba_number" class="ap-input fa-digits" dir="ltr" placeholder="IR…">
+                    @error('bankForm.sheba_number') <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <div class="mt-5 flex gap-2.5">
+                <button type="button" wire:click="addBankCard" wire:loading.attr="disabled" wire:target="addBankCard" class="ap-btn-primary flex-1">
+                    افزودن کارت
+                </button>
+                <button type="button" x-on:click="open=false" class="ap-btn-ghost">انصراف</button>
+            </div>
+        </div>
+    </div>
+
     {{-- لودینگ --}}
-    <div wire:loading wire:target="save, delete, storeNotif, updateNotif, deleteNotif"
+    <div wire:loading wire:target="save, delete, storeNotif, updateNotif, deleteNotif, openBankModal, addBankCard, deleteBankCard, setBankCardDefault"
          class="pointer-events-none fixed bottom-6 start-6 z-[65] flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2.5 shadow-pop dark:border-night-line dark:bg-night-3">
         <svg class="size-4 animate-spin text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round" />

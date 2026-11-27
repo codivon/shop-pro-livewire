@@ -582,12 +582,35 @@
             </div>
         </section>
 
-        {{-- ---------- تب حساب بانکی — فاز ۲۱۷ بازطراحی کامل ----------
-             کارت‌های بانکی به‌صورت کارت‌نمای مدرن؛ افزودن/ویرایش/حذف مستقل
-             و فوری (بدون چرخهٔ تایید مدیر). حداقل یک کارت باید باقی بماند؛
-             کارت پیش‌فرض مقصد تسویه است و با sellers_info.shaba_number همگام می‌شود.
-             (شبا و صاحب حسابِ فقط‌نمایشی از فرم کلاسیک پروفایل حذف شدند) --}}
+        {{-- ---------- تب حساب بانکی — فاز ۲۱۷ اصلاحیه ۲: کارت‌نمای فشرده و مدرن ----------
+             استایل کارت‌ها با CSS مستقل داخل خود صفحه تعریف شده تا به بیلد Tailwind
+             وابسته نباشد (کلاس bg-gradient-to-bl در بیلد فعلی پنل وجود ندارد و کارت
+             به‌صورت جعبهٔ سفید خالی رندر می‌شد). افزودن/ویرایش/حذف مستقل و فوری؛
+             حداقل یک کارت باید بماند؛ کارت پیش‌فرض مقصد تسویه است و با
+             sellers_info.shaba_number همگام می‌شود. --}}
         <section class="ap-card space-y-4 p-4 sm:p-6" x-show="tab === 'bank'" role="tabpanel" aria-label="حساب بانکی" x-cloak>
+            <style>
+                .sp-bank-card{position:relative;overflow:hidden;border-radius:16px;color:#fff;padding:14px 16px;min-height:150px;display:flex;flex-direction:column;background:linear-gradient(135deg,#0ba374 0%,#047857 52%,#04543f 100%);box-shadow:0 8px 20px -10px rgba(4,120,87,.55);transition:transform .18s ease,box-shadow .18s ease}
+                .sp-bank-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px -10px rgba(4,120,87,.6)}
+                .sp-bank-card.is-default{box-shadow:0 0 0 2px rgba(16,185,129,.45),0 8px 20px -10px rgba(4,120,87,.55)}
+                .sp-bc-glow{position:absolute;top:-45px;left:-45px;width:150px;height:150px;border-radius:9999px;background:rgba(255,255,255,.1);pointer-events:none}
+                .sp-bc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;position:relative}
+                .sp-bc-chip{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18)}
+                .sp-bc-badge{display:flex;align-items:center;gap:4px;border-radius:9999px;background:rgba(255,255,255,.24);padding:4px 10px;font-size:10px;font-weight:800;white-space:nowrap}
+                .sp-bc-number{position:relative;margin-top:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:800;letter-spacing:2.5px;direction:ltr;text-align:left}
+                .sp-bc-warning{position:relative;margin-top:7px;border-radius:8px;background:rgba(251,191,36,.24);padding:5px 9px;font-size:10.5px;font-weight:700;color:#fde68a}
+                .sp-bc-meta{position:relative;margin-top:11px;display:flex;flex-direction:column;gap:4px;font-size:11.5px}
+                .sp-bc-holder{display:flex;align-items:center;gap:5px;font-weight:700}
+                .sp-bc-sheba{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:rgba(255,255,255,.85);direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+                .sp-bc-actions{position:relative;margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid rgba(255,255,255,.18);padding-top:10px}
+                .sp-bc-btn{display:inline-flex;align-items:center;gap:4px;min-height:26px;border-radius:8px;background:rgba(255,255,255,.16);padding:3px 10px;font-size:10.5px;font-weight:700;color:#fff;cursor:pointer;transition:background .15s ease}
+                .sp-bc-btn:hover{background:rgba(255,255,255,.3)}
+                .sp-bc-btn.is-danger{background:rgba(239,68,68,.3)}
+                .sp-bc-btn.is-danger:hover{background:rgba(239,68,68,.5)}
+                .sp-bc-btn.is-success{background:rgba(16,185,129,.32)}
+                .sp-bc-btn.is-success:hover{background:rgba(16,185,129,.52)}
+            </style>
+
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <p class="text-xs font-semibold leading-6 text-ink-500 dark:text-night-ink-2">
                     کارت‌های بانکی خود را برای دریافت تسویه مدیریت کنید؛
@@ -601,50 +624,45 @@
                 </button>
             </div>
 
-            {{-- کارت‌ها به‌صورت کارت‌نمای بانکی --}}
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {{-- کارت‌ها به‌صورت کارت‌نمای فشردهٔ بانکی --}}
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <template x-for="account in bankAccounts" :key="account.id">
-                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-bl from-brand-600 via-brand-700 to-emerald-700 p-5 text-white shadow-xl transition-transform hover:scale-[1.01]">
-                        <div class="flex items-start justify-between gap-2">
-                            <span class="flex size-10 items-center justify-center rounded-xl bg-white/15">
-                                <x-admin-panel::icon name="credit-card" class="size-5" />
+                    <div class="sp-bank-card" :class="account.is_default ? 'is-default' : ''">
+                        <span class="sp-bc-glow" aria-hidden="true"></span>
+                        <div class="sp-bc-top">
+                            <span class="sp-bc-chip">
+                                <x-admin-panel::icon name="credit-card" class="size-4" />
                             </span>
-                            <span x-show="account.is_default"
-                                  class="flex items-center gap-1 rounded-full bg-white/25 px-2.5 py-1 text-[10px] font-black">
+                            <span x-show="account.is_default" class="sp-bc-badge">
                                 <x-admin-panel::icon name="badge-check" class="size-3" />
-                                کارت پیش‌فرض تسویه
+                                پیش‌فرض تسویه
                             </span>
                         </div>
 
-                        <p dir="ltr" class="mt-5 text-start font-mono text-lg font-extrabold tracking-widest"
-                           x-text="bankMaskCard(account.card_number)"></p>
-                        <p x-show="! account.card_number"
-                           class="mt-2 rounded-lg bg-amber-400/20 px-2.5 py-1.5 text-[11px] font-bold text-amber-100">
+                        <p class="sp-bc-number" x-text="bankMaskCard(account.card_number)"></p>
+                        <p x-show="! account.card_number" class="sp-bc-warning">
                             شماره کارت ثبت نشده است؛ برای تکمیل، کارت را ویرایش کنید.
                         </p>
 
-                        <div class="mt-4 space-y-1.5 text-[12px]">
-                            <p class="flex items-center gap-1.5 font-bold">
-                                <x-admin-panel::icon name="user" class="size-3.5 shrink-0 opacity-75" />
+                        <div class="sp-bc-meta">
+                            <span class="sp-bc-holder">
+                                <x-admin-panel::icon name="user" class="size-3 shrink-0 opacity-75" />
                                 <span x-text="account.holder_name"></span>
-                            </p>
-                            <p dir="ltr" class="truncate font-mono text-[11px] text-white/80" x-text="account.sheba_number"></p>
+                            </span>
+                            <span class="sp-bc-sheba" x-text="account.sheba_number"></span>
                         </div>
 
-                        <div class="mt-4 flex flex-wrap items-center gap-2 border-t border-white/15 pt-3">
-                            <button type="button" x-on:click="openBankEdit(account)"
-                                    class="inline-flex min-h-9 items-center gap-1 rounded-lg bg-white/15 px-3 text-[11px] font-bold transition-colors hover:bg-white/25">
-                                <x-admin-panel::icon name="pencil" class="size-3.5" />
+                        <div class="sp-bc-actions">
+                            <button type="button" x-on:click="openBankEdit(account)" class="sp-bc-btn">
+                                <x-admin-panel::icon name="pencil" class="size-3" />
                                 ویرایش
                             </button>
-                            <button type="button" x-on:click="askBankDelete(account)"
-                                    class="inline-flex min-h-9 items-center gap-1 rounded-lg bg-red-500/25 px-3 text-[11px] font-bold transition-colors hover:bg-red-500/40">
-                                <x-admin-panel::icon name="trash-2" class="size-3.5" />
+                            <button type="button" x-on:click="askBankDelete(account)" class="sp-bc-btn is-danger">
+                                <x-admin-panel::icon name="trash-2" class="size-3" />
                                 حذف
                             </button>
-                            <button type="button" x-show="! account.is_default" x-on:click="setBankDefault(account)"
-                                    class="inline-flex min-h-9 items-center gap-1 rounded-lg bg-emerald-400/20 px-3 text-[11px] font-bold transition-colors hover:bg-emerald-400/35">
-                                <x-admin-panel::icon name="badge-check" class="size-3.5" />
+                            <button type="button" x-show="! account.is_default" x-on:click="setBankDefault(account)" class="sp-bc-btn is-success">
+                                <x-admin-panel::icon name="badge-check" class="size-3" />
                                 انتخاب برای تسویه
                             </button>
                         </div>

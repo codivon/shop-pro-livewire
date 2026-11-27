@@ -134,6 +134,17 @@ class SellerShow extends Component
 
     public bool $notifPopup = false;
 
+    /* ---------------- مودال کارت بانکی (فاز ۲۱۷ اصلاحیه ۲) ---------------- */
+
+    public bool $bankModalOpen = false;
+
+    /** @var array<string, string> */
+    public array $bankForm = [
+        'holder_name' => '',
+        'card_number' => '',
+        'sheba_number' => '',
+    ];
+
     /* ---------------- راه‌اندازی ---------------- */
 
     public function mount(Seller $seller): void
@@ -425,6 +436,158 @@ class SellerShow extends Component
         $this->dispatch('toast', message: 'فروشنده با موفقیت حذف شد.', type: 'success');
 
         $this->redirect(route('np.sellers.index'), navigate: true);
+    }
+
+    /* ---------------- کارت‌های بانکی فروشنده (فاز ۲۱۷ اصلاحیه ۲) ----------------
+     * مدیریت کامل کارت‌های تسویه از پنل مدیریت: افزودن / حذف / انتخاب پیش‌فرض.
+     * ناوری‌ها همانند پنل فروشنده: حداقل یک کارت باید بماند و شبای کارت
+     * پیش‌فرض همیشه با sellers_info.shaba_number همگام می‌شود.
+     */
+
+    /** بازکردن مودال افزودن کارت بانکی */
+    public function openBankModal(): void
+    {
+        auth('adminPanel')->user()?->can('sellers.update') ?: abort(403);
+
+        if (! Schema::hasTable('seller_bank_accounts')) {
+            $this->dispatch('toast', message: 'جدول کارت‌های بانکی هنوز ساخته نشده است؛ ابتدا مایگریشن‌های معلق را اجرا کنید.', type: 'error');
+
+            return;
+        }
+
+        $this->bankForm = ['holder_name' => '', 'card_number' => '', 'sheba_number' => ''];
+        $this->resetValidation();
+        $this->bankModalOpen = true;
+    }
+
+    /** افزودن کارت بانکی از پنل مدیریت */
+    public function addBankCard(): void
+    {
+        auth('adminPanel')->user()?->can('sellers.update') ?: abort(403);
+
+        if (! Schema::hasTable('seller_bank_accounts')) {
+            $this->dispatch('toast', message: 'جدول کارت‌های بانکی هنوز ساخته نشده است؛ ابتدا مایگریشن‌های معلق را اجرا کنید.', type: 'error');
+
+            return;
+        }
+
+        $this->bankForm['holder_name'] = trim((string) $this->bankForm['holder_name']);
+        $this->bankForm['card_number'] = preg_replace('/[^0-9]/', '', en_digits((string) $this->bankForm['card_number']));
+        $this->bankForm['sheba_number'] = $this->normalizeBankSheba((string) $this->bankForm['sheba_number']);
+
+        $this->validate([
+            'bankForm.holder_name' => 'required|string|max:120',
+            'bankForm.card_number' => 'required|ir_bank_card_number',
+            'bankForm.sheba_number' => 'required|ir_iban',
+        ], [
+            'bankForm.holder_name.required' => 'نام صاحب حساب را وارد کنید',
+            'bankForm.holder_name.max' => 'نام صاحب حساب حداکثر ۱۲۰ نویسه است',
+            'bankForm.card_number.required' => 'شماره کارت را وارد کنید',
+            'bankForm.card_number.ir_bank_card_number' => 'شماره کارت وارد شده معتبر نیست؛ کارت بانکی ۱۶ رقمی را بررسی کنید',
+            'bankForm.sheba_number.required' => 'شماره شبا را وارد کنید',
+            'bankForm.sheba_number.ir_iban' => 'شماره شبا وارد شده معتبر نیست؛ شبای ۲۶ رقمی (IR + ۲۴ رقم) را مطابق اطلاعات بانکی بررسی کنید',
+        ]);
+
+        $isFirst = $this->seller->bankAccounts()->count() === 0;
+
+        $this->seller->bankAccounts()->create([
+            'holder_name' => $this->bankForm['holder_name'],
+            'card_number' => $this->bankForm['card_number'],
+            'sheba_number' => $this->bankForm['sheba_number'],
+            'is_default' => $isFirst,
+        ]);
+
+        if ($isFirst) {
+            $this->syncBankDefaultSheba();
+        }
+
+        $this->bankModalOpen = false;
+        $this->bankForm = ['holder_name' => '', 'card_number' => '', 'sheba_number' => ''];
+        unset($this->bankAccounts);
+
+        $this->dispatch('toast', message: $isFirst
+            ? 'کارت بانکی اضافه شد و به‌عنوان کارت پیش‌فرض تسویه انتخاب شد.'
+            : 'کارت بانکی با موفقیت اضافه شد.', type: 'success');
+    }
+
+    /** حذف کارت بانکی از پنل مدیریت — با حفظ ناوری «حداقل یک کارت» */
+    public function deleteBankCard(int $bankAccountId): void
+    {
+        auth('adminPanel')->user()?->can('sellers.update') ?: abort(403);
+
+        $account = $this->seller->bankAccounts()->whereKey($bankAccountId)->first();
+
+        if (! $account) {
+            $this->dispatch('toast', message: 'کارت بانکی یافت نشد.', type: 'error');
+
+            return;
+        }
+
+        if ($this->seller->bankAccounts()->whereKeyNot($account->id)->count() === 0) {
+            $this->dispatch('toast', message: 'حداقل یک کارت بانکی باید باقی بماند؛ ابتدا کارت دیگری اضافه کنید.', type: 'error');
+
+            return;
+        }
+
+        $wasDefault = $account->is_default;
+
+        $account->delete();
+
+        if ($wasDefault) {
+            $this->seller->bankAccounts()->orderBy('id')->first()?->update(['is_default' => true]);
+        }
+
+        $this->syncBankDefaultSheba();
+        unset($this->bankAccounts);
+
+        $this->dispatch('toast', message: 'کارت بانکی حذف شد.', type: 'success');
+    }
+
+    /** انتخاب کارت پیش‌فرض تسویه از پنل مدیریت */
+    public function setBankCardDefault(int $bankAccountId): void
+    {
+        auth('adminPanel')->user()?->can('sellers.update') ?: abort(403);
+
+        $account = $this->seller->bankAccounts()->whereKey($bankAccountId)->first();
+
+        if (! $account) {
+            $this->dispatch('toast', message: 'کارت بانکی یافت نشد.', type: 'error');
+
+            return;
+        }
+
+        $this->seller->bankAccounts()->whereKeyNot($account->id)->update(['is_default' => false]);
+
+        $account->update(['is_default' => true]);
+
+        $this->syncBankDefaultSheba();
+        unset($this->bankAccounts);
+
+        $this->dispatch('toast', message: 'تسویه‌های بعدی به این کارت انجام می‌شود.', type: 'success');
+    }
+
+    /** نرمال‌سازی شبای واردشده: حذف فاصله/خط تیره + افزودن خودکار پیشوند IR */
+    private function normalizeBankSheba(string $value): string
+    {
+        $sheba = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', en_digits($value)));
+
+        if (preg_match('/^[0-9]{24}$/', $sheba)) {
+            $sheba = 'IR'.$sheba;
+        }
+
+        return $sheba;
+    }
+
+    /** همگام‌سازی شبای کارت پیش‌فرض با sellers_info.shaba_number (جریان تسویه فعلی) */
+    private function syncBankDefaultSheba(): void
+    {
+        $default = $this->seller->bankAccounts()->orderByDesc('is_default')->orderBy('id')->first();
+
+        SellerInfo::where('seller_id', $this->seller->id)->update([
+            'shaba_number' => $default?->sheba_number ?: '',
+        ]);
+
+        $this->shabaNumber = (string) ($default?->sheba_number ?: '');
     }
 
     /* ---------------- اعلان‌ها ---------------- */

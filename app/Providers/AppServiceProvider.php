@@ -84,7 +84,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
 
-        Schema::defaultStringLength(191);
+        /*
+         * فاساد Schema به db.schema وصل است و resolution آن اتصال پیش‌فرض را
+         * می‌سازد — اگر DB config خراب/ناتمام باشد (نصب اولیه با .env ناتمام)،
+         * بدون این گارد کل بوت fatal می‌شود قبل از اینکه منطقِ نصب فرصت
+         * ریدایرکت پیدا کند (خطای «Unsupported driver» در لاگ).
+         */
+        try {
+            Schema::defaultStringLength(191);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         /*
          * سازگاری sqlite برای اجرای محلی/تستِ سریع هسته:
@@ -150,6 +160,45 @@ class AppServiceProvider extends ServiceProvider
                     $defaultConnection->getPdo()->sqliteCreateFunction('if', function ($cond = null, $a = null, $b = null) {
                         return $cond ? $a : $b;
                     }, 3);
+
+                    /*
+                     * فاز ۲۱۷ اصلاحیه ۳ — MySQL NOW() — در کوئری قیمت محصول
+                     * (Product::minPrice و مشابه‌ها) استفاده می‌شود؛ معادل
+                     * «Y-m-d H:i:s» با تایم‌زون سرور برمی‌گرداند.
+                     */
+                    $defaultConnection->getPdo()->sqliteCreateFunction('now', function () {
+                        return date('Y-m-d H:i:s');
+                    }, 0);
+
+                    /*
+                     * فاز ۲۱۷ اصلاحیه ۳ — MySQL DATE_FORMAT(value, fmt) — در آمار
+                     * فروشنده (ViewCounts/ViewerCounts) و کرونجابِ تولد
+                     * (HappyBirthday) استفاده می‌شود؛ توکن‌های متداول MySQL به
+                     * معادل PHP ترجمه و سمت PHP فرمت می‌شود (فرمت‌های استفاده‌شدهٔ
+                     * پروژه: %Y-%m و %m-%d).
+                     */
+                    $defaultConnection->getPdo()->sqliteCreateFunction('date_format', function ($value = null, $format = null) {
+                        $format = (string) $format;
+                        $timestamp = $value === null ? false : strtotime((string) $value);
+
+                        if ($format === '' || $timestamp === false) {
+                            return null;
+                        }
+
+                        $map = [
+                            '%Y' => 'Y', '%y' => 'y', '%m' => 'm', '%c' => 'n',
+                            '%d' => 'd', '%e' => 'j', '%D' => 'jS',
+                            '%H' => 'H', '%k' => 'G', '%h' => 'h', '%I' => 'h', '%l' => 'g',
+                            '%i' => 'i', '%s' => 's', '%S' => 's', '%f' => 'v',
+                            '%p' => 'A', '%M' => 'F', '%b' => 'M',
+                            '%W' => 'l', '%a' => 'D', '%j' => 'z',
+                            '%T' => 'H:i:s', '%r' => 'h:i:s A',
+                            '%U' => 'W', '%u' => 'W', '%V' => 'W', '%v' => 'W',
+                            '%X' => 'o', '%x' => 'o', '%w' => 'w',
+                        ];
+
+                        return date(strtr($format, $map), $timestamp);
+                    }, 2);
                 } catch (\Throwable $e) {
                     report($e);
                 }

@@ -6,6 +6,7 @@ use App\Livewire\Admin\System\Developer;
 use App\Models\Admin;
 use App\Models\NewSeller;
 use App\Models\Seller;
+use App\Models\SellerBankAccount;
 use App\Models\SellerInfo;
 use App\Models\SellerRegistration;
 use App\Models\Wallet;
@@ -221,7 +222,10 @@ class SellerStepRegistrationTest extends TestCase
                 'post_code' => '1234567890',
                 'phone' => '02112345678',
                 'business_name' => 'فروشگاه نمونه '.$this->faNumber(),
-                'shaba_number' => 'IR120570028180010101010101',
+                // فاز ۲۱۷ اصلاحیه ۳ — کارت بانکی از فاز ۲۱۷ اجباری شده؛
+                // مقدارها باید اعتبارسنجی ir_bank_card_number (Luhn) و ir_iban (MOD-97) را پاس کنند
+                'card_number' => '6037991122334455',
+                'shaba_number' => 'IR570570028180010101010101',
                 'main_supply_category_id' => 1,
                 'number_of_products' => '50',
                 'econtract' => '1',
@@ -641,7 +645,10 @@ class SellerStepRegistrationTest extends TestCase
                 'post_code' => '1234567890',
                 'phone' => '02112345678',
                 'business_name' => 'فروشگاه نمونه '.$this->faNumber(),
-                'shaba_number' => 'IR120570028180010101010101',
+                // فاز ۲۱۷ اصلاحیه ۳ — کارت بانکی از فاز ۲۱۷ اجباری شده؛
+                // مقدارها باید اعتبارسنجی ir_bank_card_number (Luhn) و ir_iban (MOD-97) را پاس کنند
+                'card_number' => '6037991122334455',
+                'shaba_number' => 'IR570570028180010101010101',
                 'main_supply_category_id' => 1,
                 'number_of_products' => '50',
                 'econtract' => '1',
@@ -665,6 +672,16 @@ class SellerStepRegistrationTest extends TestCase
 
         $this->assertTrue(Wallet::where('seller_id', $seller->id)->exists());
         $this->assertFalse(NewSeller::where('mobile', $draft->mobile)->exists());
+
+        // فاز ۲۱۷ — اولین کارت بانکی به‌عنوان کارت پیش‌فرض تسویه ثبت و شبای آن
+        // با sellers_info.shaba_number همگام می‌شود
+        $bankAccount = SellerBankAccount::where('seller_id', $seller->id)->first();
+        $this->assertNotNull($bankAccount, 'کارت بانکی پیش‌فرض باید با حساب فروشنده ساخته شود');
+        $this->assertTrue((bool) $bankAccount->is_default);
+        $this->assertSame('6037991122334455', (string) $bankAccount->card_number);
+        $this->assertSame('IR570570028180010101010101', (string) $bankAccount->sheba_number);
+        $this->assertSame('IR570570028180010101010101', (string) $info->shaba_number);
+        $this->assertStringContainsString('فرهادی', (string) $bankAccount->holder_name);
 
         $draft->refresh();
         $this->assertSame('documents', $draft->step);

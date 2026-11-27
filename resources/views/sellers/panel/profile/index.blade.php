@@ -590,20 +590,22 @@
              sellers_info.shaba_number همگام می‌شود. --}}
         <section class="ap-card space-y-4 p-4 sm:p-6" x-show="tab === 'bank'" role="tabpanel" aria-label="حساب بانکی" x-cloak>
             <style>
-                .sp-bank-card{position:relative;overflow:hidden;border-radius:16px;color:#fff;padding:14px 16px;min-height:150px;display:flex;flex-direction:column;background:linear-gradient(135deg,#0ba374 0%,#047857 52%,#04543f 100%);box-shadow:0 8px 20px -10px rgba(4,120,87,.55);transition:transform .18s ease,box-shadow .18s ease}
-                .sp-bank-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px -10px rgba(4,120,87,.6)}
-                .sp-bank-card.is-default{box-shadow:0 0 0 2px rgba(16,185,129,.45),0 8px 20px -10px rgba(4,120,87,.55)}
-                .sp-bc-glow{position:absolute;top:-45px;left:-45px;width:150px;height:150px;border-radius:9999px;background:rgba(255,255,255,.1);pointer-events:none}
-                .sp-bc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;position:relative}
-                .sp-bc-chip{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18)}
-                .sp-bc-badge{display:flex;align-items:center;gap:4px;border-radius:9999px;background:rgba(255,255,255,.24);padding:4px 10px;font-size:10px;font-weight:800;white-space:nowrap}
-                .sp-bc-number{position:relative;margin-top:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:800;letter-spacing:2.5px;direction:ltr;text-align:left}
-                .sp-bc-warning{position:relative;margin-top:7px;border-radius:8px;background:rgba(251,191,36,.24);padding:5px 9px;font-size:10.5px;font-weight:700;color:#fde68a}
-                .sp-bc-meta{position:relative;margin-top:11px;display:flex;flex-direction:column;gap:4px;font-size:11.5px}
-                .sp-bc-holder{display:flex;align-items:center;gap:5px;font-weight:700}
-                .sp-bc-sheba{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:rgba(255,255,255,.85);direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-                .sp-bc-actions{position:relative;margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid rgba(255,255,255,.18);padding-top:10px}
-                .sp-bc-btn{display:inline-flex;align-items:center;gap:4px;min-height:26px;border-radius:8px;background:rgba(255,255,255,.16);padding:3px 10px;font-size:10.5px;font-weight:700;color:#fff;cursor:pointer;transition:background .15s ease}
+                /* فاز ۲۱۷ اصلاحیه ۳ — کارت فشرده‌تر: در دسکتاپ حداقل ۳ کارت در هر ردیف (lg) */
+                .sp-bank-card{position:relative;overflow:hidden;border-radius:14px;color:#fff;padding:11px 13px;min-height:118px;display:flex;flex-direction:column;background:linear-gradient(135deg,#0ba374 0%,#047857 52%,#04543f 100%);box-shadow:0 6px 16px -8px rgba(4,120,87,.5);transition:transform .18s ease,box-shadow .18s ease}
+                .sp-bank-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px -8px rgba(4,120,87,.55)}
+                .sp-bank-card.is-default{box-shadow:0 0 0 2px rgba(16,185,129,.45),0 6px 16px -8px rgba(4,120,87,.5)}
+                .sp-bc-glow{position:absolute;top:-38px;left:-38px;width:120px;height:120px;border-radius:9999px;background:rgba(255,255,255,.1);pointer-events:none}
+                .sp-bc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;position:relative}
+                .sp-bc-chip{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.18);flex-shrink:0}
+                .sp-bc-badge{display:flex;align-items:center;gap:3px;border-radius:9999px;background:rgba(255,255,255,.24);padding:3px 8px;font-size:9.5px;font-weight:800;white-space:nowrap}
+                .sp-bc-number{position:relative;margin-top:9px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:800;letter-spacing:1.6px;direction:ltr;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+                .sp-bc-warning{position:relative;margin-top:6px;border-radius:8px;background:rgba(251,191,36,.24);padding:4px 8px;font-size:10px;font-weight:700;color:#fde68a}
+                .sp-bc-meta{position:relative;margin-top:8px;display:flex;flex-direction:column;gap:3px;font-size:10.5px}
+                .sp-bc-holder{display:flex;align-items:center;gap:4px;font-weight:700;overflow:hidden;white-space:nowrap}
+                .sp-bc-holder span{overflow:hidden;text-overflow:ellipsis}
+                .sp-bc-sheba{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:rgba(255,255,255,.85);direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+                .sp-bc-actions{position:relative;margin-top:9px;display:flex;flex-wrap:wrap;gap:5px;border-top:1px solid rgba(255,255,255,.18);padding-top:8px}
+                .sp-bc-btn{display:inline-flex;align-items:center;gap:3px;min-height:24px;border-radius:7px;background:rgba(255,255,255,.16);padding:2px 8px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;transition:background .15s ease}
                 .sp-bc-btn:hover{background:rgba(255,255,255,.3)}
                 .sp-bc-btn.is-danger{background:rgba(239,68,68,.3)}
                 .sp-bc-btn.is-danger:hover{background:rgba(239,68,68,.5)}
@@ -624,8 +626,9 @@
                 </button>
             </div>
 
-            {{-- کارت‌ها به‌صورت کارت‌نمای فشردهٔ بانکی --}}
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {{-- کارت‌ها به‌صورت کارت‌نمای فشردهٔ بانکی — فاز ۲۱۷ اصلاحیه ۳:
+                 در دسکتاپ (lg به بالا) حداقل ۳ کارت در هر ردیف --}}
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <template x-for="account in bankAccounts" :key="account.id">
                     <div class="sp-bank-card" :class="account.is_default ? 'is-default' : ''">
                         <span class="sp-bc-glow" aria-hidden="true"></span>

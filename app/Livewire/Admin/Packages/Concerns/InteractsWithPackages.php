@@ -139,16 +139,28 @@ trait InteractsWithPackages
                 return;
             }
 
-            if ($isFree) {
-                // پکیج رایگان: مستقیم به job
-                $this->dispatchInstall($slug, $version, $pricingPlanId);
+            /*
+             * نصب مجدد با لایسنس قبلی (خریداری‌شده — بدون پرداخت)
+             *
+             * فاز ۲۱۷ اصلاحیه ۲ — رفع «نمی‌توانم پکیجی را که با طرح آغازینِ رایگان
+             * نصب کرده بودم، پس از حذف دوباره نصب کنم»:
+             * این گیت باید «قبل» از گیت isFree اجرا شود؛ چون وقتی پلنی انتخاب
+             * نشده، ارزان‌ترین پلن (مثل طرح آغازینِ رایگان) خودکار انتخاب می‌شود و
+             * isFree=true می‌گردد — ترتیبِ قبلی جریان را به dispatchInstall ←
+             * createPurchase می‌برد و سرور بازار با گارد «خرید تکراری» (۴۲۲
+             * «شما این پکیج را با طرح آغازین در اختیار دارید…») رد می‌کرد، در حالی
+             * که کاربر اعتبارِ فعال دارد و مودال هم «بدون پرداخت نصب می‌شود»
+             * نشان می‌داد. با ترتیب جدید، نصب با همان لایسنسِ فعال انجام می‌شود.
+             */
+            if ($useLicense) {
+                $this->reinstallWithExistingLicense($slug);
 
                 return;
             }
 
-            // نصب مجدد با لایسنس قبلی (خریداری‌شده — بدون پرداخت)
-            if ($useLicense) {
-                $this->reinstallWithExistingLicense($slug);
+            if ($isFree) {
+                // پکیج رایگان: مستقیم به job
+                $this->dispatchInstall($slug, $version, $pricingPlanId);
 
                 return;
             }
@@ -387,7 +399,32 @@ trait InteractsWithPackages
         try {
             // برای پکیج رایگان، ابتدا یک درخواست "purchase" آزاد به API می‌زنیم
             $callbackUrl = $this->paymentCallbackUrl();
-            $purchase = $this->api()->createPurchase($slug, $callbackUrl, auth('adminPanel')->id(), $pricingPlanId);
+
+            try {
+                $purchase = $this->api()->createPurchase($slug, $callbackUrl, auth('adminPanel')->id(), $pricingPlanId);
+            } catch (RuntimeException $purchaseError) {
+                /*
+                 * فاز ۲۱۷ اصلاحیه ۲ — رفع «پس از حذف، نصب مجدد پکیج با طرح آغازینِ
+                 * رایگان ممکن نیست»: سرور بازار، خریدِ مجددِ همان دورهٔ فعال را با
+                 * ۴۲۲ رد می‌کند («شما این پکیج را با طرح آغازین در اختیار دارید…» /
+                 * «این طرح فقط یک‌بار قابل خریداری است…») در حالی که کاربر اعتبار
+                 * فعال دارد و باید بتواند نصب کند. در این حالت به‌جای نمایش خطا،
+                 * نصب با «لایسنس فعالِ موجود» ادامه می‌یابد.
+                 */
+                if ($this->isDuplicatePurchaseRefusal($purchaseError->getMessage())) {
+                    Log::info('Package free install refused as duplicate — retrying with existing license', [
+                        'slug'    => $slug,
+                        'message' => $purchaseError->getMessage(),
+                    ]);
+
+                    $this->reinstallWithExistingLicense($slug);
+
+                    return;
+                }
+
+                throw $purchaseError;
+            }
+
             $licenseKey = $purchase['license_key'] ?? null;
 
             if (! $licenseKey) {
@@ -605,6 +642,19 @@ trait InteractsWithPackages
 
         $this->dispatch('toast', message: 'نصب پکیج آغاز شد — تا پایان، وضعیت «در حال نصب» نمایش داده می‌شود.', type: 'success');
         $this->afterInstallQueued($slug);
+    }
+
+    /**
+     * تشخیص ردِ «خرید تکراری» از سرور بازار — پیام‌های شناخته‌شدهٔ گاردهای
+     * ضدخرید مجدد (RenewalService: «شما این پکیج را با طرح … در اختیار دارید…» /
+     * طرح یک‌بارمصرف: «این طرح فقط یک‌بار قابل خریداری است…»). این ردها یعنی
+     * کاربر «اعتبارِ فعال» دارد؛ نصب باید با همان لایسنس ادامه یابد نه خطا.
+     */
+    protected function isDuplicatePurchaseRefusal(string $message): bool
+    {
+        return str_contains($message, 'در اختیار دارید')
+            || str_contains($message, 'فقط یک‌بار قابل خریداری')
+            || str_contains($message, 'قبلاً از این طرح استفاده کرده');
     }
 
     /**
